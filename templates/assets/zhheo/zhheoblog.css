@@ -9,11 +9,11 @@
     --heo-gray: #999999;
     --heo-gray-op: #9999992b;
     --heo-vip: #e5a80d;
-    --heo-main: #0084ffbe;
-    --heo-main-op: var(--heo-theme-op);
-    --heo-main-op-deep: var(--heo-theme-op-deep);
-    --heo-main-op-light: var(--heo-theme-op-light);
-    --heo-main-none: var(--heo-theme-none);
+    --heo-main: var(--heo-theme);
+    --heo-main-op: #0084ffbe;
+    --heo-main-op-deep: #0084ffbe;
+    --heo-main-op-light: #0084ffbe;
+    --heo-main-none: #0084ffbe;
     --heo-shadow-theme: 0 0px 16px -3px #ffffff;
     --heo-shadow-blackdeep: 0 2px 16px -3px rgba(0, 0, 0, 0.15);
     --heo-shadow-main: 0 0px 16px -3px rgb(255, 255, 255);
