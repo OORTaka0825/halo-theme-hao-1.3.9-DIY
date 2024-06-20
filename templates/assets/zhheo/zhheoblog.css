@@ -3,7 +3,7 @@
 :root {
     --heo-white: rgb(255, 255, 255);
     --heo-white-op: rgba(255, 255, 255, 0.2);
-    --heo-black: rgb(255, 255, 255);
+    --heo-black: #000;
     --heo-black-op:  rgba(0, 0, 0, 0.2);
     --heo-none: #00000000;
     --heo-gray: #999999;
@@ -101,7 +101,7 @@
     --heo-card-btn-bg: #30343f;
     --heo-post-blockquote-bg: #000;
     --heo-post-tabs-bg: #121212;
-    --heo-secondbg: #696f86;
+    --heo-secondbg: #21232a;
     --heo-shadow-nav: 0 5px 20px 0px rgba(28, 28, 28, 0.4);
     --heo-card-bg: #1d1e22;
     --heo-card-bg-op: var(--heo-white-op);
