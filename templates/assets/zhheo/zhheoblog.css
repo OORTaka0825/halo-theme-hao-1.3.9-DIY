@@ -152,19 +152,7 @@ i.haofont {
 }
 
 .todolist-item i.haofont {
-    display: var(--fa-display, inline-block);
-}
-
-#page #post-comment p a:not(.headerlink):not(.fancybox) {
-    text-decoration: none;
-    border-bottom: 2px solid var(--heo-lighttext);
-    font-weight: 700;
-    padding: 0 4px;
-    border-radius: 4px 4px 0 0
-}
-
-#page p a:hover {
-    text-decoration: none
+    display: var(--fa-display,inline-block);
 }
 
 /* 旧版css */
@@ -195,11 +183,6 @@ pre {
 
 a {
     background-color: transparent;
-    color: var(--heo-fontcolor);
-    text-decoration: none;
-    transition: all .3s ease-out 0s;
-    overflow-wrap: break-word;
-    -webkit-user-drag: none;
 }
 
 abbr[title] {
@@ -373,7 +356,7 @@ template {
 }
 
 .reward-main {
-    animation: slide-in .3s ease 0s 1 normal none running
+    animation: 0.3s ease 0.1s 1 normal both running donate_effcet;
 }
 
 @-webkit-keyframes scroll-down-effect {
@@ -717,16 +700,6 @@ template {
 
     100% {
         transform: translateX(0px);
-    }
-}
-
-@keyframes heo-spin {
-    0% {
-        transform: rotate(0)
-    }
-
-    100% {
-        transform: rotate(360deg)
     }
 }
 
