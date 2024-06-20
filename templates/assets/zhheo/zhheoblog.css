@@ -3,7 +3,7 @@
 :root {
     --heo-white: rgb(255, 255, 255);
     --heo-white-op: rgba(255, 255, 255, 0.2);
-    --heo-black: #000;
+    --heo-black: #fff;
     --heo-black-op:  rgba(0, 0, 0, 0.2);
     --heo-none: #00000000;
     --heo-gray: #999999;
