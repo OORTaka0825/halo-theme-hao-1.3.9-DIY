@@ -5187,14 +5187,14 @@ html {
 
 /* 登入按钮 */
 
-#page-header #nav #nav-right div .back-menu-list-groups{
+#page-header #nav #nav-right div .back-menu-list-groups {
     position: absolute;
     right: 0;
     left: auto;
     top: 34px;
 }
 
-#page-header #nav #nav-right .console-button .nav-login{
+#page-header #nav #nav-right .console-button .nav-login {
     width: 35px;
     display: flex;
     align-items: center;
@@ -5208,17 +5208,18 @@ html {
     text-shadow: none;
 }
 
-.console-button{
+.console-button {
     cursor: pointer;
 }
 
 .console-button .back-menu-list-groups .back-menu-list {
-    display: flex;
+    display: block;
     flex-direction: row;
     flex-wrap: wrap;
     width: 140px;
     justify-content: space-between;
 }
+
 .console-button .back-menu-list-group {
     display: flex;
     flex-direction: column;
@@ -5267,10 +5268,6 @@ html {
     transform: scale(1);
 }
 
-.console-button .back-menu-list .back-menu-item {
-    width: 140px;
-}
-
 @media screen and (max-width: 768px) {
 
     .console-button .back-menu-list-groups {
@@ -5305,6 +5302,14 @@ html {
     border-radius: 40px;
 }
 
+.page .back-home-button {
+    color: var(--heo-fontcolor)
+}
+
+.page .back-home-button:hover {
+    color: var(--heo-card-bg)
+}
+
 @media screen and (max-width: 768px) {
     .back-home-button {
         display: none;
@@ -5315,13 +5320,23 @@ html {
     color: var(--heo-fontcolor);
 }
 
-#page-header.not-top-img #nav .back-home-button {
-    color: var(--heo-fontcolor);
+#page-header.not-top-img #nav .back-home-button i {
+    font-size: 20px
 }
 
 .back-home-button:hover {
     background: var(--heo-main);
-    color: var(--heo-white) !important;
+    color: var(--heo-white);
+}
+
+.post .back-home-button:hover {
+    background: var(--heo-white-op);
+    color: var(--heo-white)
+}
+
+.nav-fixed #nav .back-home-button:hover {
+    background: var(--heo-lighttext);
+    color: var(--heo-card-bg)
 }
 
 .back-menu-list-groups .back-menu-list {
@@ -5351,7 +5366,7 @@ html {
 }
 
 .back-menu-list-groups .back-menu-list .back-menu-item:hover {
-    background: var(--heo-main) !important;
+    background: var(--heo-lighttext) !important;
     transform: scale(1) !important;
 }
 
@@ -5370,12 +5385,12 @@ html {
 
 @media screen and (max-width: 768px) {
     .back-menu-list-groups .back-menu-list .back-menu-item .back-menu-item-text {
-        font-size:14px
+        font-size: 14px
     }
 }
 
 .back-menu-list-groups .back-menu-list .back-menu-item:hover .back-menu-item-text {
-    color: var(--heo-white);
+    color: var(--heo-card-bg);
 }
 
 .back-home-button .back-menu-list-group {
@@ -5413,7 +5428,7 @@ html {
 }
 
 .back-home-button .back-menu-list-group:hover .back-menu-list-title {
-    color: var(--heo-main);
+    color: var(--heo-lighttext);
 }
 
 .back-home-button:hover .back-menu-list-groups {
@@ -5490,31 +5505,31 @@ html {
     }
 
     #nav #site-name:after {
-        background: url(../images/home.webp) no-repeat 50% 50%;
         opacity: 0;
         position: absolute;
         display: flex;
         z-index: 1;
-        width: 74px;
-        height: 58px;
-        content: "";
-        transition: 0s;
-        transition-timing-function: ease-in;
-        transform: scale(0.4);
+        content: "\e69a";
+        transition: .1s;
+        font-family: haofont !important;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        line-height: 1
     }
 
     .post #nav #site-name:hover {
         background: var(--heo-white-op);
+        color: var(--heo-white)
     }
 
     .nav-fixed #nav #site-name:hover {
-        background: var(--heo-main);
+        background: var(--heo-lighttext);
+        color: var(--heo-card-bg)
     }
 
     #nav #site-name:hover:after {
         opacity: 1;
-        transform: translateY(0px) scale(0.3);
-        transition-timing-function: ease-in;
     }
 
     #nav .back-home-button:hover {
@@ -5557,6 +5572,10 @@ html {
     #page-header.nav-fixed #nav #page-name-text:hover:after {
         opacity: 1;
         line-height: 36px;
+    }
+
+    #page-header.nav-fixed #nav #page-name-text:hover:after {
+        color: var(--heo-card-bg);
     }
 
     #page-header.nav-fixed #nav div.menus_items {
