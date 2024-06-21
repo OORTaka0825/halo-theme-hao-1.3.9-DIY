@@ -5114,7 +5114,7 @@ html {
 
 #nav-totop:hover .totopbtn i {
     opacity: 1;
-    color: var(--heo-card-bg);
+    color: var(--heo-white);
     transition: 0.3s;
 }
 
