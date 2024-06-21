@@ -1,10 +1,10 @@
 @charset "UTF-8";
 
 :root {
-    --heo-white: rgb(255, 255, 255);
+    --heo-white: #fff;
     --heo-white-op: rgba(255, 255, 255, 0.2);
-    --heo-black: rgb(255, 255, 255);
-    --heo-black-op:  rgba(0, 0, 0, 0.2);
+    --heo-black: #000;
+    --heo-black-op: rgba(0, 0, 0, 0.2);
     --heo-none: #00000000;
     --heo-gray: #999999;
     --heo-gray-op: #9999992b;
@@ -14,9 +14,9 @@
     --heo-main-op-deep: var(--heo-theme-op-deep);
     --heo-main-op-light: var(--heo-theme-op-light);
     --heo-main-none: var(--heo-theme-none);
-    --heo-shadow-theme: 0 0px 16px -3px #ffffff;
+     --heo-shadow-theme: 0 0px 16px -3px #ffffff;
     --heo-shadow-blackdeep: 0 2px 16px -3px rgba(0, 0, 0, 0.15);
-    --heo-shadow-main: 0 0px 16px -3px rgb(255, 255, 255);
+    --heo-shadow-main: 0 0px 16px -3px rgb(255， 255， 255);
     --heo-shadow-blue: 0 8px 12px -3px rgba(40, 109, 234, 0.2);
     --heo-shadow-white: 0 8px 12px -3px rgba(255, 255, 255, 0.2);
     --heo-shadow-black: 0 0px 16px -3px #ffffff;
@@ -42,6 +42,7 @@
     --heo-theme: #425AEF;
     --heo-theme-op: #4259ef23;
     --heo-theme-op-deep: #4259efdd;
+    --heo-theme-op-light: #4259ef0d;
     --heo-theme-none: #4259ef01;
     --heo-blue: #425AEF;
     --heo-red: #f04a63;
@@ -100,7 +101,7 @@
     --heo-card-btn-bg: #30343f;
     --heo-post-blockquote-bg: #000;
     --heo-post-tabs-bg: #121212;
-    --heo-secondbg: #696f86;
+    --heo-secondbg: #21232a;
     --heo-shadow-nav: 0 5px 20px 0px rgba(28, 28, 28, 0.4);
     --heo-card-bg: #1d1e22;
     --heo-card-bg-op: var(--heo-white-op);
@@ -12524,7 +12525,7 @@ img.tk-avatar-img {
 /* 昵称 */
 .tk-nick {
     font-size: 1rem !important;
-    line-height: 32px;
+    line-height: 27px;
 }
 
 /* 填写项标题 */
@@ -12583,7 +12584,7 @@ img.tk-avatar-img {
     color: var(--heo-fontcolor) !important;
     border-radius: 12px !important;
     min-height: 100px !important;
-    padding: 16px 16px 40px 16px !important;
+    padding: 16px 16px 90px 16px !important;
     border: var(--style-border-always) !important;
     box-shadow: none !important;
 }
@@ -12925,8 +12926,8 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
 /* 评论时间 */
 .tk-time {
     color: var(--heo-secondtext) !important;
-    font-size: 0.8rem;
-    margin-left: 0.5rem;
+    font-size: 0.7rem;
+    margin-left: 0.4rem;
 }
 
 /* 评论之间的间距 */
