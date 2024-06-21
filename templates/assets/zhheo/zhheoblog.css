@@ -9634,12 +9634,12 @@ span.recent-post-top-text {
     line-height: 1.4;
     margin-top: 0px;
     font-weight: bold;
-    color: rgba(0， 0， 0, 0); !important;
+    color: var(--heo-fontcolor);
     margin-bottom: 0px;
     position: absolute;
     width: 100%;
     left: 0;
-    padding: 0 20px;
+    padding: 0 30px;
     transition: 0.3s;
 }
 
@@ -10287,7 +10287,7 @@ div#author-info__sayhi:hover {
 /* 时间轴卡片 */
 #aside-content .card-archives ul.card-archive-list > .card-archive-list-item a:hover,
 #aside-content .card-categories ul.card-category-list > .card-category-list-item a:hover {
-    color: var(--heo-card-bg);
+    color: var(--heo-white);
     background-color: var(--heo-theme);
     box-shadow: var(--heo-shadow-theme);
     border-radius: 8px;
@@ -10644,7 +10644,7 @@ a.extend.prev {
     }
 }
 
-#post-info #post-meta > .meta-secondline > span:first-child {
+#post-info #post-meta>.meta-secondline>span:first-child {
     margin-right: 0.8rem;
 }
 
