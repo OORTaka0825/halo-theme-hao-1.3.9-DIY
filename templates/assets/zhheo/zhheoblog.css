@@ -5982,8 +5982,8 @@ i.fab {
 
 /* 消息弹窗 */
 .snackbar-container {
-    background: var(--heo-lighttext) !important;
-    color: var(--heo-card-bg) !important;
+    background: var(--heo-main) !important;
+    color: var(--heo-white) !important;
     border-radius: 0 !important;
     display: flex;
     justify-content: center !important;
@@ -5996,7 +5996,6 @@ i.fab {
 }
 
 .snackbar-container p {
-    color: var(--heo-card-bg) !important;
     font-weight: bold !important;
     text-align: center !important;
     font-size: 0.8rem !important;
@@ -6005,7 +6004,7 @@ i.fab {
 }
 
 .snackbar-container .action {
-    color: var(--heo-card-bg) !important;
+    color: var(--heo-white) !important;
     padding: 4px 6px !important;
     font-weight: bold;
     border-radius: 8px !important;
@@ -6014,8 +6013,8 @@ i.fab {
 }
 
 .snackbar-container .action:hover {
-    color: var(--heo-lighttext) !important;
-    background: var(--heo-card-bg) !important
+    color: var(--heo-main) !important;
+    background: var(--heo-white) !important;
 }
 
 .snackbar-container::after {
@@ -6047,41 +6046,40 @@ i.fab {
 }
 
 #nav a:hover {
-    color: var(--heo-white);
+    color: var(--heo-white) !important;
     background: var(--heo-white-op);
     transition: 0.3s;
 }
 
 .page #nav a:hover {
-    color: var(--heo-card-bg) !important;
-    background: var(--heo-lighttext);
+    color: var(--heo-white) !important;
+    background: var(--heo-main);
     transition: 0.3s;
     box-shadow: var(--heo-shadow-main);
 }
 
 .nav-fixed #nav a:hover {
-    background: var(--heo-lighttext);
-    color: var(--heo-card-bg);
+    background: var(--heo-main);
     transition: 0.3s;
 }
 
 @media screen and (min-width: 768px) {
     .menus_item:hover > a.site-page {
-        color: var(--heo-card-bg);
+        color: var(--heo-white) !important;
         background: var(--heo-white-op);
         transition: 0.3s;
         box-shadow: var(--heo-shadow-main);
     }
 
     .page .menus_item:hover > a.site-page {
-        color: var(--heo-card-bg);
+        color: var(--heo-white) !important;
         background: var(--heo-main);
         transition: 0.3s;
         box-shadow: var(--heo-shadow-main);
     }
 
     .nav-fixed .menus_item:hover > a.site-page {
-        background-color: var(--heo-lighttext);
+        background-color: var(--heo-main);
     }
 }
 
