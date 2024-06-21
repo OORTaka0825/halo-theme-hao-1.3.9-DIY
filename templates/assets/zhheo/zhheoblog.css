@@ -5302,6 +5302,14 @@ html {
     border-radius: 40px;
 }
 
+.page .back-home-button {
+    color: var(--heo-fontcolor)
+}
+
+.page .back-home-button:hover {
+    color: var(--heo-card-bg)
+}
+
 @media screen and (max-width: 768px) {
     .back-home-button {
         display: none;
@@ -5312,13 +5320,18 @@ html {
     color: var(--heo-fontcolor);
 }
 
-#page-header.not-top-img #nav .back-home-button {
-    color: var(--heo-fontcolor);
+#page-header.not-top-img #nav .back-home-button i {
+    font-size: 20px
 }
 
 .back-home-button:hover {
     background: var(--heo-main);
-    color: var(--heo-white) !important;
+    color: var(--heo-white);
+}
+
+.post .back-home-button:hover {
+    background: var(--heo-white-op);
+    color: var(--heo-white)
 }
 
 .nav-fixed #nav .back-home-button:hover {
@@ -5377,7 +5390,7 @@ html {
 }
 
 .back-menu-list-groups .back-menu-list .back-menu-item:hover .back-menu-item-text {
-    color: var(--heo-white);
+    color: var(--heo-card-bg);
 }
 
 .back-home-button .back-menu-list-group {
@@ -5415,7 +5428,7 @@ html {
 }
 
 .back-home-button .back-menu-list-group:hover .back-menu-list-title {
-    color: var(--heo-main);
+    color: var(--heo-lighttext);
 }
 
 .back-home-button:hover .back-menu-list-groups {
