@@ -6929,7 +6929,7 @@ body[data-type=music] .page #nav #site-name span {
 }
 
 #aside-content .aside-list > .aside-list-item:hover a {
-    color: var(--heo-card-bg) !important;
+    color: var(--heo-white) !important;
 }
 
 /* 文章顶部波浪效果 */
@@ -7195,7 +7195,7 @@ li.tree-list-item {
 }
 
 .title-h2-a a:hover {
-    color: var(--heo-lighttext)
+    color: var(--heo-hovertext);
 }
 
 .title-h2-a-left {
@@ -7984,8 +7984,8 @@ div#banners {
         height: 100%;
         top: 0;
         left: 0;
-        background: var(--heo-lighttext);
-        color: var(--heo-card-bg);
+        background: var(--heo-theme);
+        color: var(--heo-white);
         padding-left: 0.5rem;
         display: flex;
         flex-direction: column;
@@ -8109,8 +8109,8 @@ div#banners {
     }
 
     .topGroup .banner-button:hover {
-        background: var(--heo-lighttext);
-        color: var(--heo-card-bg);
+        background: var(--heo-theme);
+        color: var(--heo-white);
     }
 
     .topGroup .banner-button i {
