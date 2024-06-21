@@ -5186,7 +5186,7 @@ html {
 
 #nav-totop:hover .totopbtn i {
     opacity: 1;
-    color: var(--heo-card-bg);
+    color: var(--heo-white);
     transition: 0.3s;
 }
 
@@ -5246,7 +5246,7 @@ html {
 }
 
 #page-header #nav #nav-right .nav-button:hover a.totopbtn {
-    background: var(--heo-lighttext);
+    background: var(--heo-main);
 }
 
 #page-header #nav #nav-right .nav-button:not(.long):hover a.totopbtn {
@@ -5259,14 +5259,14 @@ html {
 
 /* 登入按钮 */
 
-#page-header #nav #nav-right div .back-menu-list-groups {
+#page-header #nav #nav-right div .back-menu-list-groups{
     position: absolute;
     right: 0;
     left: auto;
     top: 34px;
 }
 
-#page-header #nav #nav-right .console-button .nav-login {
+#page-header #nav #nav-right .console-button .nav-login{
     width: 35px;
     display: flex;
     align-items: center;
@@ -5280,18 +5280,17 @@ html {
     text-shadow: none;
 }
 
-.console-button {
+.console-button{
     cursor: pointer;
 }
 
 .console-button .back-menu-list-groups .back-menu-list {
-    display: block;
+    display: flex;
     flex-direction: row;
     flex-wrap: wrap;
     width: 140px;
     justify-content: space-between;
 }
-
 .console-button .back-menu-list-group {
     display: flex;
     flex-direction: column;
@@ -5340,6 +5339,10 @@ html {
     transform: scale(1);
 }
 
+.console-button .back-menu-list .back-menu-item {
+    width: 140px;
+}
+
 @media screen and (max-width: 768px) {
 
     .console-button .back-menu-list-groups {
@@ -5374,14 +5377,6 @@ html {
     border-radius: 40px;
 }
 
-.page .back-home-button {
-    color: var(--heo-fontcolor)
-}
-
-.page .back-home-button:hover {
-    color: var(--heo-card-bg)
-}
-
 @media screen and (max-width: 768px) {
     .back-home-button {
         display: none;
@@ -5392,23 +5387,13 @@ html {
     color: var(--heo-fontcolor);
 }
 
-#page-header.not-top-img #nav .back-home-button i {
-    font-size: 20px
+#page-header.not-top-img #nav .back-home-button {
+    color: var(--heo-fontcolor);
 }
 
 .back-home-button:hover {
     background: var(--heo-main);
-    color: var(--heo-white);
-}
-
-.post .back-home-button:hover {
-    background: var(--heo-white-op);
-    color: var(--heo-white)
-}
-
-.nav-fixed #nav .back-home-button:hover {
-    background: var(--heo-lighttext);
-    color: var(--heo-card-bg)
+    color: var(--heo-white) !important;
 }
 
 .back-menu-list-groups .back-menu-list {
@@ -5438,7 +5423,7 @@ html {
 }
 
 .back-menu-list-groups .back-menu-list .back-menu-item:hover {
-    background: var(--heo-lighttext) !important;
+    background: var(--heo-main) !important;
     transform: scale(1) !important;
 }
 
@@ -5457,12 +5442,12 @@ html {
 
 @media screen and (max-width: 768px) {
     .back-menu-list-groups .back-menu-list .back-menu-item .back-menu-item-text {
-        font-size: 14px
+        font-size:14px
     }
 }
 
 .back-menu-list-groups .back-menu-list .back-menu-item:hover .back-menu-item-text {
-    color: var(--heo-card-bg);
+    color: var(--heo-white);
 }
 
 .back-home-button .back-menu-list-group {
@@ -5500,7 +5485,7 @@ html {
 }
 
 .back-home-button .back-menu-list-group:hover .back-menu-list-title {
-    color: var(--heo-lighttext);
+    color: var(--heo-main);
 }
 
 .back-home-button:hover .back-menu-list-groups {
