@@ -3917,13 +3917,13 @@ ul {
 #vcomment .vbtn,
 #waline .vbtn {
     border: none;
-    background: var(--btn-bg);
-    color: var(--btn-color);
+    background: #d44040;
+    color: #ffc848;
 }
 
 #vcomment .vbtn:hover,
 #waline .vbtn:hover {
-    background: var(--btn-hover-color);
+    background: #0A84FF;
 }
 
 #vcomment .vimg,
