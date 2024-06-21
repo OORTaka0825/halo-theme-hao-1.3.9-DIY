@@ -5318,12 +5318,7 @@ html {
 
 .back-home-button:hover {
     background: var(--heo-main);
-    color: var(--heo-white);
-}
-
-.post .back-home-button:hover {
-    background: var(--heo-white-op);
-    color: var(--heo-white)
+    color: var(--heo-white) !important;
 }
 
 .nav-fixed #nav .back-home-button:hover {
