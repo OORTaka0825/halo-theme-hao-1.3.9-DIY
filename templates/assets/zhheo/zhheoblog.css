@@ -5377,7 +5377,7 @@ html {
 }
 
 .back-menu-list-groups .back-menu-list .back-menu-item:hover .back-menu-item-text {
-    color: var(--heo-card-bg);
+    color: var(--heo-white);
 }
 
 .back-home-button .back-menu-list-group {
@@ -5415,7 +5415,7 @@ html {
 }
 
 .back-home-button .back-menu-list-group:hover .back-menu-list-title {
-    color: var(--heo-lighttext);
+    color: var(--heo-main);
 }
 
 .back-home-button:hover .back-menu-list-groups {
@@ -5492,17 +5492,17 @@ html {
     }
 
     #nav #site-name:after {
+        background: url(../images/home.webp) no-repeat 50% 50%;
         opacity: 0;
         position: absolute;
         display: flex;
         z-index: 1;
-        content: "\e69a";
-        transition: .1s;
-        font-family: haofont !important;
-        align-items: center;
-        justify-content: center;
-        font-size: 22px;
-        line-height: 1
+        width: 74px;
+        height: 58px;
+        content: "";
+        transition: 0s;
+        transition-timing-function: ease-in;
+        transform: scale(0.4);  
     }
 
     .post #nav #site-name:hover {
