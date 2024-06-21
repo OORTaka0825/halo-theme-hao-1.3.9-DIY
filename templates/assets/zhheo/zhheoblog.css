@@ -2657,7 +2657,7 @@ blockquote footer cite::before {
     -ms-flex-align: center;
     -webkit-align-items: center;
     align-items: center;
-    color: var(--heo-card-bg);
+    color: var(--heo-white);
     background: var(--heo-white-op) !important;
     -webkit-box-shadow: var(--heo-shadow-nav);
     box-shadow: var(--heo-shadow-nav);
@@ -3058,7 +3058,7 @@ ul {
 
 #pagination .page-number.current {
     background: rgb(0, 121, 255);
-    color: var(--heo-card-bg);
+    color: var(--white);
     cursor: default;
     border-radius: 5px;
 }
@@ -4717,8 +4717,8 @@ html {
 } */
 
 #nav .menus_items .menus_item .menus_item_child > .recursion_menus_item:hover > a {
-    background: var(--heo-lighttext) !important;
-    color: var(--heo-card-bg) !important;
+    background: var(--heo-main) !important;
+    color: var(--heo-white) !important;
     box-shadow: var(--heo-shadow-main);
     margin: 0 auto;
     transform: scale(1) !important;
