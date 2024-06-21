@@ -5174,7 +5174,7 @@ html {
 }
 
 #page-header #nav #nav-right .nav-button:hover a.totopbtn {
-    background: var(--heo-lighttext);
+    background: var(--heo-main);
 }
 
 #page-header #nav #nav-right .nav-button:not(.long):hover a.totopbtn {
@@ -5213,7 +5213,7 @@ html {
 }
 
 .console-button .back-menu-list-groups .back-menu-list {
-    display: block;
+    display: flex;
     flex-direction: row;
     flex-wrap: wrap;
     width: 140px;
@@ -5302,14 +5302,6 @@ html {
     border-radius: 40px;
 }
 
-.page .back-home-button {
-    color: var(--heo-fontcolor)
-}
-
-.page .back-home-button:hover {
-    color: var(--heo-card-bg)
-}
-
 @media screen and (max-width: 768px) {
     .back-home-button {
         display: none;
@@ -5320,8 +5312,8 @@ html {
     color: var(--heo-fontcolor);
 }
 
-#page-header.not-top-img #nav .back-home-button i {
-    font-size: 20px
+#page-header.not-top-img #nav .back-home-button {
+    color: var(--heo-fontcolor);
 }
 
 .back-home-button:hover {
