@@ -3141,23 +3141,16 @@ ul {
     overflow-wrap: break-word;
 }
 
-#article-container a:hover {
-    text-decoration: none;
-    background: var(--heo-main);
-    border-width: 0;
-    color: var(--heo-white);
-    border-radius: 4px
+#article-container a {
+    color: rgb(48, 122, 246);
 }
 
+#article-container a:hover {
+    text-decoration: underline;
+ 
 #article-container img {
     display: block;
     margin: 0px auto 0.8rem;
-}
-
-@media screen and (max-width: 768px) {
-    #article-container img {
-        max-width: 100%
-    }
 }
 
 #article-container p {
@@ -4718,8 +4711,8 @@ html {
 } */
 
 #nav .menus_items .menus_item .menus_item_child > .recursion_menus_item:hover > a {
-    background: var(--heo-lighttext) !important;
-    color: var(--heo-card-bg) !important;
+    background: var(--heo-main) !important;
+    color: var(--heo-white) !important;
     box-shadow: var(--heo-shadow-main);
     margin: 0 auto;
     transform: scale(1) !important;
@@ -4897,7 +4890,7 @@ html {
     transition: 0.3s;
     display: flex;
     justify-content: center;
-    z-index: 999 !important;
+    z-index: 1000 !important;
     -webkit-user-select: none;
 }
 
@@ -5115,7 +5108,7 @@ html {
 
 #nav-totop:hover .totopbtn i {
     opacity: 1;
-    color: var(--heo-card-bg);
+    color: var(--heo-white);
     transition: 0.3s;
 }
 
@@ -5175,7 +5168,7 @@ html {
 }
 
 #page-header #nav #nav-right .nav-button:hover a.totopbtn {
-    background: var(--heo-lighttext);
+    background: var(--heo-main);
 }
 
 #page-header #nav #nav-right .nav-button:not(.long):hover a.totopbtn {
@@ -5214,7 +5207,7 @@ html {
 }
 
 .console-button .back-menu-list-groups .back-menu-list {
-    display: block;
+    display: flex;
     flex-direction: row;
     flex-wrap: wrap;
     width: 140px;
@@ -5269,6 +5262,10 @@ html {
     transform: scale(1);
 }
 
+.console-button .back-menu-list .back-menu-item {
+    width: 140px;
+}
+    
 @media screen and (max-width: 768px) {
 
     .console-button .back-menu-list-groups {
