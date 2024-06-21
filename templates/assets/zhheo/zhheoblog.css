@@ -4798,8 +4798,8 @@ html {
 } */
 
 #nav .menus_items .menus_item .menus_item_child > .recursion_menus_item:hover > a {
-    background: var(--heo-lighttext) !important;
-    color: var(--heo-card-bg) !important;
+    background: var(--heo-main) !important;
+    color: var(--heo-white) !important;
     box-shadow: var(--heo-shadow-main);
     margin: 0 auto;
     transform: scale(1) !important;
@@ -4838,7 +4838,6 @@ html {
     flex-direction: column;
     align-items: center;
 }
-
 /**
     上级菜单为横向菜单时
  */
@@ -4846,42 +4845,37 @@ html {
 
 /*-------本菜单竖向菜单时------*/
 /* 第三级之后的菜单列 */
-#nav .menus_items .menus_item .menus_item_child > .recursion_menus_item > .menus_item_child.vertical_nav {
+#nav .menus_items .menus_item .menus_item_child > .recursion_menus_item > .menus_item_child.vertical_nav{
     margin-top: 24px;
     border-radius: 24px;
     padding: 2px 0px;
 }
-
 /* 第三级之后的菜单项 */
-#nav .menus_items .recursion_menus_item .menus_item_child.vertical_nav > .recursion_menus_item {
+#nav .menus_items .recursion_menus_item .menus_item_child.vertical_nav > .recursion_menus_item{
     display: flex;
     margin-top: 4px;
     padding: 2px 0;
 }
-
 /* 第三级之后的菜单项（第一个菜单项） */
-#nav .menus_items .recursion_menus_item .menus_item_child.vertical_nav > .recursion_menus_item:nth-child(1) {
+#nav .menus_items .recursion_menus_item .menus_item_child.vertical_nav > .recursion_menus_item:nth-child(1){
     margin-top: 0;
 }
-
 /*-------本菜单竖向菜单时END------*/
 
 /*-------上级菜单为竖向菜单时------*/
 /*第四级以后的菜单列*/
-#nav .menus_items .recursion_menus_item > .menus_item_child.vertical_nav > .recursion_menus_item > .menus_item_child {
+#nav .menus_items .recursion_menus_item > .menus_item_child.vertical_nav > .recursion_menus_item > .menus_item_child{
     position: absolute;
     left: calc(100% + 12px);
     top: 0;
     margin-top: 0;
 }
-
-#nav .menus_items .recursion_menus_item > .menus_item_child.vertical_nav > .recursion_menus_item > .menus_item_child:before {
+#nav .menus_items .recursion_menus_item > .menus_item_child.vertical_nav > .recursion_menus_item > .menus_item_child:before{
     left: -20px;
     height: 100%;
     width: 30px;
     top: 0;
 }
-
 /*-------上级菜单为竖向菜单时END------*/
 
 /* 导航栏按钮悬浮 */
