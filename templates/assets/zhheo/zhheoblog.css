@@ -9634,12 +9634,12 @@ span.recent-post-top-text {
     line-height: 1.4;
     margin-top: 0px;
     font-weight: bold;
-    color: rgba(0， 0， 0, 0);
+    color: rgba(0， 0， 0, 0); !important;
     margin-bottom: 0px;
     position: absolute;
     width: 100%;
     left: 0;
-    padding: 0 30px;
+    padding: 0 20px;
     transition: 0.3s;
 }
 
