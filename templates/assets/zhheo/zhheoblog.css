@@ -10430,17 +10430,16 @@ a.extend.prev {
 @media screen and (max-width: 768px) {
     .coverdiv {
         margin: 0 0 0 auto;
-        transform: rotate(0) translateY(0) scale(1);
-        filter: blur(0);
+        transform: rotate(0deg) translateY(0) scale(1);
+        filter: blur(0px);
         width: 100%;
         position: fixed;
         height: 30rem;
-        z-index: 1
+        z-index: 1;
     }
 
     .coverdiv:after {
-        box-shadow: 0 0 105px 99px var(--heo-main) inset;
-        height: 70%
+        box-shadow: 0px 0px 205px 59px var(--heo-main) inset;
     }
 
 }
@@ -10525,19 +10524,7 @@ a.extend.prev {
     border: var(--style-border);
     width: calc(100% - 300px);
     align-self: flex-start;
-    animation: slide-in .6s .1s backwards;
-    position: relative;
-    overflow: hidden
-}
-
-#tag {
-    padding: 3rem 2rem 1rem 2rem
-}
-
-@media screen and (min-width: 1300px) {
-    #tag {
-        padding: 4rem 2rem 1rem 2rem;
-    }
+    animation: slide-in 0.6s 0.1s backwards;
 }
 
 #page {
@@ -10574,6 +10561,11 @@ a.extend.prev {
         z-index: 10;
     }
 
+    #post {
+        background:var(--heo-background)!important;
+        border: none;
+    }
+
     .post .layout > div:first-child:not(.recent-posts) {
         border-radius: 12px 12px 0 0;
     }
@@ -10600,14 +10592,21 @@ a.extend.prev {
     max-width: 1400px;
 }
 
-.layout#content-inner p img {
-    margin: auto
-}
-
 /* 隐藏主页头图 */
 .full_page #post-cover {
     display: none;
 }
+
+/* @keyframes postheadimg {
+  from {
+    backdrop-filter: blur(0px);
+    background-color: rgba(0,0,0,0.2);
+  }
+
+  to {
+    backdrop-filter: blur(300px);
+    background-color: rgba(0,0,0,0.2);
+  } */
 
 /* 文章头部 */
 #page-header #post-info {
@@ -10854,8 +10853,14 @@ span.post-meta-pv-cv {
 
 /* 微信公众号同步 */
 span.post-meta-wechat {
-    margin-right: 10px;
+    margin-right: 0.8rem;
     opacity: 0.6;
+    transition: 0.3s;
+    cursor: pointer;
+}
+
+.post-meta-wechat:hover {
+    opacity: 1;
 }
 
 span.post-meta-position {
@@ -10911,12 +10916,23 @@ span.post-meta-position {
     opacity: 0.6;
 }
 
-.post-meta-pv, .post-meta-commentcount, .post-meta-editor {
+.post-meta-pv {
     opacity: 0.6;
-    margin-right: 2px
+    margin-right: 0.8rem;
 }
 
-#twikoo-count, #ArtalkCount {
+.post-meta-commentcount {
+    opacity: 0.6;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-right: 0.8rem;
+}
+
+.post-meta-commentcount:hover {
+    opacity: 1;
+}
+
+#twikoo-count,#ArtalkCount {
     font-weight: 800;
     color: var(--heo-white);
 }
@@ -10928,9 +10944,6 @@ span.post-meta-position {
 
 .el-textarea .el-input__count {
     color: var(--heo-secondtext) !important;
-    -webkit-user-select: none;
-    bottom: 8px !important;
-    right: 12px !important
 }
 
 .post-meta-commentcount i {
@@ -10946,7 +10959,7 @@ span.post-meta-position {
 }
 
 .inline-image a:hover {
-    background: 0 0 !important;
+    background: none !important;
     box-shadow: none !important;
 }
 
@@ -10996,16 +11009,12 @@ span.post-meta-position {
     text-decoration: none;
     color: var(--heo-fontcolor);
     line-height: 1;
-    border-radius: 12px
 }
 
 #post-info #post-meta a:hover {
     text-decoration: none;
-    color: var(--heo-white)
-}
-
-#post-info #post-meta i {
-    line-height: 1
+    color: var(--heo-blue);
+    border-radius: 12px
 }
 
 /* 文章标题前图标 */
@@ -11041,8 +11050,8 @@ span.post-meta-position {
 
 /* 文章tab样式 */
 #article-container ul > li:not(.tab):before {
-    border: 0.21em solid var(--heo-main);
-    background: var(--heo-main);
+    border: 0.21em solid var(--heo-lighttext);
+    background: var(--heo-lighttext);
 }
 
 #article-container ol,
