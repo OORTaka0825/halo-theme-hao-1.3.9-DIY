@@ -5507,12 +5507,10 @@ html {
 
     .post #nav #site-name:hover {
         background: var(--heo-white-op);
-        color: var(--heo-white)
     }
 
     .nav-fixed #nav #site-name:hover {
-        background: var(--heo-lighttext);
-        color: var(--heo-card-bg)
+        background: var(--heo-main);
     }
 
     #nav #site-name:hover:after {
@@ -5559,10 +5557,6 @@ html {
     #page-header.nav-fixed #nav #page-name-text:hover:after {
         opacity: 1;
         line-height: 36px;
-    }
-
-    #page-header.nav-fixed #nav #page-name-text:hover:after {
-        color: var(--heo-card-bg);
     }
 
     #page-header.nav-fixed #nav div.menus_items {
