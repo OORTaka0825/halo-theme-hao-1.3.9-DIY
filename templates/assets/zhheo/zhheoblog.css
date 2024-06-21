@@ -16,7 +16,7 @@
     --heo-main-none: var(--heo-theme-none);
      --heo-shadow-theme: 0 0px 16px -3px #ffffff;
     --heo-shadow-blackdeep: 0 2px 16px -3px rgba(0, 0, 0, 0.15);
-    --heo-shadow-main: 0 0px 16px -3px rgb(255， 255， 255);
+    --heo-shadow-main: 0 0px 16px -3px rgb(255, 255, 255);
     --heo-shadow-blue: 0 8px 12px -3px rgba(40, 109, 234, 0.2);
     --heo-shadow-white: 0 8px 12px -3px rgba(255, 255, 255, 0.2);
     --heo-shadow-black: 0 0px 16px -3px #ffffff;
