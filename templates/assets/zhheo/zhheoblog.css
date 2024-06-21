@@ -8443,12 +8443,12 @@ a.categoryButton:hover {
 
 .category-bar-item:hover a {
     background: var(--heo-theme);
-    color: var(--heo-card-bg);
+    color: var(--heo-white);
 }
 
 .category-bar-item.select a {
     background: var(--heo-theme);
-    color: var(--heo-card-bg);
+    color: var(--heo-white);
     border-radius: 8px;
 }
 
@@ -9634,12 +9634,12 @@ span.recent-post-top-text {
     line-height: 1.4;
     margin-top: 0px;
     font-weight: bold;
-    color: var(--heo-fontcolor);
+    color: rgba(0， 0， 0, 0);
     margin-bottom: 0px;
     position: absolute;
     width: 100%;
     left: 0;
-    padding: 0 40px;
+    padding: 0 30px;
     transition: 0.3s;
 }
 
