@@ -119,8 +119,8 @@
 
 @media screen and (max-width: 768px) {
     :root {
-        --style-border: 1px solid var(--heo-none);
-        --style-border-hover: 1px solid var(--heo-none)
+        --style-border: 0px solid var(--heo-card-border);
+        --style-border-hover: 0px solid var(--heo-main);
     }
 }
 
@@ -860,7 +860,7 @@ button {
 }
 
 a:hover {
-    color: var(--heo-lighttext)
+    color: rgb(48， 122, 246);
 }
 
 #aside-content .author-info__description,
@@ -1481,8 +1481,8 @@ blockquote footer cite::before {
     width: 100%;
     height: 120px;
     overflow: hidden;
-    border-radius: 12px 12px 0 0;
-    background: #f6f6f6
+    border-radius: 12px 12px 0px 0px;
+    background: rgb(246, 246, 246);
 }
 
 @media screen and (max-width: 500px) {
@@ -2253,7 +2253,7 @@ blockquote footer cite::before {
     position: absolute;
     top: 0.6rem;
     right: 1.2rem;
-    color: #a9a9a9;
+    color: rgb(169, 169, 169);
     content: attr(progress-percentage);
     font-style: italic;
     font-size: 1.2rem
@@ -2366,7 +2366,7 @@ blockquote footer cite::before {
     display: inline-block;
     vertical-align: middle;
     font-weight: 700;
-    font-size: 19px;
+    font-size: 1.43em;
 }
 
 #post-comment .comment-head #comment-switch {
@@ -2657,7 +2657,7 @@ blockquote footer cite::before {
     -ms-flex-align: center;
     -webkit-align-items: center;
     align-items: center;
-    color: var(--heo-white);
+    color: var(--heo-card-bg);
     background: var(--heo-white-op) !important;
     -webkit-box-shadow: var(--heo-shadow-nav);
     box-shadow: var(--heo-shadow-nav);
@@ -2715,7 +2715,6 @@ blockquote footer cite::before {
 #page-header.nav-fixed #nav #site-name,
 #page-header.nav-fixed #nav #toggle-menu,
 #page-header.nav-fixed #nav a {
-    color: var(--heo-fontcolor);
     text-shadow: none;
 }
 
@@ -3059,7 +3058,7 @@ ul {
 
 #pagination .page-number.current {
     background: rgb(0, 121, 255);
-    color: var(--white);
+    color: var(--heo-card-bg);
     cursor: default;
     border-radius: 5px;
 }
@@ -3141,16 +3140,23 @@ ul {
     overflow-wrap: break-word;
 }
 
-#article-container a {
-    color: rgb(48, 122, 246);
+#article-container a:hover {
+    text-decoration: none;
+    background: var(--heo-main);
+    border-width: 0;
+    color: var(--heo-white);
+    border-radius: 4px
 }
 
-#article-container a:hover {
-    text-decoration: underline;
- 
 #article-container img {
     display: block;
     margin: 0px auto 0.8rem;
+}
+
+@media screen and (max-width: 768px) {
+    #article-container img {
+        max-width: 100%
+    }
 }
 
 #article-container p {
@@ -4711,8 +4717,8 @@ html {
 } */
 
 #nav .menus_items .menus_item .menus_item_child > .recursion_menus_item:hover > a {
-    background: var(--heo-main) !important;
-    color: var(--heo-white) !important;
+    background: var(--heo-lighttext) !important;
+    color: var(--heo-card-bg) !important;
     box-shadow: var(--heo-shadow-main);
     margin: 0 auto;
     transform: scale(1) !important;
@@ -4890,7 +4896,7 @@ html {
     transition: 0.3s;
     display: flex;
     justify-content: center;
-    z-index: 1000 !important;
+    z-index: 999 !important;
     -webkit-user-select: none;
 }
 
@@ -5108,7 +5114,7 @@ html {
 
 #nav-totop:hover .totopbtn i {
     opacity: 1;
-    color: var(--heo-white);
+    color: var(--heo-card-bg);
     transition: 0.3s;
 }
 
@@ -5168,7 +5174,7 @@ html {
 }
 
 #page-header #nav #nav-right .nav-button:hover a.totopbtn {
-    background: var(--heo-main);
+    background: var(--heo-lighttext);
 }
 
 #page-header #nav #nav-right .nav-button:not(.long):hover a.totopbtn {
@@ -5207,7 +5213,7 @@ html {
 }
 
 .console-button .back-menu-list-groups .back-menu-list {
-    display: flex;
+    display: block;
     flex-direction: row;
     flex-wrap: wrap;
     width: 140px;
@@ -5262,10 +5268,6 @@ html {
     transform: scale(1);
 }
 
-.console-button .back-menu-list .back-menu-item {
-    width: 140px;
-}
-    
 @media screen and (max-width: 768px) {
 
     .console-button .back-menu-list-groups {
