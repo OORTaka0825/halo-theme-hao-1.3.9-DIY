@@ -1445,8 +1445,8 @@ blockquote footer cite::before {
     width: 100%;
     height: 120px;
     overflow: hidden;
-    border-radius: 12px 12px 0 0;
-    background: #f6f6f6
+    border-radius: 12px 12px 0px 0px;
+    background: rgb(246, 246, 246);
 }
 
 @media screen and (max-width: 500px) {
@@ -2217,19 +2217,14 @@ blockquote footer cite::before {
     position: absolute;
     top: 0.6rem;
     right: 1.2rem;
-    color: #a9a9a9;
+    color: rgb(169, 169, 169);
     content: attr(progress-percentage);
     font-style: italic;
-    font-size: 1.2rem
+    font-size: 1.2rem;
 }
 
 #aside-content :only-child > .card-widget {
-    margin-top: 1rem;
-}
-
-#aside-content :only-child > :first-child {
-    margin-top: 0rem;
-}
+    margin-top: 0px;
 
 #aside-content .card-more-btn {
     float: right;
@@ -2330,7 +2325,7 @@ blockquote footer cite::before {
     display: inline-block;
     vertical-align: middle;
     font-weight: 700;
-    font-size: 19px;
+    font-size: 1.43em;
 }
 
 #post-comment .comment-head #comment-switch {
@@ -2437,7 +2432,7 @@ blockquote footer cite::before {
 #page-header #site-subtitle,
 #page-header #site-title {
     text-align: center;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.15);
+    text-shadow: 2px 2px 4px rgba(0，0，0，0.15);
     line-height: 1.5;
 }
 
@@ -2592,6 +2587,10 @@ blockquote footer cite::before {
     visibility: visible
 }
 
+#body-wrap #travellings_button:hover a i {
+    color: var(--heo-white)
+}
+
 #body-wrap #travellings_button:hover a {
     background: var(--heo-main);
     -webkit-box-shadow: var(--heo-shadow-main);
@@ -2621,7 +2620,7 @@ blockquote footer cite::before {
     -ms-flex-align: center;
     -webkit-align-items: center;
     align-items: center;
-    color: var(--heo-card-bg);
+    color: var(--heo-white);
     background: var(--heo-white-op) !important;
     -webkit-box-shadow: var(--heo-shadow-nav);
     box-shadow: var(--heo-shadow-nav);
