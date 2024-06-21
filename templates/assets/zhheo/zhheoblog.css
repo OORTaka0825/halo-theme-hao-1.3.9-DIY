@@ -10671,27 +10671,20 @@ a.extend.prev {
     color: var(--heo-white);
     opacity: 0.8;
     margin-right: 8px;
-    padding: 0 8px 0 4px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    flex-direction: row
 }
 
 #post-firstinfo .post-meta__tags:hover {
     color: var(--heo-white);
     opacity: 1;
-    background: var(--heo-white-op)
 }
 
 span.post-meta-categories {
     background-color: var(--heo-white-op);
     padding: 0 0.5rem;
-    border-radius: 12px;
+    border-radius: 8px;
     line-height: 32px;
     height: 32px;
     transition: 0.3s;
-    transition: .3s ease-out
 }
 
 span.post-meta-categories:not(:first-child) {
@@ -10716,12 +10709,6 @@ span.post-meta-categories:hover a.post-meta-categories {
 
 .meta-firstline .tag_share {
     margin-left: 1rem;
-}
-
-.meta-firstline .tag_share .post-meta__tag-list {
-    display: flex;
-    flex-direction: row;
-    align-items: center
 }
 
 #post-firstinfo .meta-firstline {
@@ -10749,7 +10736,7 @@ a.post-meta-original {
     padding: 0 0.5rem;
     font-size: 0.7rem;
     margin: auto;
-    border-radius: 12px;
+    border-radius: 8px;
     font-weight: bold;
     height: 32px;
     line-height: 32px;
@@ -10761,6 +10748,7 @@ a.post-meta-original {
 a.post-meta-original:hover {
     color: var(--heo-main) !important;
     background: var(--heo-white) !important;
+    border-radius: 8px !important;
 }
 
 .meta-avatar img:hover {
@@ -10780,7 +10768,7 @@ a.post-meta-original:hover {
         position: absolute;
         content: '';
         width: 100%;
-        height: 200%;
+        height: 100%;
         bottom: 0;
         left: 0;
         box-shadow: 0px -214px 287px 45px var(--heo-main) inset;
