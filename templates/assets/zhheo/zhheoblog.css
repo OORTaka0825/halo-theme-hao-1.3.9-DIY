@@ -9223,12 +9223,12 @@ span.recent-post-top-text {
 }
 
 .recent-post-top .recent-post-item:hover .recent-post-info a {
-    color: var(--heo-fontcolor);
+    color: #ffc848;
 }
 
 @media screen and (max-width: 1300px) {
     .recent-post-top .recent-post-item:hover .recent-post-info a {
-        color: var(--heo-theme);
+        color: #FF3842;
         transition: 0.3s;
     }
 }
