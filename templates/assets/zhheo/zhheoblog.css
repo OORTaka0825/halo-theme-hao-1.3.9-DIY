@@ -6193,7 +6193,7 @@ a.deal_link {
 }
 
 a.deal_link:hover {
-    color: var(--heo-card-bg);
+    color: var(--heo-white);
     background: var(--heo-main);
     transform: scale(1.1)
 }
@@ -6277,10 +6277,6 @@ img.footer_mini_logo:hover {
     height: 35px;
     line-height: 35px;
     border-radius: 40px;
-}
-
-.page #menus > div.menus_items > .menus_item:hover > a {
-    color: var(--heo-card-bg) !important;
 }
 
 #nav .menus_items .menus_item .menus_item_child > .recursion_menus_item > a {
@@ -6370,8 +6366,8 @@ img.footer_mini_logo:hover {
 }
 
 #rightMenu .rightMenu-group .rightMenu-item:hover {
-    background-color: var(--heo-lighttext);
-    color: var(--heo-card-bg);
+    background-color: var(--heo-main);
+    color: var(--heo-white);
     box-shadow: var(--heo-shadow-main);
 }
 
@@ -6467,21 +6463,9 @@ a.console_switchbutton {
     color: var(--heo-fontcolor);
 }
 
-.nav-fixed #nav .menus_item:hover .site-page {
-    color: var(--heo-card-bg)
-}
-
-.nav-fixed #nav .menus_item:hover li .site-page {
-    color: var(--heo-fontcolor)
-}
-
 .post-bg #nav #site-name {
     color: var(--heo-white);
     transition: 0s;
-}
-
-.nav-fixed #nav #site-name {
-    color: var(--heo-fontcolor);
 }
 
 /* 导航栏名称样式 */
@@ -6512,7 +6496,7 @@ body[data-type=music] .page #nav #site-name span {
 
 @media screen and (max-width: 768px) {
     .page #nav #site-name span:hover {
-        color: var(--heo-card-bg);
+        color: var(--heo-white);
     }
 }
 
