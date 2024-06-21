@@ -4971,7 +4971,7 @@ html {
     transition: 0.3s;
     display: flex;
     justify-content: center;
-    z-index: 999 !important;
+    z-index: 1000 !important;
     -webkit-user-select: none;
 }
 
@@ -5040,7 +5040,6 @@ html {
 #page-header #nav #nav-right .nav-button a i,
 #page-header #nav #nav-left .nav-button a i {
     line-height: 1;
-    font-size: 22px;
 }
 
 #page-header #nav #nav-right div,
@@ -5098,13 +5097,11 @@ html {
     #page-header.not-top-img:not(.nav-fixed) #nav {
         background: var(--heo-background) !important;
     }
-
     div#travellings_button {
-        display: none !important
+        display: none!important
     }
-
     div#darkmode_button {
-        display: none !important
+        display: none!important
     }
 }
 
