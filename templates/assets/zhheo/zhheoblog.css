@@ -119,8 +119,8 @@
 
 @media screen and (max-width: 768px) {
     :root {
-        --style-border: 0px solid var(--heo-card-border);
-        --style-border-hover: 0px solid var(--heo-main);
+        --style-border: 1px solid var(--heo-none);
+        --style-border-hover: 1px solid var(--heo-none)
     }
 }
 
@@ -1481,8 +1481,8 @@ blockquote footer cite::before {
     width: 100%;
     height: 120px;
     overflow: hidden;
-    border-radius: 12px 12px 0px 0px;
-    background: rgb(246, 246, 246);
+    border-radius: 12px 12px 0 0;
+    background: #f6f6f6
 }
 
 @media screen and (max-width: 500px) {
@@ -2253,7 +2253,7 @@ blockquote footer cite::before {
     position: absolute;
     top: 0.6rem;
     right: 1.2rem;
-    color: rgb(169, 169, 169);
+    color: #a9a9a9;
     content: attr(progress-percentage);
     font-style: italic;
     font-size: 1.2rem
@@ -4717,7 +4717,7 @@ html {
 } */
 
 #nav .menus_items .menus_item .menus_item_child > .recursion_menus_item:hover > a {
-    background: var(--heo-main) !important;
+    background: var(--heo-lighttext) !important;
     color: var(--heo-white) !important;
     box-shadow: var(--heo-shadow-main);
     margin: 0 auto;
@@ -5216,7 +5216,7 @@ html {
     display: block;
     flex-direction: row;
     flex-wrap: wrap;
-    width: 140px;
+    width: 100px;
     justify-content: space-between;
 }
 
@@ -6072,13 +6072,14 @@ i.fab {
 }
 
 .nav-fixed #nav a:hover {
-    background: var(--heo-main);
+    background: var(--heo-lighttext);
+    color: var(--heo-card-bg);
     transition: 0.3s;
 }
 
 @media screen and (min-width: 768px) {
     .menus_item:hover > a.site-page {
-        color: var(--heo-white) !important;
+        color: var(--heo-card-bg);
         background: var(--heo-white-op);
         transition: 0.3s;
         box-shadow: var(--heo-shadow-main);
@@ -6379,7 +6380,7 @@ img.footer_mini_logo:hover {
 }
 
 #rightMenu .rightMenu-group .rightMenu-item:hover {
-    background-color: var(--heo-main);
+    background-color: var(--heo-lighttext);
     color: var(--heo-white);
     box-shadow: var(--heo-shadow-main);
 }
@@ -7208,7 +7209,7 @@ li.tree-list-item {
 }
 
 .title-h2-a a:hover {
-    color: var(--heo-hovertext);
+    color: var(--heo-lighttext)
 }
 
 .title-h2-a-left {
