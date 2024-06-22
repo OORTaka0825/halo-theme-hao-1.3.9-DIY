@@ -9,17 +9,17 @@
     --heo-gray: #999999;
     --heo-gray-op: #9999992b;
     --heo-vip: #e5a80d;
-    --heo-main: #0084ffbe;
+    --heo-main: var(--heo-theme);
     --heo-main-op: var(--heo-theme-op);
     --heo-main-op-deep: var(--heo-theme-op-deep);
     --heo-main-op-light: var(--heo-theme-op-light);
     --heo-main-none: var(--heo-theme-none);
-     --heo-shadow-theme: 0 0px 16px -3px #ffffff;
+    --heo-shadow-theme: 0 8px 12px -3px var(--heo-theme-op);
     --heo-shadow-blackdeep: 0 2px 16px -3px rgba(0, 0, 0, 0.15);
-    --heo-shadow-main: 0 0px 16px -3px rgb(255, 255, 255);
+    --heo-shadow-main: 0 8px 12px -3px var(--heo-main-op);
     --heo-shadow-blue: 0 8px 12px -3px rgba(40, 109, 234, 0.2);
     --heo-shadow-white: 0 8px 12px -3px rgba(255, 255, 255, 0.2);
-    --heo-shadow-black: 0 0px 16px -3px #ffffff;
+    --heo-shadow-black: 0 0 12px 4px rgba(0, 0, 0, 0.05);
     --heo-shadow-yellow: 0px 38px 77px -26px rgba(255, 201, 62, 0.12);
     --heo-shadow-red: 0 8px 12px -3px #ee7d7936;
     --heo-shadow-green: 0 8px 12px -3px #87ee7936;
@@ -96,7 +96,7 @@
     --heo-hovertext: #0A84FF;
     --heo-ahoverbg: #fff;
     --heo-lighttext: var(--heo-theme);
-    --heo-secondtext: #ffffff;
+    --heo-secondtext: #a1a2b8;
     --heo-scrollbar: rgba(200, 200, 223, 0.4);
     --heo-card-btn-bg: #30343f;
     --heo-post-blockquote-bg: #000;
@@ -106,10 +106,10 @@
     --heo-card-bg: #1d1e22;
     --heo-card-bg-op: var(--heo-white-op);
     --heo-card-bg-none: #1d1b2600;
-    --heo-shadow-lightblack: 0 0px 16px -3px #ffffff;
+    --heo-shadow-lightblack: 0 5px 12px -5px rgba(102, 68, 68, 0);
     --heo-shadow-light2black: 0 5px 12px -5px rgba(102, 68, 68, 0);
     --heo-card-border: #3d3d3f;
-    --heo-shadow-border: 0 0px 16px -3px #ffffff;
+    --heo-shadow-border: 0 8px 16px -4px #00000050;
     --style-border: 1px solid var(--heo-card-border);
     --style-border-always: 1px solid var(--heo-card-border);
     --style-border-hover: 1px solid var(--heo-lighttext);
@@ -6214,7 +6214,7 @@ a.deal_link {
 }
 
 a.deal_link:hover {
-    color: var(--heo-white);
+    color: var(--heo-card-bg);
     background: var(--heo-main);
     transform: scale(1.1)
 }
@@ -6298,6 +6298,10 @@ img.footer_mini_logo:hover {
     height: 35px;
     line-height: 35px;
     border-radius: 40px;
+}
+
+.page #menus > div.menus_items > .menus_item:hover > a {
+    color: var(--heo-card-bg) !important;
 }
 
 #nav .menus_items .menus_item .menus_item_child > .recursion_menus_item > a {
@@ -6387,8 +6391,8 @@ img.footer_mini_logo:hover {
 }
 
 #rightMenu .rightMenu-group .rightMenu-item:hover {
-    background-color: var(--heo-main);
-    color: var(--heo-white);
+    background-color: var(--heo-lighttext);
+    color: var(--heo-card-bg);
     box-shadow: var(--heo-shadow-main);
 }
 
@@ -6484,9 +6488,21 @@ a.console_switchbutton {
     color: var(--heo-fontcolor);
 }
 
+.nav-fixed #nav .menus_item:hover .site-page {
+    color: var(--heo-card-bg)
+}
+
+.nav-fixed #nav .menus_item:hover li .site-page {
+    color: var(--heo-fontcolor)
+}
+
 .post-bg #nav #site-name {
     color: var(--heo-white);
     transition: 0s;
+}
+
+.nav-fixed #nav #site-name {
+    color: var(--heo-fontcolor);
 }
 
 /* 导航栏名称样式 */
@@ -6517,7 +6533,7 @@ body[data-type=music] .page #nav #site-name span {
 
 @media screen and (max-width: 768px) {
     .page #nav #site-name span:hover {
-        color: var(--heo-white);
+        color: var(--heo-card-bg);
     }
 }
 
@@ -6950,7 +6966,7 @@ body[data-type=music] .page #nav #site-name span {
 }
 
 #aside-content .aside-list > .aside-list-item:hover a {
-    color: var(--heo-white) !important;
+    color: var(--heo-card-bg) !important;
 }
 
 /* 文章顶部波浪效果 */
@@ -7216,7 +7232,7 @@ li.tree-list-item {
 }
 
 .title-h2-a a:hover {
-    color: var(--heo-hovertext);
+    color: var(--heo-lighttext)
 }
 
 .title-h2-a-left {
@@ -8005,8 +8021,8 @@ div#banners {
         height: 100%;
         top: 0;
         left: 0;
-        background: var(--heo-theme);
-        color: var(--heo-white);
+        background: var(--heo-lighttext);
+        color: var(--heo-card-bg);
         padding-left: 0.5rem;
         display: flex;
         flex-direction: column;
@@ -8130,8 +8146,8 @@ div#banners {
     }
 
     .topGroup .banner-button:hover {
-        background: var(--heo-theme);
-        color: var(--heo-white);
+        background: var(--heo-lighttext);
+        color: var(--heo-card-bg);
     }
 
     .topGroup .banner-button i {
@@ -8464,12 +8480,12 @@ a.categoryButton:hover {
 
 .category-bar-item:hover a {
     background: var(--heo-theme);
-    color: var(--heo-white);
+    color: var(--heo-card-bg);
 }
 
 .category-bar-item.select a {
     background: var(--heo-theme);
-    color: var(--heo-white);
+    color: var(--heo-card-bg);
     border-radius: 8px;
 }
 
@@ -9660,7 +9676,7 @@ span.recent-post-top-text {
     position: absolute;
     width: 100%;
     left: 0;
-    padding: 0 30px;
+    padding: 0 40px;
     transition: 0.3s;
 }
 
@@ -10308,7 +10324,7 @@ div#author-info__sayhi:hover {
 /* 时间轴卡片 */
 #aside-content .card-archives ul.card-archive-list > .card-archive-list-item a:hover,
 #aside-content .card-categories ul.card-category-list > .card-category-list-item a:hover {
-    color: var(--heo-white);
+    color: var(--heo-card-bg);
     background-color: var(--heo-theme);
     box-shadow: var(--heo-shadow-theme);
     border-radius: 8px;
@@ -10452,16 +10468,17 @@ a.extend.prev {
 @media screen and (max-width: 768px) {
     .coverdiv {
         margin: 0 0 0 auto;
-        transform: rotate(0deg) translateY(0) scale(1);
-        filter: blur(0px);
+        transform: rotate(0) translateY(0) scale(1);
+        filter: blur(0);
         width: 100%;
         position: fixed;
         height: 30rem;
-        z-index: 1;
+        z-index: 1
     }
 
     .coverdiv:after {
-        box-shadow: 0px 0px 205px 59px var(--heo-main) inset;
+        box-shadow: 0 0 105px 99px var(--heo-main) inset;
+        height: 70%
     }
 
 }
@@ -10546,7 +10563,19 @@ a.extend.prev {
     border: var(--style-border);
     width: calc(100% - 300px);
     align-self: flex-start;
-    animation: slide-in 0.6s 0.1s backwards;
+    animation: slide-in .6s .1s backwards;
+    position: relative;
+    overflow: hidden
+}
+
+#tag {
+    padding: 3rem 2rem 1rem 2rem
+}
+
+@media screen and (min-width: 1300px) {
+    #tag {
+        padding: 4rem 2rem 1rem 2rem;
+    }
 }
 
 #page {
@@ -10583,11 +10612,6 @@ a.extend.prev {
         z-index: 10;
     }
 
-    #post {
-        background:var(--heo-background)!important;
-        border: none;
-    }
-
     .post .layout > div:first-child:not(.recent-posts) {
         border-radius: 12px 12px 0 0;
     }
@@ -10614,21 +10638,14 @@ a.extend.prev {
     max-width: 1400px;
 }
 
+.layout#content-inner p img {
+    margin: auto
+}
+
 /* 隐藏主页头图 */
 .full_page #post-cover {
     display: none;
 }
-
-/* @keyframes postheadimg {
-  from {
-    backdrop-filter: blur(0px);
-    background-color: rgba(0,0,0,0.2);
-  }
-
-  to {
-    backdrop-filter: blur(300px);
-    background-color: rgba(0,0,0,0.2);
-  } */
 
 /* 文章头部 */
 #page-header #post-info {
@@ -10664,7 +10681,7 @@ a.extend.prev {
     }
 }
 
-#post-info #post-meta>.meta-secondline>span:first-child {
+#post-info #post-meta > .meta-secondline > span:first-child {
     margin-right: 0.8rem;
 }
 
@@ -10692,20 +10709,27 @@ a.extend.prev {
     color: var(--heo-white);
     opacity: 0.8;
     margin-right: 8px;
+    padding: 0 8px 0 4px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    flex-direction: row
 }
 
 #post-firstinfo .post-meta__tags:hover {
     color: var(--heo-white);
     opacity: 1;
+    background: var(--heo-white-op)
 }
 
 span.post-meta-categories {
     background-color: var(--heo-white-op);
     padding: 0 0.5rem;
-    border-radius: 8px;
+    border-radius: 12px;
     line-height: 32px;
     height: 32px;
     transition: 0.3s;
+    transition: .3s ease-out
 }
 
 span.post-meta-categories:not(:first-child) {
@@ -10730,6 +10754,12 @@ span.post-meta-categories:hover a.post-meta-categories {
 
 .meta-firstline .tag_share {
     margin-left: 1rem;
+}
+
+.meta-firstline .tag_share .post-meta__tag-list {
+    display: flex;
+    flex-direction: row;
+    align-items: center
 }
 
 #post-firstinfo .meta-firstline {
@@ -10757,7 +10787,7 @@ a.post-meta-original {
     padding: 0 0.5rem;
     font-size: 0.7rem;
     margin: auto;
-    border-radius: 8px;
+    border-radius: 12px;
     font-weight: bold;
     height: 32px;
     line-height: 32px;
@@ -10769,7 +10799,6 @@ a.post-meta-original {
 a.post-meta-original:hover {
     color: var(--heo-main) !important;
     background: var(--heo-white) !important;
-    border-radius: 8px !important;
 }
 
 .meta-avatar img:hover {
@@ -10789,7 +10818,7 @@ a.post-meta-original:hover {
         position: absolute;
         content: '';
         width: 100%;
-        height: 100%;
+        height: 200%;
         bottom: 0;
         left: 0;
         box-shadow: 0px -214px 287px 45px var(--heo-main) inset;
@@ -10875,14 +10904,8 @@ span.post-meta-pv-cv {
 
 /* 微信公众号同步 */
 span.post-meta-wechat {
-    margin-right: 0.8rem;
+    margin-right: 10px;
     opacity: 0.6;
-    transition: 0.3s;
-    cursor: pointer;
-}
-
-.post-meta-wechat:hover {
-    opacity: 1;
 }
 
 span.post-meta-position {
@@ -10938,23 +10961,12 @@ span.post-meta-position {
     opacity: 0.6;
 }
 
-.post-meta-pv {
+.post-meta-pv, .post-meta-commentcount, .post-meta-editor {
     opacity: 0.6;
-    margin-right: 0.8rem;
+    margin-right: 2px
 }
 
-.post-meta-commentcount {
-    opacity: 0.6;
-    cursor: pointer;
-    transition: 0.3s;
-    margin-right: 0.8rem;
-}
-
-.post-meta-commentcount:hover {
-    opacity: 1;
-}
-
-#twikoo-count,#ArtalkCount {
+#twikoo-count, #ArtalkCount {
     font-weight: 800;
     color: var(--heo-white);
 }
@@ -10966,6 +10978,9 @@ span.post-meta-position {
 
 .el-textarea .el-input__count {
     color: var(--heo-secondtext) !important;
+    -webkit-user-select: none;
+    bottom: 8px !important;
+    right: 12px !important
 }
 
 .post-meta-commentcount i {
@@ -10981,7 +10996,7 @@ span.post-meta-position {
 }
 
 .inline-image a:hover {
-    background: none !important;
+    background: 0 0 !important;
     box-shadow: none !important;
 }
 
@@ -11031,12 +11046,16 @@ span.post-meta-position {
     text-decoration: none;
     color: var(--heo-fontcolor);
     line-height: 1;
+    border-radius: 12px
 }
 
 #post-info #post-meta a:hover {
     text-decoration: none;
-    color: var(--heo-blue);
-    border-radius: 12px
+    color: var(--heo-white)
+}
+
+#post-info #post-meta i {
+    line-height: 1
 }
 
 /* 文章标题前图标 */
@@ -11072,8 +11091,8 @@ span.post-meta-position {
 
 /* 文章tab样式 */
 #article-container ul > li:not(.tab):before {
-    border: 0.21em solid var(--heo-lighttext);
-    background: var(--heo-lighttext);
+    border: 0.21em solid var(--heo-main);
+    background: var(--heo-main);
 }
 
 #article-container ol,
@@ -12546,7 +12565,7 @@ img.tk-avatar-img {
 /* 昵称 */
 .tk-nick {
     font-size: 1rem !important;
-    line-height: 27px;
+    line-height: 32px;
 }
 
 /* 填写项标题 */
@@ -12605,7 +12624,7 @@ img.tk-avatar-img {
     color: var(--heo-fontcolor) !important;
     border-radius: 12px !important;
     min-height: 100px !important;
-    padding: 16px 16px 100px 16px !important;
+    padding: 16px 16px 40px 16px !important;
     border: var(--style-border-always) !important;
     box-shadow: none !important;
 }
@@ -12947,8 +12966,8 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
 /* 评论时间 */
 .tk-time {
     color: var(--heo-secondtext) !important;
-    font-size: 0.7rem;
-    margin-left: 0.4rem;
+    font-size: 0.8rem;
+    margin-left: 0.5rem;
 }
 
 /* 评论之间的间距 */
