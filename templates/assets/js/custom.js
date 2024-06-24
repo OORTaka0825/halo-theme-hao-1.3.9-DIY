@@ -531,7 +531,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 };
                 let htmlStr = `
-                <div class="checkbox ${this。options.class} ${this。options.colour} ${this。options.status}"><input type="checkbox" ${this.options.status}><p>${this.innerHTML.trim().替换(/^(<br>)|(<br>)$/g， "")}</p></div>
+                <div class="checkbox ${this.options.class} ${this.options.colour} ${this.options.status}"><input type="checkbox" ${this.options.status}><p>${this.innerHTML.trim().replace(/^(<br>)|(<br>)$/g, "")}</p></div>
             `;
                 this.innerHTML = htmlStr;
             }
@@ -552,10 +552,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 };
                 let htmlStr = `
                     <span class="hide-inline">
-                        <button type="button" class="hide-button" style="background-color:${this。options.bg};color:${this.options.color}">
-                        ${this。options.display}<br>
+                        <button type="button" class="hide-button" style="background-color:${this.options.bg};color:${this.options.color}">
+                        ${this.options.display}<br>
                         </button>
-                        <span class="hide-content">${this。innerHTML.trim().replace(/^(<br>)|(<br>)$/g, "")}</span>
+                        <span class="hide-content">${this.innerHTML.trim().replace(/^(<br>)|(<br>)$/g, "")}</span>
                     </span>
                 `;
                 this.innerHTML = htmlStr;
