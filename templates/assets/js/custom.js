@@ -1,200 +1,12 @@
-
-
 /* 获取直属子元素 */
 function getChildren(el, className) {
     for (let item of el.children) if (item.className === className) return item;
     return null;
 }
 
-function parseExpression(expression, occupied) {
-    if (expression === "${full}") {
-        return occupied;
-    }
-    const match = expression.replaceAll("full", occupied).match(/^\$\{([<>=]{1,2}.+)\?(.+):(.+)}$/);
-    if (match) {
-        return eval(`occupied${match[1]} ? ${match[2]} : ${match[3]}`);
-    }
-    throw new Error(`Invalid expression "${expression}"`);
-}
-
-function extractHeight(occupied, width, height) {
-    const occupiedWidth = width.endsWith("%")
-        ? occupied * (Number(width.slice(0, -1)) / 100)
-        : Number(width);
-    height = height.replaceAll("cwidth", occupiedWidth);
-    if (height.startsWith("${") && height.endsWith("}")) {
-        return parseExpression(height, occupied);
-    } else {
-        return height;
-    }
-}
-
 
 // 跳转链接的卡片
 document.addEventListener("DOMContentLoaded", () => {
-
-    // 分栏 tab
-    customElements.define(
-        "hao-tabs",
-        class HaoTabs extends HTMLElement {
-            constructor() {
-                super();
-                this.options = {
-                    id: this.getAttribute("id") || '',
-                    index: this.getAttribute("index") || ''
-                };
-                const id = this.options.id
-                const index = this.options.index
-                const _temp = getChildren(this, "_tpl");
-                let _innerHTML = _temp.innerHTML.trim().replace(/^(<br>)|(<br>)$/g, "");
-                let navs = "";
-                let contents = "";
-                let newIndex = 0;
-
-                _innerHTML.replace(
-                    /{tabs-item([^}]*)}([\s\S]*?){\/tabs-item}/g,
-                    function ($0, $1, $2) {
-                        newIndex +=1;
-                        let active =''
-                        if(index!='' && index!=null){
-                            if(newIndex == index){
-                                active = 'active';
-                            }
-                        }else{
-                            if(newIndex==1){
-                                active = 'active'
-                            }
-                        }
-                        navs += `
-                         <li class="tab ${active}"><button type="button" data-href="#${id}-${newIndex}">${$1}</button></li>
-                    `;
-                        contents += `
-                        <div class="tab-item-content  ${active}" id="${id}-${newIndex}">
-                         ${$2.trim().replace(/^(<br>)|(<br>)$/g, "")}
-                           <button type="button" class="tab-to-top" aria-label="scroll to top"><i class="haofont hao-icon-arrow-up"></i></button>
-                        </div>
-                    `;
-                    }
-                );
-                let htmlStr = `
-                <div class="tabs" id="${this.options.id}">
-                   <ul class="nav-tabs">${navs}</ul>
-                   <div class="tab-contents">${contents}</div>
-                </div>
-        
-            `;
-                this.innerHTML = htmlStr;
-            }
-        }
-    );
-
-    // 彩虹虚线
-    customElements.define(
-        "hao-dotted",
-        class DottedDom extends HTMLElement {
-            constructor() {
-                super();
-                this.startColor = this.getAttribute("begin") || "#ff6c6c";
-                this.endColor = this.getAttribute("end") || "#1989fa";
-                this.innerHTML = `
-                <span class="tool_dotted" style="background-image: repeating-linear-gradient(-45deg, ${this.startColor} 0, ${this.startColor} 20%, transparent 0, transparent 25%, ${this.endColor} 0, ${this.endColor} 45%, transparent 0, transparent 50%)"></span>
-            `;
-            }
-        }
-    );
-
-    // 进度条
-    customElements.define(
-        "hao-progress",
-        class ProgressDom extends HTMLElement {
-            constructor() {
-                super();
-                this.options = {
-                    percentage: /^\d{1,3}%$/.test(this.getAttribute("pct"))
-                        ? this.getAttribute("pct")
-                        : "50%",
-                    color: this.getAttribute("color") || "#ff6c6c",
-                };
-                this.innerHTML = `
-                    <span class="tool_progress">
-                        <div class="tool_progress__strip">
-                            <div class="tool_progress__strip-percent" style="width: ${this.options.percentage}; background: ${this.options.color};"></div>
-                        </div>
-                        <div class="tool_progress__percentage">${this.options.percentage}</div>
-                    </span>
-                `;
-            }
-        }
-    );
-
-    // 小标记
-    customElements.define(
-        "hao-sign",
-        class SignDom extends HTMLElement {
-            constructor() {
-                super();
-                this.options = {
-                    type: this.getAttribute("type"), // 小标签类型
-                    content: this.innerHTML, // 内容
-                };
-                this.render();
-            }
-            render() {
-                this.innerHTML = `<span class="${this.options.type}">${this.options.content}</span>`;
-            }
-        }
-    );
-
-
-    // B站视频
-    customElements.define(
-        "hao-bilibili",
-        class BiliBiliDom extends HTMLElement {
-            constructor() {
-                super();
-                this.options = {
-                    bvid: this.getAttribute("bvid"),
-                    page: +(this.getAttribute("page") || "1"),
-                    width: this.getAttribute("width") || "100%",
-                    height: this.getAttribute("height") || "500",
-                    autoplay: this.getAttribute("autoplay") || 0,
-                };
-                this.render();
-            }
-            render() {
-                if (!this.options.bvid) return (this.innerHTML = "请填写正确的bvid");
-                const realHeight = extractHeight(this.parentElement.offsetWidth, this.options.width, this.options.height);
-                this.setAttribute("height", realHeight);
-                this.innerHTML = `
-                    <iframe class="iframe-dom" allowfullscreen="true" scrolling="no" border="0" frameborder="no" framespacing="0" class="tool_vplayer" src="//player.bilibili.com/player.html?bvid=${this.options.bvid}&page=${this.options.page}&autoplay=${this.options.autoplay}" style="width:${this.options.width}; height:${realHeight}px;"></iframe>`;
-            }
-        }
-    );
-
-    // pdf
-    customElements.define(
-        "hao-pdf",
-        class PDFDom extends HTMLElement {
-            constructor() {
-                super();
-                this.options = {
-                    src: this.getAttribute("src") || "",
-                    width: this.getAttribute("width") || "100%",
-                    height: this.getAttribute("height") || "500",
-                };
-                this.render();
-            }
-            render() {
-                if (!this.options.src) return (this.innerHTML = "请填写正确的pdf链接");
-                const realHeight = extractHeight(this.parentElement.offsetWidth, this.options.width, this.options.height);
-                this.setAttribute("height", realHeight);
-                this.innerHTML = `
-                    <div class="tool_pdf">
-                        <iframe class="iframe-dom" src="${this.options.src}" style="width:${this.options.width}; height:${realHeight}px;"></iframe>
-                    </div>`;
-            }
-        }
-    );
 
     customElements.define(
         "hao-introduction-card",
@@ -290,20 +102,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 super();
                 this.options = {
                     link: this.getAttribute("link"),
-                    logo: this.getAttribute("logo") || '',
+                    logo: this.getAttribute("logo"),
                     title: this.getAttribute("title") || '',
                     described: this.getAttribute("described") || '',
                 };
-                let tagLinkLeft = `
-                <div class="tag-link-left">
-                    <i class="haofont hao-icon-link"></i>
-                </div>`
-                if(this.options.logo!=null && this.options.logo!=''){
-                    tagLinkLeft = `
-                    <div class="tag-link-left"
-                        style="background-image:url(${this.options.logo})">
-                    </div>`
-                }
                 let htmlStr = `
 				<div calss="hao-tag-link">
 					<a class="tag-Link" target="_blank"
@@ -311,7 +113,9 @@ document.addEventListener("DOMContentLoaded", () => {
 						draggable="false">
 						<div class="tag-link-tips">引用站外地址</div>
 						<div class="tag-link-bottom">
-                            ${tagLinkLeft}
+							<div class="tag-link-left"
+								style="background-image:url(${this.options.logo})">
+							</div>
 							<div class="tag-link-right">
 								<div class="tag-link-title">${this.options.title}</div>
 								<div class="tag-link-sitename">${this.options.described}</div>
@@ -494,6 +298,63 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     );
 
+
+    // 分栏 tab
+    // customElements.define(
+    //     "hao-tabs",
+    //     class HaoTabs extends HTMLElement {
+    //         constructor() {
+    //             super();
+    //             this.options = {
+    //                 id: this.getAttribute("id") || '',
+    //                 index: this.getAttribute("index") || ''
+    //             };
+    //             const id = this.options.id
+    //             const index = this.options.index
+    //             const _temp = getChildren(this, "_tpl");
+    //
+    //             let _innerHTML = _temp.innerHTML.trim().replace(/^(<br>)|(<br>)$/g, "");
+    //             let navs = "";
+    //             let contents = "";
+    //             let newIndex = 0;
+    //
+    //             _innerHTML.replace(
+    //                 /{tabs-item([^}]*)}([\s\S]*?){\/tabs-item}/g,
+    //                 function ($0, $1, $2) {
+    //                     newIndex +=1;
+    //                     let active =''
+    //                     if(index!='' && index!=null){
+    //                         if(newIndex == index){
+    //                             active = 'active';
+    //                         }
+    //                     }else{
+    //                         if(newIndex==1){
+    //                             active = 'active'
+    //                         }
+    //                     }
+    //                     navs += `
+	// 					 	<li class="tab ${active}"><button type="button" data-href="#${id}-${newIndex}">${$1}</button></li>
+	// 					`;
+    //                     contents += `
+	// 						<div class="tab-item-content  ${active}" id="${id}-${newIndex}">
+	// 						 ${$2.trim().replace(/^(<br>)|(<br>)$/g, "")}
+	// 						   <button type="button" class="tab-to-top" aria-label="scroll to top"><i class="haofont hao-icon-arrow-up"></i></button>
+	// 						</div>
+	// 					`;
+    //                 }
+    //             );
+    //             let htmlStr = `
+	// 				<div class="tabs" id="${this.options.id}">
+	// 				   <ul class="nav-tabs">${navs}</ul>
+	// 				   <div class="tab-contents">${contents}</div>
+	// 				</div>
+	//
+	// 			`;
+    //             this.innerHTML = htmlStr;
+    //         }
+    //     }
+    // );
+
     // gallerygroup 相册图库
     customElements.define(
         "hao-gallery-group",
@@ -670,7 +531,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 };
                 let htmlStr = `
-                <div class="checkbox ${this.options.class} ${this.options.colour} ${this.options.status}"><input type="checkbox" ${this.options.status}><p>${this.innerHTML.trim().replace(/^(<br>)|(<br>)$/g, "")}</p></div>
+                <div class="checkbox ${this。options.class} ${this。options.colour} ${this。options.status}"><input type="checkbox" ${this.options.status}><p>${this.innerHTML.trim().替换(/^(<br>)|(<br>)$/g， "")}</p></div>
             `;
                 this.innerHTML = htmlStr;
             }
@@ -691,10 +552,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 };
                 let htmlStr = `
                     <span class="hide-inline">
-                        <button type="button" class="hide-button" style="background-color:${this.options.bg};color:${this.options.color}">
-                        ${this.options.display}<br>
+                        <button type="button" class="hide-button" style="background-color:${this。options.bg};color:${this.options.color}">
+                        ${this。options.display}<br>
                         </button>
-                        <span class="hide-content">${this.innerHTML.trim().replace(/^(<br>)|(<br>)$/g, "")}</span>
+                        <span class="hide-content">${this。innerHTML.trim().replace(/^(<br>)|(<br>)$/g, "")}</span>
                     </span>
                 `;
                 this.innerHTML = htmlStr;
