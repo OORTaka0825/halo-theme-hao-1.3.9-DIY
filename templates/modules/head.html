@@ -12,6 +12,8 @@
 
     <script th:src="${assets_link + '/js/heo.js' + theme_version}"></script>
 
+    <script th:src="${assets_link + '/js/halo.js' + theme_version}"></script>
+
     <link rel="stylesheet" th:href="${assets_link + '/zhheo/zhheoblog.css' + theme_version}">
 
     <link rel="stylesheet" th:href="${assets_link + '/zhheo/custom.css' + theme_version}">
@@ -45,6 +47,7 @@
     <th:block th:replace="~{modules/common/footer-style-one}"/>
 
     <script>
+        <script>
         (win => {
             win.saveToLocal = {
                 set: function setWithExpiry(key, value, ttl) {
@@ -153,7 +156,7 @@
     </script>
 
     <!-- 动态加载条 -->
-    <script data-pace-options="{ &quot;restartOnRequestAfter&quot;:false,&quot;eventLag&quot;:false}"
+    <script data-pace-options='{ "restartOnRequestAfter":false,"eventLag":false}'
             th:src="${assets_link + '/libs/pace/pace.min.js'}"
             th:if="${theme.config.other.loadingBoxs.loadProgressBar}">
     </script>
