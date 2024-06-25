@@ -153,7 +153,7 @@
     </script>
 
     <!-- 动态加载条 -->
-    <script data-pace-options="{ &quot;restartOnRequestAfter&quot;:false,&quot;eventLag&quot;:false}"
+    <script data-pace-options='{ "restartOnRequestAfter":false,"eventLag":false}'
             th:src="${assets_link + '/libs/pace/pace.min.js'}"
             th:if="${theme.config.other.loadingBoxs.loadProgressBar}">
     </script>
@@ -162,7 +162,7 @@
     <script th:src="${assets_link + '/libs/clipboard/clipboard.min.js'}"></script>
 
     <!-- 关于统计-->
-    <script th:if="${#strings.contains(theme.config.about.widgetList,'statistics-map')}" th:src="${assets_link + '/libs/countup/countup.js'}"></script>
+    <script th:if="${#strings.contains(theme.config.about.widgets,'statistics-map')}" th:src="${assets_link + '/libs/countup/countup.js'}"></script>
 
     <!-- 小板报 -->
     <th:block th:if="${not #strings.isEmpty(theme.config.sidebar.welcome.key)}">
