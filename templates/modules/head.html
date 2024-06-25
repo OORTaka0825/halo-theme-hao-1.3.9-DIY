@@ -47,7 +47,6 @@
     <th:block th:replace="~{modules/common/footer-style-one}"/>
 
     <script>
-        <script>
         (win => {
             win.saveToLocal = {
                 set: function setWithExpiry(key, value, ttl) {
@@ -109,10 +108,12 @@
 
             win.activateDarkMode = function () {
                 document.documentElement.setAttribute('data-theme', 'dark')
+                document.documentElement.classList.add('color-scheme-dark')
                 heo.initThemeColor()
             }
             win.activateLightMode = function () {
                 document.documentElement.setAttribute('data-theme', 'light')
+                document.documentElement.classList.remove('color-scheme-dark')
                 heo.initThemeColor()
             }
             const t = saveToLocal.get('theme')
@@ -156,7 +157,7 @@
     </script>
 
     <!-- 动态加载条 -->
-    <script data-pace-options='{ "restartOnRequestAfter":false,"eventLag":false}'
+    <script data-pace-options="{ &quot;restartOnRequestAfter&quot;:false,&quot;eventLag&quot;:false}"
             th:src="${assets_link + '/libs/pace/pace.min.js'}"
             th:if="${theme.config.other.loadingBoxs.loadProgressBar}">
     </script>
