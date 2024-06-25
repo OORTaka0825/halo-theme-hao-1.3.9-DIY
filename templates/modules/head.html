@@ -37,9 +37,9 @@
     />
 
     <!-- 代码块自动识别语言 -->
-    <th:block th:replace="~{modules/common/code}"/>
+    <th:block th:replace="~{modules/common/code :: code}"/>
     <!--  代码块-->
-    <th:block th:replace="~{macro/prism-code}"/>
+    <th:block th:replace="~{macro/prism-code :: prism-code}"/>
 
     <!-- 页脚内容-样式一 -->
     <th:block th:replace="~{modules/common/footer-style-one}"/>
@@ -176,9 +176,9 @@
     </th:block>
 
     <!-- icon图标 -->
-    <link rel="stylesheet" th:href="${assets_link + '/icon/iconfont.css' + theme_version}">
+    <link rel="stylesheet" th:href="'https://cdn.cbd.int/hao-theme-static@'+${theme.spec.version}+'/icon/iconfont.css'">
 
-    <th:block th:replace="~{modules/variables/site-config}" />
+    <th:block th:replace="~{modules/variables/site-config :: site-config}" />
 
 
 </th:block>
