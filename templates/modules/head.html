@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <!-- 公共的 head 部分，可以定义部分 links,scripts,styles -->
 <th:block th:fragment="head(htmlType)">
     <meta charset="UTF-8">
@@ -11,6 +13,8 @@
     <script src="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/jquery/3.6.0/jquery.min.js"></script>
 
     <script th:src="${assets_link + '/js/heo.js' + theme_version}"></script>
+
+    <script th:src="${assets_link + '/js/halo.js' + theme_version}"></script>
 
     <link rel="stylesheet" th:href="${assets_link + '/zhheo/zhheoblog.css' + theme_version}">
 
@@ -37,12 +41,12 @@
     />
 
     <!-- 代码块自动识别语言 -->
-    <th:block th:replace="~{modules/common/code}"/>
+    <th:block th:replace="~{modules/common/code :: code}"/>
     <!--  代码块-->
-    <th:block th:replace="~{macro/prism-code}"/>
+    <th:block th:replace="~{macro/prism-code :: prism-code}"/>
 
     <!-- 页脚内容-样式一 -->
-    <th:block th:replace="~{modules/common/footer-style-one}"/>
+    <th:block th:replace="~{modules/common/footer-style-one :: footer-style-one}"/>
 
     <script>
         (win => {
@@ -106,12 +110,10 @@
 
             win.activateDarkMode = function () {
                 document.documentElement.setAttribute('data-theme', 'dark')
-                document.documentElement.classList.add('color-scheme-dark')
                 heo.initThemeColor()
             }
             win.activateLightMode = function () {
                 document.documentElement.setAttribute('data-theme', 'light')
-                document.documentElement.classList.remove('color-scheme-dark')
                 heo.initThemeColor()
             }
             const t = saveToLocal.get('theme')
@@ -155,7 +157,7 @@
     </script>
 
     <!-- 动态加载条 -->
-    <script data-pace-options="{ &quot;restartOnRequestAfter&quot;:false,&quot;eventLag&quot;:false}"
+    <script data-pace-options='{ "restartOnRequestAfter":false,"eventLag":false}'
             th:src="${assets_link + '/libs/pace/pace.min.js'}"
             th:if="${theme.config.other.loadingBoxs.loadProgressBar}">
     </script>
@@ -163,8 +165,12 @@
     <!-- 复制 https://githubfast.com/zenorocha/clipboard.js -->
     <script th:src="${assets_link + '/libs/clipboard/clipboard.min.js'}"></script>
 
+    <!-- 全局图片预览-->
+    <script src="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+    <link rel="stylesheet" href="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/fancybox/3.5.7/jquery.fancybox.min.css">
+
     <!-- 关于统计-->
-    <script th:if="${#strings.contains(theme.config.about.widgetList,'statistics-map')}" th:src="${assets_link + '/libs/countup/countup.js'}"></script>
+    <script th:if="${#strings.contains(theme.config.about.widgets,'statistics-map')}" th:src="${assets_link + '/libs/countup/countup.js'}"></script>
 
     <!-- 小板报 -->
     <th:block th:if="${not #strings.isEmpty(theme.config.sidebar.welcome.key)}">
@@ -182,3 +188,5 @@
 
 
 </th:block>
+
+</html>
