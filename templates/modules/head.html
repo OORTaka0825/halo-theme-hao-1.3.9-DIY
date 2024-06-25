@@ -39,9 +39,9 @@
     />
 
     <!-- 代码块自动识别语言 -->
-    <th:block th:replace="~{modules/common/code :: code}"/>
+    <th:block th:replace="~{modules/common/code}"/>
     <!--  代码块-->
-    <th:block th:replace="~{macro/prism-code :: prism-code}"/>
+    <th:block th:replace="~{macro/prism-code}"/>
 
     <!-- 页脚内容-样式一 -->
     <th:block th:replace="~{modules/common/footer-style-one}"/>
@@ -155,7 +155,7 @@
     </script>
 
     <!-- 动态加载条 -->
-    <script data-pace-options='{ "restartOnRequestAfter":false,"eventLag":false}'
+    <script data-pace-options="{ &quot;restartOnRequestAfter&quot;:false,&quot;eventLag&quot;:false}"
             th:src="${assets_link + '/libs/pace/pace.min.js'}"
             th:if="${theme.config.other.loadingBoxs.loadProgressBar}">
     </script>
