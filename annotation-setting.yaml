@@ -8,11 +8,20 @@ spec:
     kind: Post
   formSchema:
     - $formkit: "radio"
+      name: "ai"
+      label: "AI 摘要"
+      help: "默认后台设置"
+      options:
+        - label: "启用"
+          value: "true"
+        - label: "禁用"
+          value: "false"
+    - $formkit: "radio"
       name: "copyrightEnable"
       id: "copyrightEnable"
       key: "copyrightEnable"
       label: "显示版权声明"
-      value: "true"
+      help: "默认后台设置"
       options:
         - label: "显示"
           value: "true"
@@ -20,9 +29,9 @@ spec:
           value: "false"
     - $formkit: "radio"
       name: "copyrightType"
-      if: "$get(copyrightEnable).value == 'true'"
       label: "版权声明类型"
       value: "original"
+      if: "$get(copyrightEnable).value != 'false'"
       options:
         - label: "原创"
           value: "original"
@@ -30,9 +39,9 @@ spec:
           value: "reprint"
     - $formkit: "text"
       name: "copyrightUrl"
-      if: "$get(copyrightEnable).value == 'true'"
       label: "版权声明链接"
-      help: "默认后台设置链接"
+      help: "默认后台设置"
+      if: "$get(copyrightEnable).value != 'false'"
       placeholder: "请输入链接"
 
 ---
@@ -126,3 +135,40 @@ spec:
     - $formkit: "textarea"
       name: "description"
       label: "分组描述"
+
+---
+
+apiVersion: v1alpha1
+kind: AnnotationSetting
+metadata:
+  generateName: annotation-setting-
+spec:
+  targetRef:
+    group: core.halo.run
+    kind: EquipmentGroup
+  formSchema:
+    - $formkit: "textarea"
+      name: "description"
+      label: "分组描述"
+
+---
+
+apiVersion: v1alpha1
+kind: AnnotationSetting
+metadata:
+  generateName: annotation-setting-
+spec:
+  targetRef:
+    group: core.halo.run
+    kind: Equipment
+  formSchema:
+    - $formkit: "text"
+      name: "model"
+      label: "装备型号/版本"
+    - $formkit: "text"
+      name: "button"
+      label: "左下角按钮显示文字"
+      value: "详情"
+    - $formkit: "text"
+      name: "link"
+      label: "左下角按钮跳转链接"
