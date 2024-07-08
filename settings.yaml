@@ -556,7 +556,7 @@ spec:
         - $formkit: group
           name: widgetss
           label: 侧边栏内容
-          help: 目前提供的小部件有：profile（站点资料）, wechat（微信）, power（爱发电赞助）, welcome（小板报）, steam（Steam卡片）, music（音乐卡片）, friend-link（通讯录）, recent-posts（近期文章）, comments（最新评论）, categories（文章分类）, tags（文章标签）, stat（统计）, tags-stat（标签&归档&统计）, adbox（广告区域）。你可以随意组合或排序，以逗号隔开。
+          help: 目前提供的小部件有：profile（站点资料）, wechat（微信）, welcome（小板报）, steam（Steam卡片）, music（音乐卡片）, friend-link（通讯录）, recent-posts（近期文章）, comments（最新评论）, categories（文章分类）, tags（文章标签）, stat（统计）, tags-stat（标签&归档&统计）, adbox（广告区域）。你可以随意组合或排序，以逗号隔开。
           value:
             indexWidgets: profile,wechat,comments,recent-posts,categories,tags-stat
             postWidgets: profile,wechat,toc,comments,recent-posts,categories,tags-stat
@@ -631,69 +631,98 @@ spec:
               max: 2
               value: [ ]
               children:
-                - $formkit: text
+                - $formkit: select
                   name: icon
                   label: 图标
+                  options:
+                    - label: 电子邮箱
+                      value: hao-icon-envelope
+                    - label: 微信
+                      value: hao-icon-weixin
+                    - label: 公众号
+                      value: hao-icon-weixingongzhonghao
+                    - label: rss
+                      value: hao-icon-rss
+                    - label: 腾讯 QQ
+                      value: hao-icon-qq
+                    - label: 新浪微博
+                      value: hao-icon-weibo
+                    - label: 知乎
+                      value: hao-icon-29
+                    - label: 豆瓣
+                      value: hao-icon-douban
+                    - label: 哔哩哔哩
+                      value: hao-icon-bilibili
+                    - label: GitHub
+                      value: hao-icon-github
+                    - label: GitLab
+                      value: hao-icon-gitlab
+                    - label: 百度
+                      value: hao-icon-baidu
+                    - label: 掘金
+                      value: hao-icon-juejin
+                    - label: 语雀
+                      value: hao-icon-yuque
+                    - label: 博客园
+                      value: hao-icon-cnblogs
+                    - label: CSDN
+                      value: hao-icon-csdn
+                    - label: LeetCode
+                      value: hao-icon-leetcode
+                    - label: 头条
+                      value: hao-icon-toutiao
+                    - label: 抖音 / TikTok
+                      value: hao-icon-tiktok
+                    - label: Telegram
+                      value: hao-icon-telegram
+                    - label: Facebook
+                      value: hao-icon-facebook1
+                    - label: Instagram
+                      value: hao-icon-Instagram
+                    - label: LinkedIn
+                      value: hao-icon-linkedin
+                    - label: Twitter
+                      value: hao-icon-dove
+                    - label: Slack
+                      value: hao-icon-slack
+                    - label: Discord
+                      value: hao-icon-discord-line
+                    - label: YouTube
+                      value: hao-icon-youtube
+                    - label: Steam
+                      value: hao-icon-steam
+                    - label: Dribbble
+                      value: hao-icon-dribbble
                 - $formkit: text
                   name: name
                   label: 名称
                 - $formkit: url
                   name: url
                   label: 链接
+                - $formkit: radio
+                  name: urlType
+                  label: 链接类型
+                  value: normal
+                  help: 如果选择了图片类型，那么在访客点击之后会使用弹框的形式加载
+                  options:
+                    - label: 跳转链接
+                      value: normal
+                    - label: 图片
+                      value: image
         - $formkit: group
           name: wechat
           label: 公众号
           value:
             wechatImgFace:
             wechatImgBack:
-            color: "#07C160"
-            wechatImg: "/themes/theme-hao/assets/images/gzh_cover.png"
-            url: "/wechat"
           children:
-            - $formkit: color
-              name: color
-              label: 背景颜色
-              value: "#07C160"
-            - $formkit: attachment
-              name: wechatImg
-              label: 背景图
-            - $formkit: url
-              name: url
-              label: 链接
             - $formkit: attachment
               name: wechatImgFace
-              label: 公众号正面图
+              placeholder: 公众号正面图
             - $formkit: attachment
               name: wechatImgBack
-              label: 公众号背面图
+              placeholder: 公众号背面图
               help: 图片可以从公众号后台下载物料或者自制
-        - $formkit: group
-          name: power
-          label: 爱发电赞助
-          value:
-            powerLink: /
-            list:
-          children:
-            - $formkit: url
-              name: powerLink
-              label: 赞助地址
-            - $formkit: repeater
-              name: list
-              label: 爱发电赞助列表
-              value: [ ]
-              children:
-                - $formkit: attachment
-                  name: avatar
-                  label: 头像
-                - $formkit: text
-                  name: name
-                  label: 名称
-                - $formkit: url
-                  name: link
-                  label: 链接
-                - $formkit: text
-                  name: descr
-                  label: 描述
         - $formkit: group
           name: welcome
           label: 小板报
@@ -776,20 +805,11 @@ spec:
           label: 最新文章
           value: 4
           help: 文章数量
-        - $formkit: group
-          name: newcomment
+        - $formkit: number
+          name: newcommentnumber
           label: 最新评论
-          value:
-            newcommentUrl: /newest
-            newcommentnumber: 5
-          children:
-            - $formkit: url
-              name: newcommentUrl
-              label: 跳转地址
-            - $formkit: number
-              name: newcommentnumber
-              label: 数量
-              help: 最新评论数量, 小于 0 则展示5条评论
+          value: 5
+          help: 最新评论数量, 小于 0 则展示5条评论
         - $formkit: number
           name: categoryQuantity
           label: 文章分类
@@ -933,29 +953,167 @@ spec:
               label: 左侧
               value: [ ]
               children:
-                - $formkit: text
+                - $formkit: select
                   name: icon
                   label: 图标
+                  options:
+                    - label: 电子邮箱
+                      value: hao-icon-envelope
+                    - label: 微信
+                      value: hao-icon-weixin
+                    - label: 公众号
+                      value: hao-icon-weixingongzhonghao
+                    - label: rss
+                      value: hao-icon-rss
+                    - label: 腾讯 QQ
+                      value: hao-icon-qq
+                    - label: 新浪微博
+                      value: hao-icon-weibo
+                    - label: 知乎
+                      value: hao-icon-29
+                    - label: 豆瓣
+                      value: hao-icon-douban
+                    - label: 哔哩哔哩
+                      value: hao-icon-bilibili
+                    - label: GitHub
+                      value: hao-icon-github
+                    - label: GitLab
+                      value: hao-icon-gitlab
+                    - label: 百度
+                      value: hao-icon-baidu
+                    - label: 掘金
+                      value: hao-icon-juejin
+                    - label: 语雀
+                      value: hao-icon-yuque
+                    - label: 博客园
+                      value: hao-icon-cnblogs
+                    - label: CSDN
+                      value: hao-icon-csdn
+                    - label: LeetCode
+                      value: hao-icon-leetcode
+                    - label: 头条
+                      value: hao-icon-toutiao
+                    - label: 抖音 / TikTok
+                      value: hao-icon-tiktok
+                    - label: Telegram
+                      value: hao-icon-telegram
+                    - label: Facebook
+                      value: hao-icon-facebook1
+                    - label: Instagram
+                      value: hao-icon-Instagram
+                    - label: LinkedIn
+                      value: hao-icon-linkedin
+                    - label: Twitter
+                      value: hao-icon-dove
+                    - label: Slack
+                      value: hao-icon-slack
+                    - label: Discord
+                      value: hao-icon-discord-line
+                    - label: YouTube
+                      value: hao-icon-youtube
+                    - label: Steam
+                      value: hao-icon-steam
+                    - label: Dribbble
+                      value: hao-icon-dribbble
                 - $formkit: text
                   name: name
                   label: 名称
                 - $formkit: text
                   name: url
                   label: 链接
+                - $formkit: radio
+                  name: urlType
+                  label: 链接类型
+                  value: normal
+                  help: 如果选择了图片类型，那么在访客点击之后会使用弹框的形式加载
+                  options:
+                    - label: 跳转链接
+                      value: normal
+                    - label: 图片
+                      value: image
             - $formkit: repeater
               name: socialMediaRight
               label: 右侧
               value: [ ]
               children:
-                - $formkit: text
+                - $formkit: select
                   name: icon
                   label: 图标
+                  options:
+                    - label: 电子邮箱
+                      value: hao-icon-envelope
+                    - label: 微信
+                      value: hao-icon-weixin
+                    - label: 公众号
+                      value: hao-icon-weixingongzhonghao
+                    - label: rss
+                      value: hao-icon-rss
+                    - label: 腾讯 QQ
+                      value: hao-icon-qq
+                    - label: 新浪微博
+                      value: hao-icon-weibo
+                    - label: 知乎
+                      value: hao-icon-29
+                    - label: 豆瓣
+                      value: hao-icon-douban
+                    - label: 哔哩哔哩
+                      value: hao-icon-bilibili
+                    - label: GitHub
+                      value: hao-icon-github
+                    - label: GitLab
+                      value: hao-icon-gitlab
+                    - label: 百度
+                      value: hao-icon-baidu
+                    - label: 掘金
+                      value: hao-icon-juejin
+                    - label: 语雀
+                      value: hao-icon-yuque
+                    - label: 博客园
+                      value: hao-icon-cnblogs
+                    - label: CSDN
+                      value: hao-icon-csdn
+                    - label: LeetCode
+                      value: hao-icon-leetcode
+                    - label: 头条
+                      value: hao-icon-toutiao
+                    - label: 抖音 / TikTok
+                      value: hao-icon-tiktok
+                    - label: Telegram
+                      value: hao-icon-telegram
+                    - label: Facebook
+                      value: hao-icon-facebook1
+                    - label: Instagram
+                      value: hao-icon-Instagram
+                    - label: LinkedIn
+                      value: hao-icon-linkedin
+                    - label: Twitter
+                      value: hao-icon-dove
+                    - label: Slack
+                      value: hao-icon-slack
+                    - label: Discord
+                      value: hao-icon-discord-line
+                    - label: YouTube
+                      value: hao-icon-youtube
+                    - label: Steam
+                      value: hao-icon-steam
+                    - label: Dribbble
+                      value: hao-icon-dribbble
                 - $formkit: text
                   name: name
                   label: 名称
                 - $formkit: text
                   name: url
                   label: 链接
+                - $formkit: radio
+                  name: urlType
+                  label: 链接类型
+                  value: normal
+                  help: 如果选择了图片类型，那么在访客点击之后会使用弹框的形式加载
+                  options:
+                    - label: 跳转链接
+                      value: normal
+                    - label: 图片
+                      value: image
         - $formkit: menuRadio
           name: menu
           label: 相关链接
@@ -1261,26 +1419,17 @@ spec:
           label: 版权声明
           help: 需要在发布文章时的元数据上选显示版权声明才可以生效
           value:
-            enable: true
             content: '本文是原创文章，采用 <a target="_blank" href="/cc">CC BY-NC-ND 4.0</a> 协议，完整转载请注明来自 <a href="/" target="_blank" >程序员小航</a>'
             reprintContent: '本文是转载文章，版权归原作者所有。建议访问原文，转载本文请联系原作者。'
           children:
-            - $formkit: radio
-              name: enable
-              options:
-                - label: 显示
-                  value: true
-                - label: 隐藏
-                  value: false
-              help: 文章底部显示版权声明模块
-            - $formkit: text
-              name: originalUrl
-              label: 原创链接
-              placeholder: 请输入链接
-            - $formkit: text
-              name: reprintUrl
-              label: 转载链接
-              placeholder: 请输入链接
+            - $formkit: "text"
+              name: "originalUrl"
+              label: "原创链接"
+              placeholder: "请输入链接"
+            - $formkit: "text"
+              name: "reprintUrl"
+              label: "转载链接"
+              placeholder: "请输入链接"
             - $formkit: textarea
               name: content
               label: 原创声明内容
@@ -1611,117 +1760,6 @@ spec:
                   label: 左下角按钮跳转链接
                   placeholder: 请输入左下角按钮跳转链接
                   value: https://www.apple.com.cn/macbook-pro/
-
-    - group: new_comment
-      label: 最近评论
-      formSchema:
-        - $formkit: attachment
-          name: backgroundImg
-          label: 背景图
-          value: https://liuzhihang.com/upload/moments.png
-          placeholder: 请输入图片地址
-        - $formkit: text
-          name: smallTitle
-          label: 小标题
-          value: 评论
-        - $formkit: text
-          name: bigTitle
-          label: 大标题
-          value: 最近评论
-        - $formkit: text
-          name: detail
-          label: 描述
-          value: 快速查看本站最近评论内容。
-
-    - group: envelope_comment
-      label: 留言板
-      formSchema:
-        - $formkit: radio
-          label: 弹幕
-          name: enable_danmu
-          value: true
-          options:
-            - label: 启用
-              value: true
-            - label: 禁用
-              value: false
-        - $formkit: radio
-          label: 信笺
-          name: enable_envelope_comment
-          key: enable_envelope_comment
-          id: enable_envelope_comment
-          value: true
-          options:
-            - label: 启用
-              value: true
-            - label: 禁用
-              value: false
-        - $formkit: textarea
-          if: $get(enable_envelope_comment).value
-          name: title
-          label: 标题
-          placeholder: 请输入内容
-          value: <div align="center">留言板</div>
-          help: 支持 HTML 语法
-        - $formkit: group
-          name: custom_pic
-          if: $get(enable_envelope_comment).value
-          label: 信笺图片
-          value:
-            cover:
-            line:
-            beforeimg:
-            afterimg:
-          children:
-            - $formkit: attachment
-              name: cover
-              label: 头部图片
-              placeholder: 请输入内容
-              value: "https://npm.elemecdn.com/hexo-butterfly-envelope/lib/violet.jpg"
-            - $formkit: attachment
-              name: line
-              label: 底部图片
-              placeholder: 请输入内容
-              value: "https://npm.elemecdn.com/hexo-butterfly-envelope/lib/line.png"
-            - $formkit: attachment
-              name: beforeimg
-              label: 前半部分图片
-              placeholder: 请输入内容
-              value: "https://npm.elemecdn.com/hexo-butterfly-envelope/lib/before.png"
-            - $formkit: attachment
-              name: afterimg
-              label: 后半部分图片
-              placeholder: 请输入内容
-              value: "https://npm.elemecdn.com/hexo-butterfly-envelope/lib/after.png"
-        - $formkit: repeater
-          name: messageList
-          if: $get(enable_envelope_comment).value
-          label: 正文
-          value:
-            - content: "有什么想问的？"
-            - content: "有什么想说的？"
-            - content: "有什么想吐槽的？"
-            - content: "哪怕是有什么想吃的，都可以告诉我哦~"
-          children:
-            - $formkit: text
-              name: content
-              label: 内容
-              placeholder: 请输入内容
-              value: "有什么想问的？"
-        - $formkit: text
-          name: bottom
-          if: $get(enable_envelope_comment).value
-          label: 底部文本
-          placeholder: 请输入内容
-          value: 自动书记人偶竭诚为您服务！
-          help: 仅支持单行文本
-        - $formkit: number
-          name: height
-          if: $get(enable_envelope_comment).value
-          label: 高度
-          placeholder: 请输入内容
-          help: 信封划出的高度
-          value: 1024
 
     - group: about
       label: 关于
@@ -2137,6 +2175,96 @@ spec:
                   value: Y
                 - label: 否
                   value: N
+
+    - group: envelope_comment
+      label: 留言板
+      formSchema:
+        - $formkit: radio
+          label: 弹幕
+          name: enable_danmu
+          value: true
+          options:
+            - label: 启用
+              value: true
+            - label: 禁用
+              value: false
+        - $formkit: radio
+          label: 信笺
+          name: enable_envelope_comment
+          key: enable_envelope_comment
+          id: enable_envelope_comment
+          value: true
+          options:
+            - label: 启用
+              value: true
+            - label: 禁用
+              value: false
+        - $formkit: textarea
+          if: $get(enable_envelope_comment).value
+          name: title
+          label: 标题
+          placeholder: 请输入内容
+          value: <div align="center">留言板</div>
+          help: 支持 HTML 语法
+        - $formkit: group
+          name: custom_pic
+          if: $get(enable_envelope_comment).value
+          label: 信笺图片
+          value:
+            cover:
+            line:
+            beforeimg:
+            afterimg:
+          children:
+            - $formkit: attachment
+              name: cover
+              label: 头部图片
+              placeholder: 请输入内容
+              value: "https://npm.elemecdn.com/hexo-butterfly-envelope/lib/violet.jpg"
+            - $formkit: attachment
+              name: line
+              label: 底部图片
+              placeholder: 请输入内容
+              value: "https://npm.elemecdn.com/hexo-butterfly-envelope/lib/line.png"
+            - $formkit: attachment
+              name: beforeimg
+              label: 前半部分图片
+              placeholder: 请输入内容
+              value: "https://npm.elemecdn.com/hexo-butterfly-envelope/lib/before.png"
+            - $formkit: attachment
+              name: afterimg
+              label: 后半部分图片
+              placeholder: 请输入内容
+              value: "https://npm.elemecdn.com/hexo-butterfly-envelope/lib/after.png"
+        - $formkit: repeater
+          name: messageList
+          if: $get(enable_envelope_comment).value
+          label: 正文
+          value:
+            - content: "有什么想问的？"
+            - content: "有什么想说的？"
+            - content: "有什么想吐槽的？"
+            - content: "哪怕是有什么想吃的，都可以告诉我哦~"
+          children:
+            - $formkit: text
+              name: content
+              label: 内容
+              placeholder: 请输入内容
+              value: "有什么想问的？"
+        - $formkit: text
+          name: bottom
+          if: $get(enable_envelope_comment).value
+          label: 底部文本
+          placeholder: 请输入内容
+          value: 自动书记人偶竭诚为您服务！
+          help: 仅支持单行文本
+        - $formkit: number
+          name: height
+          if: $get(enable_envelope_comment).value
+          label: 高度
+          placeholder: 请输入内容
+          help: 信封划出的高度
+          value: 1024
 
     - group: comments
       label: 评论
@@ -2800,16 +2928,6 @@ spec:
               validation: required
               value: 'https://npm.onmicrosoft.cn/hao-theme-static@1.3.7/templates/assets'
               help: '默认为npmJs的onmicrosoft加速地址，如果你有自己的cdn地址（请确保链接下assets文件夹下主题静态资源文件），可以填写，否则请勿修改！ '
-        - $formkit: group
-          name: opengraph
-          label: Open Graph
-          value:
-            image:
-          children:
-            - $formkit: attachment
-              name: image
-              label: 默认图片
-              help: 如果页面没有设置图片，那么将会使用此图片作为 Open Graph 图片
         - $formkit: group
           name: vanillaLazyload
           label: 懒加载
