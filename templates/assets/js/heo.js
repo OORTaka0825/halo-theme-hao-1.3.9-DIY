@@ -22,12 +22,6 @@ var heo = {
     // 首页bb
     initIndexEssay: function() {
         if (document.querySelector("#bber-talk"))
-            $(".swiper-wrapper .swiper-slide").each(function () {
-                var text = $(this)[0].innerText;
-                if (text != 'undefined') {
-                    $(this).text(btf.changeContent(text));
-                }
-            })
             new Swiper(".swiper-container",{
                 direction: "vertical",
                 loop: !0,
@@ -72,36 +66,6 @@ var heo = {
             $("#cookies-window").hide())
     },
 
-    tagPageActive: function() {
-        var e = window.location.pathname;
-        if (/\/tags\/.*?/.test(e = decodeURIComponent(e))) {
-            var t = e.split("/")[2];
-            if (document.querySelector("#tag-page-tags")) {
-                $("a").removeClass("select");
-                var o = document.getElementById(t);
-                o && (o.classList.add("select"),
-                    o.style.order = "-1")
-            }
-        }
-    },
-
-    categoriesBarActive: function() {
-        document.querySelector("#category-bar") && $(".category-bar-item").removeClass("select");
-        var e = window.location.pathname;
-        if ("/" == (e = decodeURIComponent(e)))
-            document.querySelector("#category-bar") && document.getElementById("category-bar-home").classList.add("select");
-        else {
-            if (/\/categories\/.*?/.test(e)) {
-                var t = e.split("/")[2];
-                if (document.querySelector("#category-bar")) {
-                    var o = document.getElementById(t);
-                    o && (o.classList.add("select"),
-                        o.style.order = "-1")
-                }
-            }
-        }
-    },
-
     // 页脚友链
     addFriendLinksInFooter: function () {
         var footerRandomFriendsBtn = document.getElementById("footer-random-friends-btn");
@@ -109,41 +73,27 @@ var heo = {
         footerRandomFriendsBtn.style.opacity = "0.2";
         footerRandomFriendsBtn.style.transitionDuration = "0.3s";
         footerRandomFriendsBtn.style.transform = "rotate(" + 360 * refreshNum++ + "deg)";
-        function getLinks(){
-            const fetchUrl = "/apis/api.plugin.halo.run/v1alpha1/plugins/PluginLinks/links?keyword=&sort=priority,asc"
-            fetch(fetchUrl)
-                .then(res => res.json())
-                .then(json => {
-                    saveToLocal.set('links-data', JSON.stringify(json.items), 10 / (60 * 24))
-                    renderer(json.items);
-                })
-        }
-        function renderer(data){
-            const linksUrl = GLOBAL_CONFIG.source.links.linksUrl
-            const num = GLOBAL_CONFIG.source.links.linksNum
-            var randomFriendLinks = getArrayItems(data, num);
-            var htmlText = '';
-            for (let i = 0; i < randomFriendLinks.length; ++i) {
-                var item = randomFriendLinks[i]
-                htmlText += `<a class='footer-item' href='${item.spec.url}'  target="_blank" rel="noopener nofollow">${item.spec.displayName}</a>`;
-            }
-            htmlText += `<a class='footer-item' href='${linksUrl}'>更多</a>`
-            if(document.getElementById("friend-links-in-footer")){
-                document.getElementById("friend-links-in-footer").innerHTML = htmlText;
-            }
-        }
-        function friendLinksInFooterInit(){
-            const data = saveToLocal.get('links-data')
-            if (data) {
-                renderer(JSON.parse(data))
-            } else {
-                getLinks()
-            }
-            setTimeout(()=>{
-                footerRandomFriendsBtn.style.opacity = "1";
-            }, 300)
-        }
-        friendLinksInFooterInit();
+
+        const fetchUrl = "/apis/api.plugin.halo.run/v1alpha1/plugins/PluginLinks/links?keyword=&sort=priority,asc"
+        const linksUrl = GLOBAL_CONFIG.source.links.linksUrl
+        const num = GLOBAL_CONFIG.source.links.linksNum
+        fetch(fetchUrl)
+            .then(res => res.json())
+            .then(json => {
+                var randomFriendLinks = getArrayItems(json.items, num);
+                var htmlText = '';
+                for (let i = 0; i < randomFriendLinks.length; ++i) {
+                    var item = randomFriendLinks[i]
+                    htmlText += `<a class='footer-item' href='${item.spec.url}'  target="_blank" rel="noopener nofollow">${item.spec.displayName}</a>`;
+                }
+                htmlText += `<a class='footer-item' href='${linksUrl}'>更多</a>`
+                if(document.getElementById("friend-links-in-footer")){
+                    document.getElementById("friend-links-in-footer").innerHTML = htmlText;
+                }
+            })
+        setTimeout(()=>{
+            footerRandomFriendsBtn.style.opacity = "1";
+        }, 300)
     },
 
     //禁止图片右键单击
@@ -479,29 +429,9 @@ var heo = {
         $htmlDom.contains("hide-aside") ? document.querySelector("#consoleHideAside").classList.add("on") : document.querySelector("#consoleHideAside").classList.remove("on")
     },
     toPage: function() {
-        var e = document.querySelectorAll(".page-number")
-            , t = parseInt(e[e.length - 1].innerHTML)
-            , o = document.getElementById("toPageText")
-            , n = parseInt(o.value);
-        if (!isNaN(n) && n > 0 && "0" !== ("" + n)[0] && n <= t) {
-            var url = window.location.href;
-
-            var photosIndexOf = url.indexOf("?group") >= 0 ? url.indexOf("?group") : -1;
-            if (photosIndexOf >= 0) {//图库页面
-                var new_url = url.substr(0,photosIndexOf);
-                var group = url.substr(photosIndexOf)
-                var a, l = new_url.replace(/\/page\/\d$/, "");
-                a = 1 === n ? l : l + (l.endsWith("/") ? "" : "/") + "page/" + n,
-                    document.getElementById("toPageButton").href = a + group
-            }else{
-                var a, l = url.replace(/\/page\/\d$/, "");
-                a = 1 === n ? l : l + (l.endsWith("/") ? "" : "/") + "page/" + n,
-                    document.getElementById("toPageButton").href = a
-            }
-            //首页有第一屏就跳转指定位置
-            scrollToPost();
-
-        }
+        var e, t = document.querySelectorAll(".page-number"), o = parseInt(t[t.length - 1].innerHTML), n = document.getElementById("toPageText"), a = parseInt(n.value);
+        !isNaN(a) && a > 0 && "0" !== ("" + a)[0] && a <= o && (e = 1 === a ? "/" : "/page/" + a,
+            document.getElementById("toPageButton").href = e)
     },
     changeSayHelloText: function() {
         const greetings = GLOBAL_CONFIG.helloText.length == 0 ? ["🤖️ 数码科技爱好者", "🔍 分享与热心帮助", "🏠 智能家居小能手", "🔨 设计开发一条龙", "🤝 专修交互与设计", "🏃 脚踏实地行动派", "🧱 团队小组发动机", "💢 壮汉人狠话不多"] : GLOBAL_CONFIG.helloText
@@ -587,27 +517,6 @@ var heo = {
         input.setSelectionRange(-1, -1);
     },
 
-    //爱发电赞助
-    addPowerLinksInPostRightSide: async function() {
-        const image = document.getElementById("power-star-image")
-            , star = document.getElementById("power-star")
-            , title = document.getElementById("power-star-title")
-            , desc = document.getElementById("power-star-desc");
-        if (image && star && title && desc)
-            try {
-                const list = GLOBAL_CONFIG.source.power.list
-                    , i = heo.getRandomInt(0, list.length)
-                    , power = list[i].realNode;
-                image.style.backgroundImage = `url(${power.avatar})`,
-                    star.href = power.link,
-                    title.innerText = power.name,
-                    desc.innerText = power.descr
-            } catch (e) {}
-    },
-    getRandomInt: function(e, t) {
-        return Math.floor(Math.random() * (t - e)) + e
-    },
-
     //初始化console图标
     initConsoleState: function() {
         document.documentElement.classList.contains("hide-aside") ? document.querySelector("#consoleHideAside").classList.add("on") : document.querySelector("#consoleHideAside").classList.remove("on")
@@ -676,10 +585,6 @@ $(document).ready((function() {
     }
 )),
 document.addEventListener("pjax:complete", (function() {
-        initBlog();
-        // 解决 katex pjax问题
-        if((GLOBAL_CONFIG.htmlType == 'post' || GLOBAL_CONFIG.htmlType == 'page') && typeof window.renderKaTex != 'undefined'){
-            window.renderKaTex();
-        }
+         initBlog()
      }
 ));

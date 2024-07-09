@@ -12,7 +12,7 @@ if(GLOBAL_CONFIG.htmlType!='comments' && document.querySelector('#post-comment')
         //token获取见上方
         accessToken: GLOBAL_CONFIG.source.twikoo.accessToken,
         mailMd5: GLOBAL_CONFIG.source.comments.mailMd5,
-        pageUrl: window.location.pathname.replace(/\/page\/\d$/, ""),
+        pageUrl: window.location.pathname,
         barrageTimer: [],
         barrageList: [],
         siteName: GLOBAL_CONFIG.source.artalk.siteName,
@@ -173,8 +173,6 @@ if(GLOBAL_CONFIG.htmlType!='comments' && document.querySelector('#post-comment')
         let comment = isTwikoo ? data.comment :
             isArtalk ? data.content :
                 isWaline ? data.comment : '';
-        let badge_name = isArtalk ? data.badge_name : '博主'
-        let badgeName = !barrageBlogger ? "热评" : badge_name != '' ? badge_name : "博主"
         let barrage = document.createElement('div');
         let width = commentBarrageConfig.dom.clientWidth;
         let height = commentBarrageConfig.dom.clientHeight;
@@ -183,7 +181,7 @@ if(GLOBAL_CONFIG.htmlType!='comments' && document.querySelector('#post-comment')
         <div class="barrageHead">
         <a class="barrageTitle
         ${barrageBlogger ? "barrageBloggerTitle" : ""}" href="javascript:heo.scrollTo('post-comment')">
-        ${badgeName}
+        ${barrageBlogger ? "博主" : "热评"}
         </a>
         <div class="barrageNick">${nick}</div>
         <img class="barrageAvatar" src="${avatar}"/>
