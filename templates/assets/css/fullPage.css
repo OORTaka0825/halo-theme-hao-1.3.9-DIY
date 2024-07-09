@@ -11,16 +11,12 @@
 
 }
 
-.page .back-home-button {
+.back-home-button {
     color: rgba(255, 255, 255, 0.7);
 }
 
-.page #nav #site-name span {
+#nav #site-name {
     color: var(--light-grey);
-}
-
-.nav-fixed #nav #site-name span{
-    color: var(--heo-fontcolor);
 }
 
 #nav .site-page {
