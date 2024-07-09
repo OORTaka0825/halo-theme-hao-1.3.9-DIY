@@ -6948,6 +6948,9 @@ a.console_switchbutton {
 }
 
 @media screen and (min-width: 1300px) {
+    #aside-content .aside-list > .aside-list-item:hover {
+        transform: scale(1.03);
+    }
 
     #aside-content .aside-list > .aside-list-item:active {
         transform: scale(0.97);
@@ -6988,7 +6991,6 @@ a.console_switchbutton {
     bottom: -11px;
     z-index: 5;
 }
-
 .waves-area .waves-svg {
     width: 100%;
     height: 60px;
@@ -7033,7 +7035,6 @@ a.console_switchbutton {
         transform: translate3d(85px, 0, 0);
     }
 }
-
 /*Shrinking for mobile*/
 @media (max-width: 768px) {
     .main-hero-waves-area {
@@ -7165,7 +7166,6 @@ li.card-archive-list-item {
 
     #aside-content .sticky_layout {
         top: calc(60px + 0.5rem);
-        /*margin-top: 1rem;*/
     }
 
     #page-header.nav-visible + .layout > .aside-content > .sticky_layout {
@@ -7242,7 +7242,7 @@ li.tree-list-item {
 }
 
 .title-h2-a a:hover {
-    color: var(--heo-lighttext)
+    color: var(--heo-hovertext);
 }
 
 .title-h2-a-left {
@@ -7394,6 +7394,7 @@ span.fund_name {
 }
 
 /* 微信公众号翻转 */
+
 #flip-wrapper {
     position: relative;
     width: 235px;
@@ -7439,110 +7440,6 @@ span.fund_name {
     /* background-color: #212121; */
     /*background: url(../images/wechat/wechat2.png) center center no-repeat;*/
     background-size: 100%;
-}
-
-/* 爱发电赞助 */
-#aside-content .card-widget.card-power {
-    padding: .4rem .6rem !important
-}
-
-#aside-content .card-widget.card-power .power-charge {
-    margin-left: auto;
-    color: var(--heo-secondtext);
-    font-size: 14px;
-    line-height: 1
-}
-
-#aside-content .card-widget.card-power .power-charge:hover {
-    color: var(--heo-lighttext)
-}
-
-.power-list {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    margin: 0 -4px
-}
-
-.power-list .power-item .power-item-link a {
-    padding: 2px 4px;
-    border-radius: 4px;
-    margin-left: 8px
-}
-
-.power-list .power-item .power-item-link a:hover {
-    background: var(--heo-lighttext);
-    color: var(--heo-card-bg)
-}
-
-#aside-content .power-item-body {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap
-}
-
-#power-star-image {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background-size: cover;
-    margin-right: 12px;
-    border: var(--style-border-always);
-    transition: .3s ease-out
-}
-
-a#power-star {
-    display: flex;
-    padding: 8px;
-    border: var(--style-border-always);
-    border-radius: 8px;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    position: relative;
-    margin: 12px 0;
-    background: var(--heo-secondbg);
-    transition: .3s ease-out
-}
-
-a#power-star:hover {
-    background: var(--heo-lighttext);
-    color: var(--heo-card-bg);
-    box-shadow: var(--heo-shadow-theme)
-}
-
-a#power-star:hover #power-star-image {
-    transform: scale(.9);
-}
-
-div#power-star-title {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-size: 16px;
-    font-weight: 700;
-    line-height: 1;
-    margin-bottom: 8px
-}
-
-#power-star-desc {
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    overflow: hidden;
-    font-size: 12px;
-    max-width: 100%;
-    line-height: 1.2
-}
-
-.power-star-body {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    flex-wrap: wrap;
-    position: relative;
-    width: calc(100% - 68px);
-    justify-content: center
 }
 
 /* 商务广告-设计周刊 */
@@ -7754,22 +7651,20 @@ div#power-star-title {
     width: 100%;
 }
 
-@media screen and (min-width: 1200px) {
-    /* 侧边栏在左侧时，显示 100% */
-    .layout.left-aside > div:first-child {
-        -webkit-box-ordinal-group: 2;
-        -moz-box-ordinal-group: 2;
-        -o-box-ordinal-group: 2;
-        -ms-flex-order: 2;
-        -webkit-order: 2;
-        order: 2;
-    }
+/* 侧边栏在左侧时，显示 100% */
+.layout.left-aside > div:first-child {
+    -webkit-box-ordinal-group: 2;
+    -moz-box-ordinal-group: 2;
+    -o-box-ordinal-group: 2;
+    -ms-flex-order: 2;
+    -webkit-order: 2;
+    order: 2;
+}
 
-    /* 侧栏在左侧时，关闭左边距，打开右边距 */
-    .layout.left-aside .aside-content {
-        padding-right: 15px;
-        padding-left: 0px !important;
-    }
+/* 侧栏在左侧时，关闭左边距，打开右边距 */
+.layout.left-aside .aside-content {
+    padding-right: 15px;
+    padding-left: 0px !important;
 }
 
 /* 主页分类 */
@@ -7808,10 +7703,6 @@ a.categoryButton i {
     transform: scale(1.0) rotate(15deg);
 }
 
-a.categoryButton img {
-    transform: scale(1.0) rotate(15deg);
-}
-
 @media screen and (min-width: 1300px) {
     a.categoryButton:active {
         transform: scale(0.97);
@@ -7827,12 +7718,6 @@ a.categoryButton img {
         border-radius: 0px;
         height: 47%;
         box-shadow: none !important;
-    }
-}
-
-@media screen and (max-width: 1300px) {
-    .categoryItem-mobile {
-        display: none;
     }
 }
 
@@ -7863,25 +7748,8 @@ a.categoryButton i {
     filter: blur(2px);
 }
 
-a.categoryButton img {
-    font-size: 5rem;
-    opacity: 0.2;
-    position: absolute;
-    right: 0%;
-    top: 20%;
-    transition: 0.3s;
-    width: 50px;
-    text-align: center;
-    filter: blur(2px);
-    margin-right: 1rem;
-}
-
 @media screen and (max-width: 768px) {
     a.categoryButton i {
-        display: none;
-    }
-
-    a.categoryButton img {
         display: none;
     }
 
@@ -7916,21 +7784,21 @@ div#banners {
         display: flex;
         flex-direction: row;
         flex-wrap: wrap;
-        justify-content: space-between;
-        height: calc(328px + .5rem);
+        justify-content: flex-end;
+        height: calc(328px + 0.5rem);
         align-content: space-between;
-        width: calc(50% - .25rem);
+        width: calc(600px + 1.5rem);
         position: relative;
         animation: slide-in .6s .1s backwards
     }
 
     div#bannerGroup {
-        width: calc(50% - .25rem);
-        margin-right: .5rem;
-        height: calc(328px + .5rem);
+        width: calc(100% - 600px - 2rem);
+        margin-right: 0.5rem;
+        height: calc(328px + 0.5rem);
         display: flex;
         flex-direction: column;
-        justify-content: space-between
+        justify-content: space-between;
     }
 
     div#banners {
@@ -7947,7 +7815,7 @@ div#banners {
         flex-direction: column;
         overflow: hidden;
         transition: 0.3s;
-        will-change: transform;
+        clip-path: inset(0 0 0 0 round 12px);
         animation: slide-in .6s .1s backwards;
     }
 
@@ -8055,7 +7923,7 @@ div#banners {
     #banners:hover #banner-hover {
         opacity: 1;
         padding-left: 2rem;
-        background: var(--heo-theme-op-deep);
+        background: #4259efc9;
         backdrop-filter: blur(15px);
         -webkit-backdrop-filter: blur(15px);
         -webkit-backface-visibility: hidden;
@@ -8072,19 +7940,19 @@ div#banners {
 
     .topGroup .todayCard {
         position: absolute;
-        width: 100%;
+        width: calc(600px + 1rem);
         height: 100%;
         z-index: 1;
         top: 0;
-        right: 0;
-        background: var(--heo-card-bg);
+        left: 0;
+        background: var(--card-bg);
         border-radius: 12px;
-        margin-left: .5rem;
+        margin-left: 0.5rem;
         overflow: hidden;
-        transition: .3s;
+        transition: 0.3s;
         display: flex;
         cursor: pointer;
-        pointer-events: all
+        pointer-events: all;
     }
 
     .topGroup .todayCard::after {
@@ -8274,21 +8142,8 @@ div#banners {
     filter: blur(0px);
 }
 
-.categoryItem:hover img {
-    opacity: 0.8;
-    transition: 0.8s;
-    transition-delay: 0.15s;
-    transform: scale(1.03) rotate(0deg);
-    font-size: 2.5rem;
-    filter: blur(0px);
-}
-
 @media screen and (min-width: 1300px) {
     .categoryItem:hover i {
-        transform: scale(1.03) rotate(0deg);
-    }
-
-    .categoryItem:hover img {
         transform: scale(1.03) rotate(0deg);
     }
 }
@@ -8315,7 +8170,7 @@ div#banners {
     min-width: 200px;
 }
 
-.categoryGroup .categoryItem:nth-child(4) {
+.categoryGroup .categoryItem:nth-child(3) {
     display: none;
 }
 
@@ -8340,7 +8195,7 @@ div#banners {
         width: 50%;
     }
 
-    .categoryGroup .categoryItem:nth-child(4) {
+    .categoryGroup .categoryItem:nth-child(3) {
         display: flex;
     }
 }
@@ -8360,11 +8215,6 @@ a.categoryButton.shiyong {
     background-size: 200%;
 }
 
-a.categoryButton.bannerItem4 {
-    background: linear-gradient(to right, #82a531, #e38969);
-    background-size: 200%;
-}
-
 [data-theme=dark] a.categoryButton.bikan {
     background: linear-gradient(to right, #0653b8, #2fcbff);
     background-size: 200%;
@@ -8380,11 +8230,6 @@ a.categoryButton.bannerItem4 {
     background-size: 200%;
 }
 
-[data-theme=dark] a.categoryButton.bannerItem4 {
-    background: linear-gradient(to right, #82a531, #e38969);
-    background-size: 200%;
-}
-
 
 a.categoryButton:hover {
     background-position: 100% 0;
@@ -8392,7 +8237,7 @@ a.categoryButton:hover {
 
 /* 首页分类条展示 */
 #category-bar {
-    padding: 0.4rem 1rem 0.4rem 0.7rem;
+    padding: 0.4rem 1rem 0.4rem 0.5rem;
     background: var(--heo-card-bg);
     border-radius: 12px;
     display: flex;
@@ -8403,9 +8248,6 @@ a.categoryButton:hover {
     transition: 0.3s;
     width: 100%;
     justify-content: space-between;
-    -webkit-user-select: none;
-    display: flex;
-    align-items: center
 }
 
 @media screen and (min-width: 1300px) {
@@ -8423,14 +8265,15 @@ a.categoryButton:hover {
     #category-bar {
         border-radius: 0;
         background: var(--heo-background);
-        margin-bottom: 0;
+        margin-bottom: 0rem;
         position: -webkit-sticky;
         position: sticky;
+        top: 60px;
         z-index: 1;
-        padding: 0;
+        padding: 0rem 1rem 0rem 16px;
         height: 50px;
         margin-top: 0;
-        align-items: center
+        align-items: center;
     }
 }
 
@@ -8448,7 +8291,6 @@ a.categoryButton:hover {
     display: flex;
     white-space: nowrap;
     align-items: center;
-    margin-bottom: 4px
 }
 
 .category-in-bar-tips {
@@ -8458,11 +8300,7 @@ a.categoryButton:hover {
 .category-bar-items {
     white-space: nowrap;
     overflow-x: scroll;
-    overflow-y: hidden;
     display: flex;
-    border-radius: 8px;
-    align-items: center;
-    height: 30px
 }
 
 .category-in-bar .category-in-bar-tips {
@@ -8480,12 +8318,9 @@ a.categoryButton:hover {
 
 .category-bar-item a {
     padding: 0.1rem 0.5rem;
-    margin-right: 6px;
-    font-weight: 700;
+    margin: 0 4px;
+    font-weight: bold;
     border-radius: 8px;
-    display: flex;
-    align-items: center;
-    height: 30px
 }
 
 .category-bar-item:hover a {
@@ -8544,8 +8379,8 @@ a.categoryButton:hover {
 }
 
 #bber-talk .li-style {
-    width: 90%;
-    max-width: 500px;
+    width: auto;
+    max-width: 100%;
     height: 25px;
     text-align: center;
     overflow: hidden;
