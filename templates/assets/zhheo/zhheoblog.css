@@ -13022,6 +13022,7 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
 }
 
 
+
 .post-reward {
     margin-top: 0rem;
     display: flex;
@@ -13033,7 +13034,7 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
 }
 
 .post-reward .reward-main {
-    z-index: 999;
+    z-index: 1003;
 }
 
 .tk-meta-input .el-input .el-input-group__prepend {
@@ -13069,7 +13070,7 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
     }
 
     .tk-meta-input .el-input .el-input-group__prepend {
-        padding: 0 8px !important
+        padding: 0 8px!important
     }
 
     .tk-meta-input {
@@ -13090,6 +13091,7 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
         right: 0; */
     }
 }
+
 
 
 .post-reward .reward-main .reward-all:after {
@@ -13279,7 +13281,6 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
     margin: 12px 8px !important;
     min-height: 197px;
 }
-
 .OwO-packages {
     background: var(--heo-background);
     padding-left: 8px !important;
