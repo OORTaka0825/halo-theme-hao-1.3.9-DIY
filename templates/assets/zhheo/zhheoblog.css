@@ -11489,7 +11489,7 @@ blockquote p {
 /* 文章内标题 */
 #article-container .headerlink::before {
     content: "\e621";
-    font-family: haofont !important;
+    font-family: haofont!important;
 }
 
 #article-container .headerlink {
@@ -11527,9 +11527,6 @@ blockquote p {
     object-fit: cover;
 }
 
-#article-container img.error {
-    content: url(../images/404.gif)
-}
 
 /* 文章视频 */
 .doge-inner-player {
@@ -11539,7 +11536,7 @@ blockquote p {
 /* 文章数字头 */
 #article-container ol li:before,
 #article-container ul li:before {
-    background: var(--heo-main);
+    background: var(--heo-theme);
     cursor: default;
 }
 
