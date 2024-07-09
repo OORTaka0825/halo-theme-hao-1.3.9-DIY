@@ -13497,31 +13497,8 @@ figure.gallery-group:hover .gallery-group-name::after {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    margin: 0 -.25rem;
-    margin-bottom: .5rem;
-    position: absolute;
-    z-index: 1;
-    width: 100%;
-    padding: 1rem 2rem;
-    left: 0;
-    top: 0;
-    max-height: 64px;
-    overflow: hidden;
-    background: var(--heo-card-bg);
-    backdrop-filter: saturate(180%) blur(20px);
-    transition: .1s ease-out
-}
-
-@media screen and (max-width: 768px) {
-    #tag #tag-page-tags {
-        display: none
-    }
-}
-
-#tag #tag-page-tags:hover {
-    max-height: 1000px;
-    transition: .3s ease-out;
-    background: var(--heo-maskbgdeep)
+    margin: 0 -0.75rem;
+    margin-bottom: 0.5rem;
 }
 
 #tag #tag-page-tags a {
@@ -13533,17 +13510,16 @@ figure.gallery-group:hover .gallery-group-name::after {
     border: var(--style-border-always);
     display: flex;
     align-items: center;
-    background: var(--heo-card-bg)
 }
 
 #tag #tag-page-tags a.select {
-    color: var(--heo-card-bg) !important;
+    color: var(--heo-white) !important;
     background: var(--heo-theme);
     box-shadow: var(--heo-shadow-theme);
 }
 
 #tag #tag-page-tags a:hover {
-    color: var(--heo-card-bg) !important;
+    color: var(--heo-white) !important;
     background: var(--heo-theme);
     box-shadow: var(--heo-shadow-theme);
 }
