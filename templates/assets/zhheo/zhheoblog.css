@@ -11706,6 +11706,7 @@ blockquote p {
 }
 
 
+
 #post .post-copyright .post-copyright__notice .post-copyright-info a {
     padding: 0 4px;
 }
@@ -11808,7 +11809,7 @@ blockquote p {
 
 .post-reward .reward-main .reward-all {
     border-radius: 12px;
-    background: var(--heo-card-bg);
+    background: var(--heo-background);
     border: var(--style-border-always);
     padding: 0.8rem;
     display: flex;
@@ -11854,18 +11855,20 @@ a.reward-main-btn:hover {
     color: var(--heo-red);
 }
 
+
+
 /* 赞赏背景 */
+
 #quit-box {
     position: fixed;
     width: 100vw;
-    height: calc(100vh);
-    background: rgba(0, 0, 0, .2);
-    opacity: 0.01;
+    height: 100vh;
+    background: rgba(0, 0, 0, .4);
     top: 0;
     left: 0;
     display: none;
-    z-index: 109;
-    margin: 0 !important
+    z-index: 101;
+    margin: 0 !important;
 }
 
 .post-tools-left #quit-box {
@@ -11874,8 +11877,7 @@ a.reward-main-btn:hover {
 
 @media screen and (max-width: 768px) {
     #quit-box {
-        z-index: 109;
-        display: none !important;
+        display: none!important;
     }
 }
 
