@@ -14691,19 +14691,6 @@ div#heo-footer-bar .footer-bar-description {
     margin-bottom: 0.5rem;
 }
 
-/* 标签 */
-#bber .bber-content .datacont a.tag {
-    background-image: none !important;
-    background-color: #f2f2f2 !important;
-    color: #999 !important;
-    border-radius: 4px;
-    text-decoration: none;
-    font-weight: 400;
-    font-size: 15px;
-    padding: 2px 5px;
-
-}
-
 #bber .bber-content .datacont a.tag:before {
     content: "#";
 }
