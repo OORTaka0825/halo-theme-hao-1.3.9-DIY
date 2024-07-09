@@ -6378,7 +6378,6 @@ img.footer_mini_logo:hover {
     #page-header.nav-fixed #travellings_button {
         opacity: 0;
     }
-
     #page-header.nav-fixed #randomPost_button {
         opacity: 0;
     }
@@ -6439,7 +6438,7 @@ img.footer_mini_logo:hover {
 }
 
 #rightMenu .rightMenu-group .rightMenu-item:hover {
-    background-color: var(--heo-lighttext);
+    background-color: var(--heo-main);
     color: var(--heo-white);
     box-shadow: var(--heo-shadow-main);
 }
@@ -6555,24 +6554,6 @@ a.console_switchbutton {
     border-radius: 40px;
 }
 
-.page #nav #site-name {
-    color: var(--heo-white)
-}
-
-.page #nav #site-name span {
-    color: var(--heo-fontcolor)
-}
-
-body[data-type=music] .page #nav #site-name span {
-    color: var(--heo-white);
-}
-
-@media screen and (max-width: 768px) {
-    .page #nav #site-name span:hover {
-        color: var(--heo-white);
-    }
-}
-
 /* 搜索 */
 #search-button > a > span {
     display: none;
@@ -6601,7 +6582,7 @@ body[data-type=music] .page #nav #site-name span {
 
 @media screen and (max-width: 768px) {
     #rightside #switch-commentBarrage {
-        display: none
+        display:none
     }
 }
 
@@ -6616,11 +6597,11 @@ body[data-type=music] .page #nav #site-name span {
     -o-transition: -o-transform .4s;
     -ms-transition: -ms-transform .4s;
     transition: transform .4s;
-    -webkit-transform: translate(45px, 0);
-    -moz-transform: translate(45px, 0);
-    -o-transform: translate(45px, 0);
-    -ms-transform: translate(45px, 0);
-    transform: translate(45px, 0)
+    -webkit-transform: translate(45px,0);
+    -moz-transform: translate(45px,0);
+    -o-transform: translate(45px,0);
+    -ms-transform: translate(45px,0);
+    transform: translate(45px,0)
 }
 
 #rightside #rightside-config-hide.show {
@@ -6628,11 +6609,11 @@ body[data-type=music] .page #nav #site-name span {
     opacity: 1;
     -ms-filter: none;
     filter: none;
-    -webkit-transform: translate(0, 0);
-    -moz-transform: translate(0, 0);
-    -o-transform: translate(0, 0);
-    -ms-transform: translate(0, 0);
-    transform: translate(0, 0)
+    -webkit-transform: translate(0,0);
+    -moz-transform: translate(0,0);
+    -o-transform: translate(0,0);
+    -ms-transform: translate(0,0);
+    transform: translate(0,0)
 }
 
 #rightside #rightside-config-hide.status {
@@ -6642,7 +6623,7 @@ body[data-type=music] .page #nav #site-name span {
     filter: none
 }
 
-#rightside > div > a, #rightside > div > button {
+#rightside>div>a,#rightside>div>button {
     display: block;
     margin-bottom: 5px;
     width: 35px;
@@ -6655,7 +6636,7 @@ body[data-type=music] .page #nav #site-name span {
     line-height: 35px
 }
 
-#rightside > div > a:hover, #rightside > div > button:hover {
+#rightside>div>a:hover,#rightside>div>button:hover {
     background-color: var(--btn-hover-color)
 }
 
@@ -6665,21 +6646,21 @@ body[data-type=music] .page #nav #site-name span {
 
 @media screen and (max-width: 900px) {
     #rightside #mobile-toc-button {
-        display: block
+        display:block
     }
 }
 
 @media screen and (max-width: 900px) {
     #rightside #hide-aside-btn {
-        display: none
+        display:none
     }
 }
 
-.read-mode #rightside {
-    display: none !important
+.read-mode #rightside{
+    display: none!important
 }
 
-#rightside > div > button {
+#rightside>div>button {
     border-radius: 5px
 }
 
@@ -6894,26 +6875,19 @@ body[data-type=music] .page #nav #site-name span {
     }
 }
 
-/* 保证无card-widget时自动和左侧元素对齐 */
 @media screen and (min-width: 1300px) {
     #aside-content .sticky_layout {
-        margin-top: 0rem;
-    }
-}
-
-/* 用 :has() 伪类判断card-widget是否存在，进行属性覆写 */
-/* 若存在，表明需要和card-widget保持距离 */
-@media screen and (min-width: 1300px) {
-    #aside-content:has(+.card-widget) {
-        #aside-content .sticky_layout {
-            margin-top: 1rem;
-        }
+        margin-top: 1rem;
     }
 }
 
 #aside-content .sticky_layout {
     top: 80px;
     transition: top 0s;
+}
+
+#aside-content .sticky_layout .card-widget:first-child {
+    margin-top: 0;
 }
 
 #aside-content .card-widget:hover {
@@ -6941,7 +6915,7 @@ body[data-type=music] .page #nav #site-name span {
 
 @media screen and (max-width: 1200px) {
     #aside-content {
-        display: none
+        display:none
     }
 }
 
