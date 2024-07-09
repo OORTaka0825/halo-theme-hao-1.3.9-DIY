@@ -122,7 +122,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         if (typeof $.fancybox === 'undefined') {
-            $('head').append(`<link rel="stylesheet" type="text/css" href="${GLOBAL_CONFIG.source.fancybox.css}">`)
+            // $('head').append(`<link rel="stylesheet" type="text/css" href="${GLOBAL_CONFIG.source.fancybox.css}">`)
             $.getScript(`${GLOBAL_CONFIG.source.fancybox.js}`, function () {
                 runFancybox($(ele))
             })
@@ -152,15 +152,14 @@ document.addEventListener('DOMContentLoaded', function () {
      */
     const tocFn = function () {
         const postContent = document.querySelector('.post-content');
-
         if (postContent == null) return;
-
-        const headers = postContent.querySelectorAll('h1,h2,h3,h4,h5,h6');
+        const titles = postContent.querySelectorAll('h1,h2,h3,h4,h5,h6');
         // 没有 toc 目录，则直接移除
-        if (headers.length === 0) {
-            document.getElementById("card-toc").remove();
+        if (titles.length === 0 || !titles) {
+            const cardToc = document.getElementById("card-toc");
+            cardToc?.remove();
             const $mobileTocButton = document.getElementById("mobile-toc-button")
-            if($mobileTocButton){
+            if ($mobileTocButton) {
                 $('#mobile-toc-button').attr('style', 'display: none');
             }
         } else {
@@ -168,11 +167,28 @@ document.addEventListener('DOMContentLoaded', function () {
                 tocSelector: '.toc-content',
                 contentSelector: '.post-content',
                 headingSelector: 'h1,h2,h3,h4,h5,h6',
-                hasInnerContainers: true
+                listItemClass: 'toc-item',
+                activeLinkClass: 'active',
+                activeListItemClass: 'active',
+                headingsOffset: -400,
+                scrollSmooth: true,
+                scrollSmoothOffset: -70,
+                tocScrollOffset: 50,
             });
+
+            const $cardTocLayout = document.getElementById('card-toc')
+            const $cardToc = $cardTocLayout.getElementsByClassName('toc-content')[0]
+
+            // toc元素點擊
+            $cardToc.addEventListener('click', (ele) => {
+                if (window.innerWidth < 900) {
+                    $cardTocLayout.classList.remove("open");
+                }
+            })
 
         }
     }
+
 
     /**
      * Rightside
@@ -194,22 +210,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
             newEle.addEventListener('click', clickFn)
         },
-        switchDarkMode: () => { // Switch Between Light And Dark Mode
-            const nowMode = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'
-            if (nowMode === 'light') {
-                activateDarkMode()
-                saveToLocal.set('theme', 'dark', 2);
-                GLOBAL_CONFIG.Snackbar !== undefined && btf.snackbarShow(GLOBAL_CONFIG.Snackbar.day_to_night,false,2000);
-            } else {
-                activateLightMode();
-                saveToLocal.set('theme', 'light', 2);
-                GLOBAL_CONFIG.Snackbar !== undefined && btf.snackbarShow(GLOBAL_CONFIG.Snackbar.night_to_day,false,2000);
-            }
-            // handle some cases
-            typeof utterancesTheme === 'function' && utterancesTheme()
-            typeof FB === 'object' && window.loadFBComment()
-            window.DISQUS && document.getElementById('disqus_thread').children.length && setTimeout(() => window.disqusReset(), 200)
-        },
         showOrHideBtn: () => { // rightside 點擊設置 按鈕 展開
             document.getElementById('rightside-config-hide').classList.toggle('show')
         },
@@ -223,13 +223,19 @@ document.addEventListener('DOMContentLoaded', function () {
                 : saveToLocal.set('aside-status', 'hide', 2)
             $htmlDom.toggle('hide-aside')
         },
-        runMobileToc: () => {
-            const $cardToc = document.getElementById("card-toc")
-            if ($cardToc.classList.contains("open")) {
-                $cardToc.classList.remove("open");
-            } else {
-                $cardToc.classList.add("open");
-            }
+        runMobileToc: item => {
+            const tocEle = document.getElementById("card-toc");
+            tocEle.style.transformOrigin = `right ${item.getBoundingClientRect().top + 17}px`;
+            tocEle.style.transition = "transform 0.3s ease-in-out";
+            tocEle.classList.toggle("open");
+            tocEle.addEventListener(
+                "transitionend",
+                () => {
+                    tocEle.style.transition = "";
+                    tocEle.style.transformOrigin = "";
+                },
+                { once: true }
+            );
         },
     }
 
@@ -243,13 +249,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 rightSideFn.showOrHideBtn()
                 break
             case "mobile-toc-button":
-                rightSideFn.runMobileToc();
+                rightSideFn.runMobileToc(this);
                 break;
             case 'readmode':
                 rightSideFn.switchReadMode()
                 break
             case 'darkmode':
-                rightSideFn.switchDarkMode()
+                navFn.switchDarkMode();
                 break
             case 'hide-aside-btn':
                 rightSideFn.hideAsideBtn()

@@ -1,16 +1,16 @@
 let halo = {
-    darkComment : ()=>{
-        if(document.querySelector('#comment div').shadowRoot.querySelector('.halo-comment-widget').classList != null){
-            let commentDOMclass =  document.querySelector('#comment div').shadowRoot.querySelector('.halo-comment-widget').classList
-            if(commentDOMclass.contains('light'))
-                commentDOMclass.replace('light','dark')
+    darkComment: () => {
+        if (document.querySelector('#comment div').shadowRoot.querySelector('.halo-comment-widget').classList != null) {
+            let commentDOMclass = document.querySelector('#comment div').shadowRoot.querySelector('.halo-comment-widget').classList
+            if (commentDOMclass.contains('light'))
+                commentDOMclass.replace('light', 'dark')
             else
-                commentDOMclass.replace('dark','light')
+                commentDOMclass.replace('dark', 'light')
         }
 
     },
 
-    dataCodeTheme : ()=>{
+    dataCodeTheme: () => {
 
         var t = document.documentElement.getAttribute('data-theme')
         var e = document.querySelector("link[data-code-theme=light]"),
@@ -23,7 +23,7 @@ let halo = {
      * 代码
      * 只适用于halo的代码渲染
      */
-    addPrismTool : ()=>{
+    addPrismTool: () => {
         if (typeof Prism === 'undefined' || typeof document === 'undefined') {
             return;
         }
@@ -144,7 +144,7 @@ let halo = {
             customItem.className = 'custom-item absolute top-0'
 
             //复制
-            if(isEnableCopy){
+            if (isEnableCopy) {
                 var copy = document.createElement("i");
 
                 copy.className = 'haofont hao-icon-paste copy-button code-copy cursor-pointer'
@@ -181,13 +181,12 @@ let halo = {
             };
 
             //折叠
-            if(isEnableExpander){
+            if (isEnableExpander) {
                 var expander = document.createElement("i");
                 expander.className = 'fa-sharp fa-solid haofont hao-icon-angle-down code-expander cursor-pointer'
                 customItem.appendChild(expander)
 
                 expander.addEventListener('click', prismToolsFn)
-
 
 
             }
@@ -214,12 +213,12 @@ let halo = {
                 r.classList.toggle("expand-done-expander");
                 if (toolbar.classList.contains('c-expander')) {
                     r.firstElementChild.style.display = "none";
-                    if($nextEle.contains('code-expand-btn')){
+                    if ($nextEle.contains('code-expand-btn')) {
                         r.offsetParent.lastElementChild.style.display = "none";
                     }
                 } else {
                     r.firstElementChild.style.display = "block";
-                    if($nextEle.contains('code-expand-btn') &&  !r.classList.contains('expand-done')){
+                    if ($nextEle.contains('code-expand-btn') && !r.classList.contains('expand-done')) {
                         r.offsetParent.lastElementChild.style.display = "block";
                     }
                 }
@@ -247,7 +246,7 @@ let halo = {
         Prism.hooks.add("complete", r)
     },
 
-    addScript: (e,t,n)=>{
+    addScript: (e, t, n) => {
         if (document.getElementById(e))
             return n ? n() : void 0;
         let a = document.createElement("script");
@@ -257,7 +256,7 @@ let halo = {
             document.head.appendChild(a)
     },
 
-    danmu: ()=>{
+    danmu: () => {
         const e = new EasyDanmakuMin({
             el: "#danmu",
             line: 10,
@@ -270,10 +269,7 @@ let halo = {
             e.batchSend(t, !0);
         else {
             let n = [];
-            function a(e) {
-                return e = (e = (e = (e = (e = e.replace(/<\/*br>|[\s\uFEFF\xA0]+/g, "")).replace(/<img.*?>/g, "[图片]")).replace(/<a.*?>.*?<\/a>/g, "[链接]")).replace(/<pre.*?>.*?<\/pre>/g, "[代码块]")).replace(/<.*?>/g, "")
-            }
-            if(GLOBAL_CONFIG.source.comments.use == 'Twikoo'){
+            if (GLOBAL_CONFIG.source.comments.use == 'Twikoo') {
                 fetch(GLOBAL_CONFIG.source.twikoo.twikooUrl, {
                     method: "POST",
                     body: JSON.stringify({
@@ -285,12 +281,12 @@ let halo = {
                     headers: {
                         "Content-Type": "application/json"
                     }
-                }).then((e=>e.json())).then((({data: t})=>{
-                        t.forEach((e=>{
+                }).then((e => e.json())).then((({data: t}) => {
+                        t.forEach((e => {
                                 null == e.avatar && (e.avatar = "https://cravatar.cn/avatar/d615d5793929e8c7d70eab5f00f7f5f1?d=mp"),
                                     n.push({
                                         avatar: e.avatar,
-                                        content: e.nick + "：" + a(e.comment),
+                                        content: e.nick + "：" + btf.changeContent(e.comment),
                                         href: e.url + '#' + e.id
 
                                     })
@@ -301,7 +297,7 @@ let halo = {
                     }
                 ))
             }
-            if(GLOBAL_CONFIG.source.comments.use == 'Artalk'){
+            if (GLOBAL_CONFIG.source.comments.use == 'Artalk') {
                 const statheaderList = {
                     method: 'POST',
                     headers: {
@@ -311,15 +307,15 @@ let halo = {
                     body: new URLSearchParams({
                         'site_name': GLOBAL_CONFIG.source.artalk.siteName,
                         'limit': '100',
-                        'type':'latest_comments'
+                        'type': 'latest_comments'
                     })
                 }
                 fetch(GLOBAL_CONFIG.source.artalk.artalkUrl + 'api/stat', statheaderList)
-                    .then((e=>e.json())).then((({data: t})=>{
-                        t.forEach((e=>{
+                    .then((e => e.json())).then((({data: t}) => {
+                        t.forEach((e => {
                                 n.push({
                                     avatar: 'https://cravatar.cn/avatar/' + e.email_encrypted + '?d=mp&s=240',
-                                    content: e.nick + "：" + a(e.content_marked),
+                                    content: e.nick + "：" + btf.changeContent(e.content_marked),
                                     href: e.page_url + '#atk-comment-' + e.id
 
                                 })
@@ -330,15 +326,15 @@ let halo = {
                     }
                 ))
             }
-            if(GLOBAL_CONFIG.source.comments.use == 'Waline'){
+            if (GLOBAL_CONFIG.source.comments.use == 'Waline') {
                 const loadWaline = () => {
                     Waline.RecentComments({
                         serverURL: GLOBAL_CONFIG.source.waline.serverURL,
                         count: 50
-                    }).then(({ comments }) => {
+                    }).then(({comments}) => {
                         const walineArray = comments.map(e => {
                             return {
-                                'content': e.nick + "：" + a(e.comment),
+                                'content': e.nick + "：" + btf.changeContent(e.comment),
                                 'avatar': e.avatar,
                                 'href': e.url + '#' + e.objectId,
                             }
@@ -358,6 +354,90 @@ let halo = {
     changeMarginLeft(element) {
         var randomMargin = Math.floor(Math.random() * 901) + 100; // 生成100-1000之间的随机数
         element.style.marginLeft = randomMargin + 'px';
+    },
+
+    getTopSponsors() {
+        var user_id = GLOBAL_CONFIG.source.power.userId
+        var show_num = GLOBAL_CONFIG.source.power.showNum
+
+        function getPower() {
+            const url = GLOBAL_CONFIG.source.power.url + user_id
+            fetch(url)
+                .then(res => res.json())
+                .then(data => {
+                    if (200 === data["ec"]) {
+                        var values = data["data"]["list"]
+                        saveToLocal.set('power-data', JSON.stringify(values), 10 / (60 * 24))
+                        renderer(values);
+                    }
+
+                })
+        }
+
+        function renderer(values) {
+            var data = getArrayItems(values, 1);
+            let powerStar = document.getElementById("power-star")
+            if (values.length === 0) {
+                powerStar.href = GLOBAL_CONFIG.source.power.powerLink
+                powerStar.innerHTML = ` 
+                        <div id="power-star-image" style="background-image: url('/themes/theme-hao/assets/images/afadian/afadian.webp')">
+                        </div>
+                        <div class="power-star-body">
+                            <div id="power-star-title">还没有人赞助～</div>
+                            <div id="power-star-desc">为爱发电，点击赞助</div>
+                        </div>`;
+            } else {
+                if (powerStar) {
+                    powerStar.href = "https://afdian.net/u/" + data[0].user_id
+                    powerStar.innerHTML = ` 
+                        <div id="power-star-image" style="background-image: url(${data[0].avatar})">
+                        </div>
+                        <div class="power-star-body">
+                            <div id="power-star-title">${data[0].name}</div>
+                            <div id="power-star-desc">更多支持，为爱发电</div>
+                        </div>`;
+                }
+
+                if (values.length > 1) {
+                    var i = 0;
+                    var htmlText = '';
+                    for (let value of values) {
+                        if (i > parseInt(show_num)) {
+                            break;
+                        }
+                        htmlText += ` <a href="${"https://afdian.net/u/" + value["user_id"]}" rel="external nofollow" target="_blank" th:title="${value["name"]}">${value["name"]}</a>`;
+                        i = i + 1;
+                    }
+                    if (document.getElementById("power-item-link")) {
+                        document.getElementById("power-item-link").innerHTML = htmlText;
+                    }
+                }
+            }
+        }
+
+        function init() {
+            const data = saveToLocal.get('power-data')
+            if (data) {
+                renderer(JSON.parse(data))
+            } else {
+                getPower()
+            }
+        }
+
+        document.getElementById("power-star") && init()
+    },
+
+    checkAd() {
+        var default_enable = GLOBAL_CONFIG.source.footer.default_enable
+        if (default_enable) {
+            var adElement = document.getElementById("footer-banner");
+            var notMusic = document.body.getAttribute("data-type") != "music"; // 检测是否为音乐页面
+            if ((adElement.offsetWidth <= 0 || adElement.offsetHeight <= 0) && notMusic) {
+                // 元素不可见，可能被拦截
+                console.log("Element may be blocked by AdBlocker Ultimate");
+                alert("页脚信息可能被AdBlocker Ultimate拦截，请检查广告拦截插件！")
+            }
+        }
     }
 
 
