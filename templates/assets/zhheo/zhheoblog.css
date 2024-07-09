@@ -12366,7 +12366,7 @@ div#post-comment {
     margin-top: 2rem;
 }
 
-#post-comment > div.comment-head > div.comment-privacy {
+#post-comment>div.comment-head>div.comment-privacy {
     display: block;
     justify-content: space-between;
     margin-left: 8px;
@@ -12374,7 +12374,7 @@ div#post-comment {
     margin-left: auto;
 }
 
-#post-comment > div.comment-head > div.comment-privacy a:hover {
+#post-comment>div.comment-head>div.comment-privacy a:hover {
     color: var(--heo-theme);
 }
 
@@ -12390,11 +12390,6 @@ div#post-comment {
     width: 100%;
 }
 
-.tk-content img {
-    max-height: 1100px !important;
-    max-width: 100% !important;
-    border-radius: 12px
-}
 
 #post-comment .comment-tips.show {
     display: flex;
@@ -12411,16 +12406,11 @@ div#post-comment {
     width: 32px !important;
     height: 32px !important;
     box-shadow: var(--heo-shadow-border);
-    margin-right: 16px !important
 }
 
 .tk-avatar.tk-has-avatar {
     width: 32px !important;
     height: 32px !important;
-    border-radius: 32px !important;
-}
-
-.tk-avatar.tk-has-avatar img {
     border-radius: 32px !important;
 }
 
@@ -12532,23 +12522,23 @@ img.tk-avatar-img {
 /* 昵称 */
 .tk-nick {
     font-size: 1rem !important;
-    line-height: 27px;
+    line-height: 32px;
 }
 
 /* 填写项标题 */
-.el-input-group__append, .el-input-group__prepend {
-    background-color: var(--heo-card-bg) !important;
-    color: var(--heo-fontcolor) !important;
-    border-color: var(--heo-card-border) !important;
-    border: none !important;
+.el-input-group__append,.el-input-group__prepend {
+    background-color: var(--heo-card-bg)!important;
+    color: var(--heo-fontcolor)!important;
+    border-color: var(--heo-card-border)!important;
+    border: none!important;
     font-weight: 700
 }
 
 /* 输入框 */
 .el-input__inner {
-    background: var(--heo-secondbg) !important;
-    border: none !important;
-    color: var(--heo-fontcolor) !important;
+    background: var(--heo-secondbg)!important;
+    border: none!important;
+    color: var(--heo-fontcolor)!important;
     padding-left: 8px
 }
 
@@ -12558,8 +12548,8 @@ img.tk-avatar-img {
     border: var(--style-border-always);
 }
 
-.el-input-group--prepend .el-input__inner, .el-input-group__append {
-    border-radius: 12px !important
+.el-input-group--prepend .el-input__inner,.el-input-group__append {
+    border-radius: 12px!important
 }
 
 .page .el-input.el-input--small.el-input-group.el-input-group--prepend {
@@ -12568,7 +12558,7 @@ img.tk-avatar-img {
 
 @media screen and (max-width: 769px) {
     .el-input__inner {
-        background: var(--heo-card-bg) !important
+        background:var(--heo-card-bg)!important
     }
 
     .el-input.el-input--small.el-input-group.el-input-group--prepend {
@@ -12578,11 +12568,11 @@ img.tk-avatar-img {
 }
 
 .page .el-input__inner {
-    background: var(--heo-card-bg) !important
+    background: var(--heo-card-bg)!important
 }
 
 .el-input__inner:focus {
-    border: none !important
+    border: none!important
 }
 
 /* 评论输入框 */
@@ -12591,16 +12581,16 @@ img.tk-avatar-img {
     color: var(--heo-fontcolor) !important;
     border-radius: 12px !important;
     min-height: 100px !important;
-    padding: 16px 16px 100px 16px !important;
+    padding: 16px 16px 40px 16px !important;
     border: var(--style-border-always) !important;
-    box-shadow: none !important;
+    box-shadow: none!important;
 }
 
 @media screen and (max-width: 768px) {
     .el-textarea__inner {
         background: var(--card-bg) !important;
         overflow: hidden;
-        resize: none !important;
+        resize: none!important;
     }
 }
 
@@ -12722,16 +12712,16 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
 
 /* 发送按钮正常状态 */
 .tk-comments .el-button--primary {
-    border-color: var(--heo-fontcolor) !important;
-    color: var(--heo-card-bg) !important;
-    border-radius: 12px !important;
+    border-color: var(--heo-fontcolor)!important;
+    color: var(--heo-card-bg)!important;
+    border-radius: 12px!important;
     box-shadow: var(--heo-shadow-black);
     transition: .3s;
     width: 5rem;
     position: absolute;
     top: -43px;
     right: 0;
-    margin-left: .5rem !important;
+    margin-left: .5rem!important;
     height: 32px
 }
 
@@ -12750,12 +12740,12 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
 }
 
 .tk-submit {
-    margin-top: .8rem !important
+    margin-top: .8rem!important
 }
 
 @media screen and (max-width: 768px) {
     .tk-submit .el-button--primary {
-        width: 5rem;
+        width:5rem;
         height: 122px;
         top: -132px
     }
@@ -12786,10 +12776,10 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
 }
 
 .tk-row.actions {
-    margin-bottom: 0 !important;
-    margin-left: 0 !important;
-    margin-top: 0 !important;
-    justify-content: space-around !important
+    margin-bottom: 0!important;
+    margin-left: 0!important;
+    margin-top: 0!important;
+    justify-content: space-around!important
 }
 
 .tk-meta-input {
@@ -12849,11 +12839,6 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
     pointer-events: none;
 }
 
-.OwO.OwO-open .OwO-body {
-    animation: .3s ease .1s 1 normal both running donate_effcet
-}
-
-
 @keyframes owoIn {
     0% {
         transform: translate(0, -95%);
@@ -12888,53 +12873,30 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
     display: none;
 }
 
+/* 更多评论 */
+/* [data-theme=dark] .tk-expand{
+  background: linear-gradient(rgba(29, 31, 32,0), rgba(29, 31, 32,1))!important;
+  color: var(--heo-fontcolor);
+} */
+
 .tk-expand {
     background: var(--heo-card-bg) !important;
     color: var(--heo-fontcolor) !important;
     border: var(--style-border-always);
     box-shadow: var(--heo-shadow-border);
     border-radius: 12px;
-    -webkit-user-select: none;
-    position: relative;
-    z-index: 2
 }
 
-@media screen and (min-width: 769px) {
-    .tk-expand:hover {
-        background: var(--heo-theme) !important;
-        color: var(--heo-white) !important
-    }
-}
-
-.tk-comments-container > .tk-expand {
-    margin: 12px;
-    width: calc(100% - 24px) !important;
-    position: absolute;
-    bottom: 52px;
-    left: 0
-}
-
-.tk-expand::after {
-    background: linear-gradient(to bottom, var(--heo-none) 0, var(--heo-card-bg) 100%);
-    content: '';
-    width: 100%;
-    height: 100px;
-    bottom: 43px;
-    left: 0;
-    display: flex;
-    position: absolute;
-    z-index: -1
-}
-
-.tk-expand._collapse::after {
-    display: none
+.tk-expand:hover {
+    background: var(--heo-theme) !important;
+    color: var(--heo-white) !important;
 }
 
 /* 评论时间 */
 .tk-time {
     color: var(--heo-secondtext) !important;
-    font-size: 0.7rem;
-    margin-left: 0.4rem;
+    font-size: 0.8rem;
+    margin-left: 0.5rem;
 }
 
 /* 评论之间的间距 */
