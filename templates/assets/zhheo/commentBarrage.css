@@ -37,13 +37,13 @@
     border: var(--style-border);
     backdrop-filter: saturate(180%) blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    transform: translateZ(0);
     position: fixed;
     box-shadow: var(--heo-shadow-border);
+    overflow: hidden;
 }
 
 .comment-barrage-item:hover {
-    border: 1px solid var(--heo-main);
+    border: var(--style-border-hover);
     box-shadow: var(--heo-shadow-main);
 }
 
@@ -64,19 +64,12 @@
 }
 
 .comment-barrage-item .comment-barrage-close:hover {
-    color: var(--heo-lighttext);
-}
-
-.comment-barrage-item .comment-barrage-close .haofont {
-    color: var(--heo-fontcolor);
-    transition: all 0.3s ease 0s;
-    font-size: 18px !important;
-}
-
-.comment-barrage-item .comment-barrage-close:hover .haofont {
     color: var(--heo-main);
 }
 
+.comment-barrage-item .comment-barrage-close .heofont {
+    font-size: 18px !important;
+}
 
 .comment-barrage-item pre {
     display: none;
@@ -125,6 +118,7 @@
     line-height: 1;
     padding: 4px;
     border-radius: 4px;
+    white-space: nowrap;
 }
 
 .comment-barrage-item .barrageHead .barrageTitle:hover {
@@ -146,8 +140,9 @@
     font-size: 14px !important;
     font-weight: normal !important;
     height: calc(100% - 30px);
-    overflow: scroll;
-    cursor: pointer
+    overflow: hidden;
+    width: fit-content;
+    max-height: 48px;
 }
 
 .comment-barrage-item .barrageContent a {
