@@ -50,8 +50,8 @@
                         </div>
                     </div>
                 </div>
-                <!-- 文章 -->
-                <th:block th:replace="~{macro/post-list :: post-list(${'/tags/'+tag.spec.slug})}" />
+                <!-- 分页 -->
+                <div th:replace="~{modules/widgets/page :: page(${'/tags/'+tag.spec.slug},${posts},false)}"></div>
             </div>
             <!-- sidebar -->
             <div th:replace="~{modules/aside :: aside(${theme.config.sidebar.widgetss.tagWidgets})}"></div>
