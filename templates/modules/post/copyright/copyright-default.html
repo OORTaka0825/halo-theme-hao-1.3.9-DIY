@@ -1,5 +1,7 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <!-- 版权样式默认 -->
-<th:block  th:if="${#strings.equals(theme.config.post.copyrightsStyle, 'default')}">
+<th:block th:fragment="copyright-default" th:if="${#strings.equals(theme.config.post.copyrightsStyle, 'default')}">
     <div class="post-tools" id="post-tools">
         <div class="post-tools-left">
 
@@ -77,8 +79,7 @@
 
     <!-- 版权声明 -->
     <div class="post-copyright" th:with="copyrightUrl =${#annotations.get(post, 'copyrightUrl')},
-       copyrightEnable = ${not #strings.isEmpty(#annotations.get(post, 'copyrightEnable')) ?
-       #annotations.get(post, 'copyrightEnable') == 'true' : theme.config.post.copyrights.enable}">
+       copyrightEnable = ${#strings.equals(#annotations.getOrDefault(post, 'copyrightEnable','true'),'true')}">
         <div class="post-copyright__author" >
             <!-- 版权页 以及版权描述文字 -->
             <a th:if="${#strings.equals(#annotations.getOrDefault(post, 'copyrightType','original'),'original') && copyrightEnable}"
@@ -109,3 +110,6 @@
 
     <link rel="stylesheet" th:href="${assets_link + '/css/post-copyright.css' + theme_version}">
 </th:block>
+
+
+</html>
