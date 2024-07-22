@@ -357,16 +357,18 @@ let halo = {
     },
 
     getTopSponsors() {
-        var user_id = GLOBAL_CONFIG.source.power.userId
+
         var show_num = GLOBAL_CONFIG.source.power.showNum
 
+
         function getPower() {
-            const url = GLOBAL_CONFIG.source.power.url + user_id
+            const url = "/apis/api.plugin.halo.run/v1alpha1/plugins/plugin-afdian/afdian/getSponsorList"
             fetch(url)
                 .then(res => res.json())
                 .then(data => {
+                    console.log(data)
                     if (200 === data["ec"]) {
-                        var values = data["data"]["list"]
+                        const values = data["data"]["list"];
                         saveToLocal.set('power-data', JSON.stringify(values), 10 / (60 * 24))
                         renderer(values);
                     }
@@ -388,12 +390,12 @@ let halo = {
                         </div>`;
             } else {
                 if (powerStar) {
-                    powerStar.href = "https://afdian.net/u/" + data[0].user_id
+                    powerStar.href = "https://afdian.net/u/" + data[0]["user"].user_id
                     powerStar.innerHTML = ` 
-                        <div id="power-star-image" style="background-image: url(${data[0].avatar})">
+                        <div id="power-star-image" style="background-image: url(${data[0]["user"].avatar})">
                         </div>
                         <div class="power-star-body">
-                            <div id="power-star-title">${data[0].name}</div>
+                            <div id="power-star-title">${data[0]["user"].name}</div>
                             <div id="power-star-desc">更多支持，为爱发电</div>
                         </div>`;
                 }
@@ -405,7 +407,7 @@ let halo = {
                         if (i > parseInt(show_num)) {
                             break;
                         }
-                        htmlText += ` <a href="${"https://afdian.net/u/" + value["user_id"]}" rel="external nofollow" target="_blank" th:title="${value["name"]}">${value["name"]}</a>`;
+                        htmlText += ` <a href="${"https://afdian.net/u/" + value["user"]["user_id"]}" rel="external nofollow" target="_blank" th:title="${value["user"]["name"]}">${value["user"]["name"]}</a>`;
                         i = i + 1;
                     }
                     if (document.getElementById("power-item-link")) {
@@ -425,7 +427,8 @@ let halo = {
         }
 
         document.getElementById("power-star") && init()
-    },
+    }
+    ,
 
     checkAd() {
         var default_enable = GLOBAL_CONFIG.source.footer.default_enable
@@ -438,6 +441,28 @@ let halo = {
                 alert("页脚信息可能被AdBlocker Ultimate拦截，请检查广告拦截插件！")
             }
         }
+    },
+    logout() {
+        fetch('/logout', {
+            method: 'POST',
+            headers: {
+                'X-Xsrf-Token':
+                    document.cookie
+                        .split('; ')
+                        .find((row) => row.startsWith('XSRF-TOKEN'))
+                        ?.split('=')[1] || '',
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                console.error('Logout failed:', response.status);
+            }
+        })
+        .catch(error => {
+            console.error('Network error:', error);
+        });
     }
 
 
