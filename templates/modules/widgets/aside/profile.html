@@ -1,11 +1,13 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <!-- 侧边栏自我介绍 -->
 
-<div class="card-widget card-info" >
+<div class="card-widget card-info" th:fragment="profile">
 
     <!-- 默认 -->
     <th:block th:if="${#strings.equals(theme.config.sidebar.profile.profileStyle, 'default')}">
         <!-- 描述信息 -->
-        <div class="card-content" th:style="|background-image: url(${theme.config.sidebar.profile.backgroundImg});|">
+        <div class="card-content">
             <div class="card-info-avatar is-center">
                 <div class="author-info__top-group">
                     <div class="author-info__sayhi" id="author-info__sayhi" onclick="heo.changeSayHelloText()">你好啊！我是
@@ -30,7 +32,7 @@
         <div class="banner-button-group">
             <a class="banner-button" href="/about">
                 <i class="haofont hao-icon-circle-arrow-right"></i>
-                <span class="banner-button-text">了解我吧</span>
+                <span class="banner-button-text">了解更多</span>
             </a>
         </div>
 
