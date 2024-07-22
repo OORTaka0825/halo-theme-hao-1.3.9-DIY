@@ -18,7 +18,10 @@
         </header>
         <main class="layout hide-aside" id="content-inner">
             <div id="page">
+
                 <th:block th:replace="~{macro/content-links :: content-links(${htmlType})}" />
+
+
                 <hr/>
                 <!--/* 评论组件 */-->
                 <th:block
@@ -26,6 +29,7 @@
                   kind = 'SinglePage',
                   name = ${singlePage.metadata.name},
                   allowComment = ${singlePage.spec.allowComment})}"/>
+
             </div>
         </main>
         <!-- 底部 -->
