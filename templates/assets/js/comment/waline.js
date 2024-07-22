@@ -6,7 +6,7 @@
             serverURL: GLOBAL_CONFIG.source.waline.serverURL,
             pageview: false,
             dark: 'html[data-theme="dark"]',
-            path: window.location.pathname.replace(/\/page\/\d$/, ""),
+            path: window.location.pathname,
             comment: false,
             locale:GLOBAL_CONFIG.source.waline.locale
         }, null))
