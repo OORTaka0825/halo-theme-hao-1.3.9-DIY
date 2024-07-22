@@ -1,11 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 
-<th:block  th:if="${#strings.equals(theme.config.comments.use, 'Waline')
+<th:block th:fragment="waline" th:if="${#strings.equals(theme.config.comments.use, 'Waline')
   && not #strings.isEmpty(theme.config.comments.walines.serverURL)}">
     <div class="js-pjax">
         <script th:src="${assets_link + '/js/comment/waline.js'}"></script>
     </div>
     <script>
         window.addEventListener('load', () => {
+            const changeContent = (content) => {
+                if (content === '') return content
+
+                content = content.replace(/<img.*?src="(.*?)"?[^\>]+>/ig, '[图片]') // replace image link
+                content = content.replace(/<a[^>]+?href=["']?([^"']+)["']?[^>]*>([^<]+)<\/a>/gi, '[链接]') // replace url
+                content = content.replace(/<pre><code>.*?<\/pre>/gi, '[代码]') // replace code
+                content = content.replace(/<[^>]+>/g, "") // remove html tag
+
+                if (content.length > 150) {
+                    content = content.substring(0, 150) + '...'
+                }
+                return content
+            }
+
             const generateHtml = array => {
                 let result = ''
 
@@ -47,7 +63,7 @@
                     }).then(({ comments }) => {
                         const walineArray = comments.map(e => {
                             return {
-                                'content': btf.changeContent(e.comment,150),
+                                'content': changeContent(e.comment),
                                 'avatar': e.avatar,
                                 'nick': e.nick,
                                 'url': e.url + '#' + e.objectId,
@@ -70,7 +86,7 @@
             const necommHtml = array => {
                 let result = ''
 
-                const pagesize = [[${ theme.config.sidebar.newcomment.newcommentnumber }]];
+                const pagesize = [[${ theme.config.sidebar.newcommentnumber }]];
                 const defaultpagesize = 5;
                 const finalpagesize = pagesize <= 0 ? defaultpagesize : pagesize;
 
@@ -137,3 +153,4 @@
 
     </script>
 </th:block>
+</html>

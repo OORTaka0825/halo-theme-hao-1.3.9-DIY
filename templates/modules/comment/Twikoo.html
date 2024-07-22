@@ -1,5 +1,7 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 
-<th:block  th:if="${#strings.equals(theme.config.comments.use, 'Twikoo') &&
+<th:block th:fragment="twikoo" th:if="${#strings.equals(theme.config.comments.use, 'Twikoo') &&
 not #strings.isEmpty(theme.config.comments.twikoos.envId)}">
     <div class="js-pjax">
         <script th:src="${assets_link + '/js/comment/twikoo.js'}"></script>
@@ -7,6 +9,20 @@ not #strings.isEmpty(theme.config.comments.twikoos.envId)}">
     <!-- 最近评论 -->
     <script>
         window.addEventListener('load', () => {
+            const changeContent = (content) => {
+                if (content === '') return content
+
+                content = content.replace(/<img.*?src="(.*?)"?[^\>]+>/ig, '[图片]') // replace image link
+                content = content.replace(/<a[^>]+?href=["']?([^"']+)["']?[^>]*>([^<]+)<\/a>/gi, '[链接]') // replace url
+                content = content.replace(/<pre><code>.*?<\/pre>/gi, '[代码]') // replace code
+                content = content.replace(/<[^>]+>/g, "") // remove html tag
+
+                if (content.length > 150) {
+                    content = content.substring(0, 150) + '...'
+                }
+                return content
+            }
+
             const getComment = () => {
                 const runTwikoo = () => {
                     twikoo.getRecentComments({
@@ -17,7 +33,7 @@ not #strings.isEmpty(theme.config.comments.twikoos.envId)}">
                     }).then(function (res) {
                         const twikooArray = res.map(e => {
                             return {
-                                'content': btf.changeContent(e.comment,150),
+                                'content': changeContent(e.comment),
                                 'avatar': e.avatar,
                                 'nick': e.nick,
                                 'url': e.url + '#' + e.id,
@@ -82,7 +98,7 @@ not #strings.isEmpty(theme.config.comments.twikoos.envId)}">
             const necommHtml = array => {
                 let result = ''
 
-                const pagesize = [[${theme.config.sidebar.newcomment.newcommentnumber}]];
+                const pagesize = [[${theme.config.sidebar.newcommentnumber}]];
                 const defaultpagesize = 5;
                 const finalpagesize = pagesize <= 0 ? defaultpagesize : pagesize;
 
@@ -148,3 +164,4 @@ not #strings.isEmpty(theme.config.comments.twikoos.envId)}">
         })</script>
 
 </th:block>
+</html>
