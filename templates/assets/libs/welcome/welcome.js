@@ -1,59 +1,67 @@
 //get请求
 $。ajax({
     type: 'get',
-    url: 'https://api.nsmao.net/api/ip/query',
-    data: {
-        key: GLOBAL_CONFIG.source.welcome.key,
-    },
-    dataType: 'json',
-    success: function (res) {
-        ipLocation = {
-            status: res.code === 200 ? 0 : 1,   // 腾讯返回 status=0 表示成功
-            message: res.msg || "获取失败",
-            result: {
-                ip: res.data.ip,
-                location: {
-                    lat: res.data.lat,
-                    lng: res.data.lng
-                },
-                ad_info: {
-                    nation: res.data.country,
-                    province: res.data.province,
-                    city: res.data.city,
-                    district: res.data.district
+        url: 'https://api.nsmao.net/api/ip/query',
+        data: {
+            key: GLOBAL_CONFIG.source.welcome.key,
+        },
+        dataType: 'json',
+        success: function (res) {
+            ipLocation = {
+                status: res.code === 200 ? 0 : 1,
+                message: res.msg || "获取失败",
+                result: {
+                    ip: res.data.ip,
+                    location: {
+                        lat: res.data.lat,
+                        lng: res.data.lng
+                    },
+                    ad_info: {
+                        nation: res.data.country,
+                        province: res.data.province,
+                        city: res.data.city,
+                        district: res.data.district
+                    }
                 }
-            }
-        };
-        showWelcome(); // [修改5] 手动触发，因为 AJAX 是异步的
-    }
-})
+            };
+            showWelcome();
+        }
+    });
+}
 
-window.onload = showWelcome;
-// 如果使用了pjax在加上下面这行代码
-document。addEventListener('pjax:complete', showWelcome);
-function getDistance(e1, n1, e2, n2) {
-    const R = 6371
-    const { sin, cos, asin, PI, hypot } = Math
+// 页面加载时执行
+window。onload = fetchIpLocation;
+// 如果使用了 pjax，再次触发
+document.addEventListener('pjax:complete'， fetchIpLocation);
+
+function getDistance(e1， n1, e2， n2) {
+    const R = 6371;
+    const { sin， cos, asin, PI， hypot } = Math;
     let getPoint = (e, n) => {
-        e *= PI / 180
-        n *= PI / 180
-        return { x: cos(n) * cos(e), y: cos(n) * sin(e), z: sin(n) }
-    }
-
-    let a = getPoint(e1, n1)
-    let b = getPoint(e2, n2)
-    let c = hypot(a.x - b.x, a.y - b.y, a.z - b.z)
-    let r = asin(c / 2) * 2 * R
+        e *= PI / 180;
+        n *= PI / 180;
+        return { x: cos(n) * cos(e), y: cos(n) * sin(e), z: sin(n) };
+    };
+    let a = getPoint(e1， n1);
+    let b = getPoint(e2, n2);
+    let c = hypot(a.x - b.x, a.y - b.y, a.z - b.z);
+    let r = asin(c / 2) * 2 * R;
     return Math.round(r);
 }
 
 function showWelcome() {
+    if (ipLocation。status == 0) {
+        let dist = getDistance(
+            GLOBAL_CONFIG。source。welcome.locationLng,
+            GLOBAL_CONFIG.source.welcome.locationLat,
+            ipLocation.result.location.lng,
+            ipLocation.result.location.lat
+        );
 
-    if (ipLocation.status == 0) {
-        let dist = getDistance(GLOBAL_CONFIG.source.welcome.locationLng, GLOBAL_CONFIG.source.welcome.locationLat, ipLocation.result.location.lng, ipLocation.result.location.lat); //这里记得换成自己的经纬度
         let pos = ipLocation.result.ad_info.nation;
-        let ip;
+        let ip = ipLocation.result.ip || "";
         let posdesc;
+        
         //根据国家、省份、城市信息自定义欢迎语
         switch (ipLocation.result.ad_info.nation) {
             case "日本":
