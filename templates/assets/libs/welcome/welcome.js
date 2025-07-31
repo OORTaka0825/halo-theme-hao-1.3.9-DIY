@@ -1,19 +1,36 @@
 //get请求
-$.ajax({
+$。ajax({
     type: 'get',
-    url: 'https://apis.map.qq.com/ws/location/v1/ip',
+    url: 'https://api.nsmao.net/api/ip/query',
     data: {
         key: GLOBAL_CONFIG.source.welcome.key,
-        output: 'jsonp',
     },
-    dataType: 'jsonp',
+    dataType: 'json',
     success: function (res) {
-        ipLocation = res;
+        ipLocation = {
+            status: res.code === 200 ? 0 : 1,   // 腾讯返回 status=0 表示成功
+            message: res.msg || "获取失败",
+            result: {
+                ip: res.data.ip,
+                location: {
+                    lat: res.data.lat,
+                    lng: res.data.lng
+                },
+                ad_info: {
+                    nation: res.data.country,
+                    province: res.data.province,
+                    city: res.data.city,
+                    district: res.data.district
+                }
+            }
+        };
+        showWelcome(); // [修改5] 手动触发，因为 AJAX 是异步的
     }
 })
+
 window.onload = showWelcome;
 // 如果使用了pjax在加上下面这行代码
-document.addEventListener('pjax:complete', showWelcome);
+document。addEventListener('pjax:complete', showWelcome);
 function getDistance(e1, n1, e2, n2) {
     const R = 6371
     const { sin, cos, asin, PI, hypot } = Math
