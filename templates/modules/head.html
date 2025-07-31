@@ -8,11 +8,10 @@
     <title th:text="${siteTitle}"></title>
     <link rel="shortcut icon"
           th:href="@{${#strings.isEmpty(site.favicon) ? assets_link + '/images/hao-logo.jpg' : site.favicon}}"/>
-    <script src="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/jquery/3.6.0/jquery.min.js"></script>
+
+    <script th:src="${assets_link + '/libs/jquery/jquery.min.js'}"></script>
 
     <script th:src="${assets_link + '/js/heo.js' + theme_version}"></script>
-
-    <script th:src="${assets_link + '/js/halo.js' + theme_version}"></script>
 
     <link rel="stylesheet" th:href="${assets_link + '/zhheo/zhheoblog.css' + theme_version}">
 
@@ -29,10 +28,10 @@
     </style>
 
     <!-- swiper 在瞬间滚动时会使用 -->
-    <link th:if="${theme.config.top.moment}" rel="stylesheet" href="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/Swiper/8.0.6/swiper-bundle.min.css"/>
-
+    <link th:if="${theme.config.top.moment}" rel="stylesheet" th:href="${assets_link + '/libs/swiper/swiper-bundle.min.css'}"/>
+    
     <!-- 右下角通知 -->
-    <link href="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/node-snackbar/0.1.16/snackbar.min.css"
+    <link th:href="${assets_link + '/libs/node-snackbar/snackbar.min.css'}"
           media="print"
           onload='this.media="all"'
           rel="stylesheet"
@@ -166,21 +165,12 @@
     <script th:src="${assets_link + '/libs/clipboard/clipboard.min.js'}"></script>
 
     <!-- 关于统计-->
-    <script th:if="${#strings.contains(theme.config.about.widgets,'statistics-map')}" th:src="${assets_link + '/libs/countup/countup.js'}"></script>
-
-    <!-- 小板报 -->
-    <th:block th:if="${not #strings.isEmpty(theme.config.sidebar.welcome.key)}">
-        <script defer th:if="${#strings.contains(theme.config.sidebar.widgetss.indexWidgets,'welcome') ||
-            #strings.contains(theme.config.sidebar.widgetss.postWidgets,'welcome') ||
-            #strings.contains(theme.config.sidebar.widgetss.tagWidgets,'welcome') ||
-            #strings.contains(theme.config.sidebar.widgetss.categoryWidgets,'welcome')}"
-                th:src="${assets_link + '/libs/welcome/welcome.js'}"></script>
-    </th:block>
+    <script th:if="${#strings.contains(theme.config.about.widget_list,'statistics-map')}" th:src="${assets_link + '/libs/countup/countup.js'}"></script>
 
     <!-- icon图标 -->
-    <link rel="stylesheet" th:href="'https://cdn.cbd.int/hao-theme-static@'+${theme.spec.version}+'/icon/iconfont.css'">
+    <link rel="stylesheet" th:href="${assets_link + '/icon/iconfont.css' + theme_version}">
 
-    <th:block th:replace="~{modules/variables/site-config :: site-config}" />
+    <th:block th:replace="~{modules/variables/site-config}" />
 
 
 </th:block>
