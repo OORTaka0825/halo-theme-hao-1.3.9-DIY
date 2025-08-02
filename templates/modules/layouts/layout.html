@@ -24,6 +24,13 @@
         <th:block th:replace="${head}"/>
     </th:block>
 
+
+<script th:inline="javascript">
+    window.themeConfig = {
+        welcomeKey: [[${settings.welcomeKey}]]
+    };
+</script>
+
 </head>
 
 <body>
