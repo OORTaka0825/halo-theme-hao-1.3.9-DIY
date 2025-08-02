@@ -569,3 +569,30 @@ document.addEventListener('DOMContentLoaded', function () {
     refreshFn()
     unRefreshFn()
 })
+
+
+// [注入] 使用 nsmao API 获取位置并展示
+try {
+  $.ajax({
+    url: 'https://api.nsmao.net/api/ip/query',
+    data: { key: themeConfig.nsmao_key },
+    type: 'GET',
+    dataType: 'json',
+    success: function(res) {
+      if (res.code === 200) {
+        const prov = res.data.prov;
+        const city = res.data.city;
+        const district = res.data.district;
+        const ele = document.getElementById('main-location');
+        if (ele) {
+          ele.innerText = prov + ' ' + city + ' ' + district;
+        }
+      }
+    },
+    error: function() {
+      console.error('nsmao请求失败');
+    }
+  });
+} catch (e) {
+  console.error('nsmao调用异常', e);
+}
