@@ -182,9 +182,11 @@
 
     
     <script th:inline="javascript">
-        window.themeConfig = {
-            welcome: {
-                key: [[${theme.config.sidebar.welcome.key}]]
+        var GLOBAL_CONFIG = {
+            source: {
+                welcome: {
+                    key: [[${theme.config.sidebar.welcome.key}]]
+                }
             }
         };
     </script>
