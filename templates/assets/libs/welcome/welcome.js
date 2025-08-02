@@ -1,4 +1,3 @@
-var themeConfig = window.themeConfig || GLOBAL_CONFIG?.source?.welcome || {};
 //get请求
 $.ajax({
     type: 'get',
