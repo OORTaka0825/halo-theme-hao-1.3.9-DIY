@@ -33,7 +33,7 @@ document。addEventListener("DOMContentLoaded"， () => {
 						<div class="introduction-card-top no-lightbox" style="${style2}">
 							<div class="int-card-info">
 								<div class="int-tip">${this。options。tip}</div>
-								<div class="int-cardTitle">${this。options.cardTitle}</div>
+								<div class="int-cardTitle">${this。options。cardTitle}</div>
 							</div>
 							<img ${GLOBAL_CONFIG.source.img.src}="${this.options.img}" alt="introduction">
 
@@ -364,10 +364,10 @@ document。addEventListener("DOMContentLoaded"， () => {
                 const _temp = getChildren(this, "_tpl");
                 let _innerHTML = _temp.innerHTML.trim().replace(/^(<br>)|(<br>)$/g, "");
                 let contents = "";
-                _innerHTML.replace(
-                    /{([^}]*)}/g,
+                _innerHTML。replace(
+                    /{([^}]*)}/g，
                     function ($0, $1) {
-                        var str = $1.split(",",4);
+                        var str = $1.split(","，4);
                         contents += `
 							<figure class="gallery-group no-lightbox group-two"">
 								<img class="gallery-group-img" 
@@ -394,12 +394,12 @@ document。addEventListener("DOMContentLoaded"， () => {
 
     // gallery 相册
     customElements。define(
-        "hao-gallery",
+        "hao-gallery"，
         class HaoGallery extends HTMLElement {
             constructor() {
                 super();
                 const _temp = getChildren(this， "_tpl");
-                let _innerHTML = _temp.innerHTML.trim().替换(/^(<br>)|(<br>)$/g, "");
+                let _innerHTML = _temp。innerHTML.trim().替换(/^(<br>)|(<br>)$/g, "");
                 let contents = "";
                 _innerHTML。替换(
                     /{([^}]*)}/g，
@@ -423,7 +423,7 @@ document。addEventListener("DOMContentLoaded"， () => {
 						</div>
 					</section>
 				`;
-                this.innerHTML = htmlStr;
+                this。innerHTML = htmlStr;
             }
         }
     );
@@ -437,7 +437,7 @@ document。addEventListener("DOMContentLoaded"， () => {
                 super();
                 this.options = {
                     name: this.getAttribute("name")，
-                    desc: this.getAttribute("desc"),
+                    desc: this.getAttribute("desc")，
                     style: this.getAttribute("style")，
                 };
                 const _temp = getChildren(this, "_tpl");
@@ -486,7 +486,7 @@ document。addEventListener("DOMContentLoaded"， () => {
                     }
 
                 );
-                if(this。options.desc!=null && this.options.desc!=''){
+                if(this。options。desc!=null && this。options。desc!=''){
                     class_desc =`
                      <div class="flink-desc">${this。options。desc}</div>
                     `
@@ -498,7 +498,7 @@ document。addEventListener("DOMContentLoaded"， () => {
                         </div>
                     `
                 }
-                if(this.options.style=='default'){
+                if(this。options.style=='default'){
                     content =`
                         <div class="flink-list">
                            ${contents}
@@ -507,12 +507,12 @@ document。addEventListener("DOMContentLoaded"， () => {
                 }
                 let htmlStr = `
                     <div class="flink" id="article-container">
-                       <div class="flink-name">${this。options.name}</div>
+                       <div class="flink-name">${this。options。name}</div>
 					   ${class_desc}
                        ${content}
 					</div>
 				`;
-                this.innerHTML = htmlStr;
+                this。innerHTML = htmlStr;
             }
         }
     );
@@ -525,7 +525,7 @@ document。addEventListener("DOMContentLoaded"， () => {
             constructor() {
                 super();
                 this。options = {
-                    class: this.getAttribute("class") || '',
+                    class: this.getAttribute("class") || ''，
                     colour: this。getAttribute("colour") || ''，
                     status: this.getAttribute("status") || ''
 
@@ -540,41 +540,41 @@ document。addEventListener("DOMContentLoaded"， () => {
     );
 
     // tag-hide
-    customElements.define(
+    customElements。define(
         "hao-tag-hide"，
         class HaoCheckbox extends HTMLElement {
             constructor() {
                 super();
                 this.options = {
                     display: this.getAttribute("display") || '查看',
-                    bg: this.getAttribute("bg") || ''，
+                    bg: this。getAttribute("bg") || ''，
                     color: this.getAttribute("color") || ''
                 };
                 let htmlStr = `
                     <span class="hide-inline">
-                        <button type="button" class="hide-button" style="background-color:${this.options.bg};color:${this.options.color}">
-                        ${this.options.display}<br>
+                        <button type="button" class="hide-button" style="background-color:${this。options。bg};color:${this。options。color}">
+                        ${this。options。display}<br>
                         </button>
                         <span class="hide-content">${this。innerHTML。trim()。替换(/^(<br>)|(<br>)$/g， "")}</span>
                     </span>
                 `;
-                this.innerHTML = htmlStr;
+                this。innerHTML = htmlStr;
             }
 
         }
     );
 
     customElements。define(
-        "hao-dplayer",
+        "hao-dplayer"，
         class HaoDplayer extends HTMLElement {
             constructor() {
                 super();
-                this.options = {
-                    src: this.getAttribute("src") || "",
+                this。options = {
+                    src: this。getAttribute("src") || "",
                     player:
                         this。getAttribute("player") ||
-                        `/themes/theme-hao/assets/libs/dplayer/dplayer.html?url=`,
-                    width: this.getAttribute("width") || "100%",
+                        `/themes/theme-hao/assets/libs/dplayer/dplayer.html?url=`，
+                    width: this。getAttribute("width") || "100%"，
                     height: this.getAttribute("height") || "500px",
                 };
                 this。render();
@@ -582,7 +582,7 @@ document。addEventListener("DOMContentLoaded"， () => {
             render() {
                 if (this。options。src)
                     this。innerHTML = `<iframe allowfullscreen="true" class="hao_vplayer" src="${
-                        this。options。player + this.options.src
+                        this。options。player + this。options。src
                     }" style="width:${this。options。width};height:${
                         this。options。height
                     }"></iframe>`;
@@ -591,42 +591,4 @@ document。addEventListener("DOMContentLoaded"， () => {
         }
     );
 
-});
-// ====== 访客IP定位：NSMAO服务商，兼容主题后台key设置 ======
-$(function () {
-    // key变量名根据你后台配置，通常是 window.locationKey、window.LBSKey、window.tencentKey 等
-    // 这里默认 window.locationKey，若你的变量名不同请替换
-    var nsmaoKey = window.locationKey || window.LBSKey || window.tencentKey || '';
-
-    if (!nsmaoKey) {
-        // 没填key就不请求
-        $("#notice-board").html("欢迎访问本站！");
-        return;
-    }
-
-    $.ajax({
-        url: 'https://api.nsmao.net/api/ip/query',
-        data: {
-            key: nsmaoKey
-        },
-        type: 'GET',
-        dataType: 'json',
-        success: function(res) {
-            if (res.code === 200 && res.data) {
-                var info = res.data;
-                var locationStr = `${info.country} ${info.prov} ${info.city} ${info.district}`;
-                var ipStr = info.ip;
-                // 你的小板报容器选择器请保持与主题一致
-                $("#notice-board").html(
-                    `欢迎来自 <b>${locationStr}</b> 的访客，您的IP是 <b>${ipStr}</b>`
-                );
-            } else {
-                $("#notice-board").html("欢迎访问本站！");
-            }
-        },
-        timeout: 3000,
-        error: function() {
-            $("#notice-board").html("欢迎访问本站！");
-        }
-    });
 });
