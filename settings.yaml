@@ -733,14 +733,14 @@ spec:
           children:
             - $formkit: text
               name: key
-              label: 腾讯位置服务Key
+              label: NSMAO API Key
               value: "xxxx"
-              help: 申请地址：https://lbs.qq.com/dev/console/application/mine
+              help: 申请地址：https://api.nsmao.net/dev/console/application/mine
             - $formkit: text
               name: locationLng
               label: 经度坐标
               value: "113.215456"
-              help: 可访问 https://lbs.qq.com/getPoint 拾取坐标，示例：113.215456
+              help: 可访问 https://api.nsmao.net/getPoint 拾取坐标，示例：113.215456
               placeholder: 请输入经度坐标
             - $formkit: text
               name: locationLat
@@ -3125,11 +3125,3 @@ spec:
                   label: 结束时间
                   placeholder: 请输入结束时间(小时)
                   help: 可以与开始时间相同，表示一个小时内的问候
-
-
-nsmao_key:
-  name: nsmao_key
-  label: "NSMAO API Key"
-  type: text
-  default: ""
-  description: "请输入在 https://api.nsmao.net 获取的 API Key"
