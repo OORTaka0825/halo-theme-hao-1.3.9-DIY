@@ -1,7 +1,8 @@
+var themeConfig = window.themeConfig || GLOBAL_CONFIG?.source?.welcome || {};
 //get请求
 $.ajax({
     type: 'get',
-    url: `https://api.nsmao.net/api/ip/query?key=${themeConfig.nsmaoKey}`,
+    url: `https://api.nsmao.net/api/ip/query?key=${GLOBAL_CONFIG.source.welcome.key}`,
     dataType: 'json',
     success: function (res) {
         ipLocation = res;
