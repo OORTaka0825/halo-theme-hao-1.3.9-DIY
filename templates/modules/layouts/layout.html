@@ -128,15 +128,38 @@
     <script th:src="${assets_link + '/js/main.js' + theme_version}"></script>
     <script charset="utf-8" data-pjax th:src="${assets_link + '/zhheo/blogex.js' + theme_version}"></script>
     <script th:src="${assets_link + '/js/tw_cn.js' + theme_version}"></script>
-    <!-- /themes/theme-hao/assets/libs/ 网站预加载， 放在 <script src="/themes/theme-hao/assets/libs/welcome/welcome.js"></script>
+    <!-- https://instant.page/ 网站预加载， 放在 
+<script>
+// 小板报访客信息 IP 查询
+(function () {
+    const nsmaoKey = typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.source?.welcome?.key
+        ? GLOBAL_CONFIG.source.welcome.key
+        : '75gKybFM054DarMUAvMaVVtZjb';
+
+    fetch(`https://api.nsmao.net/api/ip/query?key=${nsmaoKey}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.code === 200 && data.data) {
+                const info = data.data;
+                const welcomeText = `欢迎来自 ${info.country} ${info.prov} ${info.city} 的朋友 👋`;
+                const welcomeDiv = document.querySelector('#welcome-info');
+                if (welcomeDiv) {
+                    welcomeDiv.innerHTML = `<b>${welcomeText}</b>`;
+                }
+            }
+        })
+        .catch(err => console.error('小板报 IP 接口错误:', err));
+})();
+</script>
+
 </body> 之前 -->
-    <script src="/themes/theme-hao/assets/libs/instantpage.min.js" type="module"></script>
+    <script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/instant.page/5.1.0/instantpage.min.js" type="module"></script>
 
     <script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/vanilla-lazyload/17.3.1/lazyload.iife.min.js"></script>
 
-    <!-- 右下角通知 /themes/theme-hao/assets/libs/ -->
+    <!-- 右下角通知 https://www.polonel.com/snackbar/ -->
     <!-- todo head 中有它的 css，应该可以写一块，并改成后台可配置的功能，代码中应该还有他的 js -->
-    <script src="/themes/theme-hao/assets/libs/snackbar.min.js"></script>
+    <script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/node-snackbar/0.1.16/snackbar.min.js"></script>
 
     <!-- 深色模式下添加粒子效果canvas -->
     <canvas th:if="${theme.config.style.universe}" id="universe" width="1312" height="880"></canvas>
@@ -173,7 +196,7 @@
     <script th:src="${assets_link + '/libs/pjax/pjax.min.js'}"></script>
 
     <!-- swiper 在瞬间滚动时会使用 -->
-    <script th:if="${theme.config.top.moment}" data-pjax  src="/themes/theme-hao/assets/libs/swiper-bundle.min.js"></script>
+    <script th:if="${theme.config.top.moment}" data-pjax  src="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/Swiper/6.6.2/swiper-bundle.min.js"></script>
 
     <!-- 右键菜单 -->
     <script th:if="${theme.config.tool.rightMenu.rightMenuEnable}" th:src="${assets_link + '/zhheo/rightmenu.js'}"></script>
@@ -317,7 +340,30 @@
     }
 
 </script>
-<script src="/themes/theme-hao/assets/libs/welcome/welcome.js"></script>
+
+<script>
+// 小板报访客信息 IP 查询
+(function () {
+    const nsmaoKey = typeof GLOBAL_CONFIG !== 'undefined' && GLOBAL_CONFIG.source?.welcome?.key
+        ? GLOBAL_CONFIG.source.welcome.key
+        : '75gKybFM054DarMUAvMaVVtZjb';
+
+    fetch(`https://api.nsmao.net/api/ip/query?key=${nsmaoKey}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.code === 200 && data.data) {
+                const info = data.data;
+                const welcomeText = `欢迎来自 ${info.country} ${info.prov} ${info.city} 的朋友 👋`;
+                const welcomeDiv = document.querySelector('#welcome-info');
+                if (welcomeDiv) {
+                    welcomeDiv.innerHTML = `<b>${welcomeText}</b>`;
+                }
+            }
+        })
+        .catch(err => console.error('小板报 IP 接口错误:', err));
+})();
+</script>
+
 </body>
 
 </html>
