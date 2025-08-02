@@ -6,7 +6,7 @@ function getChildren(el, className) {
 
 
 // 跳转链接的卡片
-document.addEventListener("DOMContentLoaded", () => {
+document。addEventListener("DOMContentLoaded"， () => {
 
     customElements.define(
         "hao-introduction-card",
@@ -32,8 +32,8 @@ document.addEventListener("DOMContentLoaded", () => {
 					<div class="introduction-card" style="${style1}">
 						<div class="introduction-card-top no-lightbox" style="${style2}">
 							<div class="int-card-info">
-								<div class="int-tip">${this.options.tip}</div>
-								<div class="int-cardTitle">${this.options.cardTitle}</div>
+								<div class="int-tip">${this。options。tip}</div>
+								<div class="int-cardTitle">${this。options.cardTitle}</div>
 							</div>
 							<img ${GLOBAL_CONFIG.source.img.src}="${this.options.img}" alt="introduction">
 
@@ -109,22 +109,22 @@ document.addEventListener("DOMContentLoaded", () => {
                 let htmlStr = `
 				<div calss="hao-tag-link">
 					<a class="tag-Link" target="_blank"
-						href="${this.options.link}" rel="external nofollow noreferrer"
+						href="${this。options.link}" rel="external nofollow noreferrer"
 						draggable="false">
 						<div class="tag-link-tips">引用站外地址</div>
 						<div class="tag-link-bottom">
 							<div class="tag-link-left"
-								style="background-image:url(${this.options.logo})">
+								style="background-image:url(${this。options。logo})">
 							</div>
 							<div class="tag-link-right">
-								<div class="tag-link-title">${this.options.title}</div>
-								<div class="tag-link-sitename">${this.options.described}</div>
+								<div class="tag-link-title">${this。options。title}</div>
+								<div class="tag-link-sitename">${this。options。described}</div>
 							</div><i class="haofont hao-icon-angle-right"></i>
 						</div>
 					</a>
 				</div>
             `;
-                this.innerHTML = htmlStr;
+                this。innerHTML = htmlStr;
             }
         }
     );
@@ -136,8 +136,8 @@ document.addEventListener("DOMContentLoaded", () => {
         class HaoNote extends HTMLElement {
             constructor() {
                 super();
-                this.options = {
-                    class: this.getAttribute("class") || '',
+                this。options = {
+                    class: this.getAttribute("class") || ''，
                     noIcon: this.getAttribute("noIcon") || '',
                     style: this.getAttribute("style") || ''
                 };
@@ -156,12 +156,12 @@ document.addEventListener("DOMContentLoaded", () => {
         class HaoTip extends HTMLElement {
             constructor() {
                 super();
-                this.options = {
+                this。options = {
                     class: this.getAttribute("class") || 'info',
                     noIcon: this.getAttribute("noIcon") || ''
                 };
                 let htmlStr = `
-				<div class="tip ${this.options.class} ${this.options.noIcon}">${this.innerHTML.trim().replace(/^(<br>)|(<br>)$/g, "")}</div>
+				<div class="tip ${this。options.class} ${this.options.noIcon}">${this.innerHTML.trim().replace(/^(<br>)|(<br>)$/g, "")}</div>
             `;
                 this.innerHTML = htmlStr;
             }
@@ -171,8 +171,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     // timeline
-    customElements.define(
-        "hao-timeline",
+    customElements。define(
+        "hao-timeline"，
         class HaoTimeline extends HTMLElement {
             constructor() {
                 super();
@@ -393,18 +393,18 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 
     // gallery 相册
-    customElements.define(
+    customElements。define(
         "hao-gallery",
         class HaoGallery extends HTMLElement {
             constructor() {
                 super();
-                const _temp = getChildren(this, "_tpl");
-                let _innerHTML = _temp.innerHTML.trim().replace(/^(<br>)|(<br>)$/g, "");
+                const _temp = getChildren(this， "_tpl");
+                let _innerHTML = _temp.innerHTML.trim().替换(/^(<br>)|(<br>)$/g, "");
                 let contents = "";
-                _innerHTML.replace(
-                    /{([^}]*)}/g,
-                    function ($0, $1) {
-                        var str = $1.split(",");
+                _innerHTML。替换(
+                    /{([^}]*)}/g，
+                    function ($0， $1) {
+                        var str = $1。split(",");
                         str.forEach((item) => {
                             contents += `
 								<div class="fj-gallery-item">
@@ -430,15 +430,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     // flink 友链标签
-    customElements.define(
+    customElements。define(
         "hao-flink",
         class HaoFlink extends HTMLElement {
             constructor() {
                 super();
                 this.options = {
-                    name: this.getAttribute("name"),
+                    name: this.getAttribute("name")，
                     desc: this.getAttribute("desc"),
-                    style: this.getAttribute("style"),
+                    style: this.getAttribute("style")，
                 };
                 const _temp = getChildren(this, "_tpl");
                 let _innerHTML = _temp.innerHTML.trim().replace(/^(<br>)|(<br>)$/g, "");
@@ -454,12 +454,12 @@ document.addEventListener("DOMContentLoaded", () => {
                             contents +=`
                                 <div class="site-card">
                                     <a class="img" target="_blank" href="${flink[1]}" title="${flink[0]}">
-                                        <img class="flink-avatar entered loaded" style="pointer-events: none;" alt="${flink[0]}" ${GLOBAL_CONFIG.source.img.src}="${flink[4] || flink[2]}" >
+                                        <img class="flink-avatar entered loaded" style="pointer-events: none;" alt="${flink[0]}" ${GLOBAL_CONFIG。source。img.src}="${flink[4] || flink[2]}" >
                                     </a>
 
                                     <a class="info cf-friends-link" target="_blank" href="${flink[1]}" title="${flink[0]}">
                                         <div class="site-card-avatar no-lightbox">
-                                            <img class="flink-avatar cf-friends-avatar" alt="${flink[0]}" ${GLOBAL_CONFIG.source.img.src}="${flink[2]}">
+                                            <img class="flink-avatar cf-friends-avatar" alt="${flink[0]}" ${GLOBAL_CONFIG。source。img.src}="${flink[2]}">
                                         </div>
                                         <div class="site-card-text">
                                             <span class="title cf-friends-name">${flink[0]}</span>
@@ -473,11 +473,11 @@ document.addEventListener("DOMContentLoaded", () => {
                             contents +=`
                                 <div class="flink-list-item">
                                     <a class="cf-friends-link" rel="external nofollow" target="_blank" href="${flink[1]}" title="${flink[0]}">
-                                        <img class="flink-avatar cf-friends-avatar" alt="${flink[0]}" ${GLOBAL_CONFIG.source.img.src}="${flink[2]}">
+                                        <img class="flink-avatar cf-friends-avatar" alt="${flink[0]}" ${GLOBAL_CONFIG。source.img.src}="${flink[2]}">
                                         <div class="flink-item-info no-lightbox">
                                             <span class="flink-item-name cf-friends-name">${flink[0]}</span>
                                             <span class="flink-item-desc" title="${flink[3]}">${flink[3]}</span>
-                                            <img ${GLOBAL_CONFIG.source.img.src}="${flink[2]}">
+                                            <img ${GLOBAL_CONFIG。source.img.src}="${flink[2]}">
                                         </div>
                                     </a>
                                 </div>
@@ -486,9 +486,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
 
                 );
-                if(this.options.desc!=null && this.options.desc!=''){
+                if(this。options.desc!=null && this.options.desc!=''){
                     class_desc =`
-                     <div class="flink-desc">${this.options.desc}</div>
+                     <div class="flink-desc">${this。options。desc}</div>
                     `
                 }
                 if(this.options.style=='beautify'){
@@ -507,7 +507,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
                 let htmlStr = `
                     <div class="flink" id="article-container">
-                       <div class="flink-name">${this.options.name}</div>
+                       <div class="flink-name">${this。options.name}</div>
 					   ${class_desc}
                        ${content}
 					</div>
@@ -519,21 +519,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     // 复选列表 checkbox
-    customElements.define(
-        "hao-checkbox",
+    customElements。define(
+        "hao-checkbox"，
         class HaoCheckbox extends HTMLElement {
             constructor() {
                 super();
-                this.options = {
+                this。options = {
                     class: this.getAttribute("class") || '',
-                    colour: this.getAttribute("colour") || '',
+                    colour: this。getAttribute("colour") || ''，
                     status: this.getAttribute("status") || ''
 
                 };
                 let htmlStr = `
-                <div class="checkbox ${this.options.class} ${this.options.colour} ${this.options.status}"><input type="checkbox" ${this.options.status}><p>${this.innerHTML.trim().replace(/^(<br>)|(<br>)$/g, "")}</p></div>
+                <div class="checkbox ${this。options。class} ${this。options。colour} ${this。options。status}"><input type="checkbox" ${this。options。status}><p>${this。innerHTML。trim()。替换(/^(<br>)|(<br>)$/g， "")}</p></div>
             `;
-                this.innerHTML = htmlStr;
+                this。innerHTML = htmlStr;
             }
 
         }
@@ -541,13 +541,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // tag-hide
     customElements.define(
-        "hao-tag-hide",
+        "hao-tag-hide"，
         class HaoCheckbox extends HTMLElement {
             constructor() {
                 super();
                 this.options = {
                     display: this.getAttribute("display") || '查看',
-                    bg: this.getAttribute("bg") || '',
+                    bg: this.getAttribute("bg") || ''，
                     color: this.getAttribute("color") || ''
                 };
                 let htmlStr = `
@@ -555,7 +555,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         <button type="button" class="hide-button" style="background-color:${this.options.bg};color:${this.options.color}">
                         ${this.options.display}<br>
                         </button>
-                        <span class="hide-content">${this.innerHTML.trim().replace(/^(<br>)|(<br>)$/g, "")}</span>
+                        <span class="hide-content">${this。innerHTML。trim()。替换(/^(<br>)|(<br>)$/g， "")}</span>
                     </span>
                 `;
                 this.innerHTML = htmlStr;
@@ -564,7 +564,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     );
 
-    customElements.define(
+    customElements。define(
         "hao-dplayer",
         class HaoDplayer extends HTMLElement {
             constructor() {
@@ -572,23 +572,61 @@ document.addEventListener("DOMContentLoaded", () => {
                 this.options = {
                     src: this.getAttribute("src") || "",
                     player:
-                        this.getAttribute("player") ||
+                        this。getAttribute("player") ||
                         `/themes/theme-hao/assets/libs/dplayer/dplayer.html?url=`,
                     width: this.getAttribute("width") || "100%",
                     height: this.getAttribute("height") || "500px",
                 };
-                this.render();
+                this。render();
             }
             render() {
-                if (this.options.src)
-                    this.innerHTML = `<iframe allowfullscreen="true" class="hao_vplayer" src="${
-                        this.options.player + this.options.src
-                    }" style="width:${this.options.width};height:${
-                        this.options.height
+                if (this。options。src)
+                    this。innerHTML = `<iframe allowfullscreen="true" class="hao_vplayer" src="${
+                        this。options。player + this.options.src
+                    }" style="width:${this。options。width};height:${
+                        this。options。height
                     }"></iframe>`;
                 else this.innerHTML = "视频地址未填写！";
             }
         }
     );
 
+});
+// ====== 访客IP定位：NSMAO服务商，兼容主题后台key设置 ======
+$(function () {
+    // key变量名根据你后台配置，通常是 window.locationKey、window.LBSKey、window.tencentKey 等
+    // 这里默认 window.locationKey，若你的变量名不同请替换
+    var nsmaoKey = window.locationKey || window.LBSKey || window.tencentKey || '';
+
+    if (!nsmaoKey) {
+        // 没填key就不请求
+        $("#notice-board").html("欢迎访问本站！");
+        return;
+    }
+
+    $.ajax({
+        url: 'https://api.nsmao.net/api/ip/query',
+        data: {
+            key: nsmaoKey
+        },
+        type: 'GET',
+        dataType: 'json',
+        success: function(res) {
+            if (res.code === 200 && res.data) {
+                var info = res.data;
+                var locationStr = `${info.country} ${info.prov} ${info.city} ${info.district}`;
+                var ipStr = info.ip;
+                // 你的小板报容器选择器请保持与主题一致
+                $("#notice-board").html(
+                    `欢迎来自 <b>${locationStr}</b> 的访客，您的IP是 <b>${ipStr}</b>`
+                );
+            } else {
+                $("#notice-board").html("欢迎访问本站！");
+            }
+        },
+        timeout: 3000,
+        error: function() {
+            $("#notice-board").html("欢迎访问本站！");
+        }
+    });
 });
