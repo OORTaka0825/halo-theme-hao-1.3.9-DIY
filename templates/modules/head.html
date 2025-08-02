@@ -180,19 +180,7 @@
     <!-- icon图标 -->
     <link rel="stylesheet" th:href="'https://cdn.cbd.int/hao-theme-static@'+${theme.spec.version}+'/icon/iconfont.css'">
 
-    
-    <script th:inline="javascript">
-        var GLOBAL_CONFIG = {
-            source: {
-                welcome: {
-                    key: [[${theme.config.sidebar.welcome.key}]]
-                }
-            }
-        };
-    </script>
-
-
-<th:block th:replace="~{modules/variables/site-config :: site-config}" />
+    <th:block th:replace="~{modules/variables/site-config :: site-config}" />
 
 
 </th:block>
