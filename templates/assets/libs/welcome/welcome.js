@@ -7,9 +7,9 @@ $.ajax({
         ipLocation = res;
     }
 })
-window.onload = showWelcome;
+// 已移除 window.onload 的 showWelcome 调用
 // 如果使用了pjax在加上下面这行代码
-document.addEventListener('pjax:complete', showWelcome);
+// 已移除 pjax:complete 的 showWelcome 调用
 function getDistance(e1, n1, e2, n2) {
     const R = 6371
     const { sin, cos, asin, PI, hypot } = Math
@@ -259,3 +259,27 @@ function showWelcome() {
 }
 
 
+
+
+// 新增逻辑用于确保数据加载后再渲染欢迎语
+
+$.ajax({
+    type: 'get',
+    url: `https://api.nsmao.net/api/ip/query?key=${themeConfig.nsmaoKey}`,
+    dataType: 'json',
+    success: function (res) {
+        ipLocation = res;
+        showWelcome(); // ✅ 数据获取成功后立即执行渲染
+    }
+});
+document.addEventListener('pjax:complete', () => {
+    $.ajax({
+        type: 'get',
+        url: `https://api.nsmao.net/api/ip/query?key=${themeConfig.nsmaoKey}`,
+        dataType: 'json',
+        success: function (res) {
+            ipLocation = res;
+            showWelcome(); // ✅ PJAX 下重新渲染
+        }
+    });
+});
