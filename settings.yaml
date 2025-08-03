@@ -231,7 +231,7 @@ spec:
           label: Banner 左侧
           if: $get(recentTop).value
           value:
-            bannersBackground: default
+            bannersBackground: 默认
             bannersTitleBig: Halo Theme Hao
             bannersTitleSmall: 更多信息请关注 GitHub
             categoryGroup:
@@ -263,7 +263,7 @@ spec:
               label: 背景图
               options:
                 - label: 默认技术栈
-                  value: default
+                  value: 默认
                 - label: 个人技术栈
                   value: techStack
             - $formkit: repeater
@@ -485,7 +485,7 @@ spec:
                 - label: 分类
                   value: categories
                 - label: 标签
-                  value: tags
+                  value: 标签
                 - label: 自定义地址
                   value: customUrl
             - $formkit: url
@@ -585,7 +585,7 @@ spec:
           name: profile
           label: 个人卡片
           value:
-            profileStyle: default
+            profileStyle: 默认
             helloText: 🤖️ 数码科技爱好者, 🔍 分享与热心帮助, 🏠 智能家居小能手, 🔨 设计开发一条龙, 🤝 专修交互与设计, 🏃 脚踏实地行动派, 🧱 团队小组发动机, 💢 壮汉人狠话不多
           children:
             - $formkit: select
@@ -594,7 +594,7 @@ spec:
               key: profileStyle
               label: 样式
               options:
-                - value: default
+                - value: 默认
                   label: 默认
                 - value: one
                   label: 样式一
@@ -733,9 +733,9 @@ spec:
           children:
             - $formkit: text
               name: key
-              label: NSMAO API Key
+              label: NSMAO API配置 Key
               value: "xxxx"
-              help: 申请地址：https://api.nsmao.net/dev/console/application/mine
+              help: 申请key:https://api.nsmao.net
             - $formkit: text
               name: locationLng
               label: 经度坐标
@@ -854,10 +854,10 @@ spec:
               id: adType
               key: adType
               label: 广告类型
-              value: none
+              value: 无
               options:
                 - label: 无
-                  value: none
+                  value: 无
                 - label: Google AdSence
                   value: google
             - $formkit: group
