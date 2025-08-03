@@ -53,7 +53,7 @@ function showWelcome() {
     const myLng = (GLOBAL_CONFIG.source.welcome.lng || 113.34) * 1;
     const myLat = (GLOBAL_CONFIG.source.welcome.lat || 23.08) * 1;
     let dist = getDistance(myLng, myLat, ipLocation.location.lng, ipLocation.location.lat);
-    let pos = ""; // 不再使用 nation
+    let pos = ipLocation.ad_info.nation;
     let ip = ipLocation.ip;
     let desc = '带我去你的城市逛逛吧！';
 
