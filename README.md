@@ -1,6 +1,6 @@
 <div align="center">
 <!-- 主题Logo -->
-<img width="100px" src="https://liuzhihang.com/upload/logo.png">
+<img width="100px" src="https://api.minio.yyds.pink/moony/files/2024/04/halo-theme-hao-sbxqdmuv.png">
 <!-- 主题名称 -->
 <h1>Halo-Theme-Hao</h1>
 <!-- 主题徽章 -->
@@ -24,10 +24,10 @@
 <table>
   <tr>
     <td>
-      <img src="https://liuzhihang.com/upload/hao_white.jpg"/>
+      <img src="https://redirect.cnkj.site:8099/bKlEJK.webp?type=blog"/>
     </td>
     <td>
-      <img src="https://liuzhihang.com/upload/hao_dark.jpg"/>
+      <img src="https://redirect.cnkj.site:8099/bKlEJK.webp?type=blog"/>
     </td>
   </tr>
 </table>
