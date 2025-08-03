@@ -37,7 +37,7 @@ function fetchIpLocation() {
                 },
                 ad_info: {
                     nation: res.data.country,
-                    province: res.data.province || "",
+                    province: res.data.prov || "",
                     city: res.data.city || "",
                     district: res.data.district
                 }
