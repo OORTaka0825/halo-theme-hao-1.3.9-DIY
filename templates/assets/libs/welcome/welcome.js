@@ -50,8 +50,8 @@ function fetchIpLocation() {
 // 展示欢迎语
 function showWelcome() {
     if (!ipLocation) return;
-    const myLng = (GLOBAL_CONFIG.source.welcome.lng || 113.34) * 1;
-    const myLat = (GLOBAL_CONFIG.source.welcome.lat || 23.08) * 1;
+    const myLng = (GLOBAL_CONFIG?.source?.welcome?.lng || 116.703781) * 1;
+    const myLat = (GLOBAL_CONFIG?.source?.welcome?.lat || 39.927334) * 1;
     let dist = getDistance(myLng, myLat, ipLocation.location.lng, ipLocation.location.lat);
     let pos = ipLocation.ad_info.nation;
     let ip = ipLocation.ip;
