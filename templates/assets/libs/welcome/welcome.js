@@ -52,13 +52,20 @@ function showWelcome() {
     if (!ipLocation) return;
     const myLng = GLOBAL_CONFIG.source.welcome.lng * 1;
     const myLat = GLOBAL_CONFIG.source.welcome.lat * 1;
-    let dist = getDistance(myLng, myLat, ipLocation.location.lng, ipLocation.location.lat);
+    let dist = '未知';
+    try {
+        if (ipLocation.location && ipLocation.location.lng && ipLocation.location.lat) {
+            dist = getDistance(GLOBAL_CONFIG.source.welcome.lng, GLOBAL_CONFIG.source.welcome.lat, ipLocation.location.lng, ipLocation.location.lat);
+        }
+    } catch (e) {
+        dist = '未知';
+    }
     let pos = ipLocation.ad_info.nation;
     let ip = ipLocation.ip;
     let desc = '带我去你的城市逛逛吧！';
 
     if (pos === "中国") {
-        pos = ipLocation.ad_info.province + " " + ipLocation.ad_info.city;
+        pos = [ipLocation.ad_info.province, ipLocation.ad_info.city, ipLocation.ad_info.district].filter(Boolean).join(' ');
         let city = ipLocation.ad_info.city;
         switch (city) {
             case "北京市":
@@ -86,7 +93,7 @@ function showWelcome() {
 
     if (ip.includes(":")) ip = "好复杂，咱看不懂~(ipv6)";
 
-    const content = `欢迎来自 <b><span style="color: var(--kouseki-ip-color);font-size: var(--kouseki-gl-size)">${pos}</span></b> 的小友💖<br>${desc}🍂<br>当前位置距博主约 <b><span style="color: var(--kouseki-ip-color)">${dist}</span></b> 公里！<br>您的IP地址为：<b><span>${ip}</span></b><br>${greet} <br>`;
+    const content = `<b><span style="color: var(--kouseki-ip-color);font-size: var(--kouseki-gl-size)">${pos}</span></b> 的小友💖<br>${desc}🍂<br>当前位置距博主约 <b><span style="color: var(--kouseki-ip-color)">${dist}</span></b> 公里！<br>您的IP地址为：<b><span>${ip}</span></b><br>${greet} <br>`;
 
     try {
         document.getElementById("welcome-info").innerHTML = content;
