@@ -1,6 +1,8 @@
 
-let ipLocation = null;
+// 访客欢迎信息模块（NSMAO）
+let ipLocation;
 
+// 计算两点间距离
 function getDistance(e1, n1, e2, n2) {
     const R = 6371;
     const { sin, cos, asin, PI, hypot } = Math;
@@ -12,79 +14,87 @@ function getDistance(e1, n1, e2, n2) {
     let a = getPoint(e1, n1);
     let b = getPoint(e2, n2);
     let c = hypot(a.x - b.x, a.y - b.y, a.z - b.z);
-    return Math.round(asin(c / 2) * 2 * R);
+    let r = asin(c / 2) * 2 * R;
+    return Math.round(r);
 }
 
+// 获取 IP 定位信息
 function fetchIpLocation() {
     $.ajax({
         type: 'get',
-        url: `https://api.nsmao.net/api/ip/query?key=${GLOBAL_CONFIG.source?.welcome?.key}`,
+        url: 'https://api.nsmao.net/api/ip/query',
+        data: {
+            key: GLOBAL_CONFIG.source.welcome.key
+        },
         dataType: 'json',
         success: function (res) {
-            if (res.code === 200) {
-                ipLocation = res;
-                showWelcome();  // 确保数据拿到后再执行欢迎语逻辑
-            }
+            if (res.code !== 200) return;
+            ipLocation = {
+                ip: res.data.ip,
+                location: {
+                    lat: res.data.lat,
+                    lng: res.data.lng
+                },
+                ad_info: {
+                    nation: res.data.country,
+                    province: res.data.province,
+                    city: res.data.city,
+                    district: res.data.district
+                }
+            };
+            showWelcome();
         }
     });
 }
 
+// 展示欢迎语
 function showWelcome() {
-    if (!ipLocation || ipLocation.code !== 200) return;
+    if (!ipLocation) return;
+    const myLng = GLOBAL_CONFIG.source.welcome.lng * 1;
+    const myLat = GLOBAL_CONFIG.source.welcome.lat * 1;
+    let dist = getDistance(myLng, myLat, ipLocation.location.lng, ipLocation.location.lat);
+    let pos = ipLocation.ad_info.nation;
+    let ip = ipLocation.ip;
+    let desc = '带我去你的城市逛逛吧！';
 
-    let dist = getDistance(
-        GLOBAL_CONFIG.source?.welcome?.locationLng,
-        GLOBAL_CONFIG.source?.welcome?.locationLat,
-        ipLocation.data.lng,
-        ipLocation.data.lat
-    );
-
-    let pos = ipLocation.data.country;
-    let posdesc = "";
-    switch (pos) {
-        case "日本":
-            posdesc = "よろしく，一起去看樱花吗";
-            break;
-        case "美国":
-            posdesc = "Let us make the web great again!";
-            break;
-        case "英国":
-            posdesc = "Fancy a cup of tea?";
-            break;
-        case "俄罗斯":
-            posdesc = "干了这瓶伏特加！";
-            break;
-        case "中国":
-            posdesc = "欢迎来自天朝的朋友";
-            break;
-        default:
-            posdesc = "欢迎来自" + pos + "的朋友";
+    if (pos === "中国") {
+        pos = ipLocation.ad_info.province + " " + ipLocation.ad_info.city;
+        let city = ipLocation.ad_info.city;
+        switch (city) {
+            case "北京市":
+                desc = "北——京——欢迎你~";
+                break;
+            case "广州市":
+                desc = "看小蛮腰，喝早茶了嘛~";
+                break;
+            case "深圳市":
+                desc = "今天你逛商场了嘛~";
+                break;
+            default:
+                desc = "来自 " + city + " 的小伙伴你好呀~";
+        }
     }
 
-    const welcome_el = document.getElementById("welcome-info");
-    if (!welcome_el) return;
+    let date = new Date();
+    let hour = date.getHours();
+    let greet = "夜深了，早点休息~";
+    if (hour >= 5 && hour < 11) greet = "🌤️ 早上好，一日之计在于晨";
+    else if (hour < 13) greet = "☀️ 中午好，记得午休喔~";
+    else if (hour < 17) greet = "🕞 下午好，饮茶先啦！";
+    else if (hour < 19) greet = "🚶‍♂️ 即将下班，记得按时吃饭~";
+    else if (hour < 24) greet = "🌙 晚上好，夜生活嗨起来！";
 
-    const hour = new Date().getHours();
-    const timeGreeting =
-        hour < 6 ? "凌晨好" :
-        hour < 11 ? "早上好" :
-        hour < 14 ? "中午好" :
-        hour < 18 ? "下午好" : "晚上好";
+    if (ip.includes(":")) ip = "好复杂，咱看不懂~(ipv6)";
 
-    welcome_el.innerHTML = `
-        <div style="line-height:1.5rem;">
-            <span>Hi~ </span>
-            <b>${ipLocation.data.ip}</b>
-            <br />
-            <span>欢迎来自 <b>${ipLocation.data.country}</b>
-            <b>${ipLocation.data.province}</b>
-            <b>${ipLocation.data.city}</b>
-            <b>${ipLocation.data.district}</b> 的小伙伴</span><br />
-            <span>你距离博主约 <b>${dist}</b> km</span><br />
-            <span>${timeGreeting}，${posdesc}</span>
-        </div>
-    `;
+    const content = `欢迎来自 <b><span style="color: var(--kouseki-ip-color);font-size: var(--kouseki-gl-size)">${pos}</span></b> 的小友💖<br>${desc}🍂<br>当前位置距博主约 <b><span style="color: var(--kouseki-ip-color)">${dist}</span></b> 公里！<br>您的IP地址为：<b><span>${ip}</span></b><br>${greet} <br>`;
+
+    try {
+        document.getElementById("welcome-info").innerHTML = content;
+    } catch (err) {
+        console.log("欢迎模块插入失败:", err);
+    }
 }
 
+// 页面加载与 PJAX 兼容
 window.onload = fetchIpLocation;
-document.addEventListener('pjax:complete', fetchIpLocation);
+document.addEventListener("pjax:complete", fetchIpLocation);
