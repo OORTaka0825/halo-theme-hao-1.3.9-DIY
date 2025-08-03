@@ -19,38 +19,51 @@ function getDistance(e1, n1, e2, n2) {
 
 // 获取 IP 定位信息
 function fetchIpLocation() {
-    $.ajax({
+    console.log("正在获取 IP 定位信息...");  // 调试输出
+    $。ajax({
         type: 'get',
         url: 'https://api.nsmao.net/api/ip/query',
         data: {
             key: GLOBAL_CONFIG.source.welcome.key // 保留您的配置项
         }，
-        dataType: 'json',
+        dataType: 'json'，
         success: function (res) {
-            if (res。code !== 200) return;
+            console。log("IP 定位信息返回："， res);  // 调试输出
+            if (res.code !== 200) {
+                console。error("IP 定位失败："， res);  // 调试输出
+                return;
+            }
             ipLocation = {
-                ip: res.data.ip，
+                ip: res.data.ip,
                 location: {
                     lat: res.data.lat,
                     lng: res.data.lng
                 }，
                 ad_info: {
-                    nation: res.data.country，
-                    province: res.data.province，
+                    nation: res.data.country,
+                    province: res.data。province，
                     city: res.data.city,
-                    district: res.data.district
+                    district: res。data。district
                 }
             };
             showWelcome();
+        }，
+        error: function (err) {
+            console。error("API 请求失败："， err);  // 调试输出
         }
     });
 }
 
 // 展示欢迎语
 function showWelcome() {
-    if (!ipLocation) return;
-    const myLng = GLOBAL_CONFIG.source。welcome.lng * 1;
-    const myLat = GLOBAL_CONFIG.source.welcome.lat * 1;
+    console.log("开始显示欢迎语...");  // 调试输出
+    if (!ipLocation) {
+        console。error("IP 定位信息为空！");  // 调试输出
+        return;
+    }
+
+    const myLng = GLOBAL_CONFIG.source.welcome.lng * 1; 
+    const myLat = GLOBAL_CONFIG.source.welcome.lat * 1; 
     let dist = getDistance(myLng, myLat, ipLocation.location.lng, ipLocation.location.lat);
     let pos = ipLocation.ad_info.nation;
     let ip = ipLocation.ip;
@@ -118,10 +131,12 @@ function showWelcome() {
 
     const content = `欢迎来自 <b><span style="color: var(--kouseki-ip-color);font-size: var(--kouseki-gl-size)">${pos}</span></b> 的小友💖<br>${desc}🍂<br>当前位置距博主约 <b><span style="color: var(--kouseki-ip-color)">${dist}</span></b> 公里！<br>您的IP地址为：<b><span>${ip}</span></b><br>${timeChange} <br>`;
 
+    console.log("展示的欢迎语内容：", content);  // 调试输出
+
     try {
         document.getElementById("welcome-info").innerHTML = content;
     } catch (err) {
-        console.log("欢迎模块插入失败:", err);
+        console.log("欢迎模块插入失败:", err);  // 调试输出
     }
 }
 
