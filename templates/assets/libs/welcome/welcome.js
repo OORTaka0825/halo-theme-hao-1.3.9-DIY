@@ -58,26 +58,71 @@ function showWelcome() {
     let desc = '带我去你的城市逛逛吧！';
 
     if (pos === "中国") {
-        pos = ((ipLocation.ad_info.province || "") + " " + (ipLocation.ad_info.city || "") + " " + (ipLocation.ad_info.district || "")).trim();
-        let city = ipLocation.ad_info.city;
-        switch (city) {
-            case "北京市":
-                desc = "北——京——欢迎你~";
-                break;
-            case "广州市":
-                desc = "看小蛮腰，喝早茶了嘛~";
-                break;
-            case "深圳市":
-                desc = "今天你逛商场了嘛~";
-                break;
-            default:
-                desc = "来自 " + city + " 的小伙伴你好呀~";
-        }
-  } else {
-    // 国外 IP
-    pos = "来自 " + pos + " 的朋友";
-    desc = "世界那么大，欢迎你来看看！";
+  const province = ipLocation.ad_info.province || "";
+  const city = ipLocation.ad_info.city || "";
+  const district = ipLocation.ad_info。district || "";
+  pos = `${province} ${city} ${district}`。trim();
+
+  switch (province) {
+    case "北京市":
+      desc = "北——京——欢迎你~";
+      break;
+    case "天津市":
+      desc = "讲段相声吧";
+      break;
+    case "河北省":
+      desc = "山势巍巍成壁垒，天下雄关铁马金戈由此向，无限江山";
+      break;
+    case "江苏省":
+      switch (city) {
+        case "南京市": desc = "这是我挺想去的城市啦"; break;
+        case "苏州市": desc = "上有天堂，下有苏杭"; break;
+        默认: desc = "散装是必须要散装的"; break;
+      }
+      break;
+    case "广东省":
+      switch (city) {
+        case "广州市": desc = "看小蛮腰，喝早茶了嘛~"; break;
+        case "深圳市": desc = "今天你逛商场了嘛~"; break;
+        case "阳江市": desc = "阳春合水！博主家乡~ 欢迎来玩~"; break;
+        default: desc = "来两斤福建人~"; break;
+      }
+      break;
+    case "河南省":
+      switch (city) {
+        case "郑州市": desc = "豫州之域，天地之中"; break;
+        case "南阳市": desc = "臣本布衣，躬耕于南阳，此南阳非彼南阳！"; break;
+        case "驻马店市": desc = "峰峰有奇石，石石挟仙气嵖岈山的花很美哦！"; break;
+        case "开封市": desc = "刚正不阿包青天"; break;
+        case "洛阳市": desc = "洛阳牡丹甲天下"; break;
+        default: desc = "可否带我品尝河南烩面啦？"; break;
+      }
+      break;
+    // 继续写其它省...
+    case "湖南省": desc = "74751，长沙斯塔克"; break;
+    case "四川省": desc = "康康川妹子"; break;
+    case "广西壮族自治区": desc = "桂林山水甲天下"; break;
+    case "新疆维吾尔自治区": desc = "驼铃古道丝绸路，胡马犹闻唐汉风"; break;
+    case "香港特别行政区": desc = "永定贼有残留地鬼嚎，迎击光非岁玉"; break;
+    default:
+      desc = `来自 ${city} 的小伙伴你好呀~`;
   }
+} else {
+  // 国外 IP 处理
+  switch (pos) {
+    case "日本": desc = "よろしく，一起去看樱花吗"; break;
+    case "美国": desc = "Let us live in peace!"; break;
+    case "英国": desc = "想同你一起夜乘伦敦眼"; break;
+    case "俄罗斯": desc = "干了这瓶伏特加！"; break;
+    case "法国": desc = "C'est La Vie"; break;
+    case "德国": desc = "Die Zeit verging im Fluge."; break;
+    case "澳大利亚": desc = "一起去大堡礁吧！"; break;
+    case "加拿大": desc = "拾起一片枫叶赠予你"; break;
+    default: desc = "带我去你的国家逛逛吧";
+  }
+  pos = "来自 " + pos + " 的朋友";
+}
+
     
     let date = new Date();
     let hour = date.getHours();
