@@ -19,101 +19,89 @@ function getDistance(e1, n1, e2, n2) {
 
 // 获取 IP 定位信息
 function fetchIpLocation() {
-    console.log("正在获取 IP 定位信息...");  // 调试输出
-    $。ajax({
+    $.ajax({
         type: 'get',
         url: 'https://api.nsmao.net/api/ip/query',
         data: {
-            key: GLOBAL_CONFIG.source.welcome.key // 保留您的配置项
+            key: GLOBAL_CONFIG.source.welcome.key
         }，
-        dataType: 'json'，
+        dataType: 'json',
         success: function (res) {
-            console。log("IP 定位信息返回："， res);  // 调试输出
-            if (res.code !== 200) {
-                console。error("IP 定位失败："， res);  // 调试输出
-                return;
-            }
+            if (res。code !== 200) return;
             ipLocation = {
-                ip: res.data.ip,
+                ip: res.data.ip，
                 location: {
                     lat: res.data.lat,
                     lng: res.data.lng
                 }，
                 ad_info: {
                     nation: res.data.country,
-                    province: res.data。province，
+                    province: res.data.province,
                     city: res.data.city,
-                    district: res。data。district
+                    district: res.data.district
                 }
             };
             showWelcome();
-        }，
-        error: function (err) {
-            console。error("API 请求失败："， err);  // 调试输出
         }
     });
 }
 
 // 展示欢迎语
 function showWelcome() {
-    console.log("开始显示欢迎语...");  // 调试输出
-    if (!ipLocation) {
-        console。error("IP 定位信息为空！");  // 调试输出
-        return;
-    }
+    if (!ipLocation) return;
 
-    const myLng = GLOBAL_CONFIG.source.welcome.lng * 1; 
-    const myLat = GLOBAL_CONFIG.source.welcome.lat * 1; 
+    const myLng = GLOBAL_CONFIG.source.welcome.lng * 1;
+    const myLat = GLOBAL_CONFIG.source.welcome.lat * 1;
     let dist = getDistance(myLng, myLat, ipLocation.location.lng, ipLocation.location.lat);
     let pos = ipLocation.ad_info.nation;
     let ip = ipLocation.ip;
-    let desc = '带我去你的城市逛逛吧！';
+    let posdesc = '带我去你的城市逛逛吧！';
 
     // 根据国家、省份、城市自定义欢迎语
     switch (pos) {
         case "日本":
-            desc = "よろしく，一起去看樱花吗";
+            posdesc = "よろしく，一起去看樱花吗";
             break;
         case "美国":
-            desc = "Let us live in peace!";
+            posdesc = "Let us live in peace!";
             break;
         case "英国":
-            desc = "想同你一起夜乘伦敦眼";
+            posdesc = "想同你一起夜乘伦敦眼";
             break;
         case "俄罗斯":
-            desc = "干了这瓶伏特加！";
+            posdesc = "干了这瓶伏特加！";
             break;
         case "法国":
-            desc = "C'est La Vie";
+            posdesc = "C'est La Vie";
             break;
         case "德国":
-            desc = "Die Zeit verging im Fluge.";
+            posdesc = "Die Zeit verging im Fluge.";
             break;
         case "澳大利亚":
-            desc = "一起去大堡礁吧！";
+            posdesc = "一起去大堡礁吧！";
             break;
         case "加拿大":
-            desc = "拾起一片枫叶赠予你";
+            posdesc = "拾起一片枫叶赠予你";
             break;
         case "中国":
             pos = ipLocation.ad_info.province + " " + ipLocation.ad_info.city + " " + ipLocation.ad_info.district;
             let city = ipLocation.ad_info.city;
             switch (city) {
                 case "北京市":
-                    desc = "北——京——欢迎你~";
+                    posdesc = "北——京——欢迎你~~~";
                     break;
                 case "广州市":
-                    desc = "看小蛮腰，喝早茶了嘛~";
+                    posdesc = "看小蛮腰，喝早茶了嘛~";
                     break;
                 case "深圳市":
-                    desc = "今天你逛商场了嘛~";
+                    posdesc = "今天你逛商场了嘛~";
                     break;
                 default:
-                    desc = "来自 " + city + " 的小伙伴你好呀~";
+                    posdesc = "来自 " + city + " 的小伙伴你好呀~";
             }
             break;
         default:
-            desc = "带我去你的国家逛逛吧";
+            posdesc = "带我去你的国家逛逛吧";
             break;
     }
 
@@ -129,14 +117,12 @@ function showWelcome() {
 
     if (ip.includes(":")) ip = "好复杂，咱看不懂~(ipv6)";
 
-    const content = `欢迎来自 <b><span style="color: var(--kouseki-ip-color);font-size: var(--kouseki-gl-size)">${pos}</span></b> 的小友💖<br>${desc}🍂<br>当前位置距博主约 <b><span style="color: var(--kouseki-ip-color)">${dist}</span></b> 公里！<br>您的IP地址为：<b><span>${ip}</span></b><br>${timeChange} <br>`;
-
-    console.log("展示的欢迎语内容：", content);  // 调试输出
+    const content = `欢迎来自 <b><span style="color: var(--kouseki-ip-color);font-size: var(--kouseki-gl-size)">${pos}</span></b> 的小友💖<br>${posdesc}🍂<br>当前位置距博主约 <b><span style="color: var(--kouseki-ip-color)">${dist}</span></b> 公里！<br>您的IP地址为：<b><span>${ip}</span></b><br>${timeChange} <br>`;
 
     try {
         document.getElementById("welcome-info").innerHTML = content;
     } catch (err) {
-        console.log("欢迎模块插入失败:", err);  // 调试输出
+        console.log("欢迎模块插入失败:", err);
     }
 }
 
