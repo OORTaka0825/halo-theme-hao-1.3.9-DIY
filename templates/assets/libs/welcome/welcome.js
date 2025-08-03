@@ -60,8 +60,8 @@ function showWelcome() {
     if (pos === "中国") {
   const province = ipLocation.ad_info.province || "";
   const city = ipLocation.ad_info.city || "";
-  const district = ipLocation.ad_info。district || "";
-  pos = `${province} ${city} ${district}`。trim();
+  const district = ipLocation.ad_info.district || "";
+  pos = `${province} ${city} ${district}`.trim();
 
   switch (province) {
     case "北京市":
