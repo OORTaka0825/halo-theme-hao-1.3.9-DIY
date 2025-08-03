@@ -58,7 +58,7 @@ function showWelcome() {
     let desc = '带我去你的城市逛逛吧！';
 
     if (pos === "中国") {
-        pos = (ipLocation.ad_info.province || "") + " " + (ipLocation.ad_info.city || "") + " " + (ipLocation.ad_info.district || "");
+        pos = (ipLocation.ad_info.province || "") + " " + (ipLocation.ad_info.city || "") + " " + (ipLocation.ad_info.district || "");.trim();
         let city = ipLocation.ad_info.city;
         switch (city) {
             case "北京市":
@@ -74,8 +74,10 @@ function showWelcome() {
                 desc = "来自 " + city + " 的小伙伴你好呀~";
         }
     }
-
-    
+    } else {
+        pos = "来自 " + pos + " 的朋友";
+        desc = "世界那么大，欢迎你来看看！";
+    }
     let date = new Date();
     let hour = date.getHours();
     let greet = "夜深了，早点休息~";
