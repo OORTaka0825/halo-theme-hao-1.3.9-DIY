@@ -4,7 +4,7 @@ let ipLocation;
 // 计算两点间距离
 function getDistance(e1, n1, e2, n2) {
     const R = 6371;
-    const { sin， cos, asin, PI, hypot } = Math;
+    const { sin, cos, asin, PI, hypot } = Math;
     let getPoint = (e, n) => {
         e *= PI / 180;
         n *= PI / 180;
@@ -12,28 +12,32 @@ function getDistance(e1, n1, e2, n2) {
     };
     let a = getPoint(e1, n1);
     let b = getPoint(e2, n2);
-    let c = hypot(a。x - b。x， a。y - b。y， a。z - b.z);
+    let c = hypot(a.x - b.x, a.y - b.y, a.z - b.z);
     let r = asin(c / 2) * 2 * R;
-    return Math。round(r);
+    return Math.round(r);
 }
 
 // 获取 IP 定位信息
 function fetchIpLocation() {
-    $。ajax({
+    console.log("开始获取 IP 定位信息");  // 调试输出
+    $.ajax({
         type: 'get',
         url: 'https://api.nsmao.net/api/ip/query',
         data: {
             key: GLOBAL_CONFIG.source.welcome.key // 保留您的配置项
-        }，
+        },
         dataType: 'json',
         success: function (res) {
-            if (res。code !== 200) return;
+            if (res.code !== 200) {
+                console.error("IP 定位失败：", res);  // 调试输出
+                return;
+            }
             ipLocation = {
                 ip: res.data.ip || "未知",
                 location: {
                     lat: res.data.lat || 0,
                     lng: res.data.lng || 0
-                }，
+                },
                 ad_info: {
                     nation: res.data.country || "未知",
                     province: res.data.province || "未知",
@@ -41,14 +45,22 @@ function fetchIpLocation() {
                     district: res.data.district || "未知"
                 }
             };
+            console.log("IP 定位成功：", ipLocation);  // 调试输出
             showWelcome();
+        },
+        error: function (err) {
+            console.error("API 请求失败：", err);  // 调试输出
         }
     });
 }
 
 // 根据国家、省份、城市信息自定义欢迎语
 function showWelcome() {
-    if (!ipLocation) return;
+    console.log("开始显示欢迎语");  // 调试输出
+    if (!ipLocation) {
+        console.error("IP 定位信息为空！");  // 调试输出
+        return;
+    }
 
     const myLng = GLOBAL_CONFIG.source.welcome.lng * 1; 
     const myLat = GLOBAL_CONFIG.source.welcome.lat * 1; 
@@ -58,7 +70,7 @@ function showWelcome() {
     let posdesc = '带我去你的城市逛逛吧！';
 
     // 根据国家和城市自定义欢迎语
-    switch (ipLocation.result.ad_info。nation) {
+    switch (ipLocation.result.ad_info.nation) {
         case "日本":
             posdesc = "よろしく，一起去看樱花吗";
             break;
@@ -126,10 +138,11 @@ function showWelcome() {
     }
 
     try {
+        console.log("欢迎语内容：", posdesc);  // 调试输出
         document.getElementById("welcome-info").innerHTML =
             `欢迎来自 <b><span style="color: var(--kouseki-ip-color);font-size: var(--kouseki-gl-size)">${pos}</span></b> 的小友💖<br>${posdesc}🍂<br>当前位置距博主约 <b><span style="color: var(--kouseki-ip-color)">${dist}</span></b> 公里！<br>您的IP地址为：<b><span>${ip}</span></b><br>${timeChange} <br>`;
     } catch (err) {
-        console.log("Pjax无法获取元素");
+        console.log("Pjax无法获取元素", err);
     }
 }
 
