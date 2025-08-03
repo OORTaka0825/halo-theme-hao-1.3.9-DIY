@@ -75,14 +75,18 @@ function showWelcome() {
         }
     }
 
+    
     let date = new Date();
     let hour = date.getHours();
     let greet = "夜深了，早点休息~";
+
     if (hour >= 5 && hour < 11) greet = "🌤️ 早上好，一日之计在于晨";
-    else if (hour < 13) greet = "☀️ 中午好，记得午休喔~";
-    else if (hour < 17) greet = "🕞 下午好，饮茶先啦！";
-    else if (hour < 19) greet = "🚶‍♂️ 即将下班，记得按时吃饭~";
-    else if (hour < 24) greet = "🌙 晚上好，夜生活嗨起来！";
+    else if (hour >= 11 && hour < 13) greet = "☀️ 中午好，记得午休喔~";
+    else if (hour >= 13 && hour < 17) greet = "🕞 下午好，饮茶先啦！";
+    else if (hour >= 17 && hour < 19) greet = "🚶‍♂️ 即将下班，记得按时吃饭~";
+    else if (hour >= 19 && hour < 24) greet = "🌙 晚上好，夜生活嗨起来！";
+    else if (hour >= 0 && hour < 5) greet = "夜深了，早点休息~";
+
 
     if (ip.includes(":")) ip = "好复杂，咱看不懂~(ipv6)";
 
