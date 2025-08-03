@@ -86,7 +86,7 @@ function showWelcome() {
 
     if (ip.includes(":")) ip = "好复杂，咱看不懂~(ipv6)";
 
-    const content = `欢迎来自 <b><span style="color: var(--kouseki-ip-color);font-size: var(--kouseki-gl-size)">${pos}</span></b> 的小友💖<br>${desc}🍂<br>当前位置距博主约 <b><span style="color: var(--kouseki-ip-color)">${dist}</span></b> 公里！<br>您的IP地址为：<b><span>${ip}</span></b><br>${greet} <br>`;
+    const content = ` <b><span style="color: var(--kouseki-ip-color);font-size: var(--kouseki-gl-size)">${pos}</span></b> 的小友💖<br>${desc}🍂<br>当前位置距博主约 <b><span style="color: var(--kouseki-ip-color)">${dist}</span></b> 公里！<br>您的IP地址为：<b><span>${ip}</span></b><br>${greet} <br>`;
 
     try {
         document.getElementById("welcome-info").innerHTML = content;
