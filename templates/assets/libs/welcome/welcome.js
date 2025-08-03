@@ -73,7 +73,12 @@ function showWelcome() {
             default:
                 desc = "来自 " + city + " 的小伙伴你好呀~";
         }
-    }
+  } else {
+    // 国外 IP
+    pos = "来自 " + pos + " 的朋友";
+    desc = "世界那么大，欢迎你来看看！";
+  }
+    
     let date = new Date();
     let hour = date.getHours();
     let greet = "夜深了，早点休息~";
