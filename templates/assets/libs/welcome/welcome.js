@@ -53,9 +53,9 @@ function showWelcome() {
     const myLng = (GLOBAL_CONFIG.source.welcome.lng || 113.34) * 1;
     const myLat = (GLOBAL_CONFIG.source.welcome.lat || 23.08) * 1;
     let dist = getDistance(myLng, myLat, ipLocation.location.lng, ipLocation.location.lat);
-    let pos = ""; // 不再使用 nation，直接使用省市区
+    let pos = ""; // 直接使用省市区
     let ip = ipLocation.ip;
-    let desc = "小板报提示：今日宜摸鱼~";
+    let desc = '带我去你的城市逛逛吧！';
 
     if (pos === "中国") {
         pos = ipLocation.ad_info.province + " " + ipLocation.ad_info.city + " " + ipLocation.ad_info.district;
@@ -71,7 +71,7 @@ function showWelcome() {
                 desc = "今天你逛商场了嘛~";
                 break;
             default:
-                desc = "今天来自 " + city + " 的朋友上线啦~";
+                desc = "来自 " + city + " 的小伙伴你好呀~";
         }
     }
 
