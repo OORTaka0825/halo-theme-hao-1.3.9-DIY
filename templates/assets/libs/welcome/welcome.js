@@ -4,7 +4,7 @@ let ipLocation;
 // 计算两点间距离
 function getDistance(e1, n1, e2, n2) {
     const R = 6371;
-    const { sin， cos, asin, PI, hypot } = Math;
+    const { sin， cos, asin, PI， hypot } = Math;
     let getPoint = (e, n) => {
         e *= PI / 180;
         n *= PI / 180;
@@ -14,20 +14,24 @@ function getDistance(e1, n1, e2, n2) {
     let b = getPoint(e2, n2);
     let c = hypot(a。x - b。x， a。y - b。y， a。z - b。z);
     let r = asin(c / 2) * 2 * R;
-    return Math。round(r);
+    return Math.round(r);
 }
 
 // 获取 IP 定位信息
 function fetchIpLocation() {
-    $。ajax({
+    $.ajax({
         type: 'get',
         url: 'https://api.nsmao.net/api/ip/query',
         data: {
             key: GLOBAL_CONFIG.source.welcome.key
-        }，
+        },
         dataType: 'json',
         success: function (res) {
-            if (res。code !== 200) return;
+            console。log("API请求成功:"， res);  // 确保API请求成功
+            if (res.code !== 200) {
+                console。error("IP定位失败:"， res);
+                return;
+            }
             ipLocation = {
                 ip: res.data.ip,
                 location: {
@@ -37,25 +41,32 @@ function fetchIpLocation() {
                 ad_info: {
                     nation: res.data.country,
                     province: res.data.province,
-                    city: res.data.city,
+                    city: res.data。city，
                     district: res.data.district
                 }
             };
             showWelcome();
+        },
+        error: function (err) {
+            console。error("API请求失败:"， err);  // 如果请求失败
         }
     });
 }
 
 // 展示欢迎语
 function showWelcome() {
-    if (!ipLocation) return;
-    const myLng = GLOBAL_CONFIG.source。welcome。lng * 1;
-    const myLat = GLOBAL_CONFIG.source.welcome.lat * 1;
-    let dist = getDistance(myLng， myLat， ipLocation。location。lng， ipLocation。location。lat);
-    let city = ipLocation.ad_info.city;
+    if (!ipLocation) {
+        console。error("ipLocation为空");
+        return;
+    }
+
+    const myLng = GLOBAL_CONFIG.source.welcome.lng * 1;
+    const myLat = GLOBAL_CONFIG。source。welcome。lat * 1;
+    let dist = getDistance(myLng, myLat, ipLocation.location.lng, ipLocation.location.lat);
+    let city = ipLocation。ad_info。city;
     let province = ipLocation.ad_info.province;
-    let district = ipLocation.ad_info。district;
-    let ip = ipLocation。ip;
+    let district = ipLocation。ad_info.district;
+    let ip = ipLocation.ip;
     let desc = '带我去你的城市逛逛吧！';
 
     // 更正位置展示
@@ -91,7 +102,12 @@ function showWelcome() {
     `;
 
     try {
-        document.getElementById("welcome-info").innerHTML = content;
+        const welcomeElement = document.getElementById("welcome-info");
+        if (welcomeElement) {
+            welcomeElement.innerHTML = content;
+        } else {
+            console.error("未找到元素#welcome-info");
+        }
     } catch (err) {
         console.log("欢迎模块插入失败:", err);
     }
