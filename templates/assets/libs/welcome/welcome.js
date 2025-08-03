@@ -58,10 +58,7 @@ function showWelcome() {
     let desc = '带我去你的城市逛逛吧！';
 
     if (pos === "中国") {
-        let province = ipLocation.ad_info.province || "";
-let city = ipLocation.ad_info.city || "";
-let district = ipLocation.ad_info.district || "";
-pos = province + " " + city + " " + district;
+        pos = (ipLocation.ad_info.province || "") + " " + (ipLocation.ad_info.city || "") + " " + (ipLocation.ad_info.district || "");
         let city = ipLocation.ad_info.city;
         switch (city) {
             case "北京市":
