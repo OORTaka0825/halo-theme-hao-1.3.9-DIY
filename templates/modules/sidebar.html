@@ -1,9 +1,5 @@
-<!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-
 <!-- 侧栏，主要是手机端时会使用 -->
-<div id="sidebar" th:fragment="sidebar">
-
+<div id="sidebar">
     <div id="menu-mask"></div>
     <div id="sidebar-menus">
         <span class="sidebar-menu-item-title">功能</span>
@@ -14,7 +10,7 @@
                 <span>显示模式</span>
             </a>
         </div>
-        <th:block th:if="${not #strings.isEmpty(theme.config.nav.leftMenu)}"
+        <th:block th:if="${not #strings.isEmpty(theme.config.nav.leftMenu) && theme.config.nav.menus.phone_leftMenu}"
                   th:with="leftMenu = ${menuFinder.getByName(theme.config.nav.leftMenu)}">
             <div class="back-menu-list-groups">
                 <div class="back-menu-list-group" th:each="menuItem : ${leftMenu.menuItems}">
@@ -40,7 +36,7 @@
 
             </div>
         </th:block>
-        <th:block th:if="${not #lists.isEmpty(menuFinder.getPrimary().menuItems)}"
+        <th:block th:if="${not #lists.isEmpty(menuFinder.getPrimary().menuItems) && theme.config.nav.menus.phone_menu}"
         >
             <div class="menus_items">
                 <div class="menus_item" th:each="menuItem : ${menuFinder.getPrimary().menuItems}">
@@ -52,8 +48,15 @@
                             <ul class="menus_item_child">
                                 <li th:each="childMenu : ${menuItem.children}">
                                     <a class="site-page child" th:href="@{${childMenu.status.href}}">
-                                        <i th:if="${!#strings.isEmpty(#annotations.getOrDefault(childMenu, 'icon', ''))}"
-                                           th:class="${#annotations.getOrDefault(childMenu, 'icon', '')}"></i>
+                                        <th:block th:if="${theme.config.nav.menus.enable_ali_iconfont_symbol_header}==false">
+                                            <i th:if="${!#strings.isEmpty(#annotations.getOrDefault(childMenu, 'icon', ''))}"
+                                               th:class="${#annotations.getOrDefault(childMenu, 'icon', '')}"></i>
+                                        </th:block>
+                                        <th:block th:if="${theme.config.nav.menus.enable_ali_iconfont_symbol_header}">
+                                            <svg class="ali_icon" aria-hidden="true">
+                                                <use th:href="${#annotations.getOrDefault(childMenu, 'icon','jiewen joe-icon-zuzhijiagou')}"></use>
+                                            </svg>
+                                        </th:block>
                                         <span th:text="${childMenu.status.displayName}"></span>
                                     </a>
                                 </li>
@@ -65,10 +68,10 @@
         </th:block>
         <span class="sidebar-menu-item-title">标签</span>
         <div class="card-widget card-tags card-archives card-webinfo card-allinfo"
-             th:with="tags = ${tagFinder.listAll()}">
+             th:with="tags = ${tagFinder.list(1,theme.config.sidebar.tagQuantity)}">
             <div class="item-headline"></div>
             <div class="card-tag-cloud">
-                <a style="font-size:14.3px;color:#d3d3d3" th:each="tag : ${tags}"
+                <a class="tag-item" style="font-size:1em" th:each="tag,iterStat : ${tags}"
                    th:href="@{${tag.status.permalink}}"
                    th:title="${tag.spec.displayName}">
                     <!-- 角标 -->
@@ -78,4 +81,3 @@
         </div>
     </div>
 </div>
-</html>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org"
+<html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{modules/layouts/layout :: layout(content = ~{::content},htmlType = 'photos',title = ${title + ' | ' + site.title}, head = ~{::head},_title = ${title})}">
 <th:block th:fragment="head">
     <th:block th:replace="~{modules/common/open-graph :: open-graph(_title = ${_title},
@@ -77,6 +77,10 @@
                             </div>
                         </section>
                     </div>
+                    <!-- 分页 -->
+                    <th:block th:with="param_group = ${not #strings.isEmpty(param.group) ? '?group='+param.group : ''}">
+                        <div th:replace="~{modules/widgets/page :: page('/photos',${photos},false,${param_group})}"></div>
+                    </th:block>
                 </th:block>
 
                 <div class="gallery-groups" th:if="${#strings.equals(theme.config.photos.photosStyle, 'one')}">
@@ -103,7 +107,12 @@
                             </div>
                         </section>
                     </div>
+                    <!-- 分页 -->
+                    <th:block th:with="param_group = ${not #strings.isEmpty(param.group) ? '?group='+param.group : ''}">
+                        <div th:replace="~{modules/widgets/page :: page('/photos',${photos},false,${param_group})}"></div>
+                    </th:block>
                 </div>
+
                 <style>
                     .gallery-groups {
                         box-shadow: var(--heo-shadow-border);
@@ -240,7 +249,7 @@
 
         </main>
         <!-- 底部 -->
-        <footer th:replace="~{modules/footer :: footer}"></footer>
+        <footer th:replace="~{modules/footer}"/>
         <!-- 卡片顶部气泡效果 -->
         <script th:if="${theme.config.other.bubbleEnable}" async data-pjax
                 th:src="${assets_link + '/libs/canvas/bubble.js'}"></script>

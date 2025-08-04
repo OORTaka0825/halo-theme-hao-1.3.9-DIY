@@ -7,7 +7,6 @@
             region: '',
             path: location.pathname.replace(/\/page\/\d$/, ""),
             onCommentLoaded: function () {
-                btf.loadLightbox(document.querySelectorAll('#twikoo .tk-content img:not(.tk-owo-emotion)'))
                 typeof hljs === 'object' && hljs.highlightAll()
                 typeof Prism === 'object' && Prism.highlightAll()
                 $("input").focus(function () {
@@ -48,7 +47,7 @@
             setTimeout(runFn, 0)
             return
         }
-        getScript(GLOBAL_CONFIG.source.twikoo.js).then(runFn)
+        getScript(GLOBAL_CONFIG.source.twikoo.min.js).then(runFn)
     }
 
     if ('Twikoo' === 'Twikoo' || !GLOBAL_CONFIG.source.comments.lazyload) {

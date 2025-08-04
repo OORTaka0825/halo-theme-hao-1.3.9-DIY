@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org"
+<html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{modules/layouts/layout :: layout(content = ~{::content}, htmlType = 'moments',title = ${title + ' | ' + site.title}, head = ~{::head}, _title = ${title})}">
 <th:block th:fragment="head">
     <th:block th:replace="~{modules/common/open-graph :: open-graph(_title = ${_title},
@@ -59,9 +59,10 @@
                                                   th:text="${#dates.format(moment.spec.releaseTime,'yyyy-MM-dd')}"></time>
                                         </div>
                                     </div>
-                                    <a class="bber-reply" th:onclick="rightMenuCommentText([[${content.html}]]);"
-                                       data-pjax-state=""> <i class="haofont hao-icon-message"
-                                                              style="font-size: 17px;"></i>
+                                    <a class="bber-reply" th:if="${theme.config.comments.use != 'commentWidget'}"
+                                       th:onclick="rightMenuCommentText([[${content.html}]]);"
+                                       data-pjax-state=""> <i class="haofont hao-icon-chat--fill"
+                                                              style="font-size: 20px;"></i>
                                     </a>
                                 </div>
                             </li>
@@ -71,19 +72,17 @@
                 </div>
                 <div id="bber-tips" style="color: var(--heo-secondtext);">- 只展示最近30条短文 -</div>
                 <script>heo.reflashEssayWaterFall();</script>
-                <hr />
+                <hr th:if="${theme.config.comments.use != 'commentWidget'}" />
                 <!--/* 评论组件 */-->
                 <th:block th:replace="~{modules/comment :: comment(group = 'content.halo.run',
                   kind = 'SinglePage',
                   name = 'moments',
-                  allowComment = true)}" />
-
+                  allowComment = ${theme.config.comments.use != 'commentWidget'})}" />
             </div>
-
 
         </main>
         <!-- 底部 -->
-        <footer th:replace="~{modules/footer :: footer}"></footer>
+        <footer th:replace="~{modules/footer}"/>
         <!-- 卡片顶部气泡效果 -->
         <script th:if="${theme.config.other.bubbleEnable}" async data-pjax
                 th:src="${assets_link + '/libs/canvas/bubble.js'}"></script>
