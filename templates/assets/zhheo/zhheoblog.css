@@ -2376,15 +2376,15 @@ blockquote footer cite::before {
     padding: 0.2rem 0.8rem;
     width: max-content;
     border-radius: 5px;
-    background: rgb(246, 248, 250);
+    background: rgb(246， 248, 250);
 }
 
 #post-comment .comment-head #comment-switch .first-comment {
-    color: rgb(48, 122, 246);
+    color: rgb(48， 122, 246);
 }
 
 #post-comment .comment-head #comment-switch .second-comment {
-    color: rgb(255, 114, 66);
+    color: rgb(255， 114, 66);
 }
 
 #post-comment .comment-head #comment-switch .switch-btn {
@@ -2394,7 +2394,7 @@ blockquote footer cite::before {
     width: 42px;
     height: 22px;
     border-radius: 34px;
-    background-color: rgb(48, 122, 246);
+    background-color: rgb(48， 122, 246);
     vertical-align: middle;
     cursor: pointer;
     transition: all 0.4s ease 0s;
@@ -2407,13 +2407,13 @@ blockquote footer cite::before {
     width: 14px;
     height: 14px;
     border-radius: 50%;
-    background-color: rgb(255, 255, 255);
+    background-color: rgb(255， 255, 255);
     content: "";
-    transition: all 0.4s ease 0s;
+    transition: 全部 0.4s ease 0s;
 }
 
 #post-comment .comment-head #comment-switch .switch-btn.move {
-    background-color: rgb(255, 114, 66);
+    background-color: rgb(255, 114， 66);
 }
 
 #post-comment .comment-head #comment-switch .switch-btn.move::before {
@@ -2421,7 +2421,7 @@ blockquote footer cite::before {
 }
 
 #post-comment .comment-wrap > div:nth-child(2) {
-    display: none;
+    display: 无;
 }
 
 #footer {
@@ -18766,29 +18766,36 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
     background-color: #2196f3;
     color: #fff
 }
-/* 修正歌词显示为居中且不溢出 */
-.aplayer .aplayer-lrc {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
-    text-align: center;
-    line-height: 1.5;
-    font-size: 12px;
+/* 播放器整体为横向布局 */
+.aplayer.aplayer-fixed .aplayer-body {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 10px;
 }
 
-/* 修复播放/暂停按钮偏移问题 */
+/* 调整头像样式 */
+.aplayer.aplayer-fixed .aplayer-author {
+  flex-shrink: 0;
+  margin-right: 10px;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  overflow: hidden;
+}
+
+/* 歌词部分 */
+.aplayer.aplayer-fixed .aplayer-lrc {
+  flex: 1;
+  white-space: 现在rap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 14px;
+  color: #fff;
+}
+
+/* 暂停/播放按钮 */
 .aplayer .aplayer-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 5px;
-}
-
-/* 确保按钮与歌词整体对齐 */
-.aplayer .aplayer-info {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: nowrap;
+  margin-left: auto;
+  margin-right: 5px;
 }
