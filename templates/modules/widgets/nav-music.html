@@ -1,4 +1,7 @@
 <!-- 音乐 -->
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+    
 <div  class="needEndHide" id="nav-music" >
     <a id="nav-music-hoverTips" onclick="heo.musicToggle()" accesskey="m">播放音乐</a>
     <div id="console-music-bg"></div><meting-js th:id="${theme.config.tool.nav_music.id}" th:server="${theme.config.tool.nav_music.server}" type="playlist" mutex="true"
