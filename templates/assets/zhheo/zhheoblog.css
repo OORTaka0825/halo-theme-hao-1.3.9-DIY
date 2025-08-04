@@ -18767,26 +18767,30 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
     color: #fff
 }
 
-/* 🎯 修正歌词在小播放器中超出显示 */
-#nav-music .aplayer.aplayer-fixed.aplayer-narrow .aplayer-lrc {
-  width: calc(100% - 80px);  /* 限制宽度：预留头像+按钮 */
-  left: 40px; /* 从头像右边开始 */
-  right: 40px;
-  text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 13px;
-  line-height: 34px;
-  position: absolute;
-  top: 0;
+/* 修复 APlayer 样式错位问题 */
+.aplayer {
+    max-width: 100% !important;
+    overflow: hidden !important;
+    box-sizing: border-box;
 }
-
-/* 🎯 修正播放按钮错位 */
-#nav-music .aplayer.aplayer-fixed.aplayer-narrow .aplayer-icon {
-  right: 8px !important;
-  top: 50% !important;
-  transform: translateY(-50%);
-  position: absolute !important;
-  z-index: 10;
+.aplayer-info {
+    max-width: 100%;
+    overflow: hidden;
+}
+.aplayer-title, .aplayer-author {
+    white-space: nowrap !important;
+    text-overflow: ellipsis !important;
+    overflow: hidden !important;
+    max-width: 100% !important;
+    display: inline-block !important;
+    vertical-align: middle;
+}
+.aplayer-lrc {
+    max-width: 100% !important;
+    overflow: hidden !important;
+    text-align: center !important;
+}
+.aplayer-controller {
+    margin-left: 0 !important;
+    text-align: center;
 }
