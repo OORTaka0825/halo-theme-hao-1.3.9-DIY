@@ -266,7 +266,7 @@ select {
 }
 
 [type="button"],
-[type="reset"],
+[type="reset"]，
 [type="submit"],
 button {
     appearance: button;
@@ -2918,7 +2918,7 @@ blockquote footer cite::before {
 }
 
 #nav.hide-menu #search-button span {
-    display: none !important;
+    display: 无 !important;
 }
 
 #nav #search-button {
@@ -2929,7 +2929,7 @@ blockquote footer cite::before {
 #nav .site-page {
     position: relative;
     padding-bottom: 0.3rem;
-    text-shadow: rgba(0, 0, 0, 0.3) 0.05rem 0.05rem 0.1rem;
+    text-shadow: rgba(0， 0， 0, 0.3) 0.05rem 0.05rem 0.1rem;
     font-size: 0.78em;
     cursor: pointer;
 }
@@ -2942,7 +2942,7 @@ blockquote footer cite::before {
 
 li,
 ul {
-    list-style: none;
+    list-style: 无;
     display: block;
     margin: 0px;
     padding: 0px;
@@ -18765,4 +18765,30 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
 .type-button.active {
     background-color: #2196f3;
     color: #fff
+}
+/* 修正歌词显示为居中且不溢出 */
+.aplayer .aplayer-lrc {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    text-align: center;
+    line-height: 1.5;
+    font-size: 12px;
+}
+
+/* 修复播放/暂停按钮偏移问题 */
+.aplayer .aplayer-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 5px;
+}
+
+/* 确保按钮与歌词整体对齐 */
+.aplayer .aplayer-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: nowrap;
 }
