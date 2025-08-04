@@ -1,5 +1,8 @@
+<!DOCTYPE html>
+<!-- 控制台，右上角点击的时候会显示 -->
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <!-- TODO 控制台功能 -->
-<div id="console" >
+<div id="console" th:fragment="console">
   <div class="close-btn" onclick="heo.hideConsole()" href="javascript:void(0);">
     <i class="haofont hao-icon-circle-xmark"></i>
   </div>
@@ -50,10 +53,11 @@
           <div class="author-content-item-tips">标签</div>
           <span class="author-content-item-title">寻找感兴趣的领域</span>
         </div>
-        <div class="card-tag-cloud" th:with="tags = ${tagFinder.list(1,theme.config.sidebar.tagQuantity)}">
+        <div class="card-tag-cloud" th:with="tags = ${tagFinder.listAll()}, tagQuantity = ${#conversions.convert(theme.config.sidebar.tagQuantity, 'java.lang.Integer')}">
           <a style="font-size:1em;color:#d3d3d3"
              th:each="tag,iterStat : ${tags}"
-             th:href="@{${tag.status.permalink}}">
+             th:href="@{${tag.status.permalink}}"
+             th:if="${tagQuantity >= 0 && iterStat.index < tagQuantity || tagQuantity < 0}">
             [[${tag.spec.displayName}]]<sup th:text="${tag.status.visiblePostCount}"></sup>
           </a>
         </div>
@@ -61,7 +65,7 @@
       <!-- 底部展示时间归档 -->
       <div class="console-card history" onclick="heo.hideConsole()">
         <div class="item-headline"><i class="fas fa-archive"></i><span>文章</span></div>
-        <ul class="card-archive-list" th:with="archives = ${postFinder.archives(1,0)}">
+        <ul class="card-archive-list" th:with="archives = ${postFinder.archives(1,1000)}">
           <th:block th:each="archive : ${archives.items}">
             <li class="card-archive-list-item" th:each="month,monthStat : ${archive.months}">
               <a class="card-archive-list-link" th:href="@{'/archives/'+${archive.year}+'/'+${month.month}}"
@@ -111,13 +115,13 @@
   <div class="button-group">
     <div class="console-btn-item">
       <a class="darkmode_switchbutton" href="javascript:void(0);" onclick="navFn.switchDarkMode();" rel="external nofollow"
-         title="显示模式切换"><i class="haofont hao-icon-moon-clear-fill" style="font-size:1rem"></i>
+         title="显示模式切换"><i class="haofont hao-icon-moon" style="font-size:1rem"></i>
       </a>
     </div>
     <div class="console-btn-item" id="consoleHideAside" onclick="heo.hideAsideBtn()" title="边栏显示控制"><a
             class="asideSwitch" data-pjax-state=""><i class="haofont hao-icon-arrows-left-right"></i></a></div>
     <div class="console-btn-item on" id="consoleCommentBarrage" onclick="heo.switchCommentBarrage()" title="热评开关"><a
-            class="commentBarrage" data-pjax-state=""><i class="haofont hao-icon-chat--fill"></i></a></div>
+            class="commentBarrage" data-pjax-state=""><i class="haofont hao-icon-message"></i></a></div>
 
     <!--<div class="console-btn-item" id="consoleKeyboard" onclick="heo.keyboardToggle()" title="快捷键开关"><a-->
     <!--        class="keyboard-switch"><i class="fa-duotone fa-keyboard"></i></a>-->
@@ -127,10 +131,12 @@
     <!--</div>-->
     <div th:if="${theme.config.tool.nav_music.nav_musicEnable}" class="console-btn-item" id="consoleMusic" onclick="heo.musicToggle()" title="音乐开关">
       <a class="music-switch" data-pjax-state="">
-        <i class="haofont hao-icon-disc-fill"></i>
+        <i class="haofont hao-icon-music"></i>
       </a>
     </div>
   </div>
   <div class="console-mask" href="javascript:void(0);" onclick="heo.hideConsole()" rel="external nofollow">
   </div>
 </div>
+
+</html>

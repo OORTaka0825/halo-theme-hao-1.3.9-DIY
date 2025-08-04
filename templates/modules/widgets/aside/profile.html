@@ -30,7 +30,7 @@
         <div class="banner-button-group">
             <a class="banner-button" href="/about">
                 <i class="haofont hao-icon-circle-arrow-right"></i>
-                <span class="banner-button-text">了解更多</span>
+                <span class="banner-button-text">了解我吧</span>
             </a>
         </div>
 
@@ -40,7 +40,7 @@
 
             <a class="social-icon" rel="external nofollow" target="_blank" th:each="socialMedia : ${socialMedias}"
                th:href="${socialMedia.url}" th:title="${socialMedia.name}">
-                <i th:class="${socialMedia.icon}"></i>
+                <i class="haofont " th:classappend="${socialMedia.icon}"></i>
             </a>
         </div>
 
@@ -79,9 +79,9 @@
             }
 
             #aside-content .card-info .card-info-social-icons i:hover {
-                background: var(--heo-white-op);
-                transform: scale(1.1);
-                color: var(--heo-white);
+                background: var(--heo-secondbg);
+                transform: scale(0.97);
+                color: var(--heo-main);
                 box-shadow: none;
             }
 
@@ -169,7 +169,7 @@
                     <a class="social-icon" rel="external nofollow" target="_blank"
                        th:each="socialMedia : ${socialMedias}" th:href="${socialMedia.url}"
                        th:title="${socialMedia.name}">
-                        <i th:class="${socialMedia.icon}"></i>
+                        <i class="haofont " th:classappend="${socialMedia.icon}"></i>
                     </a>
                 </div>
             </div>
@@ -192,12 +192,7 @@
                 position: absolute;
                 opacity: 1;
                 transition: .3s;
-                border: 5px solid var(--heo-white);
-                overflow: hidden
-            }
-
-            .page #aside-content .card-info img.avatar-img {
-                border-color: var(--heo-card-bg)
+                border: 5px solid var(--heo-white)
             }
 
             .author-info__top-group {
@@ -240,10 +235,6 @@
                 align-items: center
             }
 
-            a.author-info__bottom-group-left:hover {
-                opacity: .8
-            }
-
             #aside-content .card-info .card-info-social-icons {
                 margin: 0;
                 display: flex;
@@ -252,7 +243,6 @@
                 flex-wrap: wrap;
                 cursor: pointer
             }
-
 
             #aside-content .card-info .card-info-social-icons i:hover {
                 transform: rotate(540deg);
@@ -277,20 +267,10 @@
             }
 
             #aside-content .card-info .card-info-social-icons i:hover {
-                background: var(--heo-white);
+                background: var(--heo-secondbg);
                 transform: scale(1.1);
                 color: var(--heo-main);
                 box-shadow: none
-            }
-
-            [data-theme=dark] .page #aside-content .card-info .card-info-social-icons i {
-                background: var(--heo-black-op);
-                color: var(--heo-card-bg)
-            }
-
-            [data-theme=dark] .page #aside-content .card-info .card-info-social-icons i:hover {
-                background: var(--heo-card-bg);
-                color: var(--heo-fontcolor)
             }
 
             #aside-content .card-info .banner-button {
@@ -305,18 +285,9 @@
                     color: var(--heo-white)
                 }
 
-                [data-theme=dark] .page #aside-content .card-info .card-info-social-icons i {
-                    color: var(--heo-card-bg)
+                [data-theme=dark] #aside-content .card-info .card-info-social-icons i {
+                    color: var(--heo-white)
                 }
-            }
-
-            #aside-content .card-info .card-info-data>.card-info-data-item:hover {
-                background: var(--heo-post-blockquote-bg);
-                transform: scale(.97)
-            }
-
-            #aside-content>div.card-widget.card-info>div.card-content>div.card-info-data>.card-info-data-item:hover>a>div.headline,#aside-content>div.card-widget.card-info>div.card-content>div.card-info-data>.card-info-data-item:hover>a>div.length-num {
-                color: var(--heo-blue)
             }
 
             .author-info__description_group {
@@ -363,14 +334,9 @@
             }
 
             div#author-info__sayhi:hover {
-                background: var(--heo-white);
-                color: var(--heo-main);
+                background: var(--heo-card-bg);
+                color: var(--heo-fontcolor);
                 transform: scale(1.1)
-            }
-
-            [data-theme=dark] .page div#author-info__sayhi {
-                background: var(--heo-black-op);
-                color: var(--heo-black)
             }
 
             #aside-content .card-info .author-info__name {
@@ -380,10 +346,6 @@
                 font-size: 20px;
                 line-height: 1;
                 margin-bottom: 5px
-            }
-
-            .page #aside-content .card-info .author-info__name,.page .author-info__desc {
-                color: var(--heo-card-bg)
             }
 
             .author-info__desc {
@@ -397,22 +359,7 @@
                 line-height: 1.38;
                 margin: .3rem 0;
                 text-align: justify;
-                color: var(--heo-white);
-                opacity: 1
-            }
-
-            .page .author-info__description {
-                color: var(--heo-card-bg)
-            }
-
-            .author-info__description b {
-                color: var(--heo-white);
-                opacity: 1
-            }
-
-            .page .author-info__description b {
-                color: var(--heo-card-bg);
-                opacity: 1
+                color: rgba(255, 255, 255, .8)
             }
 
             .avatar-sticker {
@@ -426,14 +373,10 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                transition: .3s ease-out .2s;
+                transition: .3s .2s;
                 transform: scale(1);
                 background: var(--heo-white);
                 border-radius: 50%
-            }
-
-            .page .avatar-sticker {
-                background: var(--heo-card-bg)
             }
 
             .avatar-sticker img {
@@ -467,3 +410,5 @@
     </th:block>
 
 </div>
+
+</html>
