@@ -18794,3 +18794,58 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
     margin-left: 0 !important;
     text-align: center;
 }
+
+/* 修正播放器容器的布局问题 */
+#nav-music.needEndHide.playing .aplayer {
+  width: 100% !important;
+  max-width: 500px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+}
+
+/* 调整 info 区域 */
+#nav-music .aplayer-info {
+  flex: 1;
+  overflow: hidden;
+}
+
+/* 歌名与作者 */
+#nav-music .aplayer-music {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}
+#nav-music .aplayer-title,
+#nav-music .aplayer-author {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  line-height: 1.2;
+}
+
+/* 歌词容器 */
+#nav-music .aplayer-lrc {
+  font-size: 12px;
+  line-height: 1.2;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* 控制按钮对齐 */
+#nav-music .aplayer-controller {
+  display: flex;
+  align-items: center;
+  margin-left: 8px;
+}
+
+/* 最外层播放器限制宽度和高度 */
+#nav-music .aplayer {
+  border-radius: 30px;
+  height: 46px !important;
+  box-sizing: border-box;
+}
