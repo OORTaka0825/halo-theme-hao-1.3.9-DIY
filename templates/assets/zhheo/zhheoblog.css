@@ -5642,12 +5642,12 @@ html {
 
 /* 音乐播放器 */
 
-/* .aplayer.aplayer-narrow .aplayer-body, */
-/* .aplayer.aplayer-narrow .aplayer-pic { */
-/*     height: 66px; */
-/*     width: 66px; */
-/* } */
-/*  */
+.aplayer.aplayer-narrow .aplayer-body,
+.aplayer.aplayer-narrow .aplayer-pic {
+    height: 66px;
+    width: 66px;
+}
+
 /* 导航栏音乐 */
 @media screen and (max-width: 1200px) {
     #nav-music {
@@ -5781,9 +5781,9 @@ html {
 }
 
 #nav-music
-/* .aplayer */
-/* .aplayer-info */
-/* .aplayer-controller */
+.aplayer
+.aplayer-info
+.aplayer-controller
 .aplayer-bar-wrap:hover
 .aplayer-bar
 .aplayer-played
@@ -5818,13 +5818,13 @@ html {
     display: none;
 }
 
-/* #nav-music .aplayer .aplayer-body { */
-/*     position: relative; */
-/*     display: flex; */
-/*     align-items: center; */
-/* } */
-/*  */
-/* #nav-music .aplayer-list { */
+#nav-music .aplayer .aplayer-body {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+#nav-music .aplayer-list {
     display: none;
 }
 
@@ -18767,45 +18767,26 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
     color: #fff
 }
 
-/* ✅ Twikoo 播放器样式重构 - 保证歌词、按钮、头像对齐 */
-.aplayer.aplayer-fixed {
-  max-width: 100%;
-  border-radius: 999px;
-  background: rgba(255, 165, 0, 0.85); /* 原主题橙黄色 */
-  color: #fff;
-}
-
-.aplayer.aplayer-fixed .aplayer-body {
-  display: flex !important;
-  align-items: center;
-  padding: 6px 12px;
-}
-
-.aplayer.aplayer-fixed .aplayer-pic {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  overflow: hidden;
-  flex-shrink: 0;
-  margin-right: 10px;
-}
-
-.aplayer.aplayer-fixed .aplayer-info {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex: 1;
-}
-
-.aplayer.aplayer-fixed .aplayer-lrc {
+/* 🎯 修正歌词在小播放器中超出显示 */
+#nav-music .aplayer.aplayer-fixed.aplayer-narrow .aplayer-lrc {
+  width: calc(100% - 80px);  /* 限制宽度：预留头像+按钮 */
+  left: 40px; /* 从头像右边开始 */
+  right: 40px;
+  text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   font-size: 13px;
-  color: #fff;
+  line-height: 34px;
+  position: absolute;
+  top: 0;
 }
 
-.aplayer .aplayer-icon {
-  margin-left: auto;
-  margin-right: 5px;
+/* 🎯 修正播放按钮错位 */
+#nav-music .aplayer.aplayer-fixed.aplayer-narrow .aplayer-icon {
+  right: 8px !important;
+  top: 50% !important;
+  transform: translateY(-50%);
+  position: absolute !important;
+  z-index: 10;
 }
