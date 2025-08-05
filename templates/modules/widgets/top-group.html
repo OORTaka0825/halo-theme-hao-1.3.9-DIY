@@ -1,5 +1,8 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <!-- 推荐文章 -->
-<div class="topGroup"  th:with='topGroupPosts = ${postFinder.list(1,6)},
+<div class="topGroup" th:fragment="top-group" th:with='topGroupPosts = ${postFinder.list(1,6)},
     postRandomImg=${#strings.contains(theme.config.layout.postRandomImg,"?") ? theme.config.layout.postRandomImg+"&" : theme.config.layout.postRandomImg+"?"}'
 >
     <div class="recent-post-item"
@@ -71,9 +74,9 @@
         <div class="banner-button-group">
             <a class="banner-button" onclick="window.event.cancelBubble=!0;heo.hideTodayCard()">
                 <i class="haofont hao-icon-circle-plus"></i>
-                <span class="banner-button-text">更多推荐</span>
+                <span class="banner-button-text">推荐文章</span>
             </a>
         </div>
     </div>
 </div>
-
+</html>

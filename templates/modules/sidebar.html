@@ -1,5 +1,9 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <!-- 侧栏，主要是手机端时会使用 -->
-<div id="sidebar">
+<div id="sidebar" th:fragment="sidebar">
+
     <div id="menu-mask"></div>
     <div id="sidebar-menus">
         <span class="sidebar-menu-item-title">功能</span>
@@ -10,7 +14,7 @@
                 <span>显示模式</span>
             </a>
         </div>
-        <th:block th:if="${not #strings.isEmpty(theme.config.nav.leftMenu) && theme.config.nav.menus.phone_leftMenu}"
+        <th:block th:if="${not #strings.isEmpty(theme.config.nav.leftMenu)}"
                   th:with="leftMenu = ${menuFinder.getByName(theme.config.nav.leftMenu)}">
             <div class="back-menu-list-groups">
                 <div class="back-menu-list-group" th:each="menuItem : ${leftMenu.menuItems}">
@@ -36,7 +40,7 @@
 
             </div>
         </th:block>
-        <th:block th:if="${not #lists.isEmpty(menuFinder.getPrimary().menuItems) && theme.config.nav.menus.phone_menu}"
+        <th:block th:if="${not #lists.isEmpty(menuFinder.getPrimary().menuItems)}"
         >
             <div class="menus_items">
                 <div class="menus_item" th:each="menuItem : ${menuFinder.getPrimary().menuItems}">
@@ -61,12 +65,11 @@
         </th:block>
         <span class="sidebar-menu-item-title">标签</span>
         <div class="card-widget card-tags card-archives card-webinfo card-allinfo"
-             th:with="tags = ${tagFinder.listAll()}, tagQuantity = ${#conversions.convert(theme.config.sidebar.tagQuantity, 'java.lang.Integer')}">
+             th:with="tags = ${tagFinder.listAll()}">
             <div class="item-headline"></div>
             <div class="card-tag-cloud">
-                <a class="tag-item" style="font-size:1em" th:each="tag,iterStat : ${tags}"
+                <a style="font-size:14.3px;color:#d3d3d3" th:each="tag : ${tags}"
                    th:href="@{${tag.status.permalink}}"
-                   th:if="${tagQuantity >= 0 && iterStat.index < tagQuantity || tagQuantity < 0}"
                    th:title="${tag.spec.displayName}">
                     <!-- 角标 -->
                     [[${tag.spec.displayName}]]<sup th:text="${tag.status.visiblePostCount}"></sup>
@@ -75,3 +78,4 @@
         </div>
     </div>
 </div>
+</html>

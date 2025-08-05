@@ -1,3 +1,7 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+
 <th:block th:fragment="nav-menu-recursion(menuItem)">
     <!-- 有子菜单则显示子菜单 -->
     <th:block th:if="${not #lists.isEmpty(menuItem.children)}">
@@ -42,3 +46,6 @@
 
     </div>
 </div>
+
+
+</html>
