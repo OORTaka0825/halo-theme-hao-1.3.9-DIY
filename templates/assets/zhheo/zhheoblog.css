@@ -6478,7 +6478,7 @@ a.console_switchbutton {
 }
 
 .post-bg #nav #site-name {
-    color: var(--heo-white);
+    color: var(--heo-fontcolor);
     transition: 0s;
 }
 
