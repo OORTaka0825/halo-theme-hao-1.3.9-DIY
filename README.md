@@ -1,6 +1,6 @@
 <div align="center">
 <!-- 主题Logo -->
-<img width="100px" src="https://liuzhihang.com/upload/logo.png">
+<img width="100px" src="https://api.minio.yyds.pink/moony/files/2024/04/halo-theme-hao-sbxqdmuv.png">
 <!-- 主题名称 -->
 <h1>Halo-Theme-Hao</h1>
 <!-- 主题徽章 -->
@@ -24,10 +24,10 @@
 <table>
   <tr>
     <td>
-      <img src="https://liuzhihang.com/upload/hao_white.jpg"/>
+      <img src="https://redirect.cnkj.site:8099/bKlEJK.webp?type=blog"/>
     </td>
     <td>
-      <img src="https://liuzhihang.com/upload/hao_dark.jpg"/>
+      <img src="https://redirect.cnkj.site:8099/bKlEJK.webp?type=blog"/>
     </td>
   </tr>
 </table>
@@ -36,13 +36,10 @@
 
 |    站点名称    |          站点地址           |
 |:----------:|:-----------------------:|
-|   程序员小航    | https://liuzhihang.com  |
 |     流殃     |  https://shyblog.world  |
 |     羡羡     | https://www.hydsb0.com/ |
-|    困困鱼     |  https://kunkunyu.com   |
 |  Top John  |   https://op-lab.top    |
 |   Roozen   |   https://roozen.top    |
-|   Lanbin   | https://lib.lanbin.top  |
 | Carol`s 小屋 | https://blog.cnkj.site  |
 
 ## 👋 简介
@@ -61,6 +58,7 @@
 4. 如果群友也解决不了，再考虑提ISSUE！！！
 5. `1.3.1`及以上版本需要`Halo`版本>=`2.8.0`
 6. **若安装主题后出现500错误，请到主题设置页面，将每个设置项都保存一下！！！**
+7. **`beta`版本主题必须使用`本地资源`，正式版本才会存在`在线资源`**
 
 ## 🛠 安装
 
@@ -188,7 +186,6 @@ This project follows the [all-contributors](https://github.com/all-contributors/
 <a href="https://www.jetbrains.com/?from=Toolkit"><img src="https://cdn.jsdelivr.net/gh/liuzhihang/oss/pic/article/jetbrains-logo-MrNwcp.png" width="10%" height="10%"></a>
 <a href="https://www.jetbrains.com/?from=Toolkit"><img src="https://cdn.jsdelivr.net/gh/liuzhihang/oss/pic/article/idea-logo-XpnqgG.png" width="10%" height="10%"> </a>
 <a href="https://www.jetbrains.com/?from=Toolkit"><img src="https://logonoid.com/images/webstorm-logo.png" width="10%" height="10%"> </a>
-
 
 
 
