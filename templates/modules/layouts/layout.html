@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" th:fragment="layout(content, htmlType, title, head)" xmlns:th="http://www.thymeleaf.org"
+<html lang="en" th:fragment="layout(content, htmlType, title)" xmlns:th="http://www.thymeleaf.org"
       th:with="assets_link=${theme.config.other.staticResource.use == 'onmicrosoft' ? 'https://npm.onmicrosoft.cn/hao-theme-static@' + theme.spec.version +'/templates/assets' :
       theme.config.other.staticResource.use == 'cbd' ? 'https://cdn.cbd.int/hao-theme-static@' + theme.spec.version +'/templates/assets' :
       theme.config.other.staticResource.use == 'custom' ? theme.config.other.staticResource.cdn_link : #theme.assets('/')},
@@ -14,34 +14,103 @@
     <th:block th:replace="~{modules/head :: head(htmlType = ${htmlType})}"/>
     <link th:if="${#strings.equals(theme.config.comments.use, 'Waline')
     && not #strings.isEmpty(theme.config.comments.walines.serverURL)}"
-      rel="stylesheet" th:href="${not #strings.isEmpty(theme.config.comments.walines.walinesCss) ? theme.config.comments.walines.walinesCss : 'https://cdn.cbd.int/@waline/client@2.15.7/dist/waline.css' }">
+          rel="stylesheet"
+          th:href="${not #strings.isEmpty(theme.config.comments.walines.walinesCss) ? theme.config.comments.walines.walinesCss : 'https://cdn.cbd.int/@waline/client@2.15.7/dist/waline.css' }">
     <!--  解决 katex pjax问题 -->
-    <script th:if="${pluginFinder.available('plugin-katex')}" defer="" src="/plugins/plugin-katex/assets/static/katex.min.js"></script>
+    <script th:if="${pluginFinder.available('plugin-katex')}" defer=""
+            src="/plugins/plugin-katex/assets/static/katex.min.js"></script>
     <script th:src="${assets_link + '/js/custom.js' + theme_version}"></script>
     <th:block th:if="${head != null}">
-        <th:block th:replace="${head}" />
+        <th:block th:replace="${head}"/>
     </th:block>
+
 </head>
 
 <body>
 
-<!-- loading 页面 -->
-<th:block th:replace="~{modules/loading-box}"/>
-
-<!-- 网站背景 -->
-<div id="web_bg"></div>
-
-<!-- 网站背景 -->
-<div id="an_music_bg"></div>
+    <!-- loading 页面 -->
+    <th:block th:replace="~{modules/loading-box}"/>
+    
+    <!-- 网站背景 -->
+    <div id="web_bg">
+        <div th:if="${theme.config.top.global_background.enable_global_background_img}">
+            <img th:if="${theme.config.top.global_background.enable_global_background_above_video == false}"
+                 class="global_background_img"
+                 th:src="${theme.config.top.global_background.global_background_img}"
+            />
+            <video th:if="${theme.config.top.global_background.enable_global_background_above_video}"
+                   class="index-video"
+                   id="index-video"
+                   autoplay=""
+                   th:src="${theme.config.top.global_background.global_background_video}"
+                   loop=""
+                   muted=""
+                   playsinline=""
+                   webkit-playsinline=""
+                   style="display:block;object-fit:cover;width:100%;height:100%;pointer-events:none;">
+            </video>
+        </div>
+    </div>
+    
+    <th:block th:if="${theme.config.top.global_background.enable_global_background_img}">
+        <style>
+            @media screen and (min-width: 1300px) {
+                .global_background_img {
+                    width: 100%;
+                    height: 100%;
+                    top: 0;
+                    left: 0;
+                    opacity: 1;
+                    position: fixed;
+                    z-index: -999;
+                    background: var(--heo-background);
+                    background-attachment: fixed;
+                    background-repeat: no-repeat;
+                    background-size: cover;
+                }
+            }
+            
+            @media screen and (max-width: 1300px) {
+                .global_background_img {
+                    display: none;
+                }
+            }
+        
+        </style>
+    </th:block>
+    
+    <script th:inline="javascript">
+        
+        function toRandomPost() {
+            // 随机跳转首页的一篇文章
+            // 后续改成跳转全站的文章，可以从 sitemap 中获取所有文章
+            let posts = [[${posts}]];
+            
+            let datum = posts.total < posts.size ? posts.total : posts.size;
+            
+            let number = Math.floor(Math.random() * datum);
+            
+            let post = posts.items[number];
+            
+            // 当前窗口打开
+            //window.location.href = post.status.permalink;
+            pjax.loadUrl(post.status.permalink)
+            // window.open(post.status.permalink);
+        }
+    
+    </script>
+    
+    <!-- 网站背景 -->
+    <div id="an_music_bg"></div>
 
 <!-- 控制台 -->
-<div th:replace="~{modules/widgets/console}"/>
+<div th:replace="~{modules/widgets/console :: console}"></div>
 
-<div th:replace="~{modules/sidebar}"/>
+<div th:replace="~{modules/sidebar :: sidebar}"></div>
 
 <!-- 左下角音乐 -->
 <th:block th:if="${theme.config.tool.nav_music.nav_musicEnable}" >
-    <div  th:replace="~{modules/widgets/nav-music}"/>
+    <div  th:replace="~{modules/widgets/nav-music :: nav-music}"></div>
 </th:block>
 
 <!-- 内容 -->
@@ -49,40 +118,25 @@
 
 
 <!-- todo 右下角悬浮操作按钮 -->
-<th:block th:replace="~{modules/widgets/rightside}"/>
+<th:block th:replace="~{modules/common/rightside :: rightside}"></th:block>
 
 
-<div th:replace="~{modules/widgets/right-menu}"/>
+<div th:replace="~{modules/right-menu :: right-menu}"></div>
 
 <div>
     <script th:src="${assets_link + '/js/utils.js' + theme_version}"></script>
-    <script th:src="${assets_link + '/js/halo.js' + theme_version}"></script>
     <script th:src="${assets_link + '/js/main.js' + theme_version}"></script>
     <script charset="utf-8" data-pjax th:src="${assets_link + '/zhheo/blogex.js' + theme_version}"></script>
     <script th:src="${assets_link + '/js/tw_cn.js' + theme_version}"></script>
-    <!-- https://instant.page/ 网站预加载， 放在 </body> 之前 -->
-    <script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/instant.page/5.1.0/instantpage.min.js" type="module"></script>
+    <!-- /themes/theme-hao/assets/libs/ 网站预加载， 放在 <script src="/themes/theme-hao/assets/libs/welcome/welcome.js"></script>
+</body> 之前 -->
+    <script src="/themes/theme-hao/assets/libs/instantpage.min.js" type="module"></script>
 
     <script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/vanilla-lazyload/17.3.1/lazyload.iife.min.js"></script>
 
-    <!-- 右下角通知 https://www.polonel.com/snackbar/ -->
+    <!-- 右下角通知 /themes/theme-hao/assets/libs/ -->
     <!-- todo head 中有它的 css，应该可以写一块，并改成后台可配置的功能，代码中应该还有他的 js -->
-    <script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/node-snackbar/0.1.16/snackbar.min.js"></script>
-
-    <div class="js-pjax">
-        <!-- 动态标题 -->
-        <script th:replace="~{modules/common/diytitle}"/>
-    </div>
-
-    <!-- 评论 -->
-    <th:block th:if="${theme.config.comments.use!='commentWidget' && theme.config.comments.commentsEnable }"
-              th:with="use = ${theme.config.comments.use}">
-        <th:block th:replace="~{'modules/comment/' + ${use}}"></th:block>
-        <script th:if="${theme.config.comments.visitorMail.visitorMailEnable}">var visitorMail = "[(${theme.config.comments.visitorMail.mail})]";</script>
-    </th:block>
-
-    <!--音乐-->
-    <script>var meting_api = "[(${theme.config.tool.nav_music.meting_api})]"; </script>
+    <script src="/themes/theme-hao/assets/libs/snackbar.min.js"></script>
 
     <!-- 深色模式下添加粒子效果canvas -->
     <canvas th:if="${theme.config.style.universe}" id="universe" width="1312" height="880"></canvas>
@@ -92,6 +146,12 @@
     <!-- 应该是文章页分享使用 -->
     <script data-pjax src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/qrcodejs/1.0.0/qrcode.min.js"></script>
 
+    <!-- 评论 -->
+    <th:block th:if="${theme.config.comments.use!='commentWidget' && theme.config.comments.commentsEnable }"
+              th:with="use = ${theme.config.comments.use}">
+        <th:block th:replace="~{'modules/comment/' + ${use}}"></th:block>
+        <script th:if="${theme.config.comments.visitorMail.visitorMailEnable}">var visitorMail = "[(${theme.config.comments.visitorMail.mail})]";</script>
+    </th:block>
     <!--  https://raphamorim.io/waterfall.js/  应该是这个 还有相关的 js 代码 是否可以调整-->
     <script th:src="${assets_link + '/libs/waterfall/waterfall.min.js'}"></script>
 
@@ -100,6 +160,9 @@
     <script th:src="${assets_link + '/libs/fast-average-color/index.browser.min.js'}"></script>
 
     <script th:src="${assets_link + '/libs/view-image/view-image.min.js'}"></script>
+
+    <!--音乐-->
+    <script>var meting_api = "[(${theme.config.tool.nav_music.meting_api})]"; </script>
 
     <link rel="stylesheet" href="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/aplayer/1.10.1/APlayer.min.css" media="all" onload="this.media='all'">
 
@@ -110,7 +173,7 @@
     <script th:src="${assets_link + '/libs/pjax/pjax.min.js'}"></script>
 
     <!-- swiper 在瞬间滚动时会使用 -->
-    <script th:if="${theme.config.top.moment}" data-pjax  src="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/Swiper/6.6.2/swiper-bundle.min.js"></script>
+    <script th:if="${theme.config.top.moment}" data-pjax  src="/themes/theme-hao/assets/libs/swiper-bundle.min.js"></script>
 
     <!-- 右键菜单 -->
     <script th:if="${theme.config.tool.rightMenu.rightMenuEnable}" th:src="${assets_link + '/zhheo/rightmenu.js'}"></script>
@@ -124,21 +187,29 @@
              th:src="${assets_link + '/zhheo/commentBarrage.js'}"></script>
 
     <!-- Tocbot 目录生成 start -->
-    <th:block th:replace="~{modules/common/toc-bot}"/>
+    <th:block th:replace="~{modules/common/toc-bot :: toc-bot}"></th:block>
 
     <!-- 51统计 -->
-    <th:block th:replace="~{modules/common/51-la}"/>
+    <th:block th:replace="~{modules/common/51-la :: 51-la}"></th:block>
 
     <!--官方评论插件js-->
     <script th:if="${pluginFinder.available('PluginCommentWidget')}" src="/plugins/PluginCommentWidget/assets/static/comment-widget.iife.js"></script>
 
+    <div class="js-pjax">
+        <!-- 动态标题 -->
+        <script th:replace="~{modules/common/diytitle :: diytitle}"></script>
+    </div>
+
     <script th:if="${theme.config.envelope_comment.enable_danmu}" th:src="${assets_link + '/libs/twikoo/easy-Danmaku.min.js'}" id="Danmaku"></script>
+
+
 
     <script>
         let pjaxSelectors = ['title', '#config-diff', '#body-wrap', '#rightside-config-hide', '#rightside-config-show', '.js-pjax','#site-config']
 
-        pjaxSelectors.unshift('meta[property="og:type"]','meta[property="og:image"]', 'meta[property="og:title"]', 'meta[property="og:url"]', 'meta[property="og:description"]'
-                , 'meta[name="twitter:title"]', 'meta[name="twitter:url"]', 'meta[name="twitter:description"]', 'meta[name="twitter:image"]')
+        if (false) {
+            pjaxSelectors.unshift('meta[property="og:image"]', 'meta[property="og:title"]', 'meta[property="og:url"]')
+        }
 
         var pjax = new Pjax({
             elements: 'a:not([target="_blank"])',
@@ -224,6 +295,10 @@
 
 <script data-pjax="">
 
+    if ([[${ theme.config.other.loadingBoxs.loadingBoxEnable }]]) {
+        // 移除加载动画
+        removeLoading();
+    }
     //页脚友联
     GLOBAL_CONFIG.isFriendLinksInFooter && heo.addFriendLinksInFooter()
     //音乐页面切换歌曲调用
@@ -242,6 +317,7 @@
     }
 
 </script>
+<script src="/themes/theme-hao/assets/libs/welcome/welcome.js"></script>
 </body>
 
 </html>
