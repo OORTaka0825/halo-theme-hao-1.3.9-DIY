@@ -98,9 +98,9 @@
 <div id="an_music_bg"></div>
 
 <!-- 控制台 -->
-<div th:replace="~{modules/widgets/console :: console}"></div>
+<div th:replace="~{modules/widgets/console}"/>
 
-<div th:replace="~{modules/sidebar :: sidebar}"></div>
+<div th:replace="~{modules/sidebar}"/>
 
 <!-- 左下角音乐 -->
 <th:block th:if="${theme.config.tool.nav_music.nav_musicEnable}">
@@ -112,7 +112,7 @@
 
 
 <!-- todo 右下角悬浮操作按钮 -->
-<th:block th:replace="~{modules/common/rightside :: rightside}"></th:block>
+<th:block th:replace="~{modules/widgets/rightside}"/>
 
 
 <div th:replace="~{modules/right-menu :: right-menu}"></div>
