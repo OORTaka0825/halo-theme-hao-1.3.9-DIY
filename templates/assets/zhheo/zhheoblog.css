@@ -168,6 +168,11 @@ i.haofont {
     text-decoration: none
 }
 
+#runtimeTextTip {
+    color: #22a6c9 !important;
+}
+
+
 /* 旧版css */
 html {
     line-height: 1.15;
