@@ -773,7 +773,7 @@ body {
     position: relative;
     min-height: 100%;
     background: var(--heo-background);
-    color: var(--heo-fontcolor);
+    color: #307af6;
     font-size: var(--global-font-size);
     font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei";
     line-height: 2;
