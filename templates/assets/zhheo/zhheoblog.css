@@ -784,7 +784,8 @@ body {
 /* ——白天只改正文颜色—— */
 /* 情况1：data-theme 挂在 html 上 */
 html[data-theme='light'] body { color: #22a6c9; }
-
+/* 情况2：data-theme 挂在 body 上 */
+body[data-theme='light'] { color: #22a6c9; }
 
 /* ——夜晚显式设回你想要的颜色（或让它继承变量）—— */
 html[data-theme='dark'] body { color: inherit; }      /* 或改成 #fff 等 */
