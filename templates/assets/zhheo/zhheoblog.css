@@ -51,7 +51,7 @@
     --heo-yellow: #c28b00;
     --heo-yellow-op: #d99c001a;
     --heo-orange: #e38100;
-    --heo-fontcolor: #363636;
+    --heo-fontcolor: #26aacd;
     --heo-background: #f7f9fe;
     --heo-reverse: #000;
     --heo-maskbg: rgba(255, 255, 255, 0.6);
@@ -773,7 +773,7 @@ body {
     position: relative;
     min-height: 100%;
     background: var(--heo-background);
-    color: #40c0e2;
+    color: var(--heo-fontcolor);
     font-size: var(--global-font-size);
     font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei";
     line-height: 2;
