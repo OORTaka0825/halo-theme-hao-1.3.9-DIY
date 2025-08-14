@@ -168,10 +168,10 @@ i.haofont {
     text-decoration: none
 }
 
+/* 白天模式下运行时间区域字体颜色（#runtimeTextTip）改为蓝色 */
 html[data-theme='light'] #runtimeTextTip {
     color: #22a6c9 !important;
 }
-
 
 /* 旧版css */
 html {
