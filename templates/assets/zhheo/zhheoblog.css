@@ -168,7 +168,7 @@ i.haofont {
     text-decoration: none
 }
 
-#runtimeTextTip {
+html[data-theme='light'] #runtimeTextTip {
     color: #22a6c9 !important;
 }
 
