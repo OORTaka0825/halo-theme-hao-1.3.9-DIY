@@ -782,10 +782,10 @@ body {
 }
 
 /* 白天模式 */
-html[data-theme='light'] body,
 body[data-theme='light'] {
     color: #22a6c9;
 }
+
 
 
 input::placeholder {
