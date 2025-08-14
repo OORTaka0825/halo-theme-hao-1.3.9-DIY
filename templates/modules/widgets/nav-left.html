@@ -1,16 +1,13 @@
-<!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-
 <!-- 导航栏左侧 -->
-<div id="blog_name" th:fragment="nav-left">
+<div id="blog_name" >
 
-    <th:block th:if="${not #strings.isEmpty(theme.config.nav.leftMenu)}"
+    <th:block th:if="${not #strings.isEmpty(theme.config.nav.leftMenu) && theme.config.nav.menus.pc_leftMenu}"
               th:with="leftMenu = ${menuFinder.getByName(theme.config.nav.leftMenu)}">
         <!-- 菜单栏左侧按钮，没有配置时，则不展示-->
         <div class="back-home-button" tabindex="-1"
              th:if="${not #lists.isEmpty(leftMenu)}">
 
-            <i class="back-home-button-icon haofont hao-icon-grip-vertical" style="font-size: 1rem"></i>
+            <i class="back-home-button-icon haofont hao-icon-apps-fill" style="font-size: 1rem"></i>
             <div class="back-menu-list-groups">
                 <div class="back-menu-list-group" th:each="menuItem : ${leftMenu.menuItems}">
                     <!-- 菜单必须有子项才会展示 -->
@@ -40,6 +37,3 @@
         <span th:utext="${#strings.isEmpty(theme.config.basics.siteTitle)} ? ${site.title} : ${theme.config.basics.siteTitle}"></span>
     </a>
 </div>
-
-
-</html>

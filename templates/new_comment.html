@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org"
+<html  xmlns:th="http://www.thymeleaf.org"
       th:replace="~{modules/layouts/layout :: layout(content = ~{::content}, htmlType = 'newComment',title = ${singlePage.spec.title + ' | ' + site.title}, head = ~{::head})}">
 <th:block th:fragment="head">
     <th:block th:replace="~{modules/common/open-graph :: open-graph(_title = ${singlePage.spec.title},
@@ -18,10 +18,10 @@
         </header>
         <main class="layout hide-aside" id="content-inner">
             <div id="page">
-                <div th:replace="~{macro/author-content :: author-content(background = ${theme.config.new_comment.backgroundImg},
-                        smallTitle = ${theme.config.new_comment.smallTitle},
-                        bigTitle = ${theme.config.new_comment.bigTitle},
-                        detail = ${theme.config.new_comment.detail},
+                <div th:replace="~{macro/author-content :: author-content(background = ${singlePage.spec.cover},
+                        smallTitle = '评论',
+                        bigTitle = ${singlePage.spec.title},
+                        detail = ${singlePage.spec.excerpt.raw},
                         buttonUrl = '',
                         buttonTitle = '')}"></div>
                 <div id="comments-page">
@@ -33,7 +33,7 @@
                         <div class="comment-card" th:title="${comment.spec.content}"
                              th:onclick="pjax.loadUrl([[${url}]])">
                             <div class="comment-info">
-                                <img th:with=" img =${#strings.isEmpty(comment.owner.avatar)?'https://cravatar.cn/avatar/?d=mp':comment.owner.avatar}"
+                                <img th:with=" img =${#strings.isEmpty(comment.owner.avatar)? theme.config.sidebar.newcomment.providerMirror+'/avatar/'+comment.spec.owner.annotations['email-hash'] :comment.owner.avatar}"
                                      th:alt="${comment.owner.displayName}" th:src="${isLazyload ? loadingImg : img}"
                                      th:data-lazy-src="${ isLazyload ? img : ''}" class="no-lightbox nolazyload avatar">
                                 <div class="comment-information">
@@ -337,7 +337,7 @@
                         width: 100%;
                         z-index: 1;
                         background: var(--heo-main);
-                        color: #fff;
+                        color: var(--heo-card-bg);
                         margin: 0;
                         display: flex;
                         align-items: center;
@@ -353,7 +353,7 @@
 
         </main>
         <!-- 底部 -->
-        <footer th:replace="~{modules/footer :: footer}"></footer>
+        <footer th:replace="~{modules/footer}"/>
         <!-- 卡片顶部气泡效果 -->
         <script th:if="${theme.config.other.bubbleEnable}" async data-pjax
                 th:src="${assets_link + '/libs/canvas/bubble.js'}"></script>

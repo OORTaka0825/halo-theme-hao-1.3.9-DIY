@@ -21,7 +21,7 @@ var heo = {
 
     // 首页bb
     initIndexEssay: function() {
-        if (document.querySelector("#bber-talk"))
+        if (document.querySelector("#bber-talk")) {
             $(".swiper-wrapper .swiper-slide").each(function () {
                 var text = $(this)[0].innerText;
                 if (text != 'undefined') {
@@ -36,6 +36,7 @@ var heo = {
                     pauseOnMouseEnter: !0
                 }
             })
+        }
     },
 
 
@@ -110,7 +111,7 @@ var heo = {
         footerRandomFriendsBtn.style.transitionDuration = "0.3s";
         footerRandomFriendsBtn.style.transform = "rotate(" + 360 * refreshNum++ + "deg)";
         function getLinks(){
-            const fetchUrl = "/apis/api.plugin.halo.run/v1alpha1/plugins/PluginLinks/links?keyword=&sort=priority,asc"
+            const fetchUrl = "/apis/api.plugin.halo.run/v1alpha1/plugins/PluginLinks/links?keyword="
             fetch(fetchUrl)
                 .then(res => res.json())
                 .then(json => {
@@ -289,10 +290,8 @@ var heo = {
     },
 
     //隐藏今日推荐
-    hideTodayCard: function () {
-        if (document.getElementById("todayCard")) {
-            document.getElementById("todayCard").classList.add('hide');
-        }
+    hideTodayCard: function() {
+        document.getElementById("topGroup") && document.getElementById("topGroup").classList.add("hideCard")
     },
 
     //更改主题色
