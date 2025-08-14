@@ -781,11 +781,6 @@ body {
     margin: 0px;
 }
 
-/* 白天模式 */
-html[data-theme='light'] body {
-    color: #22a6c9;
-}
-
 
 input::placeholder {
     color: var(--heo-fontcolor);
