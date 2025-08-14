@@ -786,6 +786,10 @@ body {
     color: #22a6c9;
 }
 
+/* 夜晚模式（可选） */
+[data-theme='dark'] body {
+    color: #ffffff; /* 或其他夜晚用的颜色 */
+}
 
 input::placeholder {
     color: var(--heo-fontcolor);
