@@ -787,12 +787,6 @@ body[data-theme='light'] {
     color: #22a6c9;
 }
 
-/* 黑夜模式 */
-html[data-theme='dark'] body,
-body[data-theme='dark'] {
-    color: #ffffff !important; /* 黑夜字体白色，强制生效 */
-}
-
 
 input::placeholder {
     color: var(--heo-fontcolor);
