@@ -109,8 +109,8 @@
 <div th:replace="~{modules/sidebar :: sidebar}"></div>
 
 <!-- 左下角音乐 -->
-<th:block th:if="${theme.config.tool.nav_music.nav_musicEnable}" >
-    <div  th:replace="~{modules/widgets/nav-music :: nav-music}"></div>
+<th:block th:if="${theme.config.tool.nav_music.nav_musicEnable}">
+    <div th:replace="~{modules/widgets/nav-music}"/>
 </th:block>
 
 <!-- 内容 -->
