@@ -164,7 +164,8 @@
     <!--音乐-->
     <script>var meting_api = "[(${theme.config.tool.nav_music.meting_api})]"; </script>
 
-    <link rel="stylesheet" href="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/aplayer/1.10.1/APlayer.min.css" media="all" onload="this.media='all'">
+    <link rel="stylesheet" th:href="${assets_link + '/libs/aplayer/APlayer.min.css'}"
+          media="all" onload="this.media='all'">
 
     <script th:src="${assets_link + '/libs/aplayer/APlayer.min.js'}"></script>
     
