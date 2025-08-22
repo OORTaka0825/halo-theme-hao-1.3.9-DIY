@@ -39,9 +39,53 @@ spec:
     - group: nav
       label: 导航
       formSchema:
+        - $formkit: group
+          name: menus
+          label: 菜单控制
+          value:
+            pc_leftMenu: true
+            phone_leftMenu: true
+            phone_menu: true
+            enable_ali_iconfont_symbol_header: false
+          children:
+            - $formkit: radio
+              name: pc_leftMenu
+              id: pc_leftMenu
+              label: pc端左侧菜单
+              options:
+                - label: 显示
+                  value: true
+                - label: 隐藏
+                  value: false
+            - $formkit: radio
+              name: phone_leftMenu
+              label: 移动左侧菜单
+              options:
+                - label: 显示
+                  value: true
+                - label: 隐藏
+                  value: false
+            - $formkit: radio
+              name: phone_menu
+              label: 移动主菜单
+              options:
+                - label: 显示
+                  value: true
+                - label: 隐藏
+                  value: false
+            - $formkit: select
+              name: enable_ali_iconfont_symbol_header
+              label: 阿里巴巴IconFont Symbol
+              help: '开启后，可以使用阿里IconFont的Symbol彩色图标。语法为 #icon-xxx，例如 #icon-shouye'
+              options:
+                - value: true
+                  label: 开启
+                - value: false
+                  label: 关闭
         - $formkit: menuRadio
           name: leftMenu
-          label: 站点名左侧
+          if: $get(pc_leftMenu).value
+          label: 站点名左侧菜单
           help: 默认只有主菜单，可前往【外观】—>【菜单】新建菜单组
           value: ""
         - $formkit: group
@@ -74,16 +118,6 @@ spec:
                   value: true
                 - label: 隐藏
                   value: false
-            - $formkit: select
-              name: enable_ali_iconfont_symbol_header
-              label: 阿里巴巴IconFont Symbol
-              value: false
-              help: '开启后,可以使用阿里IconFont的Symbol彩色图标。语法为 #icon-xxx,例如 #icon-shouye'
-              options:
-                - value: true
-                  label: 开启
-                - value: false
-                  label: 关闭
             - $formkit: radio
               name: darkMode
               label: 切换模式
