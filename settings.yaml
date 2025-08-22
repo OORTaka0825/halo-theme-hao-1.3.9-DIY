@@ -229,8 +229,7 @@ spec:
               label: 移动端背景图
               placeholder: 请填写移动端背景图地址
               value: https://imgapi.kouseki.cn/random?sort=mp
-              
-            - $formkit: group
+        - $formkit: group
           name: global_background
           label: 全局背景设置
           help: 开启后设置全局背景图片/视频
