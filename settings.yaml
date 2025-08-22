@@ -7,10 +7,12 @@ spec:
     - group: basics
       label: 基础
       formSchema:
-        - $formkit: text
+        - $formkit: code
           name: siteTitle
           label: 站点名称
           placeholder: 请输入站点名称
+          height: 80px
+          language: html
           help: 支持 HTML 语法
         - $formkit: date
           name: siteStartTime
@@ -37,9 +39,53 @@ spec:
     - group: nav
       label: 导航
       formSchema:
+        - $formkit: group
+          name: menus
+          label: 菜单控制
+          value:
+            pc_leftMenu: true
+            phone_leftMenu: true
+            phone_menu: true
+            enable_ali_iconfont_symbol_header: false
+          children:
+            - $formkit: radio
+              name: pc_leftMenu
+              id: pc_leftMenu
+              label: pc端左侧菜单
+              options:
+                - label: 显示
+                  value: true
+                - label: 隐藏
+                  value: false
+            - $formkit: radio
+              name: phone_leftMenu
+              label: 移动左侧菜单
+              options:
+                - label: 显示
+                  value: true
+                - label: 隐藏
+                  value: false
+            - $formkit: radio
+              name: phone_menu
+              label: 移动主菜单
+              options:
+                - label: 显示
+                  value: true
+                - label: 隐藏
+                  value: false
+            - $formkit: select
+              name: enable_ali_iconfont_symbol_header
+              label: 阿里巴巴IconFont Symbol
+              help: '开启后，可以使用阿里IconFont的Symbol彩色图标。语法为 #icon-xxx，例如 #icon-shouye'
+              options:
+                - value: true
+                  label: 开启
+                - value: false
+                  label: 关闭
         - $formkit: menuRadio
           name: leftMenu
-          label: 站点名左侧
+          if: $get(pc_leftMenu).value
+          label: 站点名左侧菜单
           help: 默认只有主菜单，可前往【外观】—>【菜单】新建菜单组
           value: ""
         - $formkit: group
@@ -183,6 +229,52 @@ spec:
               label: 移动端背景图
               placeholder: 请填写移动端背景图地址
               value: https://imgapi.kouseki.cn/random?sort=mp
+        - $formkit: group
+          name: global_background
+          label: 全局背景设置
+          help: 开启后设置全局背景图片/视频
+          value:
+            enable_global_background_img: false
+            index_background_img:
+          children:
+            - $formkit: radio
+              label: 全局透明背景图
+              name: enable_global_background_img
+              key: enable_global_background_img
+              id: enable_global_background_img
+              value: false
+              help: 首页透明背景图
+              options:
+                - label: 启用
+                  value: true
+                - label: 禁用
+                  value: false
+            - $formkit: radio
+              if: $get(enable_global_background_img).value
+              label: 全局背景模式
+              name: enable_global_background_above_video
+              key: enable_global_background_above_video
+              id: enable_global_background_above_video
+              value: false
+              options:
+                - label: 显示视频
+                  value: true
+                - label: 显示图片
+                  value: false
+            - $formkit: attachment
+              name: global_background_img
+              key: global_background_img
+              id: global_background_img
+              if: $get(enable_global_background_img).value  &&  $get(enable_global_background_above_video).value == false
+              label: 全局背景图片
+              placeholder: 请填写全局背景图片地址
+            - $formkit: attachment
+              name: global_background_video
+              id: global_background_video
+              key: global_background_video
+              if: $get(enable_global_background_img).value  &&  $get(enable_global_background_above_video).value
+              label: 全局背景视频
+              placeholder: 请填写全局背景视频地址
         - $formkit: radio
           name: moment
           label: 瞬间说说
