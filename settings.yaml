@@ -268,6 +268,22 @@ spec:
               if: $get(enable_global_background_img).value  &&  $get(enable_global_background_above_video).value == false
               label: 全局背景图片
               placeholder: 请填写全局背景图片地址
+            # 亮/暗主题专用背景（新增）
+            - $formkit: attachment
+              name: global_background_img_light
+              key: global_background_img_light
+              id: global_background_img_light
+              if: $get(enable_global_background_img).value  &&  $get(enable_global_background_above_video).value == false
+              label: 亮背景图片
+              placeholder: 请填写亮色模式下的背景图片地址
+            - $formkit: attachment
+              name: global_background_img_dark
+              key: global_background_img_dark
+              id: global_background_img_dark
+              if: $get(enable_global_background_img).value  &&  $get(enable_global_background_above_video).value == false
+              label: 暗背景图片
+              placeholder: 请填写暗色模式下的背景图片地址
+
             - $formkit: attachment
               name: global_background_video
               id: global_background_video
