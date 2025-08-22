@@ -1,7 +1,3 @@
-<!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-
-
 <th:block th:fragment="nav-menu-recursion(menuItem)">
     <!-- 有子菜单则显示子菜单 -->
     <th:block th:if="${not #lists.isEmpty(menuItem.children)}">
@@ -11,9 +7,16 @@
             <div class="recursion_menus_item" th:each="childMenu : ${menuItem.children}">
                 <a class="site-page child" th:target="${childMenu.spec.target?.value}"
                    th:href="@{${childMenu.status.href}}">
-                    <i th:if="${!#strings.isEmpty(#annotations.getOrDefault(childMenu, 'icon', ''))}"
-                       th:class="${#annotations.getOrDefault(childMenu, 'icon', '')}"
-                       style="font-size:.9em"></i>
+                    <th:block th:if="${theme.config.nav.menus.enable_ali_iconfont_symbol_header}">
+                        <svg class="ali_icon" aria-hidden="true">
+                            <use th:href="${#annotations.getOrDefault(childMenu, 'icon','jiewen joe-icon-zuzhijiagou')}"></use>
+                        </svg>
+                    </th:block>
+                    <th:block th:if="${theme.config.nav.menus.enable_ali_iconfont_symbol_header}==false">
+                        <i th:if="${!#strings.isEmpty(#annotations.getOrDefault(childMenu, 'icon', ''))}"
+                           th:class="${#annotations.getOrDefault(childMenu, 'icon', '')}"
+                           style="font-size:.9em"></i>
+                    </th:block>
                     <span th:text="${childMenu.status.displayName}"></span>
                 </a>
                 <!--递归调用-->
@@ -25,7 +28,7 @@
 
 <!-- 导航栏菜单栏 -->
 <div id="menus" th:fragment="nav-menu">
-
+    
     <div class="menus_items">
 
         <!-- 第一层仅展示使用，不做跳转 -->
