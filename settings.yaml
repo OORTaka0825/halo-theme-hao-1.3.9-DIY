@@ -7,10 +7,12 @@ spec:
     - group: basics
       label: 基础
       formSchema:
-        - $formkit: text
+        - $formkit: code
           name: siteTitle
           label: 站点名称
           placeholder: 请输入站点名称
+          height: 80px
+          language: html
           help: 支持 HTML 语法
         - $formkit: date
           name: siteStartTime
