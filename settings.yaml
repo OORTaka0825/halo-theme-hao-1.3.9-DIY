@@ -231,76 +231,76 @@ spec:
               value: https://imgapi.kouseki.cn/random?sort=mp
               
             - $formkit: group
-  name: global_background
-  label: 全局背景设置
-  help: 开启后设置全局背景图片/视频
-  value:
-    enable_global_background_img: false
-    enable_global_background_above_video: false   # 补默认值，供 if 使用
-    index_background_img: ""                      # 原有键给空字符串，避免空映射
-    global_background_img: ""                     # 兜底图片默认值
-    global_background_img_light: ""               # ⭐ 新增：亮图默认值
-    global_background_img_dark: ""                # ⭐ 新增：暗图默认值
-  children:
-    - $formkit: radio
-      label: 全局透明背景图
-      name: enable_global_background_img
-      key: enable_global_background_img
-      id: enable_global_background_img
-      value: false
-      help: 首页透明背景图
-      options:
-        - label: 启用
-          value: true
-        - label: 禁用
-          value: false
+              name: global_background
+              label: 全局背景设置
+              help: 开启后设置全局背景图片/视频
+              value:
+                enable_global_background_img: false
+                enable_global_background_above_video: false   # 补默认值，供 if 使用
+                index_background_img: ""                      # 原有键给空字符串，避免空映射
+                global_background_img: ""                     # 兜底图片默认值
+                global_background_img_light: ""               # ⭐ 新增：亮图默认值
+                global_background_img_dark: ""                # ⭐ 新增：暗图默认值
+              children:
+                - $formkit: radio
+                  label: 全局透明背景图
+                  name: enable_global_background_img
+                  key: enable_global_background_img
+                  id: enable_global_background_img
+                  value: false
+                  help: 首页透明背景图
+                  options:
+                    - label: 启用
+                      value: true
+                    - label: 禁用
+                      value: false
 
-    - $formkit: radio
-      if: $get(enable_global_background_img).value
-      label: 全局背景模式
-      name: enable_global_background_above_video
-      key: enable_global_background_above_video
-      id: enable_global_background_above_video
-      value: false
-      options:
-        - label: 显示视频
-          value: true
-        - label: 显示图片
-          value: false
+                - $formkit: radio
+                  if: $get(enable_global_background_img).value
+                  label: 全局背景模式
+                  name: enable_global_background_above_video
+                  key: enable_global_background_above_video
+                  id: enable_global_background_above_video
+                  value: false
+                  options:
+                    - label: 显示视频
+                      value: true
+                    - label: 显示图片
+                      value: false
 
-    - $formkit: attachment
-      name: global_background_img
-      key: global_background_img
-      id: global_background_img
-      if: $get(enable_global_background_img).value && $get(enable_global_background_above_video).value == false
-      label: 全局背景图片
-      placeholder: 请填写全局背景图片地址
+                - $formkit: attachment
+                  name: global_background_img
+                  key: global_background_img
+                  id: global_background_img
+                  if: $get(enable_global_background_img).value && $get(enable_global_background_above_video).value == false
+                  label: 全局背景图片
+                  placeholder: 请填写全局背景图片地址
 
-    # ⭐ 新增：亮背景图片（条件与上面一致）
-    - $formkit: attachment
-      name: global_background_img_light
-      key: global_background_img_light
-      id: global_background_img_light
-      if: $get(enable_global_background_img).value && $get(enable_global_background_above_video).value == false
-      label: 亮背景图片
-      placeholder: 请填写亮色模式下的背景图片地址
+                # ⭐ 新增：亮背景图片（条件与上面一致）
+                - $formkit: attachment
+                  name: global_background_img_light
+                  key: global_background_img_light
+                  id: global_background_img_light
+                  if: $get(enable_global_background_img).value && $get(enable_global_background_above_video).value == false
+                  label: 亮背景图片
+                  placeholder: 请填写亮色模式下的背景图片地址
 
-    # ⭐ 新增：暗背景图片（条件与上面一致）
-    - $formkit: attachment
-      name: global_background_img_dark
-      key: global_background_img_dark
-      id: global_background_img_dark
-      if: $get(enable_global_background_img).value && $get(enable_global_background_above_video).value == false
-      label: 暗背景图片
-      placeholder: 请填写暗色模式下的背景图片地址
-
-    - $formkit: attachment
-      name: global_background_video
-      id: global_background_video
-      key: global_background_video
-      if: $get(enable_global_background_img).value && $get(enable_global_background_above_video).value
-      label: 全局背景视频
-      placeholder: 请填写全局背景视频地址
+                # ⭐ 新增：暗背景图片（条件与上面一致）
+                - $formkit: attachment
+                  name: global_background_img_dark
+                  key: global_background_img_dark
+                  id: global_background_img_dark
+                  if: $get(enable_global_background_img).value && $get(enable_global_background_above_video).value == false
+                  label: 暗背景图片
+                  placeholder: 请填写暗色模式下的背景图片地址
+            
+                - $formkit: attachment
+                  name: global_background_video
+                  id: global_background_video
+                  key: global_background_video
+                  if: $get(enable_global_background_img).value && $get(enable_global_background_above_video).value
+                  label: 全局背景视频
+                  placeholder: 请填写全局背景视频地址
 
         - $formkit: radio
           name: moment
