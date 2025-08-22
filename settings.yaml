@@ -276,30 +276,7 @@ spec:
               if: $get(enable_global_background_img).value  &&  $get(enable_global_background_above_video).value
               label: 全局背景视频
               placeholder: 请填写全局背景视频地址
-           
             - $formkit: attachment
-              name: global_background_img_light
-              key: global_background_img_light
-              id: global_background_img_light
-              if: $get(enable_global_background_img).value  &&  $get(enable_global_background_above_video).value == false
-              label: 白天背景图片
-              placeholder: 请填写亮色模式下的背景图片地址
-            
-            - $formkit: attachment
-                name: global_background_img_dark
-                key: global_background_img_dark
-                id: global_background_img_dark
-                if: $get(enable_global_background_img).value  &&  $get(enable_global_background_above_video).value == false
-                label: 黑夜背景图片
-                placeholder: 请填写暗色模式下的背景图片地址
-
-            - $formkit: attachment
-                name: global_background_video
-                id: global_background_video
-                key: global_background_video
-                if: $get(enable_global_background_img).value  &&  $get(enable_global_background_above_video).value
-                label: 全局背景视频
-                placeholder: 请填写全局背景视频地址
         - $formkit: radio
           name: moment
           label: 瞬间说说
