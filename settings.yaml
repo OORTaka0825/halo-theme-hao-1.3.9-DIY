@@ -276,7 +276,7 @@ spec:
               if: $get(enable_global_background_img).value  &&  $get(enable_global_background_above_video).value
               label: 全局背景视频
               placeholder: 请填写全局背景视频地址
-                # ⭐ 新增：亮背景图
+           
             - $formkit: attachment
               name: global_background_img_light
               key: global_background_img_light
@@ -284,7 +284,7 @@ spec:
               if: $get(enable_global_background_img).value  &&  $get(enable_global_background_above_video).value == false
               label: 白天背景图片
               placeholder: 请填写亮色模式下的背景图片地址
-              # ⭐ 新增：暗背景图
+            
             - $formkit: attachment
                 name: global_background_img_dark
                 key: global_background_img_dark
