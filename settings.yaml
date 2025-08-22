@@ -317,9 +317,7 @@ spec:
             - label: 显示
               value: true
             - label: 隐藏
-              value: false
-
-              
+              value: false   
         - $formkit: group
           name: BannerLeft
           label: Banner 左侧
