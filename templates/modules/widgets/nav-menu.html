@@ -59,6 +59,7 @@
             <div th:replace="~{modules/widgets/nav-menu :: nav-menu-recursion(menuItem=${menuItem})}"></div>
             
             <style type="text/css">
+                /* 主菜单保持原样，不动 */
                 .ali_icon {
                     width: 1.2em;
                     height: 1.2em;
@@ -66,6 +67,11 @@
                     fill: currentColor;
                     overflow: hidden;
                     right: 0;
+                }
+
+                /* 子菜单额外增加间距 */
+                .menus_item_child .ali_icon {
+                    margin-right: 0.6em;  /* 子菜单更大一点间隔 */
                 }
             </style>
         </div>
