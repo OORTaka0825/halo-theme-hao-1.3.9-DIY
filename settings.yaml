@@ -261,20 +261,20 @@ spec:
                   value: true
                 - label: 显示图片
                   value: false
-- $formkit: attachment
-  name: global_background_img_light
-  key: global_background_img_light
-  id: global_background_img_light
-  if: $get(enable_global_background_img).value  &&  $get(enable_global_background_above_video).value == false
-  label: 全局背景图片（亮主题）
-  placeholder: 请填写亮主题全局背景图片地址
-- $formkit: attachment
-  name: global_background_img_dark
-  key: global_background_img_dark
-  id: global_background_img_dark
-  if: $get(enable_global_background_img).value  &&  $get(enable_global_background_above_video).value == false
-  label: 全局背景图片（暗主题）
-  placeholder: 请填写暗主题全局背景图片地址
+            - $formkit: attachment
+              name: global_background_img_light
+              key: global_background_img_light
+              id: global_background_img_light
+              if: $get(enable_global_background_img).value  &&  $get(enable_global_background_above_video).value == false
+              label: 全局背景图片（亮主题）
+              placeholder: 请填写亮主题全局背景图片地址
+            - $formkit: attachment
+              name: global_background_img_dark
+              key: global_background_img_dark
+              id: global_background_img_dark
+              if: $get(enable_global_background_img).value  &&  $get(enable_global_background_above_video).value == false
+              label: 全局背景图片（暗主题）
+              placeholder: 请填写暗主题全局背景图片地址
             - $formkit: attachment
               name: global_background_video
               id: global_background_video
