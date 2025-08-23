@@ -1110,6 +1110,27 @@ spec:
               label: 赞助用户名
               help: carolcoral
         - $formkit: group
+          name: welcome
+          label: 小板报
+          value:
+            key:
+            locationLng:
+            locationLat:
+          children:
+            - $formkit: text
+              name: key
+              label: NSMAO API配置 Key
+              help: 申请key:https://api.nsmao.net
+            - $formkit: text
+              name: locationLng
+              label: 经度坐标
+              help: 可访问 https://api.nsmao.net/getPoint 拾取坐标
+            - $formkit: text
+              name: locationLat
+              label: 纬度坐标
+              help: 示例：22.582401
+
+        - $formkit: group
           name: music
           label: 音乐卡片
           help: 文档请看：https://githubfast.com/zonemeen/netease-recent-profile
