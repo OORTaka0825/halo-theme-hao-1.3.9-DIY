@@ -352,14 +352,17 @@ spec:
           children:
             - $formkit: select
               name: bannersBackground
+              id: bannersBackground
+              key: bannersBackground
               label: 背景图
               options:
                 - label: 默认技术栈
-                  value: 默认
+                  value: default
                 - label: 个人技术栈
                   value: techStack
             - $formkit: repeater
               name: techStack
+              if: $get(bannersBackground).value == 'techStack'
               label: 个人技术栈
               help: 需要选择上方“个人技术栈”
               value: [ ]
