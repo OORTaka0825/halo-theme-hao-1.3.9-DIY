@@ -404,45 +404,46 @@ spec:
                   validation: required
                   value: "必看精选"
                 - $formkit: select
-              name: icon
-              label: 图标
-              options:
-                - label: 腾讯 QQ
-                  value: hao-icon-qq
-                - label: Telegram
-                  value: hao-icon-telegram
-                - label: 微信
-                  value: hao-icon-weixin
-                - label: 公众号
-                  value: hao-icon-weixingongzhonghao
-                - label: GitHub
-                  value: hao-icon-github
-                - label: 哔哩哔哩
-                  value: hao-icon-bilibili
-                - label: RSS
-                  value: hao-icon-rss
-                - label: 新浪微博
-                  value: hao-icon-weibo
-                - label: 知乎
-                  value: hao-icon-zhihu
-                - label: 抖音 / TikTok
-                  value: hao-icon-tiktok
-                - label: YouTube
-                  value: hao-icon-youtube
-                - label: Discord
-                  value: hao-icon-discord
-                - label: Steam
-                  value: hao-icon-steam
-                - label: Facebook
-                  value: hao-icon-facebook
-                - label: Instagram
-                  value: hao-icon-instagram
-                - label: LinkedIn
-                  value: hao-icon-linkedin
-                - label: Twitter
-                  value: hao-icon-twitter
-                - label: 邮箱
-                  value: hao-icon-envelope
+                  name: icon
+                  label: 图标
+                  options:
+                    - label: 腾讯 QQ
+                      value: hao-icon-qq
+                    - label: Telegram
+                      value: hao-icon-telegram
+                    - label: 微信
+                      value: hao-icon-weixin
+                    - label: 公众号
+                      value: hao-icon-weixingongzhonghao
+                    - label: GitHub
+                      value: hao-icon-github
+                    - label: 哔哩哔哩
+                      value: hao-icon-bilibili
+                    - label: RSS
+                      value: hao-icon-rss
+                    - label: 新浪微博
+                      value: hao-icon-weibo
+                    - label: 知乎
+                      value: hao-icon-zhihu
+                    - label: 抖音 / TikTok
+                      value: hao-icon-tiktok
+                    - label: YouTube
+                      value: hao-icon-youtube
+                    - label: Discord
+                      value: hao-icon-discord
+                    - label: Steam
+                      value: hao-icon-steam
+                    - label: Facebook
+                      value: hao-icon-facebook
+                    - label: Instagram
+                      value: hao-icon-instagram
+                    - label: LinkedIn
+                      value: hao-icon-linkedin
+                    - label: Twitter
+                      value: hao-icon-twitter
+                    - label: 邮箱
+                      value: hao-icon-envelope
+
                   placeholder: 请输入内容
                   validation: required
                   value: "haofont hao-icon-book"
