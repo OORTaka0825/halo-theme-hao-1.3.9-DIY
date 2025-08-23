@@ -61,6 +61,11 @@
             @media screen and (min-width: 1300px) {
                 .global_background_img {
 
+                /* 根据主题显示不同背景 */
+                :root[data-theme='light'] .global_background_img--dark{ display:none; }
+                :root[data-theme='dark'] .global_background_img--light{ display:none; }
+                html:not([data-theme='dark']) .global_background_img--dark{ display:none; }
+                html[data-theme='dark'] .global_background_img--light{ display:none; }
 
                     width: 100%;
                     height: 100%;
@@ -69,7 +74,7 @@
                     opacity: 1;
                     position: fixed;
                     z-index: -999;
-                    background: var(--heo-background);
+                    
                     background-attachment: fixed;
                     background-repeat: no-repeat;
                     background-size: cover;
@@ -83,15 +88,6 @@
             }
         
         </style>
-<style>
-/* 明/暗主题切换不同背景图（不要放到 .global_background_img 的规则里） */
-:root[data-theme='light'] .global_background_img--dark { display: none !important; }
-:root[data-theme='dark']  .global_background_img--light { display: none !important; }
-/* 兜底：部分实现下，亮色时不设置 data-theme */
-html:not([data-theme='dark']) .global_background_img--dark { display: none !important; }
-html[data-theme='dark']      .global_background_img--light { display: none !important; }
-</style>
-
     </th:block>
     
     <script th:inline="javascript"
