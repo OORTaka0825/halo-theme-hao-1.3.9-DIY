@@ -35,8 +35,12 @@
     <div id="web_bg">
         <div th:if="${theme.config.top.global_background.enable_global_background_img}">
             <img th:if="${theme.config.top.global_background.enable_global_background_above_video == false}"
-                 class="global_background_img"
-                 th:src="${theme.config.top.global_background.global_background_img}"
+                 class="global_background_img global_background_img--light"
+                 th:src="${theme.config.top.global_background.global_background_img_light}"
+            />
+            <img th:if="${theme.config.top.global_background.enable_global_background_above_video == false}"
+                 class="global_background_img global_background_img--dark"
+                 th:src="${theme.config.top.global_background.global_background_img_dark}"
             />
             <video th:if="${theme.config.top.global_background.enable_global_background_above_video}"
                    class="index-video"
@@ -56,6 +60,13 @@
         <style>
             @media screen and (min-width: 1300px) {
                 .global_background_img {
+
+                /* 根据主题显示不同背景 */
+                :root[data-theme='light'] .global_background_img--dark{ display:none; }
+                :root[data-theme='dark'] .global_background_img--light{ display:none; }
+                html:not([data-theme='dark']) .global_background_img--dark{ display:none; }
+                html[data-theme='dark'] .global_background_img--light{ display:none; }
+
                     width: 100%;
                     height: 100%;
                     top: 0;
