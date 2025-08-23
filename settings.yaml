@@ -354,7 +354,7 @@ spec:
               name: bannersBackground
               label: 背景图
               options:
-                - label: default
+                - label: 默认技术栈
                   value: 默认
                 - label: 个人技术栈
                   value: techStack
