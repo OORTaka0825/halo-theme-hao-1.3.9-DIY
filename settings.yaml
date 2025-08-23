@@ -355,7 +355,7 @@ spec:
               label: 背景图
               options:
                 - label: 默认技术栈
-                  value: 默认
+                  value: default
                 - label: 个人技术栈
                   value: techStack
             - $formkit: repeater
