@@ -113,33 +113,33 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     <!-- 网站背景 -->
     <div id="an_music_bg"></div>
 
-    <!-- 控制台 -->
-    <div th:replace="~{modules/widgets/console :: console}"></div>
+<!-- 控制台 -->
+<div th:replace="~{modules/widgets/console :: console}"></div>
 
-    <div th:replace="~{modules/sidebar :: sidebar}"></div>
+<div th:replace="~{modules/sidebar :: sidebar}"></div>
 
-    <!-- 左下角音乐 -->
-    <th:block th:if="${theme.config.tool.nav_music.nav_musicEnable}">
+<!-- 左下角音乐 -->
+<th:block th:if="${theme.config.tool.nav_music.nav_musicEnable}">
     <div th:replace="~{modules/widgets/nav-music}"/>
-    </th:block>
+</th:block>
 
-    <!-- 内容 -->
-    <th:block th:replace="${content}"></th:block>
-
-
-    <!-- todo 右下角悬浮操作按钮 -->
-    <th:block th:replace="~{modules/common/rightside :: rightside}"></th:block>
+<!-- 内容 -->
+<th:block th:replace="${content}"></th:block>
 
 
-    <div th:replace="~{modules/right-menu :: right-menu}"></div>
+<!-- todo 右下角悬浮操作按钮 -->
+<th:block th:replace="~{modules/common/rightside :: rightside}"></th:block>
 
-    <div>
+
+<div th:replace="~{modules/right-menu :: right-menu}"></div>
+
+<div>
     <script th:src="${assets_link + '/js/utils.js' + theme_version}"></script>
     <script th:src="${assets_link + '/js/main.js' + theme_version}"></script>
     <script charset="utf-8" data-pjax th:src="${assets_link + '/zhheo/blogex.js' + theme_version}"></script>
     <script th:src="${assets_link + '/js/tw_cn.js' + theme_version}"></script>
     <!-- /themes/theme-hao/assets/libs/ 网站预加载， 放在 <script src="/themes/theme-hao/assets/libs/welcome/welcome.js"></script>
-    </body> 之前 -->
+</body> 之前 -->
     <script src="/themes/theme-hao/assets/libs/instantpage.min.js" type="module"></script>
 
     <script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/vanilla-lazyload/17.3.1/lazyload.iife.min.js"></script>

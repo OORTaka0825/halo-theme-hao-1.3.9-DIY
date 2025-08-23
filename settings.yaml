@@ -655,36 +655,354 @@ spec:
         - $formkit: group
           name: widgetss
           label: 侧边栏内容
-          help: 目前提供的小部件有：profile（站点资料）, wechat（微信）, welcome（小板报）, steam（Steam卡片）, music（音乐卡片）, friend-link（通讯录）, recent-posts（近期文章）, comments（最新评论）, categories（文章分类）, tags（文章标签）, stat（统计）, tags-stat（标签&归档&统计）, adbox（广告区域）。你可以随意组合或排序，以逗号隔开。
           value:
-            indexWidgets: profile,wechat,comments,recent-posts,categories,tags-stat
-            postWidgets: profile,wechat,toc,comments,recent-posts,categories,tags-stat
-            tagWidgets: profile,wechat,comments,recent-posts,categories,tags-stat
-            categoryWidgets: profile,wechat,comments,recent-posts,categories,tags-stat
-            pageWidgets: ""
+            indexWidget:
+              - widget: "profile"
+              - widget: "wechat"
+              - widget: "comments"
+              - widget: "recent-posts"
+              - widget: "categories"
+            postWidget:
+              - widget: "profile"
+              - widget: "wechat"
+              - widget: "toc"
+              - widget: "comments"
+              - widget: "recent-posts"
+              - widget: "categories"
+            tagWidget:
+              - widget: "profile"
+              - widget: "wechat"
+              - widget: "comments"
+              - widget: "recent-posts"
+              - widget: "categories"
+            categoryWidget:
+              - widget: "profile"
+              - widget: "wechat"
+              - widget: "comments"
+              - widget: "recent-posts"
+              - widget: "categories"
+            pageWidget:
           children:
-            - $formkit: textarea
-              name: indexWidgets
+            - $formkit: repeater
+              name: indexWidget
+              id: indexWidget
               label: 首页
-            - $formkit: textarea
-              name: postWidgets
+              children:
+                - $formkit: select
+                  name: widget
+                  id: widget
+                  key: widget
+                  label: "小工具"
+                  options:
+                    - value: "profile"
+                      label: 个人卡片
+                    - value: "wechat"
+                      label: 公众号
+                    - value: "power"
+                      label: 爱发电赞助
+                    - value: "steam"
+                      label: Steam卡片
+                    - value: "music"
+                      label: 音乐卡片
+                    - value: "welcome"
+                      label: 小板报
+                    - value: "friend-link"
+                      label: 通讯录
+                    - value: "recent-posts"
+                      label: 最新文章
+                    - value: "visit-posts"
+                      label: 热门文章
+                    - value: "comments"
+                      label: 最新评论
+                    - value: "categories"
+                      label: 文章分类
+                    - value: "tags"
+                      label: 文章标签
+                    - value: "stat"
+                      label: 统计
+                    - value: "tags-stat"
+                      label: 标签&归档&统计
+                    - value: "adbox"
+                      label: 广告区域
+                    - value: "custom_html"
+                      label: 自定义
+                - $formkit: group
+                  name: custom_html
+                  if: $value.widget == 'custom_html'
+                  key: custom_html
+                  label: 自定义内容
+                  children:
+                    - $formkit: code
+                      name: title
+                      label: 标题
+                      help: 支持html语法
+                      height: 50px
+                      value: <i class="haofont hao-icon-folder-open"></i><span>分类</span>
+                      language: html
+                    - $formkit: code
+                      name: html
+                      label: 内容
+                      height: 200px
+                      help: 支持html语法
+                      language: html
+            - $formkit: repeater
+              name: postWidget
+              id: postWidget
               label: 文章页
               help: post 可以支持设置 toc
-            - $formkit: textarea
-              name: tagWidgets
+              children:
+                - $formkit: select
+                  name: widget
+                  id: widget
+                  key: widget
+                  label: "小工具"
+                  options:
+                    - value: "profile"
+                      label: 个人卡片
+                    - value: "toc"
+                      label: 目录
+                    - value: "wechat"
+                      label: 公众号
+                    - value: "power"
+                      label: 爱发电赞助
+                    - value: "steam"
+                      label: Steam卡片
+                    - value: "music"
+                      label: 音乐卡片
+                    - value: "welcome"
+                      label: 小板报
+                    - value: "friend-link"
+                      label: 通讯录
+                    - value: "recent-posts"
+                      label: 最新文章
+                    - value: "visit-posts"
+                      label: 热门文章
+                    - value: "comments"
+                      label: 最新评论
+                    - value: "categories"
+                      label: 文章分类
+                    - value: "tags"
+                      label: 文章标签
+                    - value: "stat"
+                      label: 统计
+                    - value: "tags-stat"
+                      label: 标签&归档&统计
+                    - value: "adbox"
+                      label: 广告区域
+                    - value: "custom_html"
+                      label: 自定义
+                - $formkit: group
+                  name: custom_html
+                  if: $value.widget == 'custom_html'
+                  key: custom_html
+                  label: 自定义内容
+                  children:
+                    - $formkit: code
+                      name: title
+                      label: 标题
+                      help: 支持html语法
+                      height: 100px
+                      value: <i class="haofont hao-icon-folder-open"></i><span>分类</span>
+                      language: html
+                    - $formkit: code
+                      name: html
+                      label: 内容
+                      height: 200px
+                      help: 支持html语法
+                      language: html
+
+            - $formkit: repeater
+              name: tagWidget
+              id: tagWidget
               label: 标签页
-            - $formkit: textarea
-              name: categoryWidgets
+              children:
+                - $formkit: select
+                  name: widget
+                  id: widget
+                  key: widget
+                  label: "小工具"
+                  options:
+                    - value: "profile"
+                      label: 个人卡片
+                    - value: "wechat"
+                      label: 公众号
+                    - value: "power"
+                      label: 爱发电赞助
+                    - value: "steam"
+                      label: Steam卡片
+                    - value: "music"
+                      label: 音乐卡片
+                    - value: "welcome"
+                      label: 小板报
+                    - value: "friend-link"
+                      label: 通讯录
+                    - value: "recent-posts"
+                      label: 最新文章
+                    - value: "visit-posts"
+                      label: 热门文章
+                    - value: "comments"
+                      label: 最新评论
+                    - value: "categories"
+                      label: 文章分类
+                    - value: "tags"
+                      label: 文章标签
+                    - value: "stat"
+                      label: 统计
+                    - value: "tags-stat"
+                      label: 标签&归档&统计
+                    - value: "adbox"
+                      label: 广告区域
+                    - value: "custom_html"
+                      label: 自定义
+                - $formkit: group
+                  name: custom_html
+                  if: $value.widget == 'custom_html'
+                  key: custom_html
+                  label: 自定义内容
+                  children:
+                    - $formkit: code
+                      name: title
+                      label: 标题
+                      help: 支持html语法
+                      height: 100px
+                      value: <i class="haofont hao-icon-folder-open"></i><span>分类</span>
+                      language: html
+                    - $formkit: code
+                      name: html
+                      label: 内容
+                      height: 200px
+                      help: 支持html语法
+                      language: html
+            - $formkit: repeater
+              id: categoryWidget
+              name: categoryWidget
               label: 分类页
-            - $formkit: textarea
-              name: pageWidgets
+              children:
+                - $formkit: select
+                  name: widget
+                  id: widget
+                  key: widget
+                  label: "小工具"
+                  options:
+                    - value: "profile"
+                      label: 个人卡片
+                    - value: "wechat"
+                      label: 公众号
+                    - value: "power"
+                      label: 爱发电赞助
+                    - value: "steam"
+                      label: Steam卡片
+                    - value: "music"
+                      label: 音乐卡片
+                    - value: "welcome"
+                      label: 小板报
+                    - value: "friend-link"
+                      label: 通讯录
+                    - value: "recent-posts"
+                      label: 最新文章
+                    - value: "visit-posts"
+                      label: 热门文章
+                    - value: "comments"
+                      label: 最新评论
+                    - value: "categories"
+                      label: 文章分类
+                    - value: "tags"
+                      label: 文章标签
+                    - value: "stat"
+                      label: 统计
+                    - value: "tags-stat"
+                      label: 标签&归档&统计
+                    - value: "adbox"
+                      label: 广告区域
+                    - value: "custom_html"
+                      label: 自定义
+                - $formkit: group
+                  name: custom_html
+                  if: $value.widget == 'custom_html'
+                  key: custom_html
+                  label: 自定义内容
+                  children:
+                    - $formkit: code
+                      name: title
+                      label: 标题
+                      help: 支持html语法
+                      height: 100px
+                      value: <i class="haofont hao-icon-folder-open"></i><span>分类</span>
+                      language: html
+                    - $formkit: code
+                      name: html
+                      label: 内容
+                      height: 200px
+                      help: 支持html语法
+                      language: html
+            - $formkit: repeater
+              name: pageWidget
+              id: pageWidget
               label: 自定义页
               help: 自定义页面默认没有侧栏
+              children:
+                - $formkit: select
+                  name: widget
+                  id: widget
+                  key: widget
+                  label: "小工具"
+                  options:
+                    - value: "profile"
+                      label: 个人卡片
+                    - value: "wechat"
+                      label: 公众号
+                    - value: "power"
+                      label: 爱发电赞助
+                    - value: "steam"
+                      label: Steam卡片
+                    - value: "music"
+                      label: 音乐卡片
+                    - value: "welcome"
+                      label: 小板报
+                    - value: "friend-link"
+                      label: 通讯录
+                    - value: "recent-posts"
+                      label: 最新文章
+                    - value: "visit-posts"
+                      label: 热门文章
+                    - value: "comments"
+                      label: 最新评论
+                    - value: "categories"
+                      label: 文章分类
+                    - value: "tags"
+                      label: 文章标签
+                    - value: "stat"
+                      label: 统计
+                    - value: "tags-stat"
+                      label: 标签&归档&统计
+                    - value: "adbox"
+                      label: 广告区域
+                    - value: "custom_html"
+                      label: 自定义
+                - $formkit: group
+                  name: custom_html
+                  if: $value.widget == 'custom_html'
+                  key: custom_html
+                  label: 自定义内容
+                  children:
+                    - $formkit: code
+                      name: title
+                      label: 标题
+                      help: 支持html语法
+                      height: 100px
+                      value: <i class="haofont hao-icon-folder-open"></i><span>分类</span>
+                      language: html
+                    - $formkit: code
+                      name: html
+                      label: 内容
+                      height: 200px
+                      help: 支持html语法
+                      language: html
         - $formkit: group
           name: profile
           label: 个人卡片
           value:
-            profileStyle: 默认
+            profileStyle: default
             helloText: 🤖️ 数码科技爱好者, 🔍 分享与热心帮助, 🏠 智能家居小能手, 🔨 设计开发一条龙, 🤝 专修交互与设计, 🏃 脚踏实地行动派, 🧱 团队小组发动机, 💢 壮汉人狠话不多
           children:
             - $formkit: select
@@ -693,15 +1011,20 @@ spec:
               key: profileStyle
               label: 样式
               options:
-                - value: 默认
+                - value: default
                   label: 默认
                 - value: one
                   label: 样式一
             - $formkit: attachment
+              name: backgroundImg
+              label: 背景图片
+              value: /themes/theme-hao/assets/images/sidebar/profile.webp
+              placeholder: 请输入背景图片路径或地址（建议使用 280px * 330px 图片效果最佳）
+            - $formkit: attachment
               name: stickerImg
               if: $get(profileStyle).value == 'one'
               label: 贴纸
-              value: https://kunkunyu.com/upload/omxo3N22290781690363822143.png
+              value: /upload/omxo3N22290781690363822143.png
               placeholder: 请输入图片地址
             - $formkit: text
               if: $get(profileStyle).value == 'one'
@@ -717,11 +1040,13 @@ spec:
               name: profileName
               label: 卡片名称
               placeholder: 请填写个人卡片名称
-              help: 不填写默认为站点则名称
-            - $formkit: textarea
+              help: 不填写默认为站点名称
+            - $formkit: code
               name: profileDesc
               label: 描述信息
               placeholder: 请填写个人卡片描述信息
+              height: 200px
+              language: html
               help: 支持 HTML 语法
             - $formkit: repeater
               name: socialMedia
@@ -730,199 +1055,144 @@ spec:
               max: 2
               value: [ ]
               children:
-                - $formkit: select
+                - $formkit: text
                   name: icon
                   label: 图标
-                  options:
-                    - label: 电子邮箱
-                      value: hao-icon-envelope
-                    - label: 微信
-                      value: hao-icon-weixin
-                    - label: 公众号
-                      value: hao-icon-weixingongzhonghao
-                    - label: rss
-                      value: hao-icon-rss
-                    - label: 腾讯 QQ
-                      value: hao-icon-qq
-                    - label: 新浪微博
-                      value: hao-icon-weibo
-                    - label: 知乎
-                      value: hao-icon-29
-                    - label: 豆瓣
-                      value: hao-icon-douban
-                    - label: 哔哩哔哩
-                      value: hao-icon-bilibili
-                    - label: GitHub
-                      value: hao-icon-github
-                    - label: GitLab
-                      value: hao-icon-gitlab
-                    - label: 百度
-                      value: hao-icon-baidu
-                    - label: 掘金
-                      value: hao-icon-juejin
-                    - label: 语雀
-                      value: hao-icon-yuque
-                    - label: 博客园
-                      value: hao-icon-cnblogs
-                    - label: CSDN
-                      value: hao-icon-csdn
-                    - label: LeetCode
-                      value: hao-icon-leetcode
-                    - label: 头条
-                      value: hao-icon-toutiao
-                    - label: 抖音 / TikTok
-                      value: hao-icon-tiktok
-                    - label: Telegram
-                      value: hao-icon-telegram
-                    - label: Facebook
-                      value: hao-icon-facebook1
-                    - label: Instagram
-                      value: hao-icon-Instagram
-                    - label: LinkedIn
-                      value: hao-icon-linkedin
-                    - label: Twitter
-                      value: hao-icon-dove
-                    - label: Slack
-                      value: hao-icon-slack
-                    - label: Discord
-                      value: hao-icon-discord-line
-                    - label: YouTube
-                      value: hao-icon-youtube
-                    - label: Steam
-                      value: hao-icon-steam
-                    - label: Dribbble
-                      value: hao-icon-dribbble
                 - $formkit: text
                   name: name
                   label: 名称
                 - $formkit: url
                   name: url
                   label: 链接
-                - $formkit: radio
-                  name: urlType
-                  label: 链接类型
-                  value: normal
-                  help: 如果选择了图片类型，那么在访客点击之后会使用弹框的形式加载
-                  options:
-                    - label: 跳转链接
-                      value: normal
-                    - label: 图片
-                      value: image
         - $formkit: group
           name: wechat
           label: 公众号
           value:
             wechatImgFace:
             wechatImgBack:
+            color: "#07C160"
+            wechatImg: "/themes/theme-hao/assets/images/gzh_cover.png"
+            url: "/wechat"
           children:
+            - $formkit: color
+              name: color
+              label: 背景颜色
+              value: "#07C160"
+            - $formkit: attachment
+              name: wechatImg
+              label: 背景图
+            - $formkit: url
+              name: url
+              label: 链接
             - $formkit: attachment
               name: wechatImgFace
-              placeholder: 公众号正面图
+              label: 公众号正面图
             - $formkit: attachment
               name: wechatImgBack
-              placeholder: 公众号背面图
+              label: 公众号背面图
               help: 图片可以从公众号后台下载物料或者自制
         - $formkit: group
-          name: welcome
-          label: 小板报
+          name: power
+          label: 爱发电赞助
           value:
-            key:
-            locationLng:
-            locationLat:
+            powerLink: /
+            showNum: 3
           children:
+            - $formkit: url
+              name: powerLink
+              label: 赞助地址
+              help: https://afdian.com/a/ (必须带上末尾的/)
+            - $formkit: number
+              name: showNum
+              label: 最大展示条数
             - $formkit: text
-              name: key
-              label: NSMAO API配置 Key
-              value: "xxxx"
-              help: 申请key:https://api.nsmao.net
-            - $formkit: text
-              name: locationLng
-              label: 经度坐标
-              value: "113.215456"
-              help: 可访问 https://api.nsmao.net/getPoint 拾取坐标，示例：113.215456
-              placeholder: 请输入经度坐标
-            - $formkit: text
-              name: locationLat
-              label: 纬度坐标
-              help: 示例：22.582401
-              value: "22.582401"
-              placeholder: 请输入纬度坐标
+              name: username
+              label: 赞助用户名
+              help: carolcoral
         - $formkit: group
           name: music
           label: 音乐卡片
           help: 文档请看：https://githubfast.com/zonemeen/netease-recent-profile
           value:
-            musicUrl:
-            lightMsimg:
-            lightBackMsimg:
-            darkMsimg:
-            darkBackMsimg:
+            musicUrl: /music
+            lightMsimg: https://card-music.yyds.pink/?id=xxxxx&theme=card&themeColor=e60026&mode=light&size=300&show_random=1
+            lightBackMsimg: https://card-music.yyds.pink/?id=xxxxx&size=60&type=1&mode=light&title=%E6%9C%80%E8%BF%91%E5%B8%B8%E5%90%AC%E6%A6%9C%E5%8D%95&number=6
+            darkMsimg: https://card-music.yyds.pink/?id=xxxxx&theme=card&themeColor=e60026&mode=dark&size=300&show_random=1
+            darkBackMsimg: https://card-music.yyds.pink/?id=xxxxx&size=60%E2%80%A6F%91%E5%B8%B8%E5%90%AC%E6%A6%9C%E5%8D%95&number=6
           children:
             - $formkit: url
               name: musicUrl
               label: 跳转地址
-              value: /music
             - $formkit: textarea
               name: lightMsimg
               label: 浅色卡片
-              value: https://card-music.yyds.pink/?id=xxxxx&theme=card&themeColor=e60026&mode=light&size=300&show_random=1
               help: https://card-music.yyds.pink/?id=xxxxx&theme=card&themeColor=e60026&mode=light&size=300&show_random=1
             - $formkit: textarea
               name: lightBackMsimg
               label: 浅色翻页卡片
-              value: https://card-music.yyds.pink/?id=xxxxx&size=60&type=1&mode=light&title=%E6%9C%80%E8%BF%91%E5%B8%B8%E5%90%AC%E6%A6%9C%E5%8D%95&number=6
               help: https://card-music.yyds.pink/?id=xxxxx&size=60&type=1&mode=light&title=%E6%9C%80%E8%BF%91%E5%B8%B8%E5%90%AC%E6%A6%9C%E5%8D%95&number=6
             - $formkit: textarea
               name: darkMsimg
               label: 深色卡片
-              value: https://card-music.yyds.pink/?id=xxxxx&theme=card&themeColor=e60026&mode=dark&size=300&show_random=1
               help: https://card-music.yyds.pink/?id=xxxxx&theme=card&themeColor=e60026&mode=dark&size=300&show_random=1
             - $formkit: textarea
               name: darkBackMsimg
               label: 深色翻页卡片
-              value: https://card-music.yyds.pink/?id=xxxxx&size=60%E2%80%A6F%91%E5%B8%B8%E5%90%AC%E6%A6%9C%E5%8D%95&number=6
               help: https://card-music.yyds.pink/?id=xxxxx&size=60%E2%80%A6F%91%E5%B8%B8%E5%90%AC%E6%A6%9C%E5%8D%95&number=6
         - $formkit: group
           name: steam
           label: Steam卡片
           help: 文档请看：https://githubfast.com/yuyinws/steam-card
           value:
-            steamUrl:
-            cardSteam:
+            steamUrl: /
+            cardSteam: https://card.yuy1n.io/card/xxxxxx/gradient1,badge,bg-game-1111460,games,screenshots,badges
           children:
             - $formkit: url
               name: steamUrl
               label: 跳转地址
-              value: /
             - $formkit: textarea
               name: cardSteam
               label: 卡片
-              value: https://card.yuy1n.io/card/xxxxxx/gradient1,badge,bg-game-1111460,games,screenshots,badges
               help: https://card.yuy1n.io/card/xxxxxx/gradient1,badge,bg-game-1111460,games,screenshots,badges
         - $formkit: number
           name: recentPost
-          label: 最新文章
+          label: 最新文章/热门文章
           value: 4
           help: 文章数量
-        - $formkit: number
-          name: newcommentnumber
+        - $formkit: group
+          name: newcomment
           label: 最新评论
-          value: 5
-          help: 最新评论数量, 小于 0 则展示5条评论
+          value:
+            newcommentUrl: /newest
+            newcommentnumber: 5
+            providerMirror: "https://cravatar.cn"
+          children:
+            - $formkit: url
+              name: newcommentUrl
+              label: 跳转地址
+            - $formkit: number
+              name: newcommentnumber
+              label: 数量
+              help: 最新评论数量, 小于 0 则展示5条评论
+            - $formkit: text
+              label: 头像服务镜像地址
+              name: providerMirror
+              help: 使用官方源则留空, 示例：https://gravatar.com
+
         - $formkit: number
           name: categoryQuantity
           label: 文章分类
-          value: -1
+          value: 0
           help: 小于 0 则展示全部分类
         - $formkit: number
           name: tagQuantity
           label: 文章标签
-          value: -1
+          value: 0
           help: 小于 0 则展示全部标签
         - $formkit: number
           name: archivesQuantity
           label: 文章归档
-          value: -1
+          value: 0
           help: 小于 0 则展示全部归档(目前没用等适配)
         - $formkit: radio
           name: tags_switch
@@ -953,12 +1223,14 @@ spec:
               id: adType
               key: adType
               label: 广告类型
-              value: 无
+              value: none
               options:
                 - label: 无
-                  value: 无
+                  value: none
                 - label: Google AdSence
                   value: google
+                - label: 自定义
+                  value: customAd
             - $formkit: group
               if: $get(adType).value == 'google'
               name: ad_google
@@ -1004,6 +1276,28 @@ spec:
                       value: true
                     - label: 否
                       value: false
+            - $formkit: group
+              if: $get(adType).value == 'customAd'
+              name: ad_custom
+              label: 自定义区域
+              help: 填写标题图片地址和跳转地址
+              value:
+                ad_title: '广告'
+                ad_pic_url:
+                ad_redirect_url:
+              children:
+                - $formkit: text
+                  name: ad_title
+                  label: 自定义标题
+                  help: 自定义标题
+                - $formkit: text
+                  name: ad_pic_url
+                  label: 自定义图片地址
+                  help: 自定义图片地址
+                - $formkit: text
+                  name: ad_redirect_url
+                  label: 自定义跳转地址
+                  help: 自定义跳转地址
     - group: footer
       label: 页脚
       formSchema:
