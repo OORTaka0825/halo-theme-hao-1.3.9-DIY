@@ -1124,7 +1124,7 @@ spec:
             - $formkit: text
               name: locationLng
               label: 经度坐标
-              help: 可访问 https://api.nsmao.net/getPoint 拾取坐标
+              help: 可访问 https://lbs.amap.com/tools/picker 拾取坐标
             - $formkit: text
               name: locationLat
               label: 纬度坐标
