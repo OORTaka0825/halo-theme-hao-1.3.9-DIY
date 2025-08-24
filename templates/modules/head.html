@@ -331,4 +331,11 @@
     <th:block th:replace="~{modules/variables/site-config :: site-config}" />
 
 
+
+<!-- Zoom cursor hint for article images (explicit) -->
+<style>
+  /* Ensure the zoom cursor appears even before anchors are wrapped */
+  #article-container img:not(.no-lightbox):not(.avatar):not(.emoji) { cursor: zoom-in; }
+  #article-container a[data-fancybox] { cursor: zoom-in; }
+</style>
 </th:block>
