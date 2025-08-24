@@ -3373,6 +3373,7 @@ spec:
         - $formkit: radio
           name: pjax_enable
           label: PJAX加载
+          help: "控制站点是否启用 PJAX，无刷新页面切换；关闭后则整页刷新"
           options:
             - label: 开启
               value: true
