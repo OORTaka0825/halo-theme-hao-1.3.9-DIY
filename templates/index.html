@@ -21,18 +21,7 @@
             <th:block th:replace="~{modules/header/index-img :: index-img}"></th:block>
         
         
-        <script th:inline="javascript">
-        (function(){
-            try {
-                var header = document.getElementById('page-header');
-                var cfgEnable = /*[[${theme.config.top.above.enable_above}]]*/ false;
-                var cfgHeight = /*[[${theme.config.top.above.full_page_height}]]*/ '100vh';
-                if (header && cfgEnable && cfgHeight) {
-                    header.style.setProperty('height', cfgHeight, 'important');
-                }
-            } catch (e) {}
-        })();
-        </script>
+        
     
 
         </header>
