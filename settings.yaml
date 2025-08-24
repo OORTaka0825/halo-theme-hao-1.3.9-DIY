@@ -3369,6 +3369,16 @@ spec:
     - group: other
       label: 其他设置
       formSchema:
+
+        - $formkit: radio
+          name: pjax_enable
+          label: PJAX加载
+          options:
+            - label: 开启
+              value: true
+            - label: 关闭
+              value: false
+          value: true
         - $formkit: group
           name: staticResource
           label: 静态资源文件设置
