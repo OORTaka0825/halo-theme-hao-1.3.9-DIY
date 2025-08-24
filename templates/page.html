@@ -6,7 +6,13 @@
                 _permalink = ${singlePage.status.permalink},
                 _cover = ${singlePage.spec.cover},
                 _excerpt = ${singlePage.status.excerpt},
-                _type = 'website')}"></th:block>
+                _type = 'website')}">
+    <style>
+      /* widen custom page when no sidebar */
+      .page .l_main.no-aside{display:grid;grid-template-columns:1fr!important}
+    </style>
+
+</th:block>
 </th:block>
 <th:block th:fragment="content">
 
