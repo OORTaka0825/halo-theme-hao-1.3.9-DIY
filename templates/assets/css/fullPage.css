@@ -155,3 +155,9 @@
 #page-header.full_page.h-25 {
     height: 25vh;
 }
+
+/* height options for full_page */
+#page-header.full_page.h-100 { height: 100vh !important; }
+#page-header.full_page.h-75  { height: 75vh  !important; }
+#page-header.full_page.h-50  { height: 50vh  !important; }
+#page-header.full_page.h-25  { height: 25vh  !important; }

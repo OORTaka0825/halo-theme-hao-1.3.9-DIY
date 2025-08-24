@@ -13,7 +13,7 @@
     <div class="page" id="body-wrap">
         <!-- 头部导航栏 -->
         <!-- FULLPAGE_FORCE_IMPORTANT -->
-<header th:class="${theme.config.top.above.enable_above ? 'full_page' : 'not-top-img'}" th:style="${theme.config.top.above.enable_above} ? 'height:' + theme.config.top.above.full_page_height + ' !important' : null" id="page-header">
+<header th:class="${theme.config.top.above.enable_above ? 'full_page' : 'not-top-img'}" th:style="${theme.config.top.above.enable_above} ? 'height:' + theme.config.top.above.full_page_height + ' !important' : null" th:classappend="${theme.config.top.above.enable_above} ? (theme.config.top.above.full_page_height == '25vh' ? ' h-25' : (theme.config.top.above.full_page_height == '50vh' ? ' h-50' : (theme.config.top.above.full_page_height == '75vh' ? ' h-75' : ' h-100'))) : ''" id="page-header">
             <nav th:replace="~{modules/nav :: nav(title = ${siteTitle})}"></nav>
             <!-- 问候语 -->
             <th:block th:replace="~{modules/header/greeting :: greeting}"></th:block>
