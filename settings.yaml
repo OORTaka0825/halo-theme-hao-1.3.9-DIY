@@ -245,7 +245,22 @@ spec:
               placeholder: 请填写动态壁纸地址
               value: ""
               help: http(s)://xxx.mp4
-            - $formkit: attachment
+            - $formk
+            - $formkit: select
+              if: $get(enable_above).value
+              name: full_page_height
+              label: 铺满屏幕
+              value: "100vh"
+              options:
+                - label: 100%%
+                  value: "100vh"
+                - label: 75%%
+                  value: "75vh"
+                - label: 50%%
+                  value: "50vh"
+                - label: 25%%
+                  value: "25vh"
+it: attachment
               name: index_img
               if: $get(enable_above).value  &&  $get(enable_above_video).value == false
               label: PC背景图
