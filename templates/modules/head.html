@@ -20,9 +20,11 @@
             th:src="@{/assets/libs/fancybox@5.3.7/jquery.fancybox.min.js}"></script>
 
     <!-- 图片点击放大初始化脚本（增量插入） -->
-<!-- 图片点击放大初始化脚本（拦截 IMG 与含图 A；动态建组；首点按需加载；等待库就绪；PJAX 兼容） -->
-<script th:if="${htmlType == 'post'}" data-pjax>
+<!-- 图片点击放大初始化脚本（全局加载：拦截 IMG/含图 A；动态建组；首次按需加载；等待就绪；PJAX 兼容） -->
+<script data-pjax>
+
 (function () {
+  if (window.__fancyboxDelegatedBound) return; window.__fancyboxDelegatedBound = true;
   function ensureFancybox() {
     if (window.jQuery && (window.jQuery.fancybox || (window.jQuery.fn && window.jQuery.fn.fancybox))) {
       return Promise.resolve();
@@ -154,6 +156,7 @@
     }, false);
   });
 })();
+
 </script>
 <script th:src="${assets_link + '/js/heo.js' + theme_version}"></script>
 
