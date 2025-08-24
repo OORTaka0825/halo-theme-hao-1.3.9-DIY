@@ -20,33 +20,7 @@
             <!-- 第一屏 -->
             <th:block th:replace="~{modules/header/index-img :: index-img}"></th:block>
         
-        <!-- FULLPAGE_DEBUG_START -->
-        <script th:inline="javascript">
-        (function(){
-            try {
-                var header = document.getElementById('page-header');
-                var cfgEnable = /*[[${theme.config.top.above.enable_above}]]*/ false;
-                var cfgVideo  = /*[[${theme.config.top.above.enable_above_video}]]*/ false;
-                var cfgHeight = /*[[${theme.config.top.above.full_page_height}]]*/ '100vh';
-
-                if (header) {
-                    header.setAttribute('data-fullpage-enabled', String(cfgEnable));
-                    header.setAttribute('data-fullpage-video', String(cfgVideo));
-                    header.setAttribute('data-fullpage-height', String(cfgHeight));
-                    if (cfgEnable && cfgHeight) {
-                        header.style.setProperty('height', cfgHeight, 'important');
-                    }
-                    var cs = getComputedStyle(header).height;
-                    console.log('[FULLPAGE DEBUG] enable=', cfgEnable, 'video=', cfgVideo, 'height(raw)=', cfgHeight, 'height(computed)=', cs, 'classes=', header.className);
-                } else {
-                    console.log('[FULLPAGE DEBUG] #page-header not found');
-                }
-            } catch (e) {
-                console.log('[FULLPAGE DEBUG] exception', e);
-            }
-        })();
-        </script>
-        <!-- FULLPAGE_DEBUG_END -->
+        
 
         </header>
         <div id="home_top">
