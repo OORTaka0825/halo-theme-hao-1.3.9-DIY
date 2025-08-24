@@ -12,7 +12,8 @@
 
     <div class="page" id="body-wrap">
         <!-- 头部导航栏 -->
-        <header th:class="${theme.config.top.above.enable_above ? 'full_page' : 'not-top-img'}" th:style="${theme.config.top.above.enable_above} ? 'height:' + theme.config.top.above.full_page_height : null" id="page-header">
+        <!-- FULLPAGE_HEIGHT_PATCH -->
+<header th:class="${theme.config.top.above.enable_above ? 'full_page' : 'not-top-img'}" th:style="${theme.config.top.above.enable_above} ? 'height:' + theme.config.top.above.full_page_height : null" id="page-header">
             <nav th:replace="~{modules/nav :: nav(title = ${siteTitle})}"></nav>
             <!-- 问候语 -->
             <th:block th:replace="~{modules/header/greeting :: greeting}"></th:block>
