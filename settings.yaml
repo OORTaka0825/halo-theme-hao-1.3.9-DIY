@@ -211,6 +211,8 @@ spec:
             - $formkit: select
               if: $get(enable_above).value
               name: full_page_height
+              key: full_page_height
+              id: full_page_height
               label: 铺满屏幕
               value: "100vh"
               options:
