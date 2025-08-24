@@ -161,35 +161,7 @@ spec:
             enable_typed_random:
             enable_above_video:
             index_img:
-            - $formkit: select
-              if: $get(enable_above).value
-              name: full_page_height
-              label: 铺满屏幕
-              value: "100vh"
-              options:
-                - label: 100%
-                  value: "100vh"
-                - label: 75%
-                  value: "75vh"
-                - label: 50%
-                  value: "50vh"
-                - label: 25%
-                  value: "25vh"
             phone_index_img:
-            - $formkit: select
-              if: $get(enable_above).value
-              name: full_page_height
-              label: 铺满屏幕
-              value: "100vh"
-              options:
-                - label: 100%
-                  value: "100vh"
-                - label: 75%
-                  value: "75vh"
-                - label: 50%
-                  value: "50vh"
-                - label: 25%
-                  value: "25vh"
             index_video:
           children:
             - $formkit: radio
@@ -236,6 +208,20 @@ spec:
                   value: true
                 - label: 显示图片
                   value: false
+            - $formkit: select
+              if: $get(enable_above).value
+              name: full_page_height
+              label: 铺满屏幕
+              value: "100vh"
+              options:
+                - label: 100%
+                  value: "100vh"
+                - label: 75%
+                  value: "75vh"
+                - label: 50%
+                  value: "50vh"
+                - label: 25%
+                  value: "25vh"
             - $formkit: attachment
               name: index_video
               key: index_video
@@ -245,22 +231,7 @@ spec:
               placeholder: 请填写动态壁纸地址
               value: ""
               help: http(s)://xxx.mp4
-            - $formk
-            - $formkit: select
-              if: $get(enable_above).value
-              name: full_page_height
-              label: 铺满屏幕
-              value: "100vh"
-              options:
-                - label: 100%%
-                  value: "100vh"
-                - label: 75%%
-                  value: "75vh"
-                - label: 50%%
-                  value: "50vh"
-                - label: 25%%
-                  value: "25vh"
-it: attachment
+            - $formkit: attachment
               name: index_img
               if: $get(enable_above).value  &&  $get(enable_above_video).value == false
               label: PC背景图
