@@ -6,17 +6,13 @@
                 _permalink = '',
                 _cover = ${theme.config.other.opengraph.image},
                 _excerpt = ${site.seo.description},
-                _type = 'website')}">
-  <style th:inline="css">
-    #page-header.full_page{ height: [[${theme.config.top.above.first_screen_height}]]vh !important; }
-  </style>
-</th:block>
+                _type = 'website')}"></th:block>
 </th:block>
 <th:block th:fragment="content">
 
     <div class="page" id="body-wrap">
         <!-- 头部导航栏 -->
-        <header th:class="${theme.config.top.above.enable_above ? 'full_page' : 'not-top-img'}" id="page-header">
+        <header th:class="${theme.config.top.above.enable_above ? 'full_page' : 'not-top-img'}" th:style="${theme.config.top.above.enable_above} ? ('height:' + ${theme.config.top.above.full_page_height}) : null" id="page-header">
             <nav th:replace="~{modules/nav :: nav(title = ${siteTitle})}"></nav>
             <!-- 问候语 -->
             <th:block th:replace="~{modules/header/greeting :: greeting}"></th:block>

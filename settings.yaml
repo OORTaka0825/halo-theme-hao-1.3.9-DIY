@@ -161,23 +161,37 @@ spec:
             enable_typed_random:
             enable_above_video:
             index_img:
+            - $formkit: select
+              if: $get(enable_above).value
+              name: full_page_height
+              label: 铺满屏幕
+              value: "100vh"
+              options:
+                - label: 100%
+                  value: "100vh"
+                - label: 75%
+                  value: "75vh"
+                - label: 50%
+                  value: "50vh"
+                - label: 25%
+                  value: "25vh"
             phone_index_img:
+            - $formkit: select
+              if: $get(enable_above).value
+              name: full_page_height
+              label: 铺满屏幕
+              value: "100vh"
+              options:
+                - label: 100%
+                  value: "100vh"
+                - label: 75%
+                  value: "75vh"
+                - label: 50%
+                  value: "50vh"
+                - label: 25%
+                  value: "25vh"
             index_video:
-          children:          - $formkit: select
-            if: $get(enable_above).value
-            name: first_screen_height
-            label: 铺满屏幕
-            value: "100"
-            options:
-              - label: 25%
-                value: "25"
-              - label: 50%
-                value: "50"
-              - label: 75%
-                value: "75"
-              - label: 100%
-                value: "100"
-
+          children:
             - $formkit: radio
               name: enable_above
               key: enable_above
