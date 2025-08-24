@@ -6,39 +6,35 @@
                 _permalink = '',
                 _cover = ${theme.config.other.opengraph.image},
                 _excerpt = ${site.seo.description},
-                _type = 'website')}">
-  <style th:inline="css">
-    #page-header.full_page:has(.pl-container){ height: [[${theme.config.top.above.full_page_height}]] !important; min-height: 100vh; }
-  </style>
-</th:block>
-
-  <script th:inline="javascript">
-    (function(){
-      try{
-        var header = document.getElementById('page-header');
-        var cfgEnable = /*[[${theme.config.top.above.enable_above}]]*/ false;
-        var cfgHeight = /*[[${theme.config.top.above.full_page_height}]]*/ '100vh';
-        if (!header || !cfgEnable) return;
-        var hasPl = header.classList.contains('full_page') && header.querySelector('.pl-container');
-        if (!hasPl) return;
-        var resolvedHeight = String(cfgHeight || '').trim();
-        if (/^100%$/i.test(resolvedHeight)) resolvedHeight = '100vh';
-        header.style.setProperty('height', resolvedHeight, 'important');
-      }catch(e){ console.error(e); }
-    })();
-  </script>
-
+                _type = 'website')}"></th:block>
 </th:block>
 <th:block th:fragment="content">
 
     <div class="page" id="body-wrap">
         <!-- 头部导航栏 -->
-        <header th:class="${theme.config.top.above.enable_above ? 'full_page' : 'not-top-img'}" id="page-header" th:style="${theme.config.top.above.enable_above} ? ('height:' + theme.config.top.above.full_page_height + ' !important') : null">
+        
+<header th:class="${theme.config.top.above.enable_above ? 'full_page' : 'not-top-img'}" th:style="${theme.config.top.above.enable_above} ? 'height:' + theme.config.top.above.full_page_height + ' !important' : null" th:classappend="${theme.config.top.above.enable_above} ? (theme.config.top.above.full_page_height == '25vh' ? ' h-25' : (theme.config.top.above.full_page_height == '50vh' ? ' h-50' : (theme.config.top.above.full_page_height == '75vh' ? ' h-75' : ' h-100'))) : ''" id="page-header">
             <nav th:replace="~{modules/nav :: nav(title = ${siteTitle})}"></nav>
             <!-- 问候语 -->
             <th:block th:replace="~{modules/header/greeting :: greeting}"></th:block>
             <!-- 第一屏 -->
             <th:block th:replace="~{modules/header/index-img :: index-img}"></th:block>
+        
+        
+        <script th:inline="javascript">
+        (function(){
+            try {
+                var header = document.getElementById('page-header');
+                var cfgEnable = /*[[${theme.config.top.above.enable_above}]]*/ false;
+                var cfgHeight = /*[[${theme.config.top.above.full_page_height}]]*/ '100vh';
+                if (header && cfgEnable && cfgHeight) {
+                    header.style.setProperty('height', cfgHeight, 'important');
+                }
+            } catch (e) {}
+        })();
+        </script>
+    
+
         </header>
         <div id="home_top">
             <!-- 每日说说 -->
