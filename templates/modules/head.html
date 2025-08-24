@@ -20,10 +20,9 @@
             th:src="@{/assets/libs/fancybox@5.3.7/jquery.fancybox.min.js}"></script>
 
     <!-- 图片点击放大初始化脚本（增量插入） -->
-<!-- 图片点击放大初始化脚本（点击 IMG 即开灯箱；首点按需加载；PJAX 兼容） -->
+<!-- 图片点击放大初始化脚本（点击 IMG 即开灯箱；首点按需加载；等待库就绪；PJAX 兼容） -->
 <script th:if="${htmlType == 'post'}" data-pjax>
 (function () {
-  // 仅当点击文章内容中的 IMG（非 .no-lightbox/.avatar/.emoji）时，动态构建画廊并打开
   function ensureFancybox() {
     if (window.jQuery && (window.jQuery.fancybox || (window.jQuery.fn && window.jQuery.fn.fancybox))) {
       return Promise.resolve();
@@ -49,8 +48,48 @@
     return window.__fancyboxLoadingPromise;
   }
 
-  function getImgSrc(img) {
-    return img.getAttribute('data-lazy-src') || img.getAttribute('data-src') || img.getAttribute('src');
+  function waitForFancyboxReady(timeoutMs){
+    timeoutMs = timeoutMs || 2000;
+    var start = performance.now();
+    return new Promise(function(resolve, reject){
+      (function check(){
+        var ok = window.jQuery && (window.jQuery.fancybox || (window.jQuery.fn && window.jQuery.fn.fancybox));
+        if (ok) return resolve();
+        if (performance.now() - start > timeoutMs) return reject(new Error('fancybox not ready'));
+        requestAnimationFrame(check);
+      })();
+    });
+  }
+
+  function gatherItems(container){
+    var imgs = Array.prototype.slice.call(container.querySelectorAll('img:not(.no-lightbox):not(.avatar):not(.emoji)'));
+    return imgs.map(function(im){
+      var src = im.getAttribute('data-lazy-src') || im.getAttribute('data-src') || im.getAttribute('src');
+      return { src: src, opts: { caption: im.getAttribute('alt') || '' } };
+    });
+  }
+
+  function openForImage(img){
+    var container = document.querySelector('#article-container');
+    if (!container) return;
+    var imgs = Array.prototype.slice.call(container.querySelectorAll('img:not(.no-lightbox):not(.avatar):not(.emoji)'));
+    if (imgs.length === 0) return;
+
+    var items = gatherItems(container);
+    var startIndex = Math.max(0, imgs.indexOf(img));
+
+    var $ = window.jQuery;
+    // 兜底配置
+    $.fancybox.defaults.hash = false;
+    $.fancybox.defaults.backFocus = false;
+
+    $.fancybox.open(items, {
+      loop: true,
+      protect: true,
+      transitionEffect: 'slide',
+      hash: false,
+      backFocus: false
+    }, startIndex);
   }
 
   function onDocClick(e){
@@ -58,47 +97,21 @@
     if (!img) return;
     if (img.classList.contains('no-lightbox') || img.classList.contains('avatar') || img.classList.contains('emoji')) return;
 
-    // 如果被包在链接里，让我们接管；避免默认跳转/PJAX
+    // 拦截默认行为和 PJAX
     e.preventDefault();
     e.stopPropagation();
 
-    var container = document.querySelector('#article-container');
-    if (!container) return;
-
-    // 收集该文章内的所有图片，作为一个组
-    var imgs = Array.prototype.slice.call(container.querySelectorAll('img:not(.no-lightbox):not(.avatar):not(.emoji)'));
-    if (imgs.length === 0) return;
-
-    var items = imgs.map(function(im){
-      return {
-        src: getImgSrc(im),
-        opts: { caption: im.getAttribute('alt') || '' }
-      };
-    });
-    var startIndex = Math.max(0, imgs.indexOf(img));
-
-    ensureFancybox().then(function () {
-      var $ = window.jQuery;
-      if (!($ && ($.fancybox || ($.fn && $.fn.fancybox)))) return;
-      // 全局兜底
-      $.fancybox.defaults.hash = false;
-      $.fancybox.defaults.backFocus = false;
-
-      $.fancybox.open(items, {
-        loop: true,
-        protect: true,
-        transitionEffect: 'slide',
-        hash: false,
-        backFocus: false
-      }, startIndex);
-    });
+    // 确保库 → 等库就绪 → 打开
+    ensureFancybox()
+      .then(function(){ return waitForFancyboxReady(3000); })
+      .then(function(){ openForImage(img); })
+      .catch(function(err){ console && console.warn && console.warn('[fancybox]', err); });
   }
 
-  // 绑定在捕获阶段，优先于可能的导航/PJAX
+  // 绑定在捕获阶段，优先于导航/PJAX
   document.addEventListener('click', onDocClick, true);
 
-  // PJAX 后不需要重新绑定，因为是委托；但首次进入后图片列表会不同，无需额外处理
-  // 仍然可在 PJAX 完成时预加载样式以避免闪烁（可选）
+  // 可选：PJAX 完成后预加载 CSS，提升首次点击体验
   ['pjax:complete','pjax:end','pjax:success'].forEach(function(ev){
     document.addEventListener(ev, function(){
       if (!document.querySelector('link[href*="jquery.fancybox.min.css"]')) {
