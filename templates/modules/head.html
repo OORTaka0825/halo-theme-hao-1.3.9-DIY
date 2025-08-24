@@ -20,41 +20,11 @@
             th:src="@{/assets/libs/fancybox@5.3.7/jquery.fancybox.min.js}"></script>
 
     <!-- 图片点击放大初始化脚本（增量插入） -->
-<!-- 图片点击放大初始化脚本（按需加载 + PJAX 友好） -->
+<!-- 图片点击放大初始化脚本（委托点击 + PJAX 兼容 + 不依赖时序） -->
 <script th:if="${htmlType == 'post'}" data-pjax>
 (function () {
-  // 1) 按需加载 Fancybox（首进文章页时，如果还没加载，就动态加载）
-  function ensureFancybox(done) {
-    // 已存在直接走回调（兼容 $.fancybox 和 jQuery.fn.fancybox 两种挂载）
-    if (window.jQuery && (window.jQuery.fancybox || (window.jQuery.fn && window.jQuery.fn.fancybox))) {
-      return done && done();
-    }
-    var cssHref = "[[@{/assets/libs/fancybox@5.3.7/jquery.fancybox.min.css}]]";
-    var jsSrc  = "[[@{/assets/libs/fancybox@5.3.7/jquery.fancybox.min.js}]]";
-
-    // 补 CSS（只插一次）
-    if (!document.querySelector('link[href*="jquery.fancybox.min.css"]')) {
-      var link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = cssHref;
-      document.head.appendChild(link);
-    }
-    // 复用加载中的 Promise，避免多次触发
-    if (window.__fancyboxLoadingPromise) {
-      return window.__fancyboxLoadingPromise.then(function(){ done && done(); });
-    }
-    // 动态加载 JS
-    window.__fancyboxLoadingPromise = new Promise(function (resolve, reject) {
-      var s = document.createElement('script');
-      s.src = jsSrc;
-      s.onload = function(){ resolve(); };
-      s.onerror = reject;
-      document.head.appendChild(s);
-    }).then(function(){ done && done(); });
-  }
-
-  // 2) 包裹并绑定
-  function wrapAndBind($root) {
+  // 包裹图片：给文章内图片加上 data-fancybox 分组
+  function prepare($root) {
     if (!window.jQuery) return;
     var $ = window.jQuery;
     var $imgs = $root.find('#article-container img:not(.no-lightbox):not(.avatar):not(.emoji)');
@@ -73,7 +43,7 @@
         $p.attr('href', src)
           .attr('data-fancybox', 'post-gallery')
           .attr('data-caption', alt)
-          .attr('data-pjax', 'ignore'); // 保险：避免 PJAX 接管
+          .attr('data-pjax', 'ignore');
       } else if ($p.length === 0) {
         $img.wrap($('<a/>', {
           href: src,
@@ -83,50 +53,56 @@
         }));
       }
     });
+  }
 
-    // 初始化（v3）
-    if ($.fancybox) {
-      // 全局兜底，避免 hash 与焦点回退导致 PJAX 误触
-      $.fancybox.defaults.hash = false;
-      $.fancybox.defaults.backFocus = false;
-      $('[data-fancybox="post-gallery"]').fancybox({
-        loop: true,
-        buttons: ['slideShow', 'fullScreen', 'thumbs', 'zoom', 'close'],
-        protect: true,
-        transitionEffect: 'slide',
-        hash: false,
-        backFocus: false
-      });
+  // 委托点击：统一用 $.fancybox.open 打开，避免每次调用 $().fancybox() 的时序问题
+  function onDelegatedClick(e){
+    var a = e.target.closest && e.target.closest('a[data-fancybox]');
+    if (!a) return;
+    if (!window.jQuery || !window.jQuery.fancybox) return; // 库未就绪则不处理
+    e.preventDefault();
+
+    var group = a.getAttribute('data-fancybox') || 'post-gallery';
+    var anchors = Array.prototype.slice.call(document.querySelectorAll('a[data-fancybox="' + group + '"]'));
+    var items = anchors.map(function(el){
+      return { src: el.getAttribute('href'), opts: { caption: el.getAttribute('data-caption') || '' } };
+    });
+    var startIndex = Math.max(0, anchors.indexOf(a));
+
+    // 全局兜底配置
+    window.jQuery.fancybox.defaults.hash = false;
+    window.jQuery.fancybox.defaults.backFocus = false;
+
+    window.jQuery.fancybox.open(items, {
+      loop: true,
+      protect: true,
+      transitionEffect: 'slide',
+      hash: false,
+      backFocus: false
+    }, startIndex);
+  }
+
+  function run(ctx){
+    if (window.jQuery) {
+      window.jQuery(function(){ prepare(window.jQuery(document)); });
+    } else {
+      document.addEventListener('DOMContentLoaded', function(){ prepare(window.jQuery(document)); });
     }
   }
 
-  // 3) 统一入口：先确保 fancybox，再绑定
-  function ensureAndBind(ctx) {
-    ensureFancybox(function(){ wrapAndBind(ctx || window.jQuery(document)); });
-  }
+  // 首次
+  run();
 
-  // 首次进入文章页（直达或 PJAX）
-  if (window.jQuery) {
-    window.jQuery(function(){ ensureAndBind(window.jQuery(document)); });
-  } else {
-    document.addEventListener('DOMContentLoaded', function(){ ensureAndBind(window.jQuery(document)); });
-  }
-
-  // PJAX 切文章：再次按需加载并绑定
-  document.addEventListener('pjax:complete', function () {
-    ensureAndBind(window.jQuery(document));
+  // PJAX 事件兼容：不同主题可能触发的事件名不一样，这里一网打尽
+  ['pjax:complete','pjax:end','pjax:success'].forEach(function(ev){
+    document.addEventListener(ev, function(){ run(); }, false);
   });
 
-  // 兜底：阻止 a[data-fancybox] 当普通链接跳转
-  document.addEventListener('click', function(e){
-    var a = e.target.closest && e.target.closest('a[data-fancybox]');
-    if (a) e.preventDefault();
-  }, true);
+  // 委托点击绑定（一次性绑定在捕获阶段）
+  document.addEventListener('click', onDelegatedClick, true);
 })();
 </script>
-
-
-    <script th:src="${assets_link + '/js/heo.js' + theme_version}"></script>
+<script th:src="${assets_link + '/js/heo.js' + theme_version}"></script>
 
     <script th:src="${assets_link + '/js/halo.js' + theme_version}"></script>
 
