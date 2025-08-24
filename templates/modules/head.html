@@ -10,6 +10,64 @@
           th:href="@{${#strings.isEmpty(site.favicon) ? assets_link + '/images/hao-logo.jpg' : site.favicon}}"/>
     <script src="/themes/theme-hao/assets/libs/jquery.min.js"></script>
 
+    <!-- Fancybox 图片灯箱效果，仅文章页加载（增量插入） -->
+    <link th:if="${htmlType == 'post'}"
+          rel="stylesheet"
+          th:href="@{/assets/libs/fancybox@5.3.7/jquery.fancybox.min.css}" />
+
+    <script th:if="${htmlType == 'post'}"
+            data-pjax
+            th:src="@{/assets/libs/fancybox@5.3.7/jquery.fancybox.min.js}"></script>
+
+    <!-- 图片点击放大初始化脚本（增量插入） -->
+    <script th:if="${htmlType == 'post'}" data-pjax>
+      (function () {
+        function wrapAndBind($root) {
+          var $imgs = $root.find('#article-container img:not(.no-lightbox):not(.avatar):not(.emoji)');
+          if ($imgs.length === 0) return;
+
+          $imgs.each(function () {
+            var $img = $(this);
+            if ($img.parent('a[data-fancybox]').length) return;
+
+            var src = $img.attr('data-lazy-src') || $img.attr('data-src') || $img.attr('src');
+            if (!src) return;
+
+            var alt = $img.attr('alt') || '';
+            var $p = $img.parent('a');
+            if ($p.length && !$p.attr('data-fancybox')) {
+              $p.attr('href', src)
+                .attr('data-fancybox', 'post-gallery')
+                .attr('data-caption', alt);
+            } else if ($p.length === 0) {
+              $img.wrap(
+                $('<a/>', {
+                  href: src,
+                  'data-fancybox': 'post-gallery',
+                  'data-caption': alt
+                })
+              );
+            }
+          });
+
+          if ($.fancybox) {
+            $('[data-fancybox="post-gallery"]').fancybox({
+              loop: true,
+              buttons: ['slideShow', 'fullScreen', 'thumbs', 'zoom', 'close'],
+              protect: true,
+              transitionEffect: 'slide'
+            });
+          }
+        }
+
+        $(function () { wrapAndBind($(document)); });
+        document.addEventListener('pjax:complete', function () {
+          wrapAndBind($(document));
+        });
+      })();
+    </script>
+
+
     <script th:src="${assets_link + '/js/heo.js' + theme_version}"></script>
 
     <script th:src="${assets_link + '/js/halo.js' + theme_version}"></script>
