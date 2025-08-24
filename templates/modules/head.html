@@ -20,58 +20,23 @@
             th:src="@{/assets/libs/fancybox@5.3.7/jquery.fancybox.min.js}"></script>
 
     <!-- 图片点击放大初始化脚本（增量插入） -->
-<!-- 图片点击放大初始化脚本（委托点击 + 首次点击按需加载 + PJAX 兼容） -->
+<!-- 图片点击放大初始化脚本（点击 IMG 即开灯箱；首点按需加载；PJAX 兼容） -->
 <script th:if="${htmlType == 'post'}" data-pjax>
 (function () {
-  // 包裹图片：给文章内图片加上 data-fancybox 分组
-  function prepare($root) {
-    if (!window.jQuery) return;
-    var $ = window.jQuery;
-    var $imgs = $root.find('#article-container img:not(.no-lightbox):not(.avatar):not(.emoji)');
-    if ($imgs.length === 0) return;
-
-    $imgs.each(function () {
-      var $img = $(this);
-      if ($img.parent('a[data-fancybox]').length) return;
-
-      var src = $img.attr('data-lazy-src') || $img.attr('data-src') || $img.attr('src');
-      if (!src) return;
-
-      var alt = $img.attr('alt') || '';
-      var $p = $img.parent('a');
-      if ($p.length && !$p.attr('data-fancybox')) {
-        $p.attr('href', src)
-          .attr('data-fancybox', 'post-gallery')
-          .attr('data-caption', alt)
-          .attr('data-pjax', 'ignore');
-      } else if ($p.length === 0) {
-        $img.wrap($('<a/>', {
-          href: src,
-          'data-fancybox': 'post-gallery',
-          'data-caption': alt,
-          'data-pjax': 'ignore'
-        }));
-      }
-    });
-  }
-
-  // 确保 Fancybox 资源（CSS/JS）加载：返回 Promise
+  // 仅当点击文章内容中的 IMG（非 .no-lightbox/.avatar/.emoji）时，动态构建画廊并打开
   function ensureFancybox() {
-    // 已就绪（兼容 $.fancybox 和 jQuery.fn.fancybox）
     if (window.jQuery && (window.jQuery.fancybox || (window.jQuery.fn && window.jQuery.fn.fancybox))) {
       return Promise.resolve();
     }
     var cssHref = "[[@{/assets/libs/fancybox@5.3.7/jquery.fancybox.min.css}]]";
     var jsSrc  = "[[@{/assets/libs/fancybox@5.3.7/jquery.fancybox.min.js}]]";
 
-    // 补 CSS（只插一次）
     if (!document.querySelector('link[href*="jquery.fancybox.min.css"]')) {
       var link = document.createElement('link');
       link.rel = 'stylesheet';
       link.href = cssHref;
       document.head.appendChild(link);
     }
-
     if (window.__fancyboxLoadingPromise) return window.__fancyboxLoadingPromise;
 
     window.__fancyboxLoadingPromise = new Promise(function (resolve, reject) {
@@ -84,62 +49,66 @@
     return window.__fancyboxLoadingPromise;
   }
 
-  // 使用 $.fancybox.open 打开当前分组
-  function openFancyboxForAnchor(a) {
-    if (!a) return;
-    var group = a.getAttribute('data-fancybox') || 'post-gallery';
-    var anchors = Array.prototype.slice.call(document.querySelectorAll('a[data-fancybox="' + group + '"]'));
-    var items = anchors.map(function(el){
-      return { src: el.getAttribute('href'), opts: { caption: el.getAttribute('data-caption') || '' } };
-    });
-    var startIndex = Math.max(0, anchors.indexOf(a));
-
-    // 全局兜底配置
-    var $ = window.jQuery;
-    $.fancybox.defaults.hash = false;
-    $.fancybox.defaults.backFocus = false;
-
-    $.fancybox.open(items, {
-      loop: true,
-      protect: true,
-      transitionEffect: 'slide',
-      hash: false,
-      backFocus: false
-    }, startIndex);
+  function getImgSrc(img) {
+    return img.getAttribute('data-lazy-src') || img.getAttribute('data-src') || img.getAttribute('src');
   }
 
-  // 委托点击：若库未就绪则先加载，加载完成后再打开
-  function onDelegatedClick(e){
-    var a = e.target.closest && e.target.closest('a[data-fancybox]');
-    if (!a) return;
+  function onDocClick(e){
+    var img = e.target.closest && e.target.closest('#article-container img');
+    if (!img) return;
+    if (img.classList.contains('no-lightbox') || img.classList.contains('avatar') || img.classList.contains('emoji')) return;
+
+    // 如果被包在链接里，让我们接管；避免默认跳转/PJAX
     e.preventDefault();
+    e.stopPropagation();
 
-    // 若未准备好，先保障资源加载，再打开
-    if (!(window.jQuery && (window.jQuery.fancybox || (window.jQuery.fn && window.jQuery.fn.fancybox)))) {
-      ensureFancybox().then(function(){ openFancyboxForAnchor(a); });
-    } else {
-      openFancyboxForAnchor(a);
-    }
+    var container = document.querySelector('#article-container');
+    if (!container) return;
+
+    // 收集该文章内的所有图片，作为一个组
+    var imgs = Array.prototype.slice.call(container.querySelectorAll('img:not(.no-lightbox):not(.avatar):not(.emoji)'));
+    if (imgs.length === 0) return;
+
+    var items = imgs.map(function(im){
+      return {
+        src: getImgSrc(im),
+        opts: { caption: im.getAttribute('alt') || '' }
+      };
+    });
+    var startIndex = Math.max(0, imgs.indexOf(img));
+
+    ensureFancybox().then(function () {
+      var $ = window.jQuery;
+      if (!($ && ($.fancybox || ($.fn && $.fn.fancybox)))) return;
+      // 全局兜底
+      $.fancybox.defaults.hash = false;
+      $.fancybox.defaults.backFocus = false;
+
+      $.fancybox.open(items, {
+        loop: true,
+        protect: true,
+        transitionEffect: 'slide',
+        hash: false,
+        backFocus: false
+      }, startIndex);
+    });
   }
 
-  function run(){
-    if (window.jQuery) {
-      window.jQuery(function(){ prepare(window.jQuery(document)); });
-    } else {
-      document.addEventListener('DOMContentLoaded', function(){ prepare(window.jQuery(document)); });
-    }
-  }
+  // 绑定在捕获阶段，优先于可能的导航/PJAX
+  document.addEventListener('click', onDocClick, true);
 
-  // 首次
-  run();
-
-  // PJAX 事件兼容：不同主题可能触发的事件名不一样，这里一网打尽
+  // PJAX 后不需要重新绑定，因为是委托；但首次进入后图片列表会不同，无需额外处理
+  // 仍然可在 PJAX 完成时预加载样式以避免闪烁（可选）
   ['pjax:complete','pjax:end','pjax:success'].forEach(function(ev){
-    document.addEventListener(ev, function(){ run(); }, false);
+    document.addEventListener(ev, function(){
+      if (!document.querySelector('link[href*="jquery.fancybox.min.css"]')) {
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = "[[@{/assets/libs/fancybox@5.3.7/jquery.fancybox.min.css}]]";
+        document.head.appendChild(link);
+      }
+    }, false);
   });
-
-  // 委托点击绑定（一次性绑定在捕获阶段）
-  document.addEventListener('click', onDelegatedClick, true);
 })();
 </script>
 <script th:src="${assets_link + '/js/heo.js' + theme_version}"></script>
