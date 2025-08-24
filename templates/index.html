@@ -8,9 +8,26 @@
                 _excerpt = ${site.seo.description},
                 _type = 'website')}">
   <style th:inline="css">
-    #page-header.full_page:has(.pl-container){ height: [[${theme.config.top.above.full_page_height}]] !important; }
+    #page-header.full_page:has(.pl-container){ height: [[${theme.config.top.above.full_page_height}]] !important; min-height: 100vh; }
   </style>
 </th:block>
+
+  <script th:inline="javascript">
+    (function(){
+      try{
+        var header = document.getElementById('page-header');
+        var cfgEnable = /*[[${theme.config.top.above.enable_above}]]*/ false;
+        var cfgHeight = /*[[${theme.config.top.above.full_page_height}]]*/ '100vh';
+        if (!header || !cfgEnable) return;
+        var hasPl = header.classList.contains('full_page') && header.querySelector('.pl-container');
+        if (!hasPl) return;
+        var resolvedHeight = String(cfgHeight || '').trim();
+        if (/^100%$/i.test(resolvedHeight)) resolvedHeight = '100vh';
+        header.style.setProperty('height', resolvedHeight, 'important');
+      }catch(e){ console.error(e); }
+    })();
+  </script>
+
 </th:block>
 <th:block th:fragment="content">
 
