@@ -12,6 +12,38 @@
       .page .l_main.no-aside{display:grid;grid-template-columns:1fr!important}
     </style>
 
+
+    <style>
+      /* widen custom page when no sidebar */
+      .page .l_main.no-aside{display:grid;grid-template-columns:1fr!important}
+      /* broaden page containers to avoid narrow content */
+      .page .container,
+      .page .page-container,
+      .page .content-inner,
+      .page .l_main,
+      .page .main-content {
+        max-width: 1280px !important;
+        width: 100% !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+      }
+      /* if theme uses a fixed content width on article, relax it */
+      .page .post-content,
+      .page .article,
+      .page .page-content {
+        max-width: 100% !important;
+        width: 100% !important;
+      }
+    </style>
+
+
+    <style>
+      /* Override theme narrow width on custom pages without sidebar */
+      .page #content-inner.layout.hide-aside { max-width: 1280px !important; }
+      /* Ensure inner column uses full width */
+      .page #content-inner.layout.hide-aside > div { width: 100% !important; }
+    </style>
+
 </th:block>
 </th:block>
 <th:block th:fragment="content">
