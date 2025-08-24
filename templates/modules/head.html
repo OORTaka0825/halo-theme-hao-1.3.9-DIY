@@ -20,7 +20,7 @@
             th:src="@{/assets/libs/fancybox@5.3.7/jquery.fancybox.min.js}"></script>
 
     <!-- 图片点击放大初始化脚本（增量插入） -->
-<!-- 图片点击放大初始化脚本（点击 IMG 即开灯箱；首点按需加载；等待库就绪；PJAX 兼容） -->
+<!-- 图片点击放大初始化脚本（拦截 IMG 与含图 A；动态建组；首点按需加载；等待库就绪；PJAX 兼容） -->
 <script th:if="${htmlType == 'post'}" data-pjax>
 (function () {
   function ensureFancybox() {
@@ -49,7 +49,7 @@
   }
 
   function waitForFancyboxReady(timeoutMs){
-    timeoutMs = timeoutMs || 2000;
+    timeoutMs = timeoutMs || 3000;
     var start = performance.now();
     return new Promise(function(resolve, reject){
       (function check(){
@@ -61,57 +61,88 @@
     });
   }
 
-  function gatherItems(container){
-    var imgs = Array.prototype.slice.call(container.querySelectorAll('img:not(.no-lightbox):not(.avatar):not(.emoji)'));
-    return imgs.map(function(im){
-      var src = im.getAttribute('data-lazy-src') || im.getAttribute('data-src') || im.getAttribute('src');
-      return { src: src, opts: { caption: im.getAttribute('alt') || '' } };
-    });
+  function getSrcFromImgOrAnchor(el){
+    if (!el) return null;
+    if (el.tagName === 'IMG') {
+      return el.getAttribute('data-lazy-src') || el.getAttribute('data-src') || el.getAttribute('src');
+    }
+    if (el.tagName === 'A') {
+      // prefer href; fall back to contained img
+      var href = el.getAttribute('href');
+      if (href) return href;
+      var im = el.querySelector('img');
+      if (im) return getSrcFromImgOrAnchor(im);
+    }
+    return null;
   }
 
-  function openForImage(img){
-    var container = document.querySelector('#article-container');
-    if (!container) return;
-    var imgs = Array.prototype.slice.call(container.querySelectorAll('img:not(.no-lightbox):not(.avatar):not(.emoji)'));
-    if (imgs.length === 0) return;
-
-    var items = gatherItems(container);
-    var startIndex = Math.max(0, imgs.indexOf(img));
-
-    var $ = window.jQuery;
-    // 兜底配置
-    $.fancybox.defaults.hash = false;
-    $.fancybox.defaults.backFocus = false;
-
-    $.fancybox.open(items, {
-      loop: true,
-      protect: true,
-      transitionEffect: 'slide',
-      hash: false,
-      backFocus: false
-    }, startIndex);
+  function isImageLink(url){
+    if (!url) return false;
+    return /\.(jpe?g|png|webp|gif|bmp|svg)(\?.*)?$/i.test(url) || url.startsWith('blob:') || url.startsWith('data:image');
   }
 
   function onDocClick(e){
+    // 1) 目标可能是 IMG，也可能是包含 IMG 的 A，或者直接是指向图片的 A
     var img = e.target.closest && e.target.closest('#article-container img');
-    if (!img) return;
-    if (img.classList.contains('no-lightbox') || img.classList.contains('avatar') || img.classList.contains('emoji')) return;
+    var a   = e.target.closest && e.target.closest('#article-container a');
 
-    // 拦截默认行为和 PJAX
+    // 忽略特定类
+    if (img && (img.classList.contains('no-lightbox') || img.classList.contains('avatar') || img.classList.contains('emoji'))) return;
+
+    // 判断是否是我们要接管的点击
+    var candidate = null;
+    if (img) {
+      candidate = img;
+    } else if (a) {
+      // 如果是 A，必须是含图或直链图片
+      if (a.querySelector('img')) candidate = a;
+      else {
+        var href = a.getAttribute('href');
+        if (isImageLink(href)) candidate = a;
+      }
+    }
+    if (!candidate) return;
+
+    // 接管，避免默认跳转/PJAX
     e.preventDefault();
     e.stopPropagation();
 
-    // 确保库 → 等库就绪 → 打开
+    var container = document.querySelector('#article-container');
+    if (!container) return;
+
+    // 2) 构建当前文章的图片组（按 DOM 顺序）
+    var imgs = Array.prototype.slice.call(container.querySelectorAll('img:not(.no-lightbox):not(.avatar):not(.emoji)'));
+    var items = imgs.map(function(im){
+      return { src: getSrcFromImgOrAnchor(im), opts: { caption: im.getAttribute('alt') || '' } };
+    }).filter(function(it){ return !!it.src; });
+
+    // 找到起始索引：如果点的是 A，则找其内部 IMG 或 href 对应的 src
+    var startSrc = getSrcFromImgOrAnchor(candidate);
+    var startIndex = Math.max(0, items.findIndex(function(it){ return it.src === startSrc; }));
+    if (startIndex < 0) startIndex = 0;
+
+    // 3) 确保库加载并就绪，再打开
     ensureFancybox()
-      .then(function(){ return waitForFancyboxReady(3000); })
-      .then(function(){ openForImage(img); })
+      .then(function(){ return waitForFancyboxReady(4000); })
+      .then(function(){
+        var $ = window.jQuery;
+        $.fancybox.defaults.hash = false;
+        $.fancybox.defaults.backFocus = false;
+        $.fancybox.open(items, {
+          loop: true,
+          protect: true,
+          transitionEffect: 'slide',
+          hash: false,
+          backFocus: false
+        }, startIndex);
+      })
       .catch(function(err){ console && console.warn && console.warn('[fancybox]', err); });
   }
 
-  // 绑定在捕获阶段，优先于导航/PJAX
+  // 捕获阶段优先接管
   document.addEventListener('click', onDocClick, true);
 
-  // 可选：PJAX 完成后预加载 CSS，提升首次点击体验
+  // PJAX 完成时预加载样式（非必须）
   ['pjax:complete','pjax:end','pjax:success'].forEach(function(ev){
     document.addEventListener(ev, function(){
       if (!document.querySelector('link[href*="jquery.fancybox.min.css"]')) {
