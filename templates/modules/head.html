@@ -20,7 +20,7 @@
             th:src="@{/assets/libs/fancybox@5.3.7/jquery.fancybox.min.js}"></script>
 
     <!-- 图片点击放大初始化脚本（增量插入） -->
-<!-- 图片点击放大初始化脚本（委托点击 + PJAX 兼容 + 不依赖时序） -->
+<!-- 图片点击放大初始化脚本（委托点击 + 首次点击按需加载 + PJAX 兼容） -->
 <script th:if="${htmlType == 'post'}" data-pjax>
 (function () {
   // 包裹图片：给文章内图片加上 data-fancybox 分组
@@ -55,13 +55,38 @@
     });
   }
 
-  // 委托点击：统一用 $.fancybox.open 打开，避免每次调用 $().fancybox() 的时序问题
-  function onDelegatedClick(e){
-    var a = e.target.closest && e.target.closest('a[data-fancybox]');
-    if (!a) return;
-    if (!window.jQuery || !window.jQuery.fancybox) return; // 库未就绪则不处理
-    e.preventDefault();
+  // 确保 Fancybox 资源（CSS/JS）加载：返回 Promise
+  function ensureFancybox() {
+    // 已就绪（兼容 $.fancybox 和 jQuery.fn.fancybox）
+    if (window.jQuery && (window.jQuery.fancybox || (window.jQuery.fn && window.jQuery.fn.fancybox))) {
+      return Promise.resolve();
+    }
+    var cssHref = "[[@{/assets/libs/fancybox@5.3.7/jquery.fancybox.min.css}]]";
+    var jsSrc  = "[[@{/assets/libs/fancybox@5.3.7/jquery.fancybox.min.js}]]";
 
+    // 补 CSS（只插一次）
+    if (!document.querySelector('link[href*="jquery.fancybox.min.css"]')) {
+      var link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = cssHref;
+      document.head.appendChild(link);
+    }
+
+    if (window.__fancyboxLoadingPromise) return window.__fancyboxLoadingPromise;
+
+    window.__fancyboxLoadingPromise = new Promise(function (resolve, reject) {
+      var s = document.createElement('script');
+      s.src = jsSrc;
+      s.onload = function(){ resolve(); };
+      s.onerror = reject;
+      document.head.appendChild(s);
+    });
+    return window.__fancyboxLoadingPromise;
+  }
+
+  // 使用 $.fancybox.open 打开当前分组
+  function openFancyboxForAnchor(a) {
+    if (!a) return;
     var group = a.getAttribute('data-fancybox') || 'post-gallery';
     var anchors = Array.prototype.slice.call(document.querySelectorAll('a[data-fancybox="' + group + '"]'));
     var items = anchors.map(function(el){
@@ -70,10 +95,11 @@
     var startIndex = Math.max(0, anchors.indexOf(a));
 
     // 全局兜底配置
-    window.jQuery.fancybox.defaults.hash = false;
-    window.jQuery.fancybox.defaults.backFocus = false;
+    var $ = window.jQuery;
+    $.fancybox.defaults.hash = false;
+    $.fancybox.defaults.backFocus = false;
 
-    window.jQuery.fancybox.open(items, {
+    $.fancybox.open(items, {
       loop: true,
       protect: true,
       transitionEffect: 'slide',
@@ -82,7 +108,21 @@
     }, startIndex);
   }
 
-  function run(ctx){
+  // 委托点击：若库未就绪则先加载，加载完成后再打开
+  function onDelegatedClick(e){
+    var a = e.target.closest && e.target.closest('a[data-fancybox]');
+    if (!a) return;
+    e.preventDefault();
+
+    // 若未准备好，先保障资源加载，再打开
+    if (!(window.jQuery && (window.jQuery.fancybox || (window.jQuery.fn && window.jQuery.fn.fancybox)))) {
+      ensureFancybox().then(function(){ openFancyboxForAnchor(a); });
+    } else {
+      openFancyboxForAnchor(a);
+    }
+  }
+
+  function run(){
     if (window.jQuery) {
       window.jQuery(function(){ prepare(window.jQuery(document)); });
     } else {
