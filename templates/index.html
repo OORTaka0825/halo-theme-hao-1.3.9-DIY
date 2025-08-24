@@ -8,7 +8,7 @@
                 _excerpt = ${site.seo.description},
                 _type = 'website')}">
   <style th:inline="css">
-    #page-header.full_page{ height: [[${theme.config.top.above.first_screen_height}]]vh !important; }
+    #page-header.full_page:has(.pl-container){ height: [[${theme.config.top.above.first_screen_height}]]vh !important; }
   </style>
 </th:block>
 </th:block>
