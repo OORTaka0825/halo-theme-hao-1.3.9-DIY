@@ -6,45 +6,7 @@
                 _permalink = ${singlePage.status.permalink},
                 _cover = ${singlePage.spec.cover},
                 _excerpt = ${singlePage.status.excerpt},
-                _type = 'website')}">
-    <style>
-      /* widen custom page when no sidebar */
-      .page .l_main.no-aside{display:grid;grid-template-columns:1fr!important}
-    </style>
-
-
-    <style>
-      /* widen custom page when no sidebar */
-      .page .l_main.no-aside{display:grid;grid-template-columns:1fr!important}
-      /* broaden page containers to avoid narrow content */
-      .page .container,
-      .page .page-container,
-      .page .content-inner,
-      .page .l_main,
-      .page .main-content {
-        max-width: 1280px !important;
-        width: 100% !important;
-        margin-left: auto !important;
-        margin-right: auto !important;
-      }
-      /* if theme uses a fixed content width on article, relax it */
-      .page .post-content,
-      .page .article,
-      .page .page-content {
-        max-width: 100% !important;
-        width: 100% !important;
-      }
-    </style>
-
-
-    <style>
-      /* Override theme narrow width on custom pages without sidebar */
-      .page #content-inner.layout.hide-aside { max-width: 1280px !important; }
-      /* Ensure inner column uses full width */
-      .page #content-inner.layout.hide-aside > div { width: 100% !important; }
-    </style>
-
-</th:block>
+                _type = 'website')}"></th:block>
 </th:block>
 <th:block th:fragment="content">
 
@@ -54,7 +16,7 @@
         <header class="not-top-img" id="page-header">
             <nav th:replace="~{modules/nav :: nav(title = ${singlePage.spec.title})}"></nav>
         </header>
-        <main class="layout" th:classappend="${not #strings.isEmpty(theme.config.sidebar.widgetss.pageWidget) ? '' : 'hide-aside'}" id="content-inner">
+        <main class="layout" th:classappend="${not #lists.isEmpty(theme.config.sidebar.widgetss.pageWidget) ? '' : 'hide-aside'}" id="content-inner">
             <div id="page">
                 <div  id="article-container"
                       th:class="${ theme.config.code.enable_line || pluginFinder.available('PluginPrismJS') ? 'line-numbers' : ''}"
@@ -70,7 +32,7 @@
             </div>
 
             <!-- 侧栏 -->
-            <div th:replace="~{modules/aside :: aside(${theme.config.sidebar.widgetss.pageWidget})}" th:classappend="${#lists.isEmpty(theme.config.sidebar.widgetss.pageWidget)} ? ' no-aside' : ''" th:if="${!#lists.isEmpty(theme.config.sidebar.widgetss.pageWidget)}"></div>
+            <div th:replace="~{modules/aside :: aside(${theme.config.sidebar.widgetss.pageWidget})}"></div>
 
         </main>
         <!-- 底部 -->
@@ -80,4 +42,3 @@
 </th:block>
 
 </html>
-
