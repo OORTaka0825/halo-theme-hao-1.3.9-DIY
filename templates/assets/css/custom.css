@@ -1,0 +1,2 @@
+/* widen custom page when no sidebar */
+.page .l_main.no-aside{display:grid;grid-template-columns:1fr!important}
