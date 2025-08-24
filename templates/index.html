@@ -6,7 +6,11 @@
                 _permalink = '',
                 _cover = ${theme.config.other.opengraph.image},
                 _excerpt = ${site.seo.description},
-                _type = 'website')}"></th:block>
+                _type = 'website')}">
+  <style th:inline="css">
+    #page-header.full_page{ height: [[${theme.config.top.above.first_screen_height}]]vh !important; }
+  </style>
+</th:block>
 </th:block>
 <th:block th:fragment="content">
 
