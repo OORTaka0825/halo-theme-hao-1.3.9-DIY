@@ -163,7 +163,21 @@ spec:
             index_img:
             phone_index_img:
             index_video:
-          children:
+          children:          - $formkit: select
+            if: $get(enable_above).value
+            name: first_screen_height
+            label: 铺满屏幕
+            value: "100"
+            options:
+              - label: 25%
+                value: "25"
+              - label: 50%
+                value: "50"
+              - label: 75%
+                value: "75"
+              - label: 100%
+                value: "100"
+
             - $formkit: radio
               name: enable_above
               key: enable_above
@@ -179,21 +193,6 @@ spec:
               label: 打字机显示的文字
               value: [ ]
               children:
-            - $formkit: select
-              if: $get(enable_above).value
-              name: first_screen_height
-              label: 铺满屏幕
-              value: "100"
-              options:
-                - label: 25%
-                  value: "25"
-                - label: 50%
-                  value: "50"
-                - label: 75%
-                  value: "75"
-                - label: 100%
-                  value: "100"
-
                 - $formkit: text
                   name: text
                   label: 自定义文字
