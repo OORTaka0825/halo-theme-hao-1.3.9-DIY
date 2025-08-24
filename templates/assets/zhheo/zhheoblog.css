@@ -10384,7 +10384,9 @@ a.extend.prev {
         height: 25rem;
     }
 
-    #page-header:not(.full_page) { height: 25rem; }
+    #page-header {
+        height: 25rem;
+    }
 
     #page-header.post-bg:before {
         height: 25rem;
