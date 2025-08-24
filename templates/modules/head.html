@@ -55,7 +55,8 @@
               loop: true,
               buttons: ['slideShow', 'fullScreen', 'thumbs', 'zoom', 'close'],
               protect: true,
-              transitionEffect: 'slide'
+              transitionEffect: 'slide',
+              hash: false     // ✅ 禁用 hash，避免触发 PJAX
             });
           }
         }
