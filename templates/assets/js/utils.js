@@ -59,7 +59,7 @@ var btf = {
                 ele.each(function (i, o) {
                     const $this = $(o)
                     const lazyloadSrc = $this.attr('data-lazy-src') || $this.attr('src')
-                    const dataCaption = $this.attr('alt') || ''
+                    const dataCaption = ''  // 不显示标题/文件名
                     $this.wrap(`<a href="${lazyloadSrc}" data-fancybox="images" data-caption="${dataCaption}" class="fancybox" data-srcset="${lazyloadSrc}"></a>`)
                 })
 
