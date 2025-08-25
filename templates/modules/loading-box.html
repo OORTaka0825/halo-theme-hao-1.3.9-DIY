@@ -4,7 +4,7 @@
 <!-- loading 页面，todo 这块都可以不要，后面删除，先精简代码，后续考虑组件添加 -->
 <div id="loading-box" onclick="heo.hideLoading()"
      th:fragment="loading-box"
-     th:if="${false}">
+     th:if="${theme.config.other.loadingBoxs.loadingBoxEnable} and not ${#strings.isEmpty(theme.config.other.loadingBoxs.loadingBoxImg)}">
 
 
     <style type="text/css">
@@ -105,9 +105,9 @@
                 document.getElementById('loading-box').classList.remove("loaded")
             }
         }
-        // window.addEventListener('load', preloader.endLoading())  // disabled
+        window.addEventListener('load', preloader.endLoading())
         setTimeout(function () {
-            // preloader.endLoading();  // disabled
+            preloader.endLoading();
         }, 3000)
 
     </script>
