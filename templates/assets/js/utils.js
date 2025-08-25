@@ -69,10 +69,7 @@ var btf = {
                     transitionEffect: 'slide',
                     protect: true,
                     buttons: ['slideShow', 'fullScreen', 'thumbs', 'close'],
-                    hash: false,  
-                    // 关键：覆盖默认的 caption 生成逻辑
-                    caption: function () {
-                        return '';
+                    hash: false
                 })
             }
 
