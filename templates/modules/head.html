@@ -183,7 +183,7 @@
     </script>
 
     <!-- 动态加载条 -->
-    <script data-pace-options="{ &quot;restartOnRequestAfter&quot;:false,&quot;eventLag&quot;:false}"
+    <script data-pace-options="{ &quot;restartOnRequestAfter&quot;:false, &quot;eventLag&quot;:false, &quot;restartOnPushState&quot;:false, &quot;startOnPageLoad&quot;:false, &quot;minTime&quot;:0, &quot;ghostTime&quot;:0 }"
             th:src="${assets_link + '/libs/pace/pace.min.js'}"
             th:if="${theme.config.other.loadingBoxs.loadProgressBar}">
     </script>

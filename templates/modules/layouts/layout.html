@@ -231,6 +231,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
         })
 
         document.addEventListener('pjax:send', function () {
+  if (window.Pace && typeof Pace.restart === 'function') { Pace.restart(); }
 
             // removeEventListener toc scroll
             window.removeEventListener('scroll', window.tocScrollFn)
