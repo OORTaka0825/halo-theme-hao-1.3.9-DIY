@@ -28,8 +28,8 @@
 
 <body>
 
-    <!-- loading 页面--下面的加载条，想显示就删除注释 -->
-    <!-- <th:block th:replace="~{modules/loading-box}"/>
+    <!-- loading 页面 -->
+    <!-- <th:block th:replace="~{modules/loading-box}"/> -->
     
     <!-- 网站背景 -->
     <div id="web_bg">
@@ -235,9 +235,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
             // removeEventListener toc scroll
             window.removeEventListener('scroll', window.tocScrollFn)
 
-            typeof preloader === 'object' && preloader.initLoading()
-
-            if (window.aplayers) {
+            // typeof preloader === 'object' && preloader.initLoading()if (window.aplayers) {
                 for (let i = 0; i < window.aplayers.length; i++) {
                     if (!window.aplayers[i].options.fixed) {
                         window.aplayers[i].destroy()
@@ -287,8 +285,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
             // prismjs
             typeof Prism === 'object' && Prism.highlightAll()
 
-            typeof preloader === 'object' && preloader.endLoading()
-        })
+            // typeof preloader === 'object' && preloader.endLoading()})
 
         document.addEventListener('pjax:error', (e) => {
                 if (e.request.status === 404 || e.request.status === 500) {
@@ -308,7 +305,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 
     if ([[${ theme.config.other.loadingBoxs.loadingBoxEnable }]]) {
         // 移除加载动画
-        removeLoading();
+        if (typeof preloader === 'object' && typeof removeLoading === 'function') { removeLoading(); }
     }
     //页脚友联
     GLOBAL_CONFIG.isFriendLinksInFooter && heo.addFriendLinksInFooter()
