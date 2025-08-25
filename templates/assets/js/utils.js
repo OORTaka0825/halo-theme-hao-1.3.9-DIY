@@ -60,7 +60,7 @@ var btf = {
                     const $this = $(o)
                     const lazyloadSrc = $this.attr('data-lazy-src') || $this.attr('src')
                     const dataCaption = ''  // 不显示标题/文件名
-                    $this.wrap(`<a href="${lazyloadSrc}" data-fancybox="images" data-caption="${dataCaption}" class="fancybox" data-srcset="${lazyloadSrc}"></a>`)
+                    $this.wrap(`<a href="${lazyloadSrc}" data-fancybox="images" class="fancybox" data-srcset="${lazyloadSrc}"></a>`)
                 })
 
                 $().fancybox({
