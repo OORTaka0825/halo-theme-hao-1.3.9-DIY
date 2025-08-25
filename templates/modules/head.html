@@ -8,20 +8,10 @@
     <title th:text="${siteTitle}"></title>
     <link rel="shortcut icon"
           th:href="@{${#strings.isEmpty(site.favicon) ? assets_link + '/images/hao-logo.jpg' : site.favicon}}"/>
-    <script src="/themes/theme-hao/assets/libs/jquery.min.js"></script>
 
-    <!-- Fancybox 图片灯箱效果，仅文章页加载（增量插入） -->
-    <link th:if="${htmlType == 'post'}"
-          rel="stylesheet"
-          th:href="@{/assets/libs/fancybox@5.3.7/jquery.fancybox.min.css}" />
-
-    <script th:if="${htmlType == 'post'}"
-            data-pjax
-            th:src="@{/assets/libs/fancybox@5.3.7/jquery.fancybox.min.js}"></script>
+    <script th:src="${assets_link + '/libs/jquery/jquery.min.js'}"></script>
 
     <script th:src="${assets_link + '/js/heo.js' + theme_version}"></script>
-
-    <script th:src="${assets_link + '/js/halo.js' + theme_version}"></script>
 
     <link rel="stylesheet" th:href="${assets_link + '/zhheo/zhheoblog.css' + theme_version}">
 
@@ -184,96 +174,7 @@
             #strings.contains(theme.config.sidebar.widgetss.tagWidgets,'welcome') ||
             #strings.contains(theme.config.sidebar.widgetss.categoryWidgets,'welcome')}"
                 th:src="${assets_link + '/libs/welcome/welcome.js'}"></script>
-    <link rel="stylesheet" th:href="@{/assets/libs/fancybox/jquery.fancybox.min.css}">
-<script th:src="@{/assets/libs/fancybox/jquery.fancybox.min.js}"></script>
-
-<!-- Zoom cursor for article images -->
-<style>
-  #post #article-container img:not(.no-lightbox):not(.avatar):not(.emoji) { cursor: zoom-in; }
-  #post #article-container a[data-fancybox="post-gallery"] { cursor: zoom-in; }
-</style>
-
-
-<!-- ===== Fancybox（按 HAO 主题）图片包裹与初始化：新增开始 ===== -->
-<script data-pjax>
-(function(){
-  if (window.__FANCYBOX_WRAP_INITED) return;
-  window.__FANCYBOX_WRAP_INITED = true;
-
-  function wrapAndInit(container){
-    var root = container || document;
-    var area = root.querySelector('#post #article-container');
-    if (!area) return;
-    if (!area) return;
-
-    // 选择文章内图片（排除不需要放大的）
-    var imgs = Array.prototype.slice.call(
-      area.querySelectorAll('img:not(.no-lightbox):not(.avatar):not(.emoji)')
-    );
-
-    imgs.forEach(function(img){
-      // 已有包裹则跳过
-      if (img.closest('a[data-fancybox="post-gallery"]')) return;
-
-      // 原图地址
-      var src = img.getAttribute('data-lazy-src') || img.getAttribute('data-src') || img.getAttribute('src');
-      if (!src) return;
-
-      // 创建 a 包裹
-      var a = document.createElement('a');
-      a.setAttribute('href', src);
-      a.setAttribute('data-fancybox', 'post-gallery');
-      // 不设置 data-caption：与原 HAO 行为一致（不显示图片名称）
-img.parentNode.insertBefore(a, img);
-      a.appendChild(img);
-    });
-
-    function doInit(){
-      if (!(window.jQuery && (window.jQuery.fancybox || (window.jQuery.fn && window.jQuery.fn.fancybox)))) {
-        return false;
-      }
-      var $ = window.jQuery;
-      if ($.fancybox && $.fancybox.defaults) {
-        $.fancybox.defaults.hash = false;
-        $.fancybox.defaults.backFocus = false;
-      }
-      $('#post [data-fancybox="post-gallery"]').fancybox({
-        loop: true,
-        buttons: ['slideShow','fullScreen','thumbs','zoom','close'],
-        protect: true,
-        transitionEffect: 'slide',
-        hash: false,
-        backFocus: false
-      });
-      return true;
-    }
-
-    if (!doInit()) {
-      // 按需加载（HAO 路径）
-      if (typeof jQuery !== 'undefined' && !(window.jQuery && (window.jQuery.fancybox || (window.jQuery.fn && window.jQuery.fn.fancybox)))) {
-        var s = document.createElement('script');
-        s.src = "[[@{/assets/libs/fancybox/jquery.fancybox.min.js}]]";
-        s.onload = doInit;
-        document.head.appendChild(s);
-      }
-    }
-  }
-
-  // 首次
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function(){ wrapAndInit(document); });
-  } else {
-    wrapAndInit(document);
-  }
-
-  // PJAX 后重跑
-  ['pjax:complete','pjax:end','pjax:success'].forEach(function(ev){
-    document.addEventListener(ev, function(){ wrapAndInit(document); }, false);
-  });
-})();
-</script>
-<!-- ===== Fancybox（按 HAO 主题）图片包裹与初始化：新增结束 ===== -->
-</th:block>
+    </th:block>
 
     <!-- icon图标 -->
     <link rel="stylesheet" th:href="'https://cdn.cbd.int/hao-theme-static@'+${theme.spec.version}+'/icon/iconfont.css'">
