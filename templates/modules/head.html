@@ -8,10 +8,159 @@
     <title th:text="${siteTitle}"></title>
     <link rel="shortcut icon"
           th:href="@{${#strings.isEmpty(site.favicon) ? assets_link + '/images/hao-logo.jpg' : site.favicon}}"/>
+    <script src="/themes/theme-hao/assets/libs/jquery.min.js"></script>
 
-    <script th:src="${assets_link + '/libs/jquery/jquery.min.js'}"></script>
+    <!-- Fancybox 图片灯箱效果，仅文章页加载（增量插入） -->
+    <link th:if="${htmlType == 'post'}"
+          rel="stylesheet"
+          th:href="@{/assets/libs/fancybox@5.3.7/jquery.fancybox.min.css}" />
 
-    <script th:src="${assets_link + '/js/heo.js' + theme_version}"></script>
+    <script th:if="${htmlType == 'post'}"
+            data-pjax
+            th:src="@{/assets/libs/fancybox@5.3.7/jquery.fancybox.min.js}"></script>
+
+    <!-- 图片点击放大初始化脚本（增量插入） -->
+<!-- 图片点击放大初始化脚本（全局加载：拦截 IMG/含图 A；动态建组；首次按需加载；等待就绪；PJAX 兼容） -->
+<script data-pjax>
+
+(function () {
+  if (window.__fancyboxDelegatedBound) return; window.__fancyboxDelegatedBound = true;
+  function ensureFancybox() {
+    if (window.jQuery && (window.jQuery.fancybox || (window.jQuery.fn && window.jQuery.fn.fancybox))) {
+      return Promise.resolve();
+    }
+    var cssHref = "[[@{/assets/libs/fancybox@5.3.7/jquery.fancybox.min.css}]]";
+    var jsSrc  = "[[@{/assets/libs/fancybox@5.3.7/jquery.fancybox.min.js}]]";
+
+    if (!document.querySelector('link[href*="jquery.fancybox.min.css"]')) {
+      var link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = cssHref;
+      document.head.appendChild(link);
+    }
+    if (window.__fancyboxLoadingPromise) return window.__fancyboxLoadingPromise;
+
+    window.__fancyboxLoadingPromise = new Promise(function (resolve, reject) {
+      var s = document.createElement('script');
+      s.src = jsSrc;
+      s.onload = function(){ resolve(); };
+      s.onerror = reject;
+      document.head.appendChild(s);
+    });
+    return window.__fancyboxLoadingPromise;
+  }
+
+  function waitForFancyboxReady(timeoutMs){
+    timeoutMs = timeoutMs || 3000;
+    var start = performance.now();
+    return new Promise(function(resolve, reject){
+      (function check(){
+        var ok = window.jQuery && (window.jQuery.fancybox || (window.jQuery.fn && window.jQuery.fn.fancybox));
+        if (ok) return resolve();
+        if (performance.now() - start > timeoutMs) return reject(new Error('fancybox not ready'));
+        requestAnimationFrame(check);
+      })();
+    });
+  }
+
+  function getSrcFromImgOrAnchor(el){
+    if (!el) return null;
+    if (el.tagName === 'IMG') {
+      return el.getAttribute('data-lazy-src') || el.getAttribute('data-src') || el.getAttribute('src');
+    }
+    if (el.tagName === 'A') {
+      // prefer href; fall back to contained img
+      var href = el.getAttribute('href');
+      if (href) return href;
+      var im = el.querySelector('img');
+      if (im) return getSrcFromImgOrAnchor(im);
+    }
+    return null;
+  }
+
+  function isImageLink(url){
+    if (!url) return false;
+    return /\.(jpe?g|png|webp|gif|bmp|svg)(\?.*)?$/i.test(url) || url.startsWith('blob:') || url.startsWith('data:image');
+  }
+
+  function onDocClick(e){
+    // 1) 目标可能是 IMG，也可能是包含 IMG 的 A，或者直接是指向图片的 A
+    var img = e.target.closest && e.target.closest('#article-container img');
+    var a   = e.target.closest && e.target.closest('#article-container a');
+
+    // 忽略特定类
+    if (img && (img.classList.contains('no-lightbox') || img.classList.contains('avatar') || img.classList.contains('emoji'))) return;
+
+    // 判断是否是我们要接管的点击
+    var candidate = null;
+    if (img) {
+      candidate = img;
+    } else if (a) {
+      // 如果是 A，必须是含图或直链图片
+      if (a.querySelector('img')) candidate = a;
+      else {
+        var href = a.getAttribute('href');
+        if (isImageLink(href)) candidate = a;
+      }
+    }
+    if (!candidate) return;
+
+    // 接管，避免默认跳转/PJAX
+    e.preventDefault();
+    e.stopPropagation();
+
+    var container = document.querySelector('#article-container');
+    if (!container) return;
+
+    // 2) 构建当前文章的图片组（按 DOM 顺序）
+    var imgs = Array.prototype.slice.call(container.querySelectorAll('img:not(.no-lightbox):not(.avatar):not(.emoji)'));
+    var items = imgs.map(function(im){
+      return { src: getSrcFromImgOrAnchor(im), opts: { caption: im.getAttribute('alt') || '' } };
+    }).filter(function(it){ return !!it.src; });
+
+    // 找到起始索引：如果点的是 A，则找其内部 IMG 或 href 对应的 src
+    var startSrc = getSrcFromImgOrAnchor(candidate);
+    var startIndex = Math.max(0, items.findIndex(function(it){ return it.src === startSrc; }));
+    if (startIndex < 0) startIndex = 0;
+
+    // 3) 确保库加载并就绪，再打开
+    ensureFancybox()
+      .then(function(){ return waitForFancyboxReady(4000); })
+      .then(function(){
+        var $ = window.jQuery;
+        $.fancybox.defaults.hash = false;
+        $.fancybox.defaults.backFocus = false;
+        $.fancybox.open(items, {
+          loop: true,
+          protect: true,
+          transitionEffect: 'slide',
+          hash: false,
+          backFocus: false
+        }, startIndex);
+      })
+      .catch(function(err){ console && console.warn && console.warn('[fancybox]', err); });
+  }
+
+  // 捕获阶段优先接管
+  document.addEventListener('click', onDocClick, true);
+
+  // PJAX 完成时预加载样式（非必须）
+  ['pjax:complete','pjax:end','pjax:success'].forEach(function(ev){
+    document.addEventListener(ev, function(){
+      if (!document.querySelector('link[href*="jquery.fancybox.min.css"]')) {
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = "[[@{/assets/libs/fancybox@5.3.7/jquery.fancybox.min.css}]]";
+        document.head.appendChild(link);
+      }
+    }, false);
+  });
+})();
+
+</script>
+<script th:src="${assets_link + '/js/heo.js' + theme_version}"></script>
+
+    <script th:src="${assets_link + '/js/halo.js' + theme_version}"></script>
 
     <link rel="stylesheet" th:href="${assets_link + '/zhheo/zhheoblog.css' + theme_version}">
 
