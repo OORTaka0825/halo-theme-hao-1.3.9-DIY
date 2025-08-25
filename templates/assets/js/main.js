@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const $this = $(o)
                 const lazyloadSrc = $this.attr('data-lazy-src') || $this.attr('src')
                 const dataCaption = $this.attr('alt') || ''
-                $this.wrap(`<a href="${lazyloadSrc}" data-fancybox="images" data-caption="${dataCaption}" class="fancybox" data-srcset="${lazyloadSrc}"></a>`)
+                $this.wrap(`<a href="${lazyloadSrc}" data-fancybox="images" class="fancybox" data-srcset="${lazyloadSrc}"></a>`)
 
             })
 
@@ -117,8 +117,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 transitionEffect: 'slide',
                 protect: true,
                 buttons: ['slideShow', 'fullScreen', 'thumbs', 'close'],
-                hash: false
-            })
+                hash: false,
+              caption: function () { return '' }
+})
         }
 
         if (typeof $.fancybox === 'undefined') {
