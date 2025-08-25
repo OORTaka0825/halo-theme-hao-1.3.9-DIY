@@ -18767,5 +18767,17 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
     color: #fff
 }
 
-/* === Fix: remove accidental bottom Pace bar on home === */
-.pace[style*="bottom"], .pace .pace-progress[style*="bottom"]{ display:none !important; }
+/* 仅隐藏 APlayer 固定/悬浮播放器的底部进度条，不影响正文内播放器 */
+.aplayer.aplayer-fixed .aplayer-bar-wrap,
+.aplayer.aplayer-fixed .aplayer-bar,
+.aplayer.aplayer-fixed .aplayer-played {
+  display: none !important;
+  height: 0 !important;
+  opacity: 0 !important;
+}
+
+/* 兼容一些主题把播放器挂在 nav-music 容器的情况 */
+#nav-music .aplayer .aplayer-bar-wrap {
+  display: none !important;
+  height: 0 !important;
+}
