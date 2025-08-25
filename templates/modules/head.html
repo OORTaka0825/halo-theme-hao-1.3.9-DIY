@@ -189,8 +189,8 @@
 
 <!-- Zoom cursor for article images -->
 <style>
-  #article-container img:not(.no-lightbox):not(.avatar):not(.emoji) { cursor: zoom-in; }
-  #article-container a[data-fancybox="post-gallery"] { cursor: zoom-in; }
+  #post #article-container img:not(.no-lightbox):not(.avatar):not(.emoji) { cursor: zoom-in; }
+  #post #article-container a[data-fancybox="post-gallery"] { cursor: zoom-in; }
 </style>
 
 
@@ -202,7 +202,8 @@
 
   function wrapAndInit(container){
     var root = container || document;
-    var area = root.querySelector('#article-container') || root;
+    var area = root.querySelector('#post #article-container');
+    if (!area) return;
     if (!area) return;
 
     // 选择文章内图片（排除不需要放大的）
@@ -222,9 +223,8 @@
       var a = document.createElement('a');
       a.setAttribute('href', src);
       a.setAttribute('data-fancybox', 'post-gallery');
-      var alt = img.getAttribute('alt') || '';
-      if (alt) a.setAttribute('data-caption', alt);
-      img.parentNode.insertBefore(a, img);
+      // 不设置 data-caption：与原 HAO 行为一致（不显示图片名称）
+img.parentNode.insertBefore(a, img);
       a.appendChild(img);
     });
 
@@ -237,7 +237,7 @@
         $.fancybox.defaults.hash = false;
         $.fancybox.defaults.backFocus = false;
       }
-      $('[data-fancybox="post-gallery"]').fancybox({
+      $('#post [data-fancybox="post-gallery"]').fancybox({
         loop: true,
         buttons: ['slideShow','fullScreen','thumbs','zoom','close'],
         protect: true,
