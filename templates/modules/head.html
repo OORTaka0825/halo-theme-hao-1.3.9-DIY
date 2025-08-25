@@ -182,10 +182,11 @@
         })(window)
     </script>
 
-    <!-- 动态加载条（强制启用） -->
-<script data-pace-options="{ &quot;restartOnRequestAfter&quot;:false, &quot;eventLag&quot;:false, &quot;restartOnPushState&quot;:false, &quot;startOnPageLoad&quot;:false, &quot;minTime&quot;:0, &quot;ghostTime&quot;:0 }"
-        th:src="${assets_link + '/libs/pace/pace.min.js'}"></script>
-<style>.pace{top:4px !important; bottom:auto !important;} .pace .pace-progress{top:0 !important; bottom:auto !important;}</style>
+    <!-- 动态加载条 -->
+    <script data-pace-options="{ &quot;restartOnRequestAfter&quot;:false, &quot;eventLag&quot;:false, &quot;restartOnPushState&quot;:false, &quot;startOnPageLoad&quot;:false, &quot;minTime&quot;:0, &quot;ghostTime&quot;:0 }"
+            th:src="${assets_link + '/libs/pace/pace.min.js'}"
+            th:if="${theme.config.other.loadingBoxs.loadProgressBar}">
+    </script>
 
     <!-- 复制 https://githubfast.com/zenorocha/clipboard.js -->
     <script th:src="${assets_link + '/libs/clipboard/clipboard.min.js'}"></script>
