@@ -18767,24 +18767,3 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
     color: #fff
 }
 
-/* 移除底部固定播放器(APlayer fixed)的顶边线和底部进度条 */
-body .aplayer.aplayer-fixed { border: none !important; box-shadow: none !important; }
-
-body .aplayer.aplayer-fixed .aplayer-bar-wrap,
-body .aplayer.aplayer-fixed .aplayer-bar,
-body .aplayer.aplayer-fixed .aplayer-loaded,
-body .aplayer.aplayer-fixed .aplayer-played {
-  display: none !important;
-  height: 0 !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-}
-
-/* 兼容主题把播放器挂在 #nav-music 的情况 */
-#nav-music .aplayer .aplayer-bar-wrap,
-#nav-music .aplayer .aplayer-bar,
-#nav-music .aplayer .aplayer-loaded,
-#nav-music .aplayer .aplayer-played {
-  display: none !important;
-  height: 0 !important;
-}
