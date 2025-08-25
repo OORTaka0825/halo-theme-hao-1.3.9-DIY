@@ -18766,3 +18766,6 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
     background-color: #2196f3;
     color: #fff
 }
+
+/* === Fix: remove accidental bottom Pace bar on home === */
+.pace[style*="bottom"], .pace .pace-progress[style*="bottom"]{ display:none !important; }
