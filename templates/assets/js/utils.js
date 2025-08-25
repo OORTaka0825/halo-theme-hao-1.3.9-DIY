@@ -63,6 +63,11 @@ var btf = {
                     $this.wrap(`<a href="${lazyloadSrc}" data-fancybox="images" data-caption="${dataCaption}" class="fancybox" data-srcset="${lazyloadSrc}"></a>`)
                 })
 
+                if ($.fancybox && $.fancybox.defaults) {
+                    $.fancybox.defaults.caption = function (instance, item) { return ''; };
+                }
+  
+
                 $().fancybox({
                     selector: '[data-fancybox]',
                     loop: true,
