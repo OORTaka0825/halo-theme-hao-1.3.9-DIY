@@ -18766,3 +18766,9 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
     background-color: #2196f3;
     color: #fff
 }
+
+/* === Pace position hardening === */
+.pace{ top:4px !important; bottom:auto !important; }
+.pace .pace-progress{ top:0 !important; bottom:auto !important; }
+/* If any duplicate bar appears at bottom, nuke it */
+.pace[style*="bottom"], .pace .pace-progress[style*="bottom"]{ display:none !important; }
