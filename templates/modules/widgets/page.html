@@ -63,42 +63,80 @@
 
 <script th:inline="javascript">
   /**
-   * 分页滚动：精确滚到“第一屏配置”的高度（25/50/75/100vh）。
-   * 注意：btf.scrollToDest 内部会 -70px（utils.js），这里在传参时 +70 抵消。
-   * 仅当启用第一屏且计算出正数高度时才做 +70 抵消；否则保持 0 顶部。
+   * 分页滚动（按 100vh 的“参考点”成比例计算）：
+   * - 100 → 1.00 * window.innerHeight
+   * - 75  → 0.75 * window.innerHeight
+   * - 50  → 0.50 * window.innerHeight
+   * - 25  → 0.25 * window.innerHeight
+   * 与主题原来 100vh 的行为一致，只是按比例缩放。
+   * 兼容 PJAX：点击时只记录目标像素，等 pjax:complete 再滚。
    */
-  function scrollToPost() {
-    setTimeout(() => {
+  (function(){
+    function parseFactor(cfg) {
+      // cfg 形如 '100vh' | '75vh' | '50vh' | '25vh' | '480px'（极少数）
+      try {
+        if (!cfg || typeof cfg !== 'string') return 1;
+        var m = /(\d+)\s*vh/i.exec(cfg);
+        if (m) {
+          var n = parseInt(m[1], 10);
+          if (n > 0) return n / 100;
+        }
+        var m2 = /(\d+)\s*px/i.exec(cfg);
+        if (m2) {
+          var px = parseInt(m2[1], 10);
+          if (px > 0) return px / (window.innerHeight || 1);
+        }
+      } catch(e){}
+      return 1;
+    }
+
+    window.scrollToPost = function() {
       try {
         var enable = /*[[${theme.config.top.above.enable_above}]]*/ false;
-        var cfg = /*[[${theme.config.top.above.full_page_height}]]*/ '100vh'; // e.g. '75vh'
-        var dest = 0;
+        var cfg = /*[[${theme.config.top.above.full_page_height}]]*/ '100vh';
+        var factor = enable ? parseFactor(cfg) : 0; // 未启用第一屏 → 回到顶部
+        var dest = factor > 0 ? Math.round((window.innerHeight || 0) * factor) : 0;
 
-        if (enable && cfg) {
-          // 解析 '75vh' / '480px' 等
-          var m = /(\d+)\s*vh/i.exec(cfg);
-          if (m) {
-            dest = Math.round(window.innerHeight * (parseInt(m[1], 10) / 100));
-          } else {
-            var m2 = /(\d+)\s*px/i.exec(cfg);
-            if (m2) dest = parseInt(m2[1], 10);
-          }
-        }
+        // 存到全局，留给 pjax:complete 执行
+        window.__needScrollToPost = dest;
 
-        if (window.btf && typeof window.btf.scrollToDest === 'function') {
-          if (dest > 0) {
-            window.btf.scrollToDest(dest + 70, 500); // 抵消 utils.js 的 -70
-          } else {
-            window.btf.scrollToDest(0, 500);
+        // 兜底：1s 后再滚一次（非 PJAX 或 PJAX 慢时也能命中）
+        setTimeout(function(){
+          if (window.__needScrollToPost != null) {
+            var d = window.__needScrollToPost;
+            if (window.btf && typeof window.btf.scrollToDest === 'function') {
+              window.btf.scrollToDest(d + 70, 500); // 抵消 utils.js 的 -70
+            } else {
+              window.scrollTo({ top: d, behavior: 'smooth' });
+            }
+            window.__needScrollToPost = null;
           }
-        } else {
-          window.scrollTo({ top: dest, behavior: 'smooth' });
+        }, 1000);
+      } catch(e){}
+    };
+
+    // PJAX 完成后执行滚动
+    function doScrollAfterPjax(){
+      try{
+        if (window.__needScrollToPost != null) {
+          var d = window.__needScrollToPost;
+          if (window.btf && typeof window.btf.scrollToDest === 'function') {
+            window.btf.scrollToDest(d + 70, 500);
+          } else {
+            window.scrollTo({ top: d, behavior: 'smooth' });
+          }
+          window.__needScrollToPost = null;
         }
-      } catch (e) {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    }, 150);
-  }
+      } catch(e){}
+    }
+    document.addEventListener('pjax:complete', doScrollAfterPjax);
+    // 首次载入也试一次
+    if (document.readyState === 'complete') {
+      setTimeout(doScrollAfterPjax, 300);
+    } else {
+      window.addEventListener('load', function(){ setTimeout(doScrollAfterPjax, 300); });
+    }
+  })();
 </script>
 
 </nav>
