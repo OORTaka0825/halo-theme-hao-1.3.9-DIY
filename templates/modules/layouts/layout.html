@@ -142,8 +142,8 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 
 <script>
 (function(){
-  if (window._haoScrollManagerInit) return;
-  window._haoScrollManagerInit = true;
+  if (window._haoScrollFixInit) return;
+  window._haoScrollFixInit = true;
 
   var KEY_PREFIX = 'hao:scroll:';
   var CURRENT_KEY = null;
@@ -157,8 +157,19 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   function getItem(k){ try{ return sessionStorage.getItem(KEY_PREFIX + k); }catch(e){ return null; } }
   function rmItem(k){ try{ sessionStorage.removeItem(KEY_PREFIX + k); }catch(e){} }
 
+  function isListPage(){
+    // list/首页等： body-wrap 有 class "page"
+    var bw = document.getElementById('body-wrap');
+    return !!(bw && bw.classList && bw.classList.contains('page'));
+  }
+  function isPostPage(){
+    var bw = document.getElementById('body-wrap');
+    return !!(bw && bw.classList && bw.classList.contains('post'));
+  }
+
   function throttledSave(){
-    if (restoring) return; // don't overwrite while restoring
+    if (!isListPage()) return; // 只在列表页保存
+    if (restoring) return;
     if (saveTicking) return;
     saveTicking = true;
     requestAnimationFrame(function(){
@@ -168,59 +179,63 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     });
   }
 
-  // Monkey-patch pjax.loadUrl to save before any navigation
   function patchPjaxLoadUrl(){
     try{
-      if (window.pjax && !window.pjax._haoPatched){
+      if (window.pjax && !window.pjax._haoSavePatched){
         var orig = window.pjax.loadUrl;
         window.pjax.loadUrl = function(url){
-          try{ setItem(pageKey(), getY()); }catch(e){}
+          try{ if (isListPage()) setItem(pageKey(), getY()); }catch(e){}
           return orig.apply(this, arguments);
         };
-        window.pjax._haoPatched = true;
+        window.pjax._haoSavePatched = true;
       }
     }catch(e){}
   }
 
-  // Detect browser back/forward
+  // 监听后退/前进
   window.addEventListener('popstate', function(){ isPop = true; }, true);
 
-  // Save continuously while the user scrolls
+  // 滚动时保存（仅列表页）
   window.addEventListener('scroll', throttledSave, {passive:true});
 
-  // Also save beforeunload
-  window.addEventListener('beforeunload', function(){ setItem(pageKey(), getY()); });
+  // 离开前保一次（仅列表页）
+  window.addEventListener('beforeunload', function(){ if (isListPage()) setItem(pageKey(), getY()); });
 
-  // After PJAX completes, either restore (if back) or just refresh CURRENT_KEY
   document.addEventListener('pjax:complete', function(){
     CURRENT_KEY = pageKey();
     patchPjaxLoadUrl();
+
+    if (!isListPage()) return; // 只在回到列表页时考虑恢复
+
     if (isPop){
       var v = getItem(CURRENT_KEY);
       if (v != null){
-        patchScrollToPostTemporarily(2000); // suppress for longer
+        patchScrollToPostTemporarily(2000);
         restoreWithRetries(parseInt(v,10) || 0);
+        // 恢复成功后清掉，防止被后续滚动误用
+        setTimeout(function(){ rmItem(CURRENT_KEY); }, 2500);
       }
       isPop = false;
     }
   });
 
-  // Support BFCache
+  // 支持 BFCache
   window.addEventListener('pageshow', function(ev){
     CURRENT_KEY = pageKey();
     patchPjaxLoadUrl();
+    if (!isListPage()) return;
     if (ev && ev.persisted){
       var v = getItem(CURRENT_KEY);
       if (v != null){
         patchScrollToPostTemporarily(2000);
         restoreWithRetries(parseInt(v,10) || 0);
+        setTimeout(function(){ rmItem(CURRENT_KEY); }, 2500);
       }
     }
   });
 
   function restoreWithRetries(y){
     restoring = true;
-    // Multiple RAF attempts + timed attempts to beat layout/lazyload shifts
     var tries = 0;
     function rafTick(){
       window.scrollTo(0, y);
@@ -250,8 +265,6 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   CURRENT_KEY = pageKey();
-
-  // Try to patch pjax.loadUrl immediately too (in case PJAX was already created)
   patchPjaxLoadUrl();
 })();
 </script>
@@ -448,8 +461,8 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 
 <script>
 (function(){
-  if (window._haoScrollManagerInit) return;
-  window._haoScrollManagerInit = true;
+  if (window._haoScrollFixInit) return;
+  window._haoScrollFixInit = true;
 
   var KEY_PREFIX = 'hao:scroll:';
   var CURRENT_KEY = null;
@@ -463,8 +476,19 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   function getItem(k){ try{ return sessionStorage.getItem(KEY_PREFIX + k); }catch(e){ return null; } }
   function rmItem(k){ try{ sessionStorage.removeItem(KEY_PREFIX + k); }catch(e){} }
 
+  function isListPage(){
+    // list/首页等： body-wrap 有 class "page"
+    var bw = document.getElementById('body-wrap');
+    return !!(bw && bw.classList && bw.classList.contains('page'));
+  }
+  function isPostPage(){
+    var bw = document.getElementById('body-wrap');
+    return !!(bw && bw.classList && bw.classList.contains('post'));
+  }
+
   function throttledSave(){
-    if (restoring) return; // don't overwrite while restoring
+    if (!isListPage()) return; // 只在列表页保存
+    if (restoring) return;
     if (saveTicking) return;
     saveTicking = true;
     requestAnimationFrame(function(){
@@ -474,59 +498,63 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     });
   }
 
-  // Monkey-patch pjax.loadUrl to save before any navigation
   function patchPjaxLoadUrl(){
     try{
-      if (window.pjax && !window.pjax._haoPatched){
+      if (window.pjax && !window.pjax._haoSavePatched){
         var orig = window.pjax.loadUrl;
         window.pjax.loadUrl = function(url){
-          try{ setItem(pageKey(), getY()); }catch(e){}
+          try{ if (isListPage()) setItem(pageKey(), getY()); }catch(e){}
           return orig.apply(this, arguments);
         };
-        window.pjax._haoPatched = true;
+        window.pjax._haoSavePatched = true;
       }
     }catch(e){}
   }
 
-  // Detect browser back/forward
+  // 监听后退/前进
   window.addEventListener('popstate', function(){ isPop = true; }, true);
 
-  // Save continuously while the user scrolls
+  // 滚动时保存（仅列表页）
   window.addEventListener('scroll', throttledSave, {passive:true});
 
-  // Also save beforeunload
-  window.addEventListener('beforeunload', function(){ setItem(pageKey(), getY()); });
+  // 离开前保一次（仅列表页）
+  window.addEventListener('beforeunload', function(){ if (isListPage()) setItem(pageKey(), getY()); });
 
-  // After PJAX completes, either restore (if back) or just refresh CURRENT_KEY
   document.addEventListener('pjax:complete', function(){
     CURRENT_KEY = pageKey();
     patchPjaxLoadUrl();
+
+    if (!isListPage()) return; // 只在回到列表页时考虑恢复
+
     if (isPop){
       var v = getItem(CURRENT_KEY);
       if (v != null){
-        patchScrollToPostTemporarily(2000); // suppress for longer
+        patchScrollToPostTemporarily(2000);
         restoreWithRetries(parseInt(v,10) || 0);
+        // 恢复成功后清掉，防止被后续滚动误用
+        setTimeout(function(){ rmItem(CURRENT_KEY); }, 2500);
       }
       isPop = false;
     }
   });
 
-  // Support BFCache
+  // 支持 BFCache
   window.addEventListener('pageshow', function(ev){
     CURRENT_KEY = pageKey();
     patchPjaxLoadUrl();
+    if (!isListPage()) return;
     if (ev && ev.persisted){
       var v = getItem(CURRENT_KEY);
       if (v != null){
         patchScrollToPostTemporarily(2000);
         restoreWithRetries(parseInt(v,10) || 0);
+        setTimeout(function(){ rmItem(CURRENT_KEY); }, 2500);
       }
     }
   });
 
   function restoreWithRetries(y){
     restoring = true;
-    // Multiple RAF attempts + timed attempts to beat layout/lazyload shifts
     var tries = 0;
     function rafTick(){
       window.scrollTo(0, y);
@@ -556,8 +584,6 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   CURRENT_KEY = pageKey();
-
-  // Try to patch pjax.loadUrl immediately too (in case PJAX was already created)
   patchPjaxLoadUrl();
 })();
 </script>
