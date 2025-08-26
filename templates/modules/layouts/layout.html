@@ -254,6 +254,38 @@ elements: 'a:not([target="_blank"])',
         })
 
         document.addEventListener('pjax:complete', function () {
+
+            // --- Scroll control to isolate pages and avoid cross-page interference ---
+            (function() {
+                var path = (window.location && window.location.pathname) || "/";
+                var isPostPage = function(p) {
+                    // Common Halo patterns: /archives/slug, /posts/slug, /p/slug
+                    return /^\/(archives|posts|p)\b/.test(p);
+                };
+                var isHomeOrPagination = function(p) {
+                    return p === "/" || /^\/page\//.test(p);
+                };
+                try {
+                    // Always take over scroll restoration on PJAX pages
+                    if (typeof window.history === "object" && "scrollRestoration" in window.history) {
+                        window.history.scrollRestoration = "manual";
+                    }
+                    if (isPostPage(path)) {
+                        // Entering an article: always reset to top so it doesn't keep homepage scroll
+                        window.scrollTo(0, 0);
+                    } else if (isHomeOrPagination(path)) {
+                        // Home or pagination: keep existing behavior (do not force)
+                        // If you need a specific VH jump, do it in your pagination logic instead.
+                    } else {
+                        // Other inner pages (categories, tags, links, about, etc.): reset to top
+                        window.scrollTo(0, 0);
+                    }
+                } catch (e) {
+                    // noop
+                }
+            })();
+            // --- end scroll control ---
+
             window.refreshFn()
 
             document.querySelectorAll('script[data-pjax]').forEach(item => {
