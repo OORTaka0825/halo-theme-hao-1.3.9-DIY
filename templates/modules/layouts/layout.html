@@ -254,38 +254,6 @@ elements: 'a:not([target="_blank"])',
         })
 
         document.addEventListener('pjax:complete', function () {
-
-            // --- Scroll control to isolate pages and avoid cross-page interference ---
-            (function() {
-                var path = (window.location && window.location.pathname) || "/";
-                var isPostPage = function(p) {
-                    // Common Halo patterns: /archives/slug, /posts/slug, /p/slug
-                    return /^\/(archives|posts|p)\b/.test(p);
-                };
-                var isHomeOrPagination = function(p) {
-                    return p === "/" || /^\/page\//.test(p);
-                };
-                try {
-                    // Always take over scroll restoration on PJAX pages
-                    if (typeof window.history === "object" && "scrollRestoration" in window.history) {
-                        window.history.scrollRestoration = "manual";
-                    }
-                    if (isPostPage(path)) {
-                        // Entering an article: always reset to top so it doesn't keep homepage scroll
-                        window.scrollTo(0, 0);
-                    } else if (isHomeOrPagination(path)) {
-                        // Home or pagination: keep existing behavior (do not force)
-                        // If you need a specific VH jump, do it in your pagination logic instead.
-                    } else {
-                        // Other inner pages (categories, tags, links, about, etc.): reset to top
-                        window.scrollTo(0, 0);
-                    }
-                } catch (e) {
-                    // noop
-                }
-            })();
-            // --- end scroll control ---
-
             window.refreshFn()
 
             document.querySelectorAll('script[data-pjax]').forEach(item => {
@@ -322,6 +290,59 @@ elements: 'a:not([target="_blank"])',
 
             typeof preloader === 'object' && preloader.endLoading()
         })
+
+        
+            // --- Precise back/forward scroll position management (PJAX) ---
+            (function() {
+                // Ensure browser doesn't try to do its own thing; we'll restore manually
+                try {
+                    if (typeof history === 'object' && 'scrollRestoration' in history) {
+                        history.scrollRestoration = 'manual';
+                    }
+                } catch (e) {}
+
+                // Save current page scroll into history.state (so BACK returns to this exact spot)
+                function saveScrollToHistory() {
+                    try {
+                        var st = history.state || {};
+                        st.__scrollY = window.scrollY || window.pageYOffset || 0;
+                        history.replaceState(st, '', location.href);
+                    } catch (e) {}
+                }
+
+                // When user hits Back/Forward, popstate fires BEFORE PJAX loads the content.
+                // We capture the desired Y here and apply it right after PJAX completes.
+                var __pendingRestoreY = null;
+                window.addEventListener('popstate', function(ev) {
+                    var y = 0;
+                    if (ev && ev.state && typeof ev.state.__scrollY === 'number') {
+                        y = ev.state.__scrollY;
+                    }
+                    __pendingRestoreY = y;
+                }, { passive: true });
+
+                // Before PJAX navigation, save the current page's scroll position
+                document.addEventListener('pjax:send', function() {
+                    saveScrollToHistory();
+                });
+
+                // After PJAX completes:
+                // - If this was a back/forward, restore the saved Y of that entry
+                // - Otherwise (normal forward click), reset article pages to top (expected UX)
+                document.addEventListener('pjax:complete', function() {
+                    var path = (window.location && window.location.pathname) || "/";
+                    var isPostPage = /^\\/(archives|posts|p)\\b/.test(path);
+
+                    if (__pendingRestoreY !== null) {
+                        // Defer to ensure layout is ready
+                        setTimeout(function() { window.scrollTo(0, __pendingRestoreY); __pendingRestoreY = null; }, 0);
+                    } else if (isPostPage) {
+                        // Normal forward navigation into article: start at top
+                        window.scrollTo(0, 0);
+                    }
+                });
+            })();
+            // --- end precise scroll management ---
 
         document.addEventListener('pjax:error', (e) => {
                 if (e.request.status === 404 || e.request.status === 500) {
