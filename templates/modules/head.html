@@ -10,10 +10,9 @@
           th:href="@{${#strings.isEmpty(site.favicon) ? assets_link + '/images/hao-logo.jpg' : site.favicon}}"/>
     <script src="/themes/theme-hao/assets/libs/jquery.min.js"></script>
 
-    <!-- ===== PJAX 开关（仅改动回退问题，不动其它逻辑） ===== -->
+    <!-- ===== PJAX 开关：只改回退问题 ===== -->
     <script th:if="${theme.config.other.pjax_enable}" src="/themes/theme-hao/assets/libs/pjax/pjax.min.js"></script>
 
-    <!-- 初始化 PJAX（开启才执行，且防重复） -->
     <script th:if="${theme.config.other.pjax_enable}">
       (function(){
         if (window.__PJAX_INITED) return;
@@ -25,72 +24,117 @@
             selectors: ['title', '#content', '#post', '#page', '#rightside'],
             cache: true,
             history: true,
-            scrollTo: false   // ★仅此一处从 0 改为 false，避免强制置顶
+            scrollTo: false
           });
-          console.log('[PJAX] init with scrollTo:false');
+          console.log('[PJAX] enabled (scrollTo:false)');
         } catch(e) { console.warn('PJAX init failed:', e); }
       })();
     </script>
 
-    <!-- 极简滚动记忆：只为“后退回到原位置”，不改你其它代码 -->
+    <!-- Back Button Fix: robust restore + pagination guard -->
     <script th:if="${theme.config.other.pjax_enable}">
-      (function(){
-        var KEY = function(url){ return '__SCROLL__' + encodeURIComponent(url || (location.pathname + location.search + location.hash)); };
-        function save() {
-          try { sessionStorage.setItem(KEY(location.href), String(window.scrollY || 0)); } catch(e) {}
+    (function(){
+      if (window.__BACK_FIX__) return; window.__BACK_FIX__ = true;
+
+      // --- flags ---
+      window.__IS_BACK_NAV__ = false;
+      const PAGINATE_KEY = '__PAGINATE_CLICKED__';
+
+      // mark back/forward
+      document.addEventListener('pjax:popstate', function(){ window.__IS_BACK_NAV__ = true; });
+      window.addEventListener('pageshow', function(e){
+        try {
+          var nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+          if (e.persisted || (nav && nav.type === 'back_forward')) window.__IS_BACK_NAV__ = true;
+        } catch(_){}
+      });
+
+      // save scroll
+      const key = function(){ return '__SCROLL__' + encodeURIComponent(location.pathname + location.search + location.hash); };
+      const save = function(){
+        try { sessionStorage.setItem(key(), String(window.scrollY || 0)); } catch(e){}
+      };
+      const read = function(){
+        try { var y = parseInt(sessionStorage.getItem(key()) || '0', 10); return isNaN(y)?0:y; } catch(e){ return 0; }
+      };
+
+      document.addEventListener('pjax:send', save, {capture:true});
+      window.addEventListener('pagehide', save, {capture:true});
+
+      // mark paginate clicks, so your auto-scroll只在“主动翻页”时执行
+      document.addEventListener('click', function(ev){
+        var a = ev.target && ev.target.closest ? ev.target.closest('a') : null;
+        if (!a) return;
+        // 常见分页选择器：按你的主题改了也不影响，尽量覆盖
+        if (a.matches('.pagination a, a.page-numbers, a[rel="next"], a[rel="prev"], .pager a, .nav-links a')) {
+          try { sessionStorage.setItem(PAGINATE_KEY, '1'); } catch(e){}
         }
-        function read(url) {
-          try {
-            var y = parseInt(sessionStorage.getItem(KEY(url || location.href)) || '0', 10);
-            return isNaN(y) ? 0 : y;
-          } catch(e) { return 0; }
-        }
-        function robustRestore(y) {
-          if (!(y > 0)) return;
-          var tries = 0, max = 24;
-          function tick(){
-            tries++;
-            window.scrollTo(0, y);
-            if (tries < max && Math.abs((window.scrollY||0) - y) > 2) {
-              requestAnimationFrame(tick);
-            }
+      }, true);
+
+      // 暴露一个供你现有“分页自动下滑”判断的函数（如果你愿意用它包一层就更稳）
+      window.__shouldAutoScrollAfterPagination__ = function(){
+        var clicked = sessionStorage.getItem(PAGINATE_KEY) === '1';
+        var isBack = window.__IS_BACK_NAV__ === true;
+        // 用过即焚，避免多次触发
+        try { sessionStorage.removeItem(PAGINATE_KEY); } catch(e){}
+        return clicked && !isBack;
+      };
+
+      function robustRestore(){
+        if (!window.__IS_BACK_NAV__) return;
+        var targetY = read();
+        if (!(targetY > 0)) return;
+
+        var tries = 0, maxTries = 40, done = false, lastH = 0, start = Date.now();
+        var container = document.querySelector('#content,#post,#page,#body-wrap') || document.body;
+        var goodEnough = function(){ return Math.abs((window.scrollY||0) - targetY) <= 2; };
+
+        function tick(){
+          if (done) return;
+          tries++;
+          window.scrollTo(0, targetY);
+          var h = (container && container.scrollHeight) || document.documentElement.scrollHeight || document.body.scrollHeight;
+          var grown = h > lastH; lastH = h;
+          if (goodEnough()) { done = true; return; }
+          if (tries < maxTries) {
+            var elapsed = Date.now() - start;
+            if (elapsed > 3000) return;
+            var delay = tries<10 ? 0 : tries<18 ? 50 : tries<28 ? 120 : 240;
+            (delay ? setTimeout(tick, delay) : requestAnimationFrame(tick));
           }
-          requestAnimationFrame(tick);
-          try {
-            var imgs = Array.prototype.slice.call(document.images || []).filter(function(i){ return i && !i.complete; });
-            if (imgs.length) {
-              var left = imgs.length, fired = false;
-              function again(){ if (!fired){ fired = true; requestAnimationFrame(tick);} }
-              imgs.forEach(function(img){
-                img.addEventListener('load', function(){ if(--left===0) again(); }, {once:true});
-                img.addEventListener('error', function(){ if(--left===0) again(); }, {once:true});
-              });
-              setTimeout(again, 800);
-            }
-          } catch(e) {}
         }
-        // 保存时机（不影响 bfcache）
-        document.addEventListener('pjax:send', save, {capture:true});
-        window.addEventListener('pagehide', save, {capture:true});
-        // 捕获阶段点击内部链接时也保存一次（极端兜底）
-        document.addEventListener('click', function(ev){
-          var a = ev.target && ev.target.closest ? ev.target.closest('a') : null;
-          if (!a) return;
-          if (a.target === '_blank') return;
-          if (a.getAttribute && a.getAttribute('data-pjax') === 'ignore') return;
-          if (a.origin && a.origin !== location.origin) return;
-          save();
-        }, true);
-        // 恢复时机
-        document.addEventListener('pjax:popstate', function(){ robustRestore(read()); });
-        window.addEventListener('pageshow', function(e){
-          var isBF = false;
-          try { var nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0]; isBF = !!nav && nav.type === 'back_forward'; } catch(err){}
-          if (e.persisted || isBF) robustRestore(read());
-        });
-      })();
+        requestAnimationFrame(tick);
+
+        try{
+          var imgs = Array.prototype.slice.call(document.images||[]).filter(function(i){ return i && !i.complete; });
+          if (imgs.length){
+            var left = imgs.length, fired = false;
+            function again(){ if(!fired){ fired = true; requestAnimationFrame(tick);} }
+            imgs.forEach(function(img){
+              img.addEventListener('load', function(){ if(--left===0) again(); }, {once:true});
+              img.addEventListener('error', function(){ if(--left===0) again(); }, {once:true});
+            });
+            setTimeout(again, 800);
+          }
+        }catch(e){}
+      }
+
+      // 恢复时机：后退/前进、bfcache、以及 pjax 完成后兜底
+      document.addEventListener('pjax:complete', function(){
+        robustRestore();
+        if (window.__IS_BACK_NAV__) {
+          setTimeout(robustRestore, 60);
+          setTimeout(robustRestore, 180);
+          setTimeout(robustRestore, 400);
+          // 一段时间后把标志清掉，回到正常模式
+          setTimeout(function(){ window.__IS_BACK_NAV__ = false; }, 800);
+        }
+      });
+      document.addEventListener('pjax:popstate', robustRestore);
+      window.addEventListener('pageshow', robustRestore);
+    })();
     </script>
-    <!-- ===== /PJAX ===== -->
+    <!-- ===== end back-fix ===== -->
 
     <script th:src="${assets_link + '/js/heo.js' + theme_version}"></script>
 
