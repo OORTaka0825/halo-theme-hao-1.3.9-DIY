@@ -223,12 +223,13 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
         }
 
         var pjax = new Pjax({
-            elements: 'a:not([target="_blank"])',
+            
+            scrollTo: false,
+elements: 'a:not([target="_blank"])',
             selectors: pjaxSelectors,
             cacheBust: false,
             analytics: false,
-            scrollRestoration: false
-        })
+            scrollRestoration: false})
 
         document.addEventListener('pjax:send', function () {
 
@@ -329,97 +330,6 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 
 </script>
 <script src="/themes/theme-hao/assets/libs/welcome/welcome.js"></script>
-
-<!-- Back/List Scroll Guard v3 (minimal & safe): restore list on BACK, do not affect article forward -->
-<script>
-(function(){
-  if (window.__LIST_SCROLL_GUARD_V3__) return; window.__LIST_SCROLL_GUARD_V3__ = true;
-
-  function isPostPage(){ return !!document.getElementById('post'); }
-  function isListPage(){ return !isPostPage(); }
-
-  function keyFor(url){ return '__LIST_SCROLL__' + encodeURIComponent(url || (location.pathname + location.search + location.hash)); }
-  function saveListScroll(){
-    if (!isListPage()) return;
-    try { sessionStorage.setItem(keyFor(), String(window.scrollY || 0)); } catch(e){}
-  }
-  function readListScroll(){
-    try { var y = parseInt(sessionStorage.getItem(keyFor()) || '0', 10); return isNaN(y)?0:y; } catch(e){ return 0; }
-  }
-  function robustRestoreList(){
-    var y = readListScroll();
-    if (!(y > 0)) return;
-    var tries = 0, max = 40, start = Date.now();
-    function tick(){
-      tries++;
-      window.scrollTo(0, y);
-      if (Math.abs((window.scrollY||0) - y) <= 2) return;
-      if (tries < max && (Date.now()-start) < 3000) {
-        (tries < 10 ? requestAnimationFrame : setTimeout)(tick, tries < 18 ? 0 : tries < 28 ? 80 : 160);
-      }
-    }
-    requestAnimationFrame(tick);
-    // when lazy images finish, try again once
-    try {
-      var imgs = Array.prototype.slice.call(document.images||[]).filter(function(i){ return i && !i.complete; });
-      if (imgs.length){
-        var left = imgs.length, fired = false;
-        function again(){ if (!fired){ fired = true; requestAnimationFrame(tick);} }
-        imgs.forEach(function(img){
-          img.addEventListener('load', function(){ if(--left===0) again(); }, {once:true});
-          img.addEventListener('error', function(){ if(--left===0) again(); }, {once:true});
-        });
-        setTimeout(again, 800);
-      }
-    } catch(e){}
-  }
-
-  // Mark back/forward via both popstate and pageshow(back_forward)
-  var IS_BACK = false;
-  document.addEventListener('pjax:popstate', function(){ IS_BACK = true; });
-  window.addEventListener('pageshow', function(e){
-    try {
-      var nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
-      if (e.persisted || (nav && nav.type === 'back_forward')) IS_BACK = true;
-    } catch(_){}
-    // If we land on list via real back (bfcache or not), restore now too
-    if (IS_BACK && isListPage()) {
-      robustRestoreList();
-      setTimeout(function(){ IS_BACK = false; }, 800);
-    }
-  });
-
-  // Save when leaving list (safe for bfcache)
-  document.addEventListener('pjax:send', saveListScroll, {capture:true});
-  window.addEventListener('pagehide', saveListScroll, {capture:true});
-  document.addEventListener('visibilitychange', function(){
-    if (document.visibilityState === 'hidden') saveListScroll();
-  }, {capture:true});
-
-  // Also save immediately on click of internal link, if currently on list
-  document.addEventListener('click', function(ev){
-    if (!isListPage()) return;
-    var a = ev.target && ev.target.closest ? ev.target.closest('a') : null;
-    if (!a) return;
-    if (a.target === '_blank') return;
-    if (a.getAttribute && a.getAttribute('data-pjax') === 'ignore') return;
-    if (a.origin && a.origin !== location.origin) return;
-    saveListScroll();
-  }, true);
-
-  // After PJAX completes:
-  document.addEventListener('pjax:complete', function(){
-    if (IS_BACK) {
-      if (isListPage()) robustRestoreList();
-      setTimeout(function(){ IS_BACK = false; }, 800);
-    } else {
-      // Forward navigation: do NOT change article scroll; it will naturally start at top unless anchor
-      // 如果你的文章页偶尔不在顶部，可能是文章链接带 hash；这种情况建议清理 hash。
-    }
-  });
-})();
-</script>
-
 </body>
 
 </html>
