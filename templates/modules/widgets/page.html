@@ -58,26 +58,20 @@
         </div>
 
     </div>
-    
-<script>
-  // 统一的分页滚动：启用第一屏则滚到第一屏真实高度；否则滚到顶部
-  function scrollToPost() {
-    setTimeout(() => {
-      try {
-        const header = document.getElementById('page-header');
-        const dest = header ? header.getBoundingClientRect().height : 0;
-        if (window.btf && typeof window.btf.scrollToDest === 'function') {
-          window.btf.scrollToDest(dest, 500);
-        } else {
-          window.scrollTo({ top: dest, behavior: 'smooth' });
+    <script th:if="${theme.config.top.above.enable_above}">
+        function scrollToPost(){
+            setTimeout(()=>{
+                btf.scrollToDest(window.innerHeight, 500);
+            },1000)
         }
-      } catch (e) {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    }, 300);
-  }
-</script>
-
+    </script>
+    <script th:unless="${theme.config.top.above.enable_above}">
+        function scrollToPost(){
+            setTimeout(()=>{
+                btf.scrollToDest(0, 500);
+            },1000)
+        }
+    </script>
 </nav>
 
 </html>
