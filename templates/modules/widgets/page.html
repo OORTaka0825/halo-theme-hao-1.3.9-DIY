@@ -58,20 +58,44 @@
         </div>
 
     </div>
-    <script th:if="${theme.config.top.above.enable_above}">
-        function scrollToPost(){
-            setTimeout(()=>{
-                btf.scrollToDest(window.innerHeight, 500);
-            },1000)
+    
+    
+
+<script th:inline="javascript">
+  /**
+   * 分页滚动：精确滚到“第一屏配置”的高度（25/50/75/100vh）。
+   * 避免 btf.scrollToDest 的 -70 偏移，使用原生 smooth scroll。
+   */
+  function scrollToPost() {
+    setTimeout(() => {
+      try {
+        var enable = /*[[${theme.config.top.above.enable_above}]]*/ false;
+        var cfg = /*[[${theme.config.top.above.full_page_height}]]*/ '100vh'; // e.g. '75vh'
+        var dest = 0;
+
+        if (enable && cfg) {
+          var m = /(\d+)\s*vh/i.exec(cfg);
+          if (m) {
+            dest = window.innerHeight * (parseInt(m[1], 10) / 100);
+          } else {
+            var m2 = /(\d+)\s*px/i.exec(cfg);
+            if (m2) dest = parseInt(m2[1], 10);
+          }
         }
-    </script>
-    <script th:unless="${theme.config.top.above.enable_above}">
-        function scrollToPost(){
-            setTimeout(()=>{
-                btf.scrollToDest(0, 500);
-            },1000)
+
+        if (!dest) {
+          var header = document.getElementById('page-header');
+          dest = header ? header.getBoundingClientRect().height : 0;
         }
-    </script>
+
+        window.scrollTo({ top: dest, behavior: 'smooth' });
+      } catch (e) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }, 150);
+  }
+</script>
+
 </nav>
 
 </html>
