@@ -328,6 +328,30 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 
 </script>
 <script src="/themes/theme-hao/assets/libs/welcome/welcome.js"></script>
+<script data-pjax="">
+// Remember and restore scroll position when navigating with PJAX
+(function(){
+  var KEY_PREFIX = 'hao:scroll:';
+  function keyFor(path){ return KEY_PREFIX + path; }
+  function getScroll(){ return (window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0); }
+  function saveScroll(path){ try{ sessionStorage.setItem(keyFor(path), String(getScroll())); }catch(e){} }
+  function restoreScroll(path){
+    try{
+      var v = sessionStorage.getItem(keyFor(path));
+      if(v !== null){
+        var top = parseInt(v,10) || 0;
+        requestAnimationFrame(function(){ window.scrollTo(0, top); });
+        sessionStorage.removeItem(keyFor(path));
+      }
+    }catch(e){}
+  }
+  if ('scrollRestoration' in history) { history.scrollRestoration = 'manual'; }
+  document.addEventListener('pjax:send', function(){ saveScroll(location.pathname + location.search); });
+  document.addEventListener('pjax:complete', function(){ restoreScroll(location.pathname + location.search); });
+  window.addEventListener('pageshow', function(ev){ if (ev.persisted) restoreScroll(location.pathname + location.search); });
+})();
+</script>
+
 </body>
 
 </html>
