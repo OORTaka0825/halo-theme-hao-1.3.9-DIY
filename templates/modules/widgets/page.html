@@ -85,7 +85,9 @@
           factor = 0; // 未启用第一屏则回到顶部
         }
 
-        var dest = Math.round((window.innerHeight || 0) * factor);
+        const bleed = 28; // 微调：向上“露出”一点（默认 28px，可改 0~60）
+        var dest = Math.round((window.innerHeight || 0) * factor) - bleed;
+        if (dest < 0) dest = 0;
 
         if (window.btf && typeof window.btf.scrollToDest === 'function') {
           window.btf.scrollToDest(dest + 70, 500); // 抵消 utils.js 中的 -70
