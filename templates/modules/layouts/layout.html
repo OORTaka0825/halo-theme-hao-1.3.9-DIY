@@ -141,11 +141,14 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     <!-- /themes/theme-hao/assets/libs/ 网站预加载， 放在 <script src="/themes/theme-hao/assets/libs/welcome/welcome.js"></script>
 
 <style>
-  /* Hide content for a moment during back/forward to avoid 'flash' of old scroll position */
+  /* Avoid layout jank affecting scroll position during back/forward restore */
+  html { scroll-behavior: auto; } /* ensure instant jump, not smooth */
   #body-wrap.pjax-hide { visibility: hidden; }
+  /* Disable scroll anchoring so late-loaded content won't nudge the viewport */
+  html, body, #body-wrap { overflow-anchor: none; }
 </style>
 <script>
-// --- Minimal, additive PJAX back/forward precise scroll restore (no flash) ---
+// --- Minimal append patch: ultra-precise back/forward scroll restore without offset ---
 (function () {
   try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch (e) {}
 
@@ -159,20 +162,52 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 
   var __pendingRestoreY = null;
 
-  // When user presses Back/Forward
   window.addEventListener('popstate', function (ev) {
     __pendingRestoreY = (ev && ev.state && typeof ev.state.__scrollY === 'number') ? ev.state.__scrollY : 0;
-
-    // Avoid the 1-frame flash of the current page at its old scroll
     var bw = document.getElementById('body-wrap');
     if (bw) bw.classList.add('pjax-hide');
     try { window.scrollTo(0, 0); } catch (e) {}
   }, { passive: true });
 
-  // Persist the current page's scroll before PJAX navigates away
   document.addEventListener('pjax:send', saveY);
 
-  // After PJAX swaps the DOM
+  function restoreExactScroll(targetY) {
+    // Re-apply the targetY several times while layout is still settling
+    var attempts = 40;            // ~40 frames (~0.65s at 60fps)
+    var done = false;
+
+    function apply() {
+      if (done) return;
+      window.scrollTo(0, targetY);
+      attempts--;
+      if (attempts > 0) {
+        requestAnimationFrame(apply);
+      } else {
+        // Final guard: slight drift correction after images/fonts finish
+        setTimeout(function(){ window.scrollTo(0, targetY); }, 50);
+        setTimeout(function(){ window.scrollTo(0, targetY); }, 150);
+      }
+    }
+    requestAnimationFrame(apply);
+
+    // Also correct when images finish loading (lazyload may change heights)
+    var imgs = Array.prototype.slice.call(document.images || []);
+    imgs.forEach(function(img){
+      if (!img.complete) {
+        img.addEventListener('load', function(){ window.scrollTo(0, targetY); }, { once: true });
+      }
+    });
+
+    // Observe DOM mutations that may affect height above viewport; recenter once then disconnect
+    try {
+      var mo = new MutationObserver(function(){
+        window.scrollTo(0, targetY);
+      });
+      mo.observe(document.body, { childList: true, subtree: true });
+      setTimeout(function(){ try{ mo.disconnect(); }catch(e){} }, 800);
+    } catch (e) {}
+  }
+
   document.addEventListener('pjax:complete', function () {
     var bw = document.getElementById('body-wrap');
     if (bw) bw.classList.remove('pjax-hide');
@@ -180,15 +215,14 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     if (__pendingRestoreY !== null) {
       var y = __pendingRestoreY;
       __pendingRestoreY = null;
-      requestAnimationFrame(function () { window.scrollTo(0, y); });
+      restoreExactScroll(y);
     } else {
-      // Forward navigation into article pages -> start at top
       var path = (window.location && window.location.pathname) || '/';
       if (/^\/(archives|posts|p)\b/.test(path)) window.scrollTo(0, 0);
     }
   });
 })();
-// --- end minimal patch ---
+// --- end patch ---
 </script>
 
 </body> 之前 -->
