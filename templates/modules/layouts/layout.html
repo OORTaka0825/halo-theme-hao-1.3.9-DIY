@@ -290,6 +290,57 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
             typeof preloader === 'object' && preloader.endLoading()
         })
 
+        
+            // --- Precise scroll restore without 1s flash on Back ---
+            (function() {
+                try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch(e) {}
+
+                // Save current page scroll into history entry
+                function saveScrollToHistory() {
+                    try {
+                        var st = history.state || {};
+                        st.__scrollY = window.scrollY || window.pageYOffset || 0;
+                        history.replaceState(st, '', location.href);
+                    } catch (e) {}
+                }
+
+                // Target scroll position to restore for the *destination* entry (after back/forward)
+                var __pendingRestoreY = null;
+                window.addEventListener('popstate', function(ev) {
+                    // Grab the saved Y of the destination entry
+                    var y = 0;
+                    if (ev && ev.state && typeof ev.state.__scrollY === 'number') y = ev.state.__scrollY;
+                    __pendingRestoreY = y;
+
+                    // Prevent the visual "flash" of the current (article) scroll position:
+                    // immediately reset scroll so the user doesn't see the old page at 50% height.
+                    try { window.scrollTo(0, 0); } catch(e) {}
+                }, { passive: true });
+
+                // Before navigating away via PJAX, persist the current page's scroll
+                document.addEventListener('pjax:send', function () {
+                    saveScrollToHistory();
+                });
+
+                // After PJAX finishes swapping DOM
+                document.addEventListener('pjax:complete', function () {
+                    var path = (window.location && window.location.pathname) || "/";
+                    var isPostPage = /^\\/(archives|posts|p)\\b/.test(path);
+
+                    if (__pendingRestoreY !== null) {
+                        // Restore exact scroll of the entry we navigated to (back/forward)
+                        var y = __pendingRestoreY;
+                        __pendingRestoreY = null;
+                        // Use rAF to wait for layout
+                        requestAnimationFrame(function(){ window.scrollTo(0, y); });
+                    } else if (isPostPage) {
+                        // Normal forward navigation into article: start from top
+                        window.scrollTo(0, 0);
+                    }
+                });
+            })();
+            // --- end precise scroll restore ---
+
         document.addEventListener('pjax:error', (e) => {
                 if (e.request.status === 404 || e.request.status === 500) {
                     window.location.href = e.request.responseURL;
