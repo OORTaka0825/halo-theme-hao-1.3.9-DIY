@@ -12,7 +12,10 @@
 
     <!-- ===== PJAX 开关：新增开始 ===== -->
 <!-- 仅在开启时加载 PJAX 库 -->
-<!-- PJAX init removed to avoid double-initialization; keep only layout.html PJAX -->
+<script th:if="${theme.config.other.pjax_enable}" src="/themes/theme-hao/assets/libs/pjax/pjax.min.js"></script>
+
+<!-- 初始化 PJAX（开启才执行，且防重复） -->
+<!-- Removed duplicate PJAX init (keep layout.html PJAX only) -->
 <!-- ===== PJAX 开关：新增结束 ===== -->
 
     <script th:src="${assets_link + '/js/heo.js' + theme_version}"></script>
