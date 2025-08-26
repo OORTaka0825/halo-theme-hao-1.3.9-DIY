@@ -139,126 +139,6 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     <script charset="utf-8" data-pjax th:src="${assets_link + '/zhheo/blogex.js' + theme_version}"></script>
     <script th:src="${assets_link + '/js/tw_cn.js' + theme_version}"></script>
     <!-- /themes/theme-hao/assets/libs/ 网站预加载， 放在 <script src="/themes/theme-hao/assets/libs/welcome/welcome.js"></script>
-
-<style>
-  /* Hide content for a moment during back/forward to avoid 'flash' of old scroll position */
-  #body-wrap.pjax-hide { visibility: hidden; }
-</style>
-<script>
-// --- Minimal, additive PJAX back/forward precise scroll restore (no flash) ---
-(function () {
-  try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch (e) {}
-
-  function saveY() {
-    try {
-      var st = history.state || {};
-      st.__scrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
-      history.replaceState(st, '', location.href);
-    } catch (e) {}
-  }
-
-  var __pendingRestoreY = null;
-
-  // When user presses Back/Forward
-  window.addEventListener('popstate', function (ev) {
-    __pendingRestoreY = (ev && ev.state && typeof ev.state.__scrollY === 'number') ? ev.state.__scrollY : 0;
-
-    // Avoid the 1-frame flash of the current page at its old scroll
-    var bw = document.getElementById('body-wrap');
-    if (bw) bw.classList.add('pjax-hide');
-    try { window.scrollTo(0, 0); } catch (e) {}
-  }, { passive: true });
-
-  // Persist the current page's scroll before PJAX navigates away
-  document.addEventListener('pjax:send', saveY);
-
-  // After PJAX swaps the DOM
-  document.addEventListener('pjax:complete', function () {
-    var bw = document.getElementById('body-wrap');
-    if (bw) bw.classList.remove('pjax-hide');
-
-    if (__pendingRestoreY !== null) {
-      var y = __pendingRestoreY;
-      __pendingRestoreY = null;
-      requestAnimationFrame(function () { window.scrollTo(0, y); });
-    } else {
-      // Forward navigation into article pages -> start at top
-      var path = (window.location && window.location.pathname) || '/';
-      if (/^\/(archives|posts|p)\b/.test(path)) window.scrollTo(0, 0);
-    }
-  });
-})();
-// --- end minimal patch ---
-</script>
-
-
-<!-- PJAX precise back/forward scroll restore (no flash) - minimal append -->
-<style>
-  /* Prevent flash of old page during back/forward */
-  #body-wrap.pjax-hide { visibility: hidden; }
-  /* Disable browser scroll anchoring that nudges viewport after lazyload */
-  html, body, #body-wrap { overflow-anchor: none; }
-  /* Ensure instant jumps */
-  html { scroll-behavior: auto; }
-</style>
-<script>
-(function () {
-  try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch (e) {}
-
-  function saveY() {
-    try {
-      var st = history.state || {};
-      st.__scrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
-      history.replaceState(st, '', location.href);
-    } catch (e) {}
-  }
-
-  var __pendingRestoreY = null;
-
-  // Back/forward pressed -> compute target scroll and hide current page to avoid 1-frame flash
-  window.addEventListener('popstate', function (ev) {
-    __pendingRestoreY = (ev && ev.state && typeof ev.state.__scrollY === 'number') ? ev.state.__scrollY : 0;
-    var wrap = document.getElementById('body-wrap');
-    if (wrap) wrap.classList.add('pjax-hide');
-    try { window.scrollTo(0, 0); } catch (e) {}
-  }, { passive: true });
-
-  // Persist current scroll before PJAX navigates away
-  document.addEventListener('pjax:send', saveY);
-
-  // Robust restore after PJAX swap
-  function restoreExact(y) {
-    var tries = 40; // ~0.6s
-    var tick = function() {
-      window.scrollTo(0, y);
-      if (--tries > 0) requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
-    // extra guards for late layout changes
-    setTimeout(function(){ window.scrollTo(0, y); }, 50);
-    setTimeout(function(){ window.scrollTo(0, y); }, 150);
-    // re-align when images load
-    Array.prototype.forEach.call(document.images || [], function(img){
-      if (!img.complete) img.addEventListener('load', function(){ window.scrollTo(0, y); }, { once: true });
-    });
-  }
-
-  document.addEventListener('pjax:complete', function () {
-    var wrap = document.getElementById('body-wrap');
-    if (wrap) wrap.classList.remove('pjax-hide');
-
-    if (__pendingRestoreY !== null) {
-      var y = __pendingRestoreY; __pendingRestoreY = null;
-      restoreExact(y);
-    } else {
-      var path = (window.location && window.location.pathname) || '/';
-      if (/^\/(archives|posts|p)\b/.test(path)) window.scrollTo(0, 0);
-    }
-  });
-})();
-</script>
-<!-- / PJAX precise back/forward scroll restore -->
-
 </body> 之前 -->
     <script src="/themes/theme-hao/assets/libs/instantpage.min.js" type="module"></script>
 
@@ -321,7 +201,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     <th:block th:replace="~{modules/common/toc-bot :: toc-bot}"></th:block>
 
     <!-- 51统计 -->
-    <th:block th:replace="~{modules/common/51-la :: 51-la}"></th:block>
+    <th:block th:replace="~{modules/common/51-la}"/>
 
     <!--官方评论插件js-->
     <script th:if="${pluginFinder.available('PluginCommentWidget')}" src="/plugins/PluginCommentWidget/assets/static/comment-widget.iife.js"></script>
@@ -336,12 +216,11 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 
 
     <script>
-        let pjaxSelectors = ['title', '#config-diff', '#body-wrap', '#rightside-config-hide', '#rightside-config-show', '.js-pjax','#site-config']
-
-        if (false) {
-            pjaxSelectors.unshift('meta[property="og:image"]', 'meta[property="og:title"]', 'meta[property="og:url"]')
-        }
-
+        let pjaxSelectors = ['title', '#config-diff', '#body-wrap', '#rightside-config-hide', '#rightside-config-show', '.js-pjax', '#site-config']
+        
+        pjaxSelectors.unshift('meta[property="og:type"]', 'meta[property="og:image"]', 'meta[property="og:title"]', 'meta[property="og:url"]', 'meta[property="og:description"]'
+                , 'meta[name="twitter:title"]', 'meta[name="twitter:url"]', 'meta[name="twitter:description"]', 'meta[name="twitter:image"]')
+        
         var pjax = new Pjax({
             elements: 'a:not([target="_blank"])',
             selectors: pjaxSelectors,
@@ -349,14 +228,14 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
             analytics: false,
             scrollRestoration: false
         })
-
+        
         document.addEventListener('pjax:send', function () {
-
+            
             // removeEventListener toc scroll
             window.removeEventListener('scroll', window.tocScrollFn)
-
+            
             typeof preloader === 'object' && preloader.initLoading()
-
+            
             if (window.aplayers) {
                 for (let i = 0; i < window.aplayers.length; i++) {
                     if (!window.aplayers[i].options.fixed) {
@@ -364,57 +243,57 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
                     }
                 }
             }
-
+            
             typeof typed === 'object' && typed.destroy()
-
+            
             //reset readmode
             const $bodyClassList = document.body.classList
             $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
         })
-
+        
         document.addEventListener('pjax:complete', function () {
             window.refreshFn()
-
+            
             document.querySelectorAll('script[data-pjax]').forEach(item => {
-                    const newScript = document.createElement('script')
-                    const content = item.text || item.textContent || item.innerHTML || ""
-                    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
-                    newScript.appendChild(document.createTextNode(content))
-                    item.parentNode.replaceChild(newScript, item)
-                }
+                        const newScript = document.createElement('script')
+                        const content = item.text || item.textContent || item.innerHTML || ""
+                        Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+                        newScript.appendChild(document.createTextNode(content))
+                        item.parentNode.replaceChild(newScript, item)
+                    }
             )
-
+            
             GLOBAL_CONFIG.lazyload.enable && window.lazyLoadInstance.update()
-
+            
             typeof chatBtnFn === 'function' && chatBtnFn()
             typeof panguInit === 'function' && panguInit()
-
+            
             // google analytics
             typeof gtag === 'function' && gtag('config', '', {
                 'page_path': window.location.pathname
             });
-
+            
             // baidu analytics
             typeof _hmt === 'object' && _hmt.push(['_trackPageview', window.location.pathname]);
-
+            
             typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
-
+            
             // Analytics
             if (false) {
                 MtaH5.pgv()
             }
-
+            
             // prismjs
             typeof Prism === 'object' && Prism.highlightAll()
-
+            
             typeof preloader === 'object' && preloader.endLoading()
         })
-
+        
         document.addEventListener('pjax:error', (e) => {
-                if (e.request.status === 404 || e.request.status === 500) {
-                    window.location.href = e.request.responseURL;
+                    if (e.request.status === 404 || e.request.status === 500) {
+                        window.location.href = e.request.responseURL;
+                    }
                 }
-            }
         )
     </script>
 
