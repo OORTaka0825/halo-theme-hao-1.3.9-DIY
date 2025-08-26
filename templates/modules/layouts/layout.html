@@ -139,6 +139,52 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     <script charset="utf-8" data-pjax th:src="${assets_link + '/zhheo/blogex.js' + theme_version}"></script>
     <script th:src="${assets_link + '/js/tw_cn.js' + theme_version}"></script>
     <!-- /themes/theme-hao/assets/libs/ 网站预加载， 放在 <script src="/themes/theme-hao/assets/libs/welcome/welcome.js"></script>
+
+<script>
+(function(){
+  if (window._haoScrollRestoreInit) return;
+  window._haoScrollRestoreInit = true;
+
+  var KEY_PREFIX = 'hao:scroll:';
+  function pathKey(p){ return KEY_PREFIX + p; }
+  function cur(){ return location.pathname + location.search + location.hash; }
+  function getY(){ return window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0; }
+
+  function save(){ try{ sessionStorage.setItem(pathKey(cur()), String(getY())); }catch(e){} }
+
+  function restoreWithRetry(){
+    var k = pathKey(cur()), v=null;
+    try{ v = sessionStorage.getItem(k); }catch(e){}
+    if(v==null) return;
+    var y = parseInt(v,10) || 0, tries = 0;
+    function tick(){
+      window.scrollTo(0, y);
+      if(++tries < 6) requestAnimationFrame(tick);
+      else { try{ sessionStorage.removeItem(k); }catch(e){} }
+    }
+    requestAnimationFrame(tick);
+  }
+
+  if('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  document.addEventListener('pjax:send', save);
+  document.addEventListener('pjax:complete', function(){ patchScrollToPostOnceIfNeeded(); restoreWithRetry(); });
+  window.addEventListener('pageshow', function(e){ if(e && e.persisted){ patchScrollToPostOnceIfNeeded(); restoreWithRetry(); } });
+
+  function patchScrollToPostOnceIfNeeded(){
+    try{
+      var k = pathKey(cur());
+      if (sessionStorage.getItem(k)==null) return;
+      if (typeof window.scrollToPost === 'function' && !window._scrollToPostPatched){
+        var orig = window.scrollToPost;
+        window.scrollToPost = function(){};
+        window._scrollToPostPatched = true;
+        setTimeout(function(){ window.scrollToPost = orig; window._scrollToPostPatched = false; }, 500);
+      }
+    }catch(e){}
+  }
+})();
+</script>
+
 </body> 之前 -->
     <script src="/themes/theme-hao/assets/libs/instantpage.min.js" type="module"></script>
 
@@ -328,27 +374,49 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 
 </script>
 <script src="/themes/theme-hao/assets/libs/welcome/welcome.js"></script>
-<script data-pjax="">
-// Remember and restore scroll position when navigating with PJAX
+
+<script>
 (function(){
+  if (window._haoScrollRestoreInit) return;
+  window._haoScrollRestoreInit = true;
+
   var KEY_PREFIX = 'hao:scroll:';
-  function keyFor(path){ return KEY_PREFIX + path; }
-  function getScroll(){ return (window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0); }
-  function saveScroll(path){ try{ sessionStorage.setItem(keyFor(path), String(getScroll())); }catch(e){} }
-  function restoreScroll(path){
+  function pathKey(p){ return KEY_PREFIX + p; }
+  function cur(){ return location.pathname + location.search + location.hash; }
+  function getY(){ return window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0; }
+
+  function save(){ try{ sessionStorage.setItem(pathKey(cur()), String(getY())); }catch(e){} }
+
+  function restoreWithRetry(){
+    var k = pathKey(cur()), v=null;
+    try{ v = sessionStorage.getItem(k); }catch(e){}
+    if(v==null) return;
+    var y = parseInt(v,10) || 0, tries = 0;
+    function tick(){
+      window.scrollTo(0, y);
+      if(++tries < 6) requestAnimationFrame(tick);
+      else { try{ sessionStorage.removeItem(k); }catch(e){} }
+    }
+    requestAnimationFrame(tick);
+  }
+
+  if('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  document.addEventListener('pjax:send', save);
+  document.addEventListener('pjax:complete', function(){ patchScrollToPostOnceIfNeeded(); restoreWithRetry(); });
+  window.addEventListener('pageshow', function(e){ if(e && e.persisted){ patchScrollToPostOnceIfNeeded(); restoreWithRetry(); } });
+
+  function patchScrollToPostOnceIfNeeded(){
     try{
-      var v = sessionStorage.getItem(keyFor(path));
-      if(v !== null){
-        var top = parseInt(v,10) || 0;
-        requestAnimationFrame(function(){ window.scrollTo(0, top); });
-        sessionStorage.removeItem(keyFor(path));
+      var k = pathKey(cur());
+      if (sessionStorage.getItem(k)==null) return;
+      if (typeof window.scrollToPost === 'function' && !window._scrollToPostPatched){
+        var orig = window.scrollToPost;
+        window.scrollToPost = function(){};
+        window._scrollToPostPatched = true;
+        setTimeout(function(){ window.scrollToPost = orig; window._scrollToPostPatched = false; }, 500);
       }
     }catch(e){}
   }
-  if ('scrollRestoration' in history) { history.scrollRestoration = 'manual'; }
-  document.addEventListener('pjax:send', function(){ saveScroll(location.pathname + location.search); });
-  document.addEventListener('pjax:complete', function(){ restoreScroll(location.pathname + location.search); });
-  window.addEventListener('pageshow', function(ev){ if (ev.persisted) restoreScroll(location.pathname + location.search); });
 })();
 </script>
 
