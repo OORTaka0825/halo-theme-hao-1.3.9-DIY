@@ -142,50 +142,64 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 
 <script>
 (function(){
-  if (window._haoBackRestoreInit) return;
-  window._haoBackRestoreInit = true;
+  if (window._haoScrollManagerInit) return;
+  window._haoScrollManagerInit = true;
 
   var KEY_PREFIX = 'hao:scroll:';
   var CURRENT_KEY = null;
   var isPop = false;
+  var restoring = false;
   var saveTicking = false;
 
-  function pageKey() { return location.pathname + location.search; }
-  function storeKey(k, y){
-    try { sessionStorage.setItem(KEY_PREFIX + k, String(y)); } catch(e){}
-  }
-  function readKey(k){
-    try { return sessionStorage.getItem(KEY_PREFIX + k); } catch(e){ return null; }
-  }
-  function clearKey(k){
-    try { sessionStorage.removeItem(KEY_PREFIX + k);} catch(e){}
-  }
+  function pageKey(){ return location.pathname + location.search; }
   function getY(){ return window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0; }
+  function setItem(k,v){ try{ sessionStorage.setItem(KEY_PREFIX + k, String(v)); }catch(e){} }
+  function getItem(k){ try{ return sessionStorage.getItem(KEY_PREFIX + k); }catch(e){ return null; } }
+  function rmItem(k){ try{ sessionStorage.removeItem(KEY_PREFIX + k); }catch(e){} }
 
   function throttledSave(){
+    if (restoring) return; // don't overwrite while restoring
     if (saveTicking) return;
     saveTicking = true;
     requestAnimationFrame(function(){
       var k = CURRENT_KEY || pageKey();
-      storeKey(k, getY());
+      setItem(k, getY());
       saveTicking = false;
     });
   }
 
-  // Detect browser history back/forward within PJAX
+  // Monkey-patch pjax.loadUrl to save before any navigation
+  function patchPjaxLoadUrl(){
+    try{
+      if (window.pjax && !window.pjax._haoPatched){
+        var orig = window.pjax.loadUrl;
+        window.pjax.loadUrl = function(url){
+          try{ setItem(pageKey(), getY()); }catch(e){}
+          return orig.apply(this, arguments);
+        };
+        window.pjax._haoPatched = true;
+      }
+    }catch(e){}
+  }
+
+  // Detect browser back/forward
   window.addEventListener('popstate', function(){ isPop = true; }, true);
 
-  // Set/refresh current key after PJAX completes
+  // Save continuously while the user scrolls
+  window.addEventListener('scroll', throttledSave, {passive:true});
+
+  // Also save beforeunload
+  window.addEventListener('beforeunload', function(){ setItem(pageKey(), getY()); });
+
+  // After PJAX completes, either restore (if back) or just refresh CURRENT_KEY
   document.addEventListener('pjax:complete', function(){
     CURRENT_KEY = pageKey();
-    if (isPop) {
-      // Restore if we have a recorded position for this page
-      var v = readKey(CURRENT_KEY);
-      if (v != null) {
-        patchScrollToPostTemporarily();
+    patchPjaxLoadUrl();
+    if (isPop){
+      var v = getItem(CURRENT_KEY);
+      if (v != null){
+        patchScrollToPostTemporarily(2000); // suppress for longer
         restoreWithRetries(parseInt(v,10) || 0);
-        // keep the key for a short while; clear later so a second back still works
-        setTimeout(function(){ clearKey(CURRENT_KEY); }, 3000);
       }
       isPop = false;
     }
@@ -194,48 +208,51 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   // Support BFCache
   window.addEventListener('pageshow', function(ev){
     CURRENT_KEY = pageKey();
-    if (ev && ev.persisted) {
-      var v = readKey(CURRENT_KEY);
-      if (v != null) {
-        patchScrollToPostTemporarily();
+    patchPjaxLoadUrl();
+    if (ev && ev.persisted){
+      var v = getItem(CURRENT_KEY);
+      if (v != null){
+        patchScrollToPostTemporarily(2000);
         restoreWithRetries(parseInt(v,10) || 0);
-        setTimeout(function(){ clearKey(CURRENT_KEY); }, 3000);
       }
     }
   });
 
-  // Save while user scrolls (on list pages etc.)
-  window.addEventListener('scroll', throttledSave, {passive:true});
-
-  // Also save right before unload just in case
-  window.addEventListener('beforeunload', function(){ storeKey(pageKey(), getY()); });
-
   function restoreWithRetries(y){
-    // Multi-phase restore: several RAFs + a delayed shot to win over lazy content
+    restoring = true;
+    // Multiple RAF attempts + timed attempts to beat layout/lazyload shifts
     var tries = 0;
-    function tick(){
+    function rafTick(){
       window.scrollTo(0, y);
-      if (++tries < 10) requestAnimationFrame(tick);
+      if (++tries < 20) requestAnimationFrame(rafTick);
     }
-    requestAnimationFrame(tick);
+    requestAnimationFrame(rafTick);
+    setTimeout(function(){ window.scrollTo(0, y); }, 0);
+    setTimeout(function(){ window.scrollTo(0, y); }, 300);
     setTimeout(function(){ window.scrollTo(0, y); }, 800);
     setTimeout(function(){ window.scrollTo(0, y); }, 1500);
+    setTimeout(function(){ restoring = false; }, 2000);
   }
 
-  function patchScrollToPostTemporarily(){
-    try {
+  function patchScrollToPostTemporarily(ms){
+    try{
       if (typeof window.scrollToPost === 'function' && !window._scrollToPostPatched){
         var orig = window.scrollToPost;
         window.scrollToPost = function(){};
         window._scrollToPostPatched = true;
-        setTimeout(function(){ window.scrollToPost = orig; window._scrollToPostPatched = false; }, 1200);
+        setTimeout(function(){
+          window.scrollToPost = orig;
+          window._scrollToPostPatched = false;
+        }, ms || 1200);
       }
-    } catch(e){}
+    }catch(e){}
   }
 
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-  // Init key for the first load
   CURRENT_KEY = pageKey();
+
+  // Try to patch pjax.loadUrl immediately too (in case PJAX was already created)
+  patchPjaxLoadUrl();
 })();
 </script>
 
@@ -431,50 +448,64 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 
 <script>
 (function(){
-  if (window._haoBackRestoreInit) return;
-  window._haoBackRestoreInit = true;
+  if (window._haoScrollManagerInit) return;
+  window._haoScrollManagerInit = true;
 
   var KEY_PREFIX = 'hao:scroll:';
   var CURRENT_KEY = null;
   var isPop = false;
+  var restoring = false;
   var saveTicking = false;
 
-  function pageKey() { return location.pathname + location.search; }
-  function storeKey(k, y){
-    try { sessionStorage.setItem(KEY_PREFIX + k, String(y)); } catch(e){}
-  }
-  function readKey(k){
-    try { return sessionStorage.getItem(KEY_PREFIX + k); } catch(e){ return null; }
-  }
-  function clearKey(k){
-    try { sessionStorage.removeItem(KEY_PREFIX + k);} catch(e){}
-  }
+  function pageKey(){ return location.pathname + location.search; }
   function getY(){ return window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0; }
+  function setItem(k,v){ try{ sessionStorage.setItem(KEY_PREFIX + k, String(v)); }catch(e){} }
+  function getItem(k){ try{ return sessionStorage.getItem(KEY_PREFIX + k); }catch(e){ return null; } }
+  function rmItem(k){ try{ sessionStorage.removeItem(KEY_PREFIX + k); }catch(e){} }
 
   function throttledSave(){
+    if (restoring) return; // don't overwrite while restoring
     if (saveTicking) return;
     saveTicking = true;
     requestAnimationFrame(function(){
       var k = CURRENT_KEY || pageKey();
-      storeKey(k, getY());
+      setItem(k, getY());
       saveTicking = false;
     });
   }
 
-  // Detect browser history back/forward within PJAX
+  // Monkey-patch pjax.loadUrl to save before any navigation
+  function patchPjaxLoadUrl(){
+    try{
+      if (window.pjax && !window.pjax._haoPatched){
+        var orig = window.pjax.loadUrl;
+        window.pjax.loadUrl = function(url){
+          try{ setItem(pageKey(), getY()); }catch(e){}
+          return orig.apply(this, arguments);
+        };
+        window.pjax._haoPatched = true;
+      }
+    }catch(e){}
+  }
+
+  // Detect browser back/forward
   window.addEventListener('popstate', function(){ isPop = true; }, true);
 
-  // Set/refresh current key after PJAX completes
+  // Save continuously while the user scrolls
+  window.addEventListener('scroll', throttledSave, {passive:true});
+
+  // Also save beforeunload
+  window.addEventListener('beforeunload', function(){ setItem(pageKey(), getY()); });
+
+  // After PJAX completes, either restore (if back) or just refresh CURRENT_KEY
   document.addEventListener('pjax:complete', function(){
     CURRENT_KEY = pageKey();
-    if (isPop) {
-      // Restore if we have a recorded position for this page
-      var v = readKey(CURRENT_KEY);
-      if (v != null) {
-        patchScrollToPostTemporarily();
+    patchPjaxLoadUrl();
+    if (isPop){
+      var v = getItem(CURRENT_KEY);
+      if (v != null){
+        patchScrollToPostTemporarily(2000); // suppress for longer
         restoreWithRetries(parseInt(v,10) || 0);
-        // keep the key for a short while; clear later so a second back still works
-        setTimeout(function(){ clearKey(CURRENT_KEY); }, 3000);
       }
       isPop = false;
     }
@@ -483,48 +514,51 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   // Support BFCache
   window.addEventListener('pageshow', function(ev){
     CURRENT_KEY = pageKey();
-    if (ev && ev.persisted) {
-      var v = readKey(CURRENT_KEY);
-      if (v != null) {
-        patchScrollToPostTemporarily();
+    patchPjaxLoadUrl();
+    if (ev && ev.persisted){
+      var v = getItem(CURRENT_KEY);
+      if (v != null){
+        patchScrollToPostTemporarily(2000);
         restoreWithRetries(parseInt(v,10) || 0);
-        setTimeout(function(){ clearKey(CURRENT_KEY); }, 3000);
       }
     }
   });
 
-  // Save while user scrolls (on list pages etc.)
-  window.addEventListener('scroll', throttledSave, {passive:true});
-
-  // Also save right before unload just in case
-  window.addEventListener('beforeunload', function(){ storeKey(pageKey(), getY()); });
-
   function restoreWithRetries(y){
-    // Multi-phase restore: several RAFs + a delayed shot to win over lazy content
+    restoring = true;
+    // Multiple RAF attempts + timed attempts to beat layout/lazyload shifts
     var tries = 0;
-    function tick(){
+    function rafTick(){
       window.scrollTo(0, y);
-      if (++tries < 10) requestAnimationFrame(tick);
+      if (++tries < 20) requestAnimationFrame(rafTick);
     }
-    requestAnimationFrame(tick);
+    requestAnimationFrame(rafTick);
+    setTimeout(function(){ window.scrollTo(0, y); }, 0);
+    setTimeout(function(){ window.scrollTo(0, y); }, 300);
     setTimeout(function(){ window.scrollTo(0, y); }, 800);
     setTimeout(function(){ window.scrollTo(0, y); }, 1500);
+    setTimeout(function(){ restoring = false; }, 2000);
   }
 
-  function patchScrollToPostTemporarily(){
-    try {
+  function patchScrollToPostTemporarily(ms){
+    try{
       if (typeof window.scrollToPost === 'function' && !window._scrollToPostPatched){
         var orig = window.scrollToPost;
         window.scrollToPost = function(){};
         window._scrollToPostPatched = true;
-        setTimeout(function(){ window.scrollToPost = orig; window._scrollToPostPatched = false; }, 1200);
+        setTimeout(function(){
+          window.scrollToPost = orig;
+          window._scrollToPostPatched = false;
+        }, ms || 1200);
       }
-    } catch(e){}
+    }catch(e){}
   }
 
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-  // Init key for the first load
   CURRENT_KEY = pageKey();
+
+  // Try to patch pjax.loadUrl immediately too (in case PJAX was already created)
+  patchPjaxLoadUrl();
 })();
 </script>
 
