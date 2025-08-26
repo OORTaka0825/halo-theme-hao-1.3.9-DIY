@@ -142,46 +142,100 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 
 <script>
 (function(){
-  if (window._haoScrollRestoreInit) return;
-  window._haoScrollRestoreInit = true;
+  if (window._haoBackRestoreInit) return;
+  window._haoBackRestoreInit = true;
 
   var KEY_PREFIX = 'hao:scroll:';
-  function pathKey(p){ return KEY_PREFIX + p; }
-  function cur(){ return location.pathname + location.search + location.hash; }
+  var CURRENT_KEY = null;
+  var isPop = false;
+  var saveTicking = false;
+
+  function pageKey() { return location.pathname + location.search; }
+  function storeKey(k, y){
+    try { sessionStorage.setItem(KEY_PREFIX + k, String(y)); } catch(e){}
+  }
+  function readKey(k){
+    try { return sessionStorage.getItem(KEY_PREFIX + k); } catch(e){ return null; }
+  }
+  function clearKey(k){
+    try { sessionStorage.removeItem(KEY_PREFIX + k);} catch(e){}
+  }
   function getY(){ return window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0; }
 
-  function save(){ try{ sessionStorage.setItem(pathKey(cur()), String(getY())); }catch(e){} }
-
-  function restoreWithRetry(){
-    var k = pathKey(cur()), v=null;
-    try{ v = sessionStorage.getItem(k); }catch(e){}
-    if(v==null) return;
-    var y = parseInt(v,10) || 0, tries = 0;
-    function tick(){
-      window.scrollTo(0, y);
-      if(++tries < 6) requestAnimationFrame(tick);
-      else { try{ sessionStorage.removeItem(k); }catch(e){} }
-    }
-    requestAnimationFrame(tick);
+  function throttledSave(){
+    if (saveTicking) return;
+    saveTicking = true;
+    requestAnimationFrame(function(){
+      var k = CURRENT_KEY || pageKey();
+      storeKey(k, getY());
+      saveTicking = false;
+    });
   }
 
-  if('scrollRestoration' in history) history.scrollRestoration = 'manual';
-  document.addEventListener('pjax:send', save);
-  document.addEventListener('pjax:complete', function(){ patchScrollToPostOnceIfNeeded(); restoreWithRetry(); });
-  window.addEventListener('pageshow', function(e){ if(e && e.persisted){ patchScrollToPostOnceIfNeeded(); restoreWithRetry(); } });
+  // Detect browser history back/forward within PJAX
+  window.addEventListener('popstate', function(){ isPop = true; }, true);
 
-  function patchScrollToPostOnceIfNeeded(){
-    try{
-      var k = pathKey(cur());
-      if (sessionStorage.getItem(k)==null) return;
+  // Set/refresh current key after PJAX completes
+  document.addEventListener('pjax:complete', function(){
+    CURRENT_KEY = pageKey();
+    if (isPop) {
+      // Restore if we have a recorded position for this page
+      var v = readKey(CURRENT_KEY);
+      if (v != null) {
+        patchScrollToPostTemporarily();
+        restoreWithRetries(parseInt(v,10) || 0);
+        // keep the key for a short while; clear later so a second back still works
+        setTimeout(function(){ clearKey(CURRENT_KEY); }, 3000);
+      }
+      isPop = false;
+    }
+  });
+
+  // Support BFCache
+  window.addEventListener('pageshow', function(ev){
+    CURRENT_KEY = pageKey();
+    if (ev && ev.persisted) {
+      var v = readKey(CURRENT_KEY);
+      if (v != null) {
+        patchScrollToPostTemporarily();
+        restoreWithRetries(parseInt(v,10) || 0);
+        setTimeout(function(){ clearKey(CURRENT_KEY); }, 3000);
+      }
+    }
+  });
+
+  // Save while user scrolls (on list pages etc.)
+  window.addEventListener('scroll', throttledSave, {passive:true});
+
+  // Also save right before unload just in case
+  window.addEventListener('beforeunload', function(){ storeKey(pageKey(), getY()); });
+
+  function restoreWithRetries(y){
+    // Multi-phase restore: several RAFs + a delayed shot to win over lazy content
+    var tries = 0;
+    function tick(){
+      window.scrollTo(0, y);
+      if (++tries < 10) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+    setTimeout(function(){ window.scrollTo(0, y); }, 800);
+    setTimeout(function(){ window.scrollTo(0, y); }, 1500);
+  }
+
+  function patchScrollToPostTemporarily(){
+    try {
       if (typeof window.scrollToPost === 'function' && !window._scrollToPostPatched){
         var orig = window.scrollToPost;
         window.scrollToPost = function(){};
         window._scrollToPostPatched = true;
-        setTimeout(function(){ window.scrollToPost = orig; window._scrollToPostPatched = false; }, 500);
+        setTimeout(function(){ window.scrollToPost = orig; window._scrollToPostPatched = false; }, 1200);
       }
-    }catch(e){}
+    } catch(e){}
   }
+
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  // Init key for the first load
+  CURRENT_KEY = pageKey();
 })();
 </script>
 
@@ -377,46 +431,100 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 
 <script>
 (function(){
-  if (window._haoScrollRestoreInit) return;
-  window._haoScrollRestoreInit = true;
+  if (window._haoBackRestoreInit) return;
+  window._haoBackRestoreInit = true;
 
   var KEY_PREFIX = 'hao:scroll:';
-  function pathKey(p){ return KEY_PREFIX + p; }
-  function cur(){ return location.pathname + location.search + location.hash; }
+  var CURRENT_KEY = null;
+  var isPop = false;
+  var saveTicking = false;
+
+  function pageKey() { return location.pathname + location.search; }
+  function storeKey(k, y){
+    try { sessionStorage.setItem(KEY_PREFIX + k, String(y)); } catch(e){}
+  }
+  function readKey(k){
+    try { return sessionStorage.getItem(KEY_PREFIX + k); } catch(e){ return null; }
+  }
+  function clearKey(k){
+    try { sessionStorage.removeItem(KEY_PREFIX + k);} catch(e){}
+  }
   function getY(){ return window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0; }
 
-  function save(){ try{ sessionStorage.setItem(pathKey(cur()), String(getY())); }catch(e){} }
-
-  function restoreWithRetry(){
-    var k = pathKey(cur()), v=null;
-    try{ v = sessionStorage.getItem(k); }catch(e){}
-    if(v==null) return;
-    var y = parseInt(v,10) || 0, tries = 0;
-    function tick(){
-      window.scrollTo(0, y);
-      if(++tries < 6) requestAnimationFrame(tick);
-      else { try{ sessionStorage.removeItem(k); }catch(e){} }
-    }
-    requestAnimationFrame(tick);
+  function throttledSave(){
+    if (saveTicking) return;
+    saveTicking = true;
+    requestAnimationFrame(function(){
+      var k = CURRENT_KEY || pageKey();
+      storeKey(k, getY());
+      saveTicking = false;
+    });
   }
 
-  if('scrollRestoration' in history) history.scrollRestoration = 'manual';
-  document.addEventListener('pjax:send', save);
-  document.addEventListener('pjax:complete', function(){ patchScrollToPostOnceIfNeeded(); restoreWithRetry(); });
-  window.addEventListener('pageshow', function(e){ if(e && e.persisted){ patchScrollToPostOnceIfNeeded(); restoreWithRetry(); } });
+  // Detect browser history back/forward within PJAX
+  window.addEventListener('popstate', function(){ isPop = true; }, true);
 
-  function patchScrollToPostOnceIfNeeded(){
-    try{
-      var k = pathKey(cur());
-      if (sessionStorage.getItem(k)==null) return;
+  // Set/refresh current key after PJAX completes
+  document.addEventListener('pjax:complete', function(){
+    CURRENT_KEY = pageKey();
+    if (isPop) {
+      // Restore if we have a recorded position for this page
+      var v = readKey(CURRENT_KEY);
+      if (v != null) {
+        patchScrollToPostTemporarily();
+        restoreWithRetries(parseInt(v,10) || 0);
+        // keep the key for a short while; clear later so a second back still works
+        setTimeout(function(){ clearKey(CURRENT_KEY); }, 3000);
+      }
+      isPop = false;
+    }
+  });
+
+  // Support BFCache
+  window.addEventListener('pageshow', function(ev){
+    CURRENT_KEY = pageKey();
+    if (ev && ev.persisted) {
+      var v = readKey(CURRENT_KEY);
+      if (v != null) {
+        patchScrollToPostTemporarily();
+        restoreWithRetries(parseInt(v,10) || 0);
+        setTimeout(function(){ clearKey(CURRENT_KEY); }, 3000);
+      }
+    }
+  });
+
+  // Save while user scrolls (on list pages etc.)
+  window.addEventListener('scroll', throttledSave, {passive:true});
+
+  // Also save right before unload just in case
+  window.addEventListener('beforeunload', function(){ storeKey(pageKey(), getY()); });
+
+  function restoreWithRetries(y){
+    // Multi-phase restore: several RAFs + a delayed shot to win over lazy content
+    var tries = 0;
+    function tick(){
+      window.scrollTo(0, y);
+      if (++tries < 10) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+    setTimeout(function(){ window.scrollTo(0, y); }, 800);
+    setTimeout(function(){ window.scrollTo(0, y); }, 1500);
+  }
+
+  function patchScrollToPostTemporarily(){
+    try {
       if (typeof window.scrollToPost === 'function' && !window._scrollToPostPatched){
         var orig = window.scrollToPost;
         window.scrollToPost = function(){};
         window._scrollToPostPatched = true;
-        setTimeout(function(){ window.scrollToPost = orig; window._scrollToPostPatched = false; }, 500);
+        setTimeout(function(){ window.scrollToPost = orig; window._scrollToPostPatched = false; }, 1200);
       }
-    }catch(e){}
+    } catch(e){}
   }
+
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  // Init key for the first load
+  CURRENT_KEY = pageKey();
 })();
 </script>
 
