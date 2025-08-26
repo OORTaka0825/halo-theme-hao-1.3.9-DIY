@@ -85,7 +85,7 @@
           factor = 0; // 未启用第一屏则回到顶部
         }
 
-        const bleed = 28; // 微调：向上“露出”一点（默认 28px，可改 0~60）
+        const bleed = 32; // 微调：向上“露出”一点（默认 28px，可改 0~60）
         var dest = Math.round((window.innerHeight || 0) * factor) - bleed;
         if (dest < 0) dest = 0;
 
