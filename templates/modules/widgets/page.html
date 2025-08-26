@@ -64,7 +64,8 @@
 <script th:inline="javascript">
   /**
    * 分页滚动：精确滚到“第一屏配置”的高度（25/50/75/100vh）。
-   * 避免 btf.scrollToDest 的 -70 偏移，使用原生 smooth scroll。
+   * 注意：btf.scrollToDest 内部会 -70px（utils.js），这里在传参时 +70 抵消。
+   * 仅当启用第一屏且计算出正数高度时才做 +70 抵消；否则保持 0 顶部。
    */
   function scrollToPost() {
     setTimeout(() => {
@@ -74,21 +75,25 @@
         var dest = 0;
 
         if (enable && cfg) {
+          // 解析 '75vh' / '480px' 等
           var m = /(\d+)\s*vh/i.exec(cfg);
           if (m) {
-            dest = window.innerHeight * (parseInt(m[1], 10) / 100);
+            dest = Math.round(window.innerHeight * (parseInt(m[1], 10) / 100));
           } else {
             var m2 = /(\d+)\s*px/i.exec(cfg);
             if (m2) dest = parseInt(m2[1], 10);
           }
         }
 
-        if (!dest) {
-          var header = document.getElementById('page-header');
-          dest = header ? header.getBoundingClientRect().height : 0;
+        if (window.btf && typeof window.btf.scrollToDest === 'function') {
+          if (dest > 0) {
+            window.btf.scrollToDest(dest + 70, 500); // 抵消 utils.js 的 -70
+          } else {
+            window.btf.scrollToDest(0, 500);
+          }
+        } else {
+          window.scrollTo({ top: dest, behavior: 'smooth' });
         }
-
-        window.scrollTo({ top: dest, behavior: 'smooth' });
       } catch (e) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
