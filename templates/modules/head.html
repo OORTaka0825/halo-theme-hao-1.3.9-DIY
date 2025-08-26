@@ -10,67 +10,114 @@
           th:href="@{${#strings.isEmpty(site.favicon) ? assets_link + '/images/hao-logo.jpg' : site.favicon}}"/>
     <script src="/themes/theme-hao/assets/libs/jquery.min.js"></script>
 
-    <!-- ===== PJAX 开关：仅改动 scrollTo 参数 ===== -->
-<!-- 仅在开启时加载 PJAX 库 -->
-<script th:if="${theme.config.other.pjax_enable}" src="/themes/theme-hao/assets/libs/pjax/pjax.min.js"></script>
+    <!-- ===== PJAX 开关（保持你的结构，仅加最小改动） ===== -->
+    <!-- 仅在开启时加载 PJAX 库 -->
+    <script th:if="${theme.config.other.pjax_enable}" src="/themes/theme-hao/assets/libs/pjax/pjax.min.js"></script>
 
-<!-- 初始化 PJAX（开启才执行，且防重复） -->
-<script th:if="${theme.config.other.pjax_enable}">
-  (function(){
-    if (window.__PJAX_INITED) return;
-    window.__PJAX_INITED = true;
-    if (!window.Pjax) return;
-    try {
-      new Pjax({
-        elements: 'a[href]:not([target="_blank"]):not([data-pjax="ignore"])',
-        selectors: ['title', '#content', '#post', '#page', '#rightside'],
-        cache: true,
-        history: true,
-        scrollTo: false   // ← 仅此一处改动：不再强制置顶
-      });
-      console.log('[PJAX] 已启用');
-    } catch(e) { console.warn('PJAX init failed:', e); }
-  })();
-</script>
+    <!-- 初始化 PJAX（开启才执行，且防重复） -->
+    <script th:if="${theme.config.other.pjax_enable}">
+      (function(){
+        if (window.__PJAX_INITED) return;
+        window.__PJAX_INITED = true;
+        if (!window.Pjax) return;
+        try {
+          new Pjax({
+            elements: 'a[href]:not([target="_blank"]):not([data-pjax="ignore"])',
+            selectors: ['title', '#content', '#post', '#page', '#rightside'],
+            cache: true,
+            history: true,
+            scrollTo: false   // ← 仅此一处从 0 改为 false，避免强制置顶
+          });
+          console.log('[PJAX] 已启用 (scrollTo:false)');
+        } catch(e) { console.warn('PJAX init failed:', e); }
+      })();
+    </script>
 
-<!-- 极简滚动记忆：不改原有逻辑，只在后退时兜底恢复 -->
-<script th:if="${theme.config.other.pjax_enable}">
-  (function(){
-    // 只做兜底，不影响现有脚本
-    var KEY = function(){ return '__SCROLL__' + (location.pathname + location.search); };
-    var save = function(){
-      try { sessionStorage.setItem(KEY(), String(window.scrollY || 0)); } catch(e) {}
-    };
-    var restore = function(){
-      var y = 0;
-      try { y = parseInt(sessionStorage.getItem(KEY()) || '0', 10); } catch(e) {}
-      if (y > 0) {
-        requestAnimationFrame(function(){
-          window.scrollTo(0, y);
-          setTimeout(function(){ window.scrollTo(0, y); }, 50);
-          setTimeout(function(){ window.scrollTo(0, y); }, 150);
+    <!-- 仅针对此问题的极简滚动记忆（不动你的其他代码） -->
+    <script th:if="${theme.config.other.pjax_enable}">
+      (function(){
+        var KEY = function(url){ return '__SCROLL__' + encodeURIComponent(url || (location.pathname + location.search + location.hash)); };
+
+        function save() {
+          try {
+            var y = window.scrollY || 0;
+            sessionStorage.setItem(KEY(location.href), String(y));
+          } catch(e) {}
+        }
+
+        function read(url) {
+          try {
+            var v = sessionStorage.getItem(KEY(url || location.href));
+            var y = parseInt(v || '0', 10);
+            return isNaN(y) ? 0 : y;
+          } catch(e) { return 0; }
+        }
+
+        function robustRestore(targetY) {
+          if (!targetY || targetY < 0) return;
+          var attempts = 0, max = 24;
+          function tick(){
+            attempts++;
+            window.scrollTo(0, targetY);
+            // 如果图片/字体懒加载改变布局，再尝试多几次
+            if (attempts < max && Math.abs((window.scrollY||0) - targetY) > 2) {
+              requestAnimationFrame(tick);
+            }
+          }
+          // 先尝试立即恢复
+          requestAnimationFrame(tick);
+
+          // 等待未完成的图片加载完再恢复一次（防止高度变化）
+          try {
+            var imgs = Array.prototype.slice.call(document.images || []).filter(function(i){ return i && !i.complete; });
+            if (imgs.length) {
+              var left = imgs.length, once = false;
+              function again(){ if (!once){ once = true; requestAnimationFrame(tick);}}
+              imgs.forEach(function(img){
+                img.addEventListener('load', function(){ if(--left===0) again(); }, {once:true});
+                img.addEventListener('error', function(){ if(--left===0) again(); }, {once:true});
+              });
+              // 最多 600ms 再兜底一次
+              setTimeout(again, 600);
+            }
+          } catch(e) {}
+        }
+
+        // ----- 保存时机（不影响 bfcache） -----
+        document.addEventListener('pjax:send', save, {capture:true});
+        // 使用 pagehide 而不是 beforeunload，避免禁用 bfcache
+        window.addEventListener('pagehide', save, {capture:true});
+
+        // ----- 恢复时机 -----
+        document.addEventListener('pjax:popstate', function(){
+          robustRestore(read());
         });
-      }
-    };
 
-    // 离开/发送前保存
-    document.addEventListener('pjax:send', save);
-    window.addEventListener('pagehide', save, {capture:true});
+        window.addEventListener('pageshow', function(e){
+          // bfcache 情况或 back/forward 导航
+          var isBF = false;
+          try {
+            var nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+            isBF = !!nav && nav.type === 'back_forward';
+          } catch(err){}
+          if (e.persisted || isBF) {
+            robustRestore(read());
+          }
+        });
 
-    // 后退/前进或缓存恢复时尝试恢复
-    document.addEventListener('pjax:popstate', restore);
-    window.addEventListener('pageshow', function(e){
-      var persisted = !!(e && e.persisted);
-      var isBF = false;
-      try {
-        var nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
-        isBF = !!nav && nav.type === 'back_forward';
-      } catch (err) {}
-      if (persisted || isBF) restore();
-    });
-  })();
-</script>
-<!-- ===== PJAX 开关：结束 ===== -->
+        // 额外：点击文章前立刻保存一次当前滚动（防止极端情况没触发 pjax:send）
+        document.addEventListener('click', function(ev){
+          var a = ev.target.closest && ev.target.closest('a');
+          if (!a) return;
+          // 内部链接且非新窗口/非忽略
+          if (a.target === '_blank' || a.hasAttribute('data-pjax') && a.getAttribute('data-pjax') === 'ignore') return;
+          if (a.origin === location.origin) {
+            save();
+          }
+        }, true);
+      })();
+    </script>
+    <!-- ===== PJAX 开关：结束 ===== -->
 
     <script th:src="${assets_link + '/js/heo.js' + theme_version}"></script>
 
