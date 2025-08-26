@@ -223,12 +223,13 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
         }
 
         var pjax = new Pjax({
-            elements: 'a:not([target="_blank"])',
+            
+            scrollTo: false,
+elements: 'a:not([target="_blank"])',
             selectors: pjaxSelectors,
             cacheBust: false,
             analytics: false,
-            scrollRestoration: false
-        })
+            scrollRestoration: false})
 
         document.addEventListener('pjax:send', function () {
 
