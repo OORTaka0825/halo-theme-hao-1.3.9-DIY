@@ -330,58 +330,52 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 </script>
 <script src="/themes/theme-hao/assets/libs/welcome/welcome.js"></script>
 
-<!-- Add-on: List-page-only scroll memory & article open-at-top (minimal, non-invasive) -->
+<!-- Back/List Scroll Guard v2: list-only restore, article forward open at top -->
 <script>
 (function(){
-  if (window.__LIST_SCROLL_GUARD__) return; window.__LIST_SCROLL_GUARD__ = true;
+  if (window.__BACK_LIST_ONLY_V2__) return; window.__BACK_LIST_ONLY_V2__ = true;
 
-  function isPostPage(){ return !!document.querySelector('#post'); }
+  function isPostPage(){ return !!document.getElementById('post'); }
   function isListPage(){ return !isPostPage(); }
 
-  function key(){ return '__LIST_SCROLL__' + encodeURIComponent(location.pathname + location.search); }
+  function key(url){ return '__LIST_SCROLL__' + encodeURIComponent(url || (location.pathname + location.search)); }
   function saveListScroll(){
     if (!isListPage()) return;
     try { sessionStorage.setItem(key(), String(window.scrollY || 0)); } catch(e){}
   }
-  function readListScroll(){
-    try { var v = parseInt(sessionStorage.getItem(key()) || '0', 10); return isNaN(v) ? 0 : v; } catch(e){ return 0; }
-  }
-  function restoreListScroll(){
+  // 保存列表页滚动：仅在离开列表页时
+  document.addEventListener('pjax:send', saveListScroll, {capture:true});
+
+  var IS_BACK = false;
+  document.addEventListener('pjax:popstate', function(){ IS_BACK = true; });
+
+  function robustRestoreList(){
+    if (!IS_BACK) return;
     if (!isListPage()) return;
-    var y = readListScroll();
+    var y = 0;
+    try { y = parseInt(sessionStorage.getItem(key()) || '0', 10) } catch(e){ y = 0; }
     if (!(y > 0)) return;
-    var tries = 0, max = 24;
+
+    var tries = 0, max = 40;
     function tick(){
       tries++;
       window.scrollTo(0, y);
-      if (tries < max && Math.abs((window.scrollY||0) - y) > 2) requestAnimationFrame(tick);
+      if (tries < max && Math.abs((window.scrollY||0) - y) > 2) {
+        requestAnimationFrame(tick);
+      }
     }
     requestAnimationFrame(tick);
+    setTimeout(function(){ window.scrollTo(0, y); }, 60);
+    setTimeout(function(){ window.scrollTo(0, y); }, 180);
+    setTimeout(function(){ window.scrollTo(0, y); }, 360);
   }
 
-  // Mark back/forward nav
-  window.__IS_BACK_NAV__ = false;
-  document.addEventListener('pjax:popstate', function(){ window.__IS_BACK_NAV__ = true; });
-  window.addEventListener('pageshow', function(e){
-    try {
-      var nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
-      if (e.persisted || (nav && nav.type === 'back_forward')) window.__IS_BACK_NAV__ = true;
-    } catch(_){}
-  });
-
-  // Save list scroll when leaving (won't affect article pages)
-  document.addEventListener('pjax:send', saveListScroll, {capture:true});
-  window.addEventListener('pagehide', saveListScroll, {capture:true});
-
-  // After PJAX completes:
   document.addEventListener('pjax:complete', function(){
-    if (window.__IS_BACK_NAV__) {
-      // Back/forward: if we are back to LIST page, restore its scroll
-      restoreListScroll();
-      // clear flag shortly after
-      setTimeout(function(){ window.__IS_BACK_NAV__ = false; }, 200);
+    if (IS_BACK) {
+      robustRestoreList();
+      setTimeout(function(){ IS_BACK = false; }, 500);
     } else {
-      // Forward navigation: if we are on ARTICLE page, force open at top
+      // 前进进入文章页：强制从顶部开始
       if (isPostPage()) {
         window.scrollTo(0, 0);
       }
