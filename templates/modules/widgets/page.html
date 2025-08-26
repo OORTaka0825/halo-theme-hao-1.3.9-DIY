@@ -58,20 +58,47 @@
         </div>
 
     </div>
-    <script th:if="${theme.config.top.above.enable_above}">
-        function scrollToPost(){
-            setTimeout(()=>{
-                btf.scrollToDest(window.innerHeight, 500);
-            },1000)
+    
+    
+
+<script th:inline="javascript">
+  // 分页滚动（简单稳妥版）：始终延时 1200ms，再按配置的 100/75/50/25vh 等比滚动
+  function scrollToPost() {
+    setTimeout(function(){
+      try {
+        var enable = /*[[${theme.config.top.above.enable_above}]]*/ false;
+        var cfg = /*[[${theme.config.top.above.full_page_height}]]*/ '100vh';
+        var factor = 1; // 默认 100%
+        if (enable && cfg) {
+          var m = /(\d+)\s*vh/i.exec(cfg);
+          if (m) {
+            var n = parseInt(m[1], 10);
+            if (n > 0) factor = n / 100;
+          } else {
+            var m2 = /(\d+)\s*px/i.exec(cfg);
+            if (m2) {
+              var px = parseInt(m2[1], 10);
+              if (px > 0) factor = px / (window.innerHeight || 1);
+            }
+          }
+        } else {
+          factor = 0; // 未启用第一屏则回到顶部
         }
-    </script>
-    <script th:unless="${theme.config.top.above.enable_above}">
-        function scrollToPost(){
-            setTimeout(()=>{
-                btf.scrollToDest(0, 500);
-            },1000)
+
+        var dest = Math.round((window.innerHeight || 0) * factor);
+
+        if (window.btf && typeof window.btf.scrollToDest === 'function') {
+          window.btf.scrollToDest(dest + 70, 500); // 抵消 utils.js 中的 -70
+        } else {
+          window.scrollTo({ top: dest, behavior: 'smooth' });
         }
-    </script>
+      } catch(e) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }, 1200); // 延时与你原主题一致，确保 PJAX/布局稳定后再滚
+  }
+</script>
+
 </nav>
 
 </html>
