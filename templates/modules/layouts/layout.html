@@ -100,11 +100,16 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     postPermalink=${allPostList[randomIndex].status.permalink}"
 >
     function toRandomPost() {
-        // 随机跳转全站的一篇文章
-        let permalink = /*[[${postPermalink}]]*/ "/";
+  let permalink = /*[[${postPermalink}]]*/ "/";
+  if (window.pjax && typeof pjax.loadUrl === 'function') {
+
+  } else {
+    window.location.href = permalink;
+  }
+}]]*/ "/";
         // 当前窗口打开
         //window.location.href = permalink;
-        pjax.loadUrl(permalink);
+
         // window.open(permalink);
         }
     
