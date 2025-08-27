@@ -443,7 +443,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 
 
 
-    <script>
+    <th:block th:if="${theme.config.other.pjax_enable}"><script>
         let pjaxSelectors = ['title', '#config-diff', '#body-wrap', '#rightside-config-hide', '#rightside-config-show', '.js-pjax', '#site-config']
         
         pjaxSelectors.unshift('meta[property="og:type"]', 'meta[property="og:image"]', 'meta[property="og:title"]', 'meta[property="og:url"]', 'meta[property="og:description"]'
@@ -523,7 +523,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
                     }
                 }
         )
-    </script>
+    </script></th:block>
 
 
 </div>
