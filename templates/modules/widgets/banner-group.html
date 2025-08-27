@@ -363,25 +363,51 @@
     </style>
 
     <script th:inline="javascript">
+  async function toRandomPost() {
+    try {
+      // 先拉一次拿到 total（每页先用 1，减少流量）
+      const size = 1;
+      const metaRes = await fetch(`/apis/content/posts?size=${size}`);
+      const meta = await metaRes.json();
+      if (!meta || !meta.total) {
+        // 兜底：保留原逻辑（当前页随机）
+        let posts = [[${posts}]];
+        let datum = posts.total < posts.size ? posts.total : posts.size;
+        let number = Math.floor(Math.random() * datum);
+        const link = posts.items[number].status.permalink;
+        if (window.pjax && typeof pjax.loadUrl === 'function') pjax.loadUrl(link);
+        else window.location.href = link;
+        return;
+      }
 
-        function toRandomPost() {
-            // 随机跳转首页的一篇文章
-            // 后续改成跳转全站的文章，可以从 sitemap 中获取所有文章
-            let posts = [[${posts}]];
+      // 在 [0, total) 内取一个随机索引
+      const total = meta.total;
+      const r = Math.floor(Math.random() * total);
 
-            let datum = posts.total < posts.size ? posts.total : posts.size;
+      // 计算该索引所在的页码（页大小还是 1，最简单稳定）
+      const page = r + 1; // size=1 时，索引 r 就在第 r+1 页
 
-            let number = Math.floor(Math.random() * datum);
+      // 再请求这一页，拿到文章
+      const pageRes = await fetch(`/apis/content/posts?page=${page}&size=${size}`);
+      const pageData = await pageRes.json();
+      const item = (pageData.items && pageData.items[0]) ? pageData.items[0] : null;
 
-            let post = posts.items[number];
+      // 跳转
+      const link = item ? item.status.permalink : "/";
+      if (window.pjax && typeof pjax.loadUrl === 'function') pjax.loadUrl(link);
+      else window.location.href = link;
+    } catch (e) {
+      // 出错兜底：仍然随机当前页
+      let posts = [[${posts}]];
+      let datum = posts.total < posts.size ? posts.total : posts.size;
+      let number = Math.floor(Math.random() * datum);
+      const link = posts.items[number].status.permalink;
+      if (window.pjax && typeof pjax.loadUrl === 'function') pjax.loadUrl(link);
+      else window.location.href = link;
+    }
+  }
+</script>
 
-            // 当前窗口打开
-            //window.location.href = post.status.permalink;
-            pjax.loadUrl(post.status.permalink)
-            // window.open(post.status.permalink);
-        }
-
-    </script>
 
 </div>
 </html>
