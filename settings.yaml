@@ -82,6 +82,11 @@ spec:
                   label: 开启
                 - value: false
                   label: 关闭
+            - $formkit: text
+              name: iconfont_js
+              label: 阿里巴巴 IconFont Symbol 链接
+              help: 填写 IconFont 的 js 链接，例如 //at.alicdn.com/t/c/font_xxxxx.js
+              value: ""
         - $formkit: menuRadio
           name: leftMenu
           if: $get(pc_leftMenu).value
