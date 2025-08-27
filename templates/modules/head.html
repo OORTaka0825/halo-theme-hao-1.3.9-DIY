@@ -182,6 +182,12 @@
     <!-- icon图标 -->
     <link rel="stylesheet" th:href="'https://cdn.cbd.int/hao-theme-static@'+${theme.spec.version}+'/icon/iconfont.css'">
 
+    <th:block th:if="${theme.config.nav.menus.enable_ali_iconfont_symbol_header}">
+    <th:block th:if="${not #strings.isEmpty(theme.config.nav.menus.iconfont_js)}">
+        <script th:src="${theme.config.nav.menus.iconfont_js}"></script>
+    </th:block>
+    </th:block>
+
     <th:block th:replace="~{modules/variables/site-config :: site-config}" />
 
 
