@@ -50,10 +50,12 @@
                     <a sec:authorize="isAuthenticated()" class="back-menu-item" rel="external nofollow" target="_blank" href="/console">
                         <span class="back-menu-item-text">控制台</span>
                     </a>
-                    <!-- <a sec:authorize="isAuthenticated()" class="back-menu-item" rel="external nofollow" href="/logout">
-                        <span class="back-menu-item-text">退出登录</span>
-                    </a> -->
-                    <a sec:authorize="isAnonymous()" class="back-menu-item" rel="external nofollow" target="_blank" href="/console/login">
+                     <a sec:authorize="isAuthenticated()" class="back-menu-item" rel="external nofollow" href="/logout">
+                        <span class="back-menu-item-text">退出</span>
+                    </a> 
+                    <a sec:authorize="isAnonymous()" class="back-menu-item" rel="external nofollow" target="_blank"
+                       href="/login"
+                       onclick="this.href = '/login?redirect_uri=' + encodeURIComponent(window.location.href)">
                         <span class="back-menu-item-text">登录</span>
                     </a>
                 </div>
