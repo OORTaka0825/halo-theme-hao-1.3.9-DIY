@@ -1,16 +1,24 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-<!-- 51.la 统计卡片（使用官方挂件参数 + PJAX 兼容；仅需填写 V6 站点 id） -->
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<!-- 51.la 统计卡片（保持主题样式）：把官方挂件脚本注入到隐藏容器，提取数字后按主题原有结构渲染；失败再降级为官方挂件 -->
 <div class="author-content" th:fragment="statistics-map">
-  <div class="about-statistic author-content-item" style="background: url(https://bu.dusays.com/2023/03/12/640dc8c72f623.webp);">
+  <div class="about-statistic author-content-item" style="background:url(https://bu.dusays.com/2023/03/12/640dc8c72f623.webp)">
     <div class="card-content">
       <div class="author-content-item-tips">数据</div>
       <span class="author-content-item-title">访问统计</span>
 
-      <div id="statistic" class="la-wrap"></div>
+      <!-- 主题原有容器（保持你的样式） -->
+      <div id="statistic" class="statistic__list"></div>
+
+      <!-- 隐藏容器：把 51.la 的 quote.js 写进来以便解析，不影响可视区域 -->
+      <div id="la-shadow-host" style="display:none"></div>
 
       <div class="post-tips">统计信息来自 <a href="https://invite.51.la/1NzKqTeb?target=V6" rel="noopener nofollow" target="_blank">51la网站统计</a></div>
-      <div class="banner-button-group"><a class="banner-button" onclick="pjax.loadUrl('/archives')" data-pjax-state=""><i class="haofont hao-icon-circle-arrow-up-right-1"></i><span class="banner-button-text">文章隧道</span></a></div>
+      <div class="banner-button-group">
+        <a class="banner-button" onclick="pjax.loadUrl('/archives')" data-pjax-state="">
+          <i class="haofont hao-icon-circle-arrow-up-right-1"></i><span class="banner-button-text">文章隧道</span>
+        </a>
+      </div>
     </div>
   </div>
 
@@ -19,42 +27,105 @@
       <span class="map-title">我现在住在 <b>[[${theme.config.about.map.StrengthenTitle}]]</b></span>
     </div>
     <div class="author-content-item selfInfo single" th:if="${not #lists.isEmpty(theme.config.about.map.authorInfo)}" th:with="texts = ${theme.config.about.map.authorInfo}">
-      <div th:if="${theme.config.about.map.authorInfo.size()}>'0'"><span class="selfInfo-title" th:text="${texts[0].authorInfoTitle}">生于</span><span class="selfInfo-content" id="selfInfo-content-year" th:style="'color:' + ${texts[0].authorInfoColor}" th:text="${texts[0].authorInfoContent}">2000</span></div>
-      <div th:if="${theme.config.about.map.authorInfo.size()}>'1'"><span class="selfInfo-title" th:text="${texts[1].authorInfoTitle}">太原理工大学</span><span class="selfInfo-content" th:style="'color:' + ${texts[1].authorInfoColor}" th:text="${texts[1].authorInfoContent}">计算机科学</span></div>
-      <div th:if="${theme.config.about.map.authorInfo.size()}>'2'"><span class="selfInfo-title" th:text="${texts[2].authorInfoTitle}">现在职业</span><span class="selfInfo-content" th:style="'color:' + ${texts[2].authorInfoColor}" th:text="${texts[2].authorInfoContent}">BI工程师</span></div>
+      <div th:if="${theme.config.about.map.authorInfo.size()}>'0'">
+        <span class="selfInfo-title" th:text="${texts[0].authorInfoTitle}">生于</span>
+        <span class="selfInfo-content" id="selfInfo-content-year" th:style="'color:' + ${texts[0].authorInfoColor}" th:text="${texts[0].authorInfoContent}">2000</span>
+      </div>
+      <div th:if="${theme.config.about.map.authorInfo.size()}>'1'">
+        <span class="selfInfo-title" th:text="${texts[1].authorInfoTitle}">太原理工大学</span>
+        <span class="selfInfo-content" th:style="'color:' + ${texts[1].authorInfoColor}" th:text="${texts[1].authorInfoContent}">计算机科学</span>
+      </div>
+      <div th:if="${theme.config.about.map.authorInfo.size()}>'2'">
+        <span class="selfInfo-title" th:text="${texts[2].authorInfoTitle}">现在职业</span>
+        <span class="selfInfo-content" th:style="'color:' + ${texts[2].authorInfoColor}" th:text="${texts[2].authorInfoContent}">BI工程师</span>
+      </div>
     </div>
   </div>
 
   <style>
-    .la-wrap{width:100%;}
-    .author-content-item.map { background: url([[${theme.config.about.map.background}]]) no-repeat center; min-height: 160px; max-height: 400px; position: relative; overflow: hidden; margin-bottom: .5rem; height: 60%; background-size: 100%; transition: 1s ease-in-out; }
-    [data-theme=dark] .author-content-item.map { background: url([[${theme.config.about.map.backgroundDark}]]) no-repeat center; background-size: 100%; }
-    .author-content-item.map:hover { background-size:120%; transition:4s ease-in-out; background-position-x:0; background-position-y:36%; }
-    .author-content-item.map .map-title { position:absolute; bottom:0; left:0; width:100%; background:var(--heo-maskbg); padding:.5rem 2rem; backdrop-filter:saturate(180%) blur(20px); -webkit-backdrop-filter:blur(20px); transition:1s ease-in-out; font-size:20px; }
-    .author-content-item.map:hover .map-title { bottom:-100%; }
-    .author-content-item.map .map-title b { color:var(--heo-fontcolor); }
-    @media (max-width:768px){ .author-content-item.map.myphoto{ background-size:cover!important;} .author-content-item.map .map-title{ padding:1rem;} }
+    /* 仅保障列表布局存在，使用你主题的变量与样式名 */
+    .statistic__list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.75rem; }
+    .statistic__item { display:flex; align-items:center; justify-content:space-between; padding:.5rem .75rem; background:var(--heo-card-bg,rgba(255,255,255,.04)); border-radius:.75rem }
+    .statistic__title { opacity:.8; font-size:.9rem }
+    .statistic__num { font-size:1.4rem; font-weight:600 }
+    @media (max-width:768px){ .statistic__list{grid-template-columns:1fr;} }
+    .author-content-item.map { background:url([[${theme.config.about.map.background}]]) no-repeat center; min-height:160px; max-height:400px; position:relative; overflow:hidden; margin-bottom:.5rem; height:60%; background-size:100%; transition:1s ease-in-out }
+    [data-theme=dark] .author-content-item.map { background:url([[${theme.config.about.map.backgroundDark}]]) no-repeat center; background-size:100% }
+    .author-content-item.map:hover { background-size:120%; transition:4s ease-in-out; background-position-x:0; background-position-y:36% }
+    .author-content-item.map .map-title { position:absolute; bottom:0; left:0; width:100%; background:var(--heo-maskbg); padding:.5rem 2rem; backdrop-filter:saturate(180%) blur(20px); -webkit-backdrop-filter:blur(20px); transition:1s ease-in-out; font-size:20px }
+    .author-content-item.map:hover .map-title { bottom:-100% }
+    .author-content-item.map .map-title b { color:var(--heo-fontcolor) }
   </style>
 
   <script defer>
-    (function(){
-      var ID = '[[${theme.config.about.LingQueMonitorID}]]'; // 这里填 LA.init 里的 id
-      // 用官方挂件完整参数
-      var SRC = 'https://v6-widget.51.la/v6/' + ID + '/quote.js?theme=0&col=true&f=12&badge=icon_0&icon=center';
-      function mount(){
-        var host = document.getElementById('statistic');
-        if(!host || !ID) return;
-        host.innerHTML = '';
-        var s = document.createElement('script');
-        s.id = 'LA-DATA-WIDGET';
-        s.crossOrigin = 'anonymous';
-        s.charset = 'UTF-8';
-        s.src = SRC;
-        host.appendChild(s);
+  (function(){
+    var ID = '[[${theme.config.about.LingQueMonitorID}]]'; // LA.init 里的 id，非统计ID数字
+    var SRC = 'https://v6-widget.51.la/v6/' + ID + '/quote.js?theme=0&col=true&f=12&badge=icon_0&icon=center';
+
+    var labels = ['最近活跃','今日人数','今日访问','昨日人数','昨日访问','本月访问','总访问量'];
+
+    function render(nums){
+      var box = document.getElementById('statistic');
+      if(!box) return;
+      box.innerHTML = labels.map(function(t,i){
+        return '<div class="statistic__item">\\
+          <div class="statistic__title">'+t+'</div>\\
+          <div class="statistic__num">'+(nums[i]||'-')+'</div>\\
+        </div>';
+      }).join('');
+    }
+
+    function parseFromShadow(){
+      var host = document.getElementById('la-shadow-host');
+      if(!host) return false;
+      // 挂件通常渲染为多个 <p><span>标题</span><span>数字</span></p>
+      var items = host.querySelectorAll('p');
+      if(!items || items.length < 7) return false;
+      var nums = [];
+      for(var i=0;i<items.length;i++){
+        var spans = items[i].querySelectorAll('span');
+        if(spans.length>=2){ nums.push(spans[1].textContent.trim()); }
       }
-      if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', mount, {once:true}); } else { mount(); }
-      document.addEventListener('pjax:complete', mount);
-    })();
+      if(nums.length < 7) return false;
+      render(nums.slice(0,7));
+      return true;
+    }
+
+    function mount(){
+      // 先清空可见区域
+      render(['-','-','-','-','-','-','-']);
+      // 清空隐藏容器并注入脚本
+      var hidden = document.getElementById('la-shadow-host');
+      hidden.innerHTML = '';
+      var s = document.createElement('script');
+      s.id = 'LA-DATA-WIDGET';
+      s.crossOrigin = 'anonymous';
+      s.charset = 'UTF-8';
+      s.src = SRC;
+      hidden.appendChild(s);
+      // 等脚本写入 DOM 后尝试解析
+      setTimeout(function(){
+        if(!parseFromShadow()){
+          // 失败则降级为官方挂件（可见区域渲染），确保不空白
+          var box = document.getElementById('statistic');
+          box.innerHTML = '';
+          var s2 = document.createElement('script');
+          s2.id = 'LA-DATA-WIDGET';
+          s2.crossOrigin = 'anonymous';
+          s2.charset = 'UTF-8';
+          s2.src = SRC;
+          box.appendChild(s2);
+        }
+      }, 900);
+    }
+
+    if(document.readyState === 'loading'){
+      document.addEventListener('DOMContentLoaded', mount, {once:true});
+    }else{
+      mount();
+    }
+    document.addEventListener('pjax:complete', mount);
+  })();
   </script>
 </div>
 </html>
