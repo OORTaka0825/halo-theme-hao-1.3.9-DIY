@@ -243,6 +243,35 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     })();
     </script>
 
+
+    <!-- Non-PJAX pagination: trigger the same loading bar as pjax:send (append-only, loading bar only) -->
+    <script th:if="${!theme.config.other.pjax_enable}">
+    (function(){
+      function shouldHook(a){
+        if (!a) return false;
+        // 仅处理分页相关的链接：页码/上一页/下一页
+        if (a.closest && a.closest('#pagination')) return true;
+        var rel = a.getAttribute && a.getAttribute('rel');
+        if (rel === 'prev' || rel === 'next') return true;
+        if (a.classList && (a.classList.contains('page-number') || a.classList.contains('extend'))) return true;
+        return false;
+      }
+      document.addEventListener('click', function(e){
+        var a = e.target && e.target.closest ? e.target.closest('a') : null;
+        if (!shouldHook(a)) return;
+        try {
+          // 与 blogex.js 的 pjax:send 保持一致
+          if (window.GLOBAL_CONFIG && GLOBAL_CONFIG.loadProgressBar && window.Pace && typeof Pace.restart === 'function'){
+            Pace.restart();
+          }
+          if (window.GLOBAL_CONFIG && GLOBAL_CONFIG.loadingBox && window.heo && typeof heo.showLoading === 'function'){
+            heo.showLoading();
+          }
+        } catch (err) {}
+      }, true); // 捕获阶段，确保在跳转前触发
+    })();
+    </script>
+
 </body> 之前 -->
     <script src="/themes/theme-hao/assets/libs/instantpage.min.js" type="module"></script>
 
@@ -757,6 +786,35 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
           setTimeout(scrollToListSmooth, 0);
         }
       });
+    })();
+    </script>
+
+
+    <!-- Non-PJAX pagination: trigger the same loading bar as pjax:send (append-only, loading bar only) -->
+    <script th:if="${!theme.config.other.pjax_enable}">
+    (function(){
+      function shouldHook(a){
+        if (!a) return false;
+        // 仅处理分页相关的链接：页码/上一页/下一页
+        if (a.closest && a.closest('#pagination')) return true;
+        var rel = a.getAttribute && a.getAttribute('rel');
+        if (rel === 'prev' || rel === 'next') return true;
+        if (a.classList && (a.classList.contains('page-number') || a.classList.contains('extend'))) return true;
+        return false;
+      }
+      document.addEventListener('click', function(e){
+        var a = e.target && e.target.closest ? e.target.closest('a') : null;
+        if (!shouldHook(a)) return;
+        try {
+          // 与 blogex.js 的 pjax:send 保持一致
+          if (window.GLOBAL_CONFIG && GLOBAL_CONFIG.loadProgressBar && window.Pace && typeof Pace.restart === 'function'){
+            Pace.restart();
+          }
+          if (window.GLOBAL_CONFIG && GLOBAL_CONFIG.loadingBox && window.heo && typeof heo.showLoading === 'function'){
+            heo.showLoading();
+          }
+        } catch (err) {}
+      }, true); // 捕获阶段，确保在跳转前触发
     })();
     </script>
 
