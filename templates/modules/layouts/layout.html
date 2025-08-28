@@ -24,6 +24,24 @@
         <th:block th:replace="${head}"/>
     </th:block>
 
+
+    <!-- ===== Mark NON-PJAX & Smooth Pace CSS (append-only, scoped) ===== -->
+    <script th:if="${!theme.config.other.pjax_enable}">
+      document.documentElement.classList.add('__pjax_off__');
+    </script>
+    <style th:if="${!theme.config.other.pjax_enable}">
+      .__pjax_off__ .pace { pointer-events:none; user-select:none; }
+      .__pjax_off__ .pace .pace-progress{
+        position:fixed; top:0; left:0; height:2px; width:100%;
+        z-index: 2000;
+        /* 仅在关闭 PJAX 时使其“更快更顺滑” */
+        transition: width .18s cubic-bezier(.22,.61,.36,1), opacity .2s linear, transform .18s ease;
+        will-change: width, transform, opacity;
+      }
+      .__pjax_off__ .pace .pace-activity,
+      .__pjax_off__ .pace .pace-progress-inner{ display:none; }
+    </style>
+
 </head>
 
 <body>
@@ -144,33 +162,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     <script charset="utf-8" data-pjax th:src="${assets_link + '/zhheo/blogex.js' + theme_version}"></script>
     <script th:src="${assets_link + '/js/tw_cn.js' + theme_version}"></script>
 
-<!-- 
-    <!-- ===== Non-PJAX: trigger same loading bar as pjax:send before nav (append-only, v6) ===== -->
-    <script th:if="${!theme.config.other.pjax_enable}">
-    (function(){
-      function shouldHook(a){
-        if (!a) return false;
-        if (a.closest('#pagination')) return true;
-        if (a.classList && (a.classList.contains('page-number') || a.classList.contains('extend'))) return true;
-        if (a.getAttribute && (a.getAttribute('rel') === 'prev' || a.getAttribute('rel') === 'next')) return true;
-        return false;
-      }
-      document.addEventListener('click', function(e){
-        var a = e.target.closest && e.target.closest('a');
-        if (!shouldHook(a)) return;
-        try {
-          if (window.GLOBAL_CONFIG && GLOBAL_CONFIG.loadProgressBar && window.Pace && typeof Pace.restart === 'function'){
-            Pace.restart();
-          }
-          if (window.GLOBAL_CONFIG && GLOBAL_CONFIG.loadingBox && window.heo && typeof heo.showLoading === 'function'){
-            heo.showLoading();
-          }
-        } catch (err) {}
-      }, true); // 捕获阶段，尽可能提前
-    })();
-    </script>
-
-</body> 之前 -->
+<!-- </body> 之前 -->
     <script src="/themes/theme-hao/assets/libs/instantpage.min.js" type="module"></script>
 
     <script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/vanilla-lazyload/17.3.1/lazyload.iife.min.js"></script>
@@ -587,32 +579,6 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   setState(false);
 })();
 </script>
-
-
-    <!-- ===== Non-PJAX: trigger same loading bar as pjax:send before nav (append-only, v6) ===== -->
-    <script th:if="${!theme.config.other.pjax_enable}">
-    (function(){
-      function shouldHook(a){
-        if (!a) return false;
-        if (a.closest('#pagination')) return true;
-        if (a.classList && (a.classList.contains('page-number') || a.classList.contains('extend'))) return true;
-        if (a.getAttribute && (a.getAttribute('rel') === 'prev' || a.getAttribute('rel') === 'next')) return true;
-        return false;
-      }
-      document.addEventListener('click', function(e){
-        var a = e.target.closest && e.target.closest('a');
-        if (!shouldHook(a)) return;
-        try {
-          if (window.GLOBAL_CONFIG && GLOBAL_CONFIG.loadProgressBar && window.Pace && typeof Pace.restart === 'function'){
-            Pace.restart();
-          }
-          if (window.GLOBAL_CONFIG && GLOBAL_CONFIG.loadingBox && window.heo && typeof heo.showLoading === 'function'){
-            heo.showLoading();
-          }
-        } catch (err) {}
-      }, true); // 捕获阶段，尽可能提前
-    })();
-    </script>
 
 </body>
 
