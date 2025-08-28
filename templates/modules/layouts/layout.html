@@ -24,6 +24,25 @@
         <th:block th:replace="${head}"/>
     </th:block>
 
+
+    <!-- ===== Mark NON-PJAX using theme setting (append-only) ===== -->
+    <script th:if="${!theme.config.other.pjax_enable}">
+      document.documentElement.classList.add('no-pjax');
+    </script>
+
+    <!-- ===== Smooth Pace bar only when PJAX is OFF (append-only) ===== -->
+    <style>
+      .no-pjax .pace { pointer-events: none; user-select: none; }
+      .no-pjax .pace .pace-progress{
+        position:fixed;top:0;left:0;height:2px;width:100%;
+        background: var(--heo-theme, #409eff);
+        z-index:2000;transform:translate3d(0,0,0);
+        transition: transform .4s ease,width .4s ease,opacity .4s ease;
+      }
+      .no-pjax .pace .pace-activity,
+      .no-pjax .pace .pace-progress-inner{display:none;}
+    </style>
+
 </head>
 
 <body>
@@ -144,7 +163,71 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     <script charset="utf-8" data-pjax th:src="${assets_link + '/zhheo/blogex.js' + theme_version}"></script>
     <script th:src="${assets_link + '/js/tw_cn.js' + theme_version}"></script>
 
-<!-- </body> 之前 -->
+<!-- 
+    <!-- ===== Keep PJAX-like behavior when PJAX is OFF (append-only) ===== -->
+    <script th:if="${!theme.config.other.pjax_enable}">
+    (function () {
+      var LIST_SELECTOR = '#recent-posts';
+      var KEY_PREFIX = 'hao:list:scroll:';
+
+      if ('scrollRestoration' in history) try { history.scrollRestoration = 'manual'; } catch (e) {}
+
+      function saveScroll() {
+        try {
+          var key = KEY_PREFIX + location.pathname + location.search;
+          sessionStorage.setItem(key, String(window.scrollY || document.documentElement.scrollTop || 0));
+        } catch (e) {}
+      }
+      addEventListener('beforeunload', saveScroll, { passive: true });
+      addEventListener('pagehide', saveScroll, { passive: true });
+
+      function restoreScrollIfAny() {
+        try {
+          var key = KEY_PREFIX + location.pathname + location.search;
+          var y = sessionStorage.getItem(key);
+          if (y !== null) requestAnimationFrame(function(){ scrollTo(0, parseInt(y,10) || 0); });
+        } catch (e) {}
+      }
+
+      function scrollToListSmooth() {
+        var list = document.querySelector(LIST_SELECTOR);
+        if (!list) return;
+        var y = list.getBoundingClientRect().top + pageYOffset;
+        if (window.btf && typeof window.btf.scrollToDest === 'function') {
+          // 使用主题内置位移(减 70)与动画
+          window.btf.scrollToDest(y, 500);
+        } else {
+          try { scrollTo({ top: Math.max(0, y - 70), behavior: 'smooth' }); }
+          catch (e) { scrollTo(0, Math.max(0, y - 70)); }
+        }
+      }
+
+      function isIndexPagination() {
+        if (/\/page\/\d+\/?$/i.test(location.pathname)) return true;
+        if (/[?&]page=\d+/i.test(location.search)) return true;
+        return false;
+      }
+
+      function isBackForwardNav() {
+        try { 
+          var entries = performance.getEntriesByType && performance.getEntriesByType('navigation');
+          if (entries && entries[0]) return entries[0].type === 'back_forward';
+        } catch (e) {}
+        return false;
+      }
+
+      addEventListener('pageshow', function (ev) {
+        if (ev.persisted || isBackForwardNav()) { restoreScrollIfAny(); return; }
+        if (isIndexPagination()) setTimeout(scrollToListSmooth, 60);
+      }, { passive: true });
+
+      document.addEventListener('DOMContentLoaded', function () {
+        if (isIndexPagination()) setTimeout(scrollToListSmooth, 0);
+      });
+    })();
+    </script>
+
+</body> 之前 -->
     <script src="/themes/theme-hao/assets/libs/instantpage.min.js" type="module"></script>
 
     <script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/vanilla-lazyload/17.3.1/lazyload.iife.min.js"></script>
@@ -561,6 +644,70 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   setState(false);
 })();
 </script>
+
+
+    <!-- ===== Keep PJAX-like behavior when PJAX is OFF (append-only) ===== -->
+    <script th:if="${!theme.config.other.pjax_enable}">
+    (function () {
+      var LIST_SELECTOR = '#recent-posts';
+      var KEY_PREFIX = 'hao:list:scroll:';
+
+      if ('scrollRestoration' in history) try { history.scrollRestoration = 'manual'; } catch (e) {}
+
+      function saveScroll() {
+        try {
+          var key = KEY_PREFIX + location.pathname + location.search;
+          sessionStorage.setItem(key, String(window.scrollY || document.documentElement.scrollTop || 0));
+        } catch (e) {}
+      }
+      addEventListener('beforeunload', saveScroll, { passive: true });
+      addEventListener('pagehide', saveScroll, { passive: true });
+
+      function restoreScrollIfAny() {
+        try {
+          var key = KEY_PREFIX + location.pathname + location.search;
+          var y = sessionStorage.getItem(key);
+          if (y !== null) requestAnimationFrame(function(){ scrollTo(0, parseInt(y,10) || 0); });
+        } catch (e) {}
+      }
+
+      function scrollToListSmooth() {
+        var list = document.querySelector(LIST_SELECTOR);
+        if (!list) return;
+        var y = list.getBoundingClientRect().top + pageYOffset;
+        if (window.btf && typeof window.btf.scrollToDest === 'function') {
+          // 使用主题内置位移(减 70)与动画
+          window.btf.scrollToDest(y, 500);
+        } else {
+          try { scrollTo({ top: Math.max(0, y - 70), behavior: 'smooth' }); }
+          catch (e) { scrollTo(0, Math.max(0, y - 70)); }
+        }
+      }
+
+      function isIndexPagination() {
+        if (/\/page\/\d+\/?$/i.test(location.pathname)) return true;
+        if (/[?&]page=\d+/i.test(location.search)) return true;
+        return false;
+      }
+
+      function isBackForwardNav() {
+        try { 
+          var entries = performance.getEntriesByType && performance.getEntriesByType('navigation');
+          if (entries && entries[0]) return entries[0].type === 'back_forward';
+        } catch (e) {}
+        return false;
+      }
+
+      addEventListener('pageshow', function (ev) {
+        if (ev.persisted || isBackForwardNav()) { restoreScrollIfAny(); return; }
+        if (isIndexPagination()) setTimeout(scrollToListSmooth, 60);
+      }, { passive: true });
+
+      document.addEventListener('DOMContentLoaded', function () {
+        if (isIndexPagination()) setTimeout(scrollToListSmooth, 0);
+      });
+    })();
+    </script>
 
 </body>
 
