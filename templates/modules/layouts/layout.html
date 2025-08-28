@@ -25,16 +25,25 @@
     </th:block>
 
 
-    <!-- ===== Smooth Pace bar for NON-PJAX (append-only) ===== -->
+    <!-- ===== Mark NON-PJAX on <html> early (append-only) ===== -->
+    <script>
+      (function(){
+        var pjaxOn = !!(window.pjax && typeof window.pjax.loadUrl === 'function');
+        if (!pjaxOn) { document.documentElement.classList.add('no-pjax'); }
+      })();
+    </script>
+
+    <!-- ===== Smooth Pace bar only when PJAX is OFF (append-only) ===== -->
     <style>
-      .pace { pointer-events: none; user-select: none; }
-      .pace .pace-progress{
+      .no-pjax .pace { pointer-events: none; user-select: none; }
+      .no-pjax .pace .pace-progress{
         position:fixed;top:0;left:0;height:2px;width:100%;
         background: var(--heo-theme, #409eff);
         z-index:2000;transform:translate3d(0,0,0);
         transition: transform .4s ease,width .4s ease,opacity .4s ease;
       }
-      .pace .pace-activity,.pace .pace-progress-inner{display:none;}
+      .no-pjax .pace .pace-activity,
+      .no-pjax .pace .pace-progress-inner{display:none;}
     </style>
 
 </head>
@@ -163,15 +172,35 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     (function () {
       var pjaxOn = !!(window.pjax && typeof window.pjax.loadUrl === 'function');
       if (pjaxOn) return;
-    
+
       var LIST_SELECTOR = '#recent-posts';
-      var OFFSET = 70;
       var KEY_PREFIX = 'hao:list:scroll:';
-    
+
       if ('scrollRestoration' in history) {
         try { history.scrollRestoration = 'manual'; } catch (e) {}
       }
-    
+
+      function getHeaderOffset(){
+        // try common fixed/sticky headers at top
+        var candidates = [
+          '#page-header', 'header#page-header', 'header.header', '#navbar', '#nav', 'header', '.navbar', '.site-header'
+        ];
+        var h = 0;
+        for (var i=0;i<candidates.length;i++){
+          var el = document.querySelector(candidates[i]);
+          if (!el) continue;
+          var cs = getComputedStyle(el);
+          if ((cs.position === 'fixed' || cs.position === 'sticky')){
+            var rect = el.getBoundingClientRect();
+            if (Math.abs(rect.top) <= 2) {
+              h = Math.max(h, el.offsetHeight || 0);
+            }
+          }
+        }
+        // small breathing space
+        return h + 8;
+      }
+
       function saveScroll() {
         try {
           var key = KEY_PREFIX + location.pathname + location.search;
@@ -180,7 +209,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
       }
       window.addEventListener('beforeunload', saveScroll, { passive: true });
       window.addEventListener('pagehide', saveScroll, { passive: true });
-    
+
       function restoreScrollIfAny() {
         try {
           var key = KEY_PREFIX + location.pathname + location.search;
@@ -192,19 +221,22 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
           }
         } catch (e) {}
       }
-    
+
       function scrollToListSmooth() {
         var list = document.querySelector(LIST_SELECTOR);
         if (!list) return;
-        var top = list.getBoundingClientRect().top + window.pageYOffset - OFFSET;
+        var offset = getHeaderOffset();
+        var top = list.getBoundingClientRect().top + window.pageYOffset - offset;
         try { window.scrollTo({ top: top, behavior: 'smooth' }); }
         catch (e) { window.scrollTo(0, top); }
       }
-    
+
       function isIndexPagination() {
-        return /\/page\/\d+\/?$/.test(location.pathname);
+        if (/\/page\/\d+\/?$/i.test(location.pathname)) return true;
+        if (/[?&]page=\d+/i.test(location.search)) return true;
+        return false;
       }
-    
+
       function isBackForwardNav() {
         try {
           var entries = performance.getEntriesByType && performance.getEntriesByType('navigation');
@@ -212,12 +244,12 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
         } catch (e) {}
         return false;
       }
-    
+
       window.addEventListener('pageshow', function (ev) {
         if (ev.persisted || isBackForwardNav()) { restoreScrollIfAny(); return; }
         if (isIndexPagination()) { setTimeout(scrollToListSmooth, 60); }
       }, { passive: true });
-    
+
       document.addEventListener('DOMContentLoaded', function () {
         if (isIndexPagination()) { setTimeout(scrollToListSmooth, 0); }
       });
@@ -648,15 +680,35 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     (function () {
       var pjaxOn = !!(window.pjax && typeof window.pjax.loadUrl === 'function');
       if (pjaxOn) return;
-    
+
       var LIST_SELECTOR = '#recent-posts';
-      var OFFSET = 70;
       var KEY_PREFIX = 'hao:list:scroll:';
-    
+
       if ('scrollRestoration' in history) {
         try { history.scrollRestoration = 'manual'; } catch (e) {}
       }
-    
+
+      function getHeaderOffset(){
+        // try common fixed/sticky headers at top
+        var candidates = [
+          '#page-header', 'header#page-header', 'header.header', '#navbar', '#nav', 'header', '.navbar', '.site-header'
+        ];
+        var h = 0;
+        for (var i=0;i<candidates.length;i++){
+          var el = document.querySelector(candidates[i]);
+          if (!el) continue;
+          var cs = getComputedStyle(el);
+          if ((cs.position === 'fixed' || cs.position === 'sticky')){
+            var rect = el.getBoundingClientRect();
+            if (Math.abs(rect.top) <= 2) {
+              h = Math.max(h, el.offsetHeight || 0);
+            }
+          }
+        }
+        // small breathing space
+        return h + 8;
+      }
+
       function saveScroll() {
         try {
           var key = KEY_PREFIX + location.pathname + location.search;
@@ -665,7 +717,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
       }
       window.addEventListener('beforeunload', saveScroll, { passive: true });
       window.addEventListener('pagehide', saveScroll, { passive: true });
-    
+
       function restoreScrollIfAny() {
         try {
           var key = KEY_PREFIX + location.pathname + location.search;
@@ -677,19 +729,22 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
           }
         } catch (e) {}
       }
-    
+
       function scrollToListSmooth() {
         var list = document.querySelector(LIST_SELECTOR);
         if (!list) return;
-        var top = list.getBoundingClientRect().top + window.pageYOffset - OFFSET;
+        var offset = getHeaderOffset();
+        var top = list.getBoundingClientRect().top + window.pageYOffset - offset;
         try { window.scrollTo({ top: top, behavior: 'smooth' }); }
         catch (e) { window.scrollTo(0, top); }
       }
-    
+
       function isIndexPagination() {
-        return /\/page\/\d+\/?$/.test(location.pathname);
+        if (/\/page\/\d+\/?$/i.test(location.pathname)) return true;
+        if (/[?&]page=\d+/i.test(location.search)) return true;
+        return false;
       }
-    
+
       function isBackForwardNav() {
         try {
           var entries = performance.getEntriesByType && performance.getEntriesByType('navigation');
@@ -697,12 +752,12 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
         } catch (e) {}
         return false;
       }
-    
+
       window.addEventListener('pageshow', function (ev) {
         if (ev.persisted || isBackForwardNav()) { restoreScrollIfAny(); return; }
         if (isIndexPagination()) { setTimeout(scrollToListSmooth, 60); }
       }, { passive: true });
-    
+
       document.addEventListener('DOMContentLoaded', function () {
         if (isIndexPagination()) { setTimeout(scrollToListSmooth, 0); }
       });
