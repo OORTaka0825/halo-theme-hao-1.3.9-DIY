@@ -100,6 +100,10 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     postPermalink=${allPostList[randomIndex].status.permalink}">
   function toRandomPost() {
     var permalink = /*[[${postPermalink}]]*/ "/";
+    (window.pjax && typeof pjax.loadUrl === 'function')
+        ? pjax.loadUrl(permalink)
+        : (window.location.href = permalink);
+}]]*/ "/";
     if (window.pjax && typeof pjax.loadUrl === 'function') {
       // 开启 PJAX：无刷新跳转
       pjax.loadUrl(permalink);
