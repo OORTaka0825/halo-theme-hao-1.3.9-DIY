@@ -8,13 +8,10 @@
     <title th:text="${siteTitle}"></title>
     <link rel="shortcut icon"
           th:href="@{${#strings.isEmpty(site.favicon) ? assets_link + '/images/hao-logo.jpg' : site.favicon}}"/>
-    <script src="/themes/theme-hao/assets/libs/jquery.min.js"></script>
+
+    <script th:src="${assets_link + '/libs/jquery/jquery.min.js'}"></script>
 
     <script th:src="${assets_link + '/js/heo.js' + theme_version}"></script>
-
-    <script th:src="${assets_link + '/js/halo.js' + theme_version}"></script>
-
-    <link rel="stylesheet" th:href="${assets_link + '/libs/fancybox/jquery.fancybox.min.css'}">
 
     <link rel="stylesheet" th:href="${assets_link + '/zhheo/zhheoblog.css' + theme_version}">
 
