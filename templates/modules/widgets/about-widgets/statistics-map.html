@@ -1,80 +1,75 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<!-- 数据统计&音乐偏好（PJAX 兼容版：直接嵌入官方脚本，不依赖自定义 JS 执行） -->
+<!-- 数据统计&音乐偏好（最终修复：PJAX 感知 + quote.js 动态加载 + iframe 兜底；仅需填写站点ID） -->
 <div class="author-content" th:fragment="statistics-map">
-    <div class="about-statistic author-content-item"
-         style="background: url(https://bu.dusays.com/2023/03/12/640dc8c72f623.webp);">
-        <div class="card-content">
-            <div class="author-content-item-tips">数据</div>
-            <span class="author-content-item-title">访问统计</span>
+  <div class="about-statistic author-content-item" style="background: url(https://bu.dusays.com/2023/03/12/640dc8c72f623.webp);">
+    <div class="card-content">
+      <div class="author-content-item-tips">数据</div>
+      <span class="author-content-item-title">访问统计</span>
 
-            <!-- 直接挂载官方小挂件：PJAX 下也会执行，避免空白 -->
-            <div id="statistic"></div>
-            <script id="LA-DATA-WIDGET" crossOrigin="anonymous"
-                    th:src="'https://v6-widget.51.la/v6/' + ${theme.config.about.LingQueMonitorID} + '/quote.js?theme=3'">
-            </script>
-            <noscript>
-                <!-- 极端情况下（禁用 JS）用 iframe 显示 -->
-                <iframe style="width:100%;border:0;overflow:hidden"
-                        th:src="'https://v6-widget.51.la/v6/' + ${theme.config.about.LingQueMonitorID} + '/quote.html?theme=3'">
-                </iframe>
-            </noscript>
+      <div id="statistic" class="la-iframe-wrap"></div>
 
-            <div class="post-tips">统计信息来自 <a href="https://invite.51.la/1NzKqTeb?target=V6" rel="noopener nofollow"
-                                                   target="_blank">51la网站统计</a></div>
-            <div class="banner-button-group"><a class="banner-button" onclick="pjax.loadUrl('/archives')"
-                                                data-pjax-state=""><i class="haofont hao-icon-circle-arrow-up-right-1"></i><span
-                    class="banner-button-text">文章隧道</span></a></div>
-        </div>
+      <div class="post-tips">统计信息来自 <a href="https://invite.51.la/1NzKqTeb?target=V6" rel="noopener nofollow" target="_blank">51la网站统计</a></div>
+      <div class="banner-button-group"><a class="banner-button" onclick="pjax.loadUrl('/archives')" data-pjax-state=""><i class="haofont hao-icon-circle-arrow-up-right-1"></i><span class="banner-button-text">文章隧道</span></a></div>
     </div>
+  </div>
 
-    <div class="author-content-item-group column mapAndInfo">
-        <div class="author-content-item map single">
-            <span class="map-title">我现在住在
-                <b>[[${theme.config.about.map.StrengthenTitle}]]</b></span>
-        </div>
-        <div class="author-content-item selfInfo single"
-             th:if="${not #lists.isEmpty(theme.config.about.map.authorInfo)}"
-             th:with="texts = ${theme.config.about.map.authorInfo}">
-            <div th:if="${theme.config.about.map.authorInfo.size()}>'0'"><span class="selfInfo-title"
-                                                                               th:text="${texts[0].authorInfoTitle}">生于</span><span class="selfInfo-content"
-                                                                                                                                      id="selfInfo-content-year" th:style="'color:' + ${texts[0].authorInfoColor}"
-                                                                                                                                      th:text="${texts[0].authorInfoContent}">2000</span>
-            </div>
-            <div th:if="${theme.config.about.map.authorInfo.size()}>'1'"><span class="selfInfo-title"
-                                                                               th:text="${texts[1].authorInfoTitle}">太原理工大学</span><span class="selfInfo-content"
-                                                                                                                                              th:style="'color:' + ${texts[1].authorInfoColor}"
-                                                                                                                                              th:text="${texts[1].authorInfoContent}">计算机科学</span>
-            </div>
-            <div th:if="${theme.config.about.map.authorInfo.size()}>'2'"><span class="selfInfo-title"
-                                                                               th:text="${texts[2].authorInfoTitle}">现在职业</span><span class="selfInfo-content"
-                                                                                                                                          th:style="'color:' + ${texts[2].authorInfoColor}"
-                                                                                                                                          th:text="${texts[2].authorInfoContent}">BI工程师</span>
-            </div>
-        </div>
+  <div class="author-content-item-group column mapAndInfo">
+    <div class="author-content-item map single">
+      <span class="map-title">我现在住在 <b>[[${theme.config.about.map.StrengthenTitle}]]</b></span>
     </div>
+    <div class="author-content-item selfInfo single" th:if="${not #lists.isEmpty(theme.config.about.map.authorInfo)}" th:with="texts = ${theme.config.about.map.authorInfo}">
+      <div th:if="${theme.config.about.map.authorInfo.size()}>'0'"><span class="selfInfo-title" th:text="${texts[0].authorInfoTitle}">生于</span><span class="selfInfo-content" id="selfInfo-content-year" th:style="'color:' + ${texts[0].authorInfoColor}" th:text="${texts[0].authorInfoContent}">2000</span></div>
+      <div th:if="${theme.config.about.map.authorInfo.size()}>'1'"><span class="selfInfo-title" th:text="${texts[1].authorInfoTitle}">太原理工大学</span><span class="selfInfo-content" th:style="'color:' + ${texts[1].authorInfoColor}" th:text="${texts[1].authorInfoContent}">计算机科学</span></div>
+      <div th:if="${theme.config.about.map.authorInfo.size()}>'2'"><span class="selfInfo-title" th:text="${texts[2].authorInfoTitle}">现在职业</span><span class="selfInfo-content" th:style="'color:' + ${texts[2].authorInfoColor}" th:text="${texts[2].authorInfoContent}">BI工程师</span></div>
+    </div>
+  </div>
 
-    <style>
-        .author-content-item.map {
-            background: url([[${theme.config.about.map.background}]]) no-repeat center;
-            min-height: 160px;
-            max-height: 400px;
-            position: relative;
-            overflow: hidden;
-            margin-bottom: 0.5rem;
-            height: 60%;
-            background-size: 100%;
-            transition: 1s ease-in-out;
+  <style>
+    .la-iframe-wrap { position: relative; width: 100%; }
+    .la-iframe { width: 100%; height: 220px; display: block; border: 0; overflow: hidden; }
+    .author-content-item.map { background: url([[${theme.config.about.map.background}]]) no-repeat center; min-height: 160px; max-height: 400px; position: relative; overflow: hidden; margin-bottom: .5rem; height: 60%; background-size: 100%; transition: 1s ease-in-out; }
+    [data-theme=dark] .author-content-item.map { background: url([[${theme.config.about.map.backgroundDark}]]) no-repeat center; background-size: 100%; }
+    .author-content-item.map:hover { background-size:120%; transition:4s ease-in-out; background-position-x:0; background-position-y:36%; }
+    .author-content-item.map .map-title { position:absolute; bottom:0; left:0; width:100%; background:var(--heo-maskbg); padding:.5rem 2rem; backdrop-filter:saturate(180%) blur(20px); -webkit-backdrop-filter:blur(20px); transition:1s ease-in-out; font-size:20px; }
+    .author-content-item.map:hover .map-title { bottom:-100%; }
+    .author-content-item.map .map-title b { color:var(--heo-fontcolor); }
+    @media (max-width:768px){ .author-content-item.map.myphoto{ background-size:cover!important;} .author-content-item.map .map-title{ padding:1rem;} }
+  </style>
+
+  <script defer>
+    (function(){
+      var ID = '[[${theme.config.about.LingQueMonitorID}]]';
+      function mount() {
+        var host = document.getElementById('statistic');
+        if (!host || !ID) return;
+        host.innerHTML = '';
+        try {
+          var s = document.createElement('script');
+          s.id = 'LA-DATA-WIDGET';
+          s.crossOrigin = 'anonymous';
+          s.src = 'https://v6-widget.51.la/v6/' + ID + '/quote.js?theme=3';
+          s.onerror = function(){ fallbackIframe(host); };
+          host.appendChild(s);
+        } catch(e) {
+          fallbackIframe(host);
         }
-        [data-theme=dark] .author-content-item.map {
-            background: url([[${theme.config.about.map.backgroundDark}]]) no-repeat center;
-            background-size: 100%;
-        }
-        .author-content-item.map:hover { background-size: 120%; transition: 4s ease-in-out; background-position-x: 0; background-position-y: 36%; }
-        .author-content-item.map .map-title { position: absolute; bottom: 0; left: 0; width: 100%; background: var(--heo-maskbg); padding: .5rem 2rem; backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: blur(20px); transition: 1s ease-in-out; font-size: 20px; }
-        .author-content-item.map:hover .map-title { bottom: -100%; }
-        .author-content-item.map .map-title b { color: var(--heo-fontcolor); }
-        @media screen and (max-width: 768px){ .author-content-item.map.myphoto{ background-size: cover !important;} .author-content-item.map .map-title{ padding:1rem; } }
-    </style>
+      }
+      function fallbackIframe(host){
+        host.innerHTML = '';
+        var ifr = document.createElement('iframe');
+        ifr.className = 'la-iframe';
+        ifr.setAttribute('frameborder','0');
+        ifr.setAttribute('scrolling','no');
+        ifr.referrerPolicy = 'no-referrer-when-downgrade';
+        ifr.src = 'https://v6-widget.51.la/v6/' + ID + '/quote.html?theme=3';
+        host.appendChild(ifr);
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', mount, { once: true });
+      } else { mount(); }
+      document.addEventListener('pjax:complete', mount);
+    })();
+  </script>
 </div>
 </html>
