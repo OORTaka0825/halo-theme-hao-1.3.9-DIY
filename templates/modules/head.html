@@ -180,7 +180,7 @@
     </th:block>
 
     <!-- icon图标 -->
-    <link rel="stylesheet" th:href="${assets_link + '/icon/iconfont.css' + theme_version}">
+    <link rel="stylesheet" th:href="'https://cdn.cbd.int/hao-theme-static@'+${theme.spec.version}+'/icon/iconfont.css'">
     
     <!-- icon后台填写JS链接配置 -->
     <th:block th:if="${theme.config.nav.menus.enable_ali_iconfont_symbol_header}">
