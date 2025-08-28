@@ -113,20 +113,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
         // window.open(permalink);
         }
     
-    
-
-// 全局委托：命中首页顶大横幅（随便逛逛所在的容器）就触发随机跳转
-document.addEventListener('click', function (ev) {
-  var target = ev.target;
-  if (!target || !target.closest) return;
-  // 覆盖常见容器选择器：banner-hover / banner / banner-group / home_top
-  var hit = target.closest('#banner-hover, .banner, .banner-group, #home_top .banner, #home_top .banner-group');
-  if (!hit) return;
-  try { ev.preventDefault(); } catch(e){}
-  try { toRandomPost(); } catch (e) {}
-}, true);
-
-</script>
+    </script>
     
     <!-- 网站背景 -->
     <div id="an_music_bg"></div>
