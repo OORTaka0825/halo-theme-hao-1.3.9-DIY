@@ -97,18 +97,34 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     <script th:inline="javascript"
     th:with="allPostList=${postFinder.listAll()},
     randomIndex=${T(java.lang.Math).floor(T(java.lang.Math).random()*#lists.size(allPostList))},
-    postPermalink=${allPostList[randomIndex].status.permalink}">
-  \1
+    postPermalink=${allPostList[randomIndex].status.permalink}"
+>
+    function toRandomPost() {
+  let permalink = /*[[${postPermalink}]]*/ "/";
+  if (window.pjax && typeof pjax.loadUrl === 'function') {
 
-  // 全局委托：无论元素是否有 onclick/是否是 <a>，都能触发随机跳转
-  document.addEventListener('click', function (ev) {
-    var el = ev.target && (ev.target.closest && ev.target.closest('#banner-hover, [onclick*="toRandomPost"], .random-post, [data-random-post]'));
-    if (!el) return;
-    try { ev.preventDefault(); } catch(e){}
-    if (typeof toRandomPost === 'function') {
-      try { toRandomPost(); } catch(e){ window.location.reload(); }
-    }
-  }, true);
+  } else {
+    window.location.href = permalink;
+  }
+}]]*/ "/";
+        // 当前窗口打开
+        //window.location.href = permalink;
+
+        // window.open(permalink);
+        }
+    
+    
+
+// 全局委托：命中首页顶大横幅（随便逛逛所在的容器）就触发随机跳转
+document.addEventListener('click', function (ev) {
+  var target = ev.target;
+  if (!target || !target.closest) return;
+  // 覆盖常见容器选择器：banner-hover / banner / banner-group / home_top
+  var hit = target.closest('#banner-hover, .banner, .banner-group, #home_top .banner, #home_top .banner-group');
+  if (!hit) return;
+  try { ev.preventDefault(); } catch(e){}
+  try { toRandomPost(); } catch (e) {}
+}, true);
 
 </script>
     
