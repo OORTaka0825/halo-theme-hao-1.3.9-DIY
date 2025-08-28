@@ -1,13 +1,25 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<!-- 数据统计&音乐偏好 -->
+<!-- 数据统计&音乐偏好（PJAX 兼容版：直接嵌入官方脚本，不依赖自定义 JS 执行） -->
 <div class="author-content" th:fragment="statistics-map">
     <div class="about-statistic author-content-item"
          style="background: url(https://bu.dusays.com/2023/03/12/640dc8c72f623.webp);">
         <div class="card-content">
             <div class="author-content-item-tips">数据</div>
             <span class="author-content-item-title">访问统计</span>
+
+            <!-- 直接挂载官方小挂件：PJAX 下也会执行，避免空白 -->
             <div id="statistic"></div>
+            <script id="LA-DATA-WIDGET" crossOrigin="anonymous"
+                    th:src="'https://v6-widget.51.la/v6/' + ${theme.config.about.LingQueMonitorID} + '/quote.js?theme=3'">
+            </script>
+            <noscript>
+                <!-- 极端情况下（禁用 JS）用 iframe 显示 -->
+                <iframe style="width:100%;border:0;overflow:hidden"
+                        th:src="'https://v6-widget.51.la/v6/' + ${theme.config.about.LingQueMonitorID} + '/quote.html?theme=3'">
+                </iframe>
+            </noscript>
+
             <div class="post-tips">统计信息来自 <a href="https://invite.51.la/1NzKqTeb?target=V6" rel="noopener nofollow"
                                                    target="_blank">51la网站统计</a></div>
             <div class="banner-button-group"><a class="banner-button" onclick="pjax.loadUrl('/archives')"
@@ -15,7 +27,6 @@
                     class="banner-button-text">文章隧道</span></a></div>
         </div>
     </div>
-
 
     <div class="author-content-item-group column mapAndInfo">
         <div class="author-content-item map single">
@@ -42,6 +53,7 @@
             </div>
         </div>
     </div>
+
     <style>
         .author-content-item.map {
             background: url([[${theme.config.about.map.background}]]) no-repeat center;
@@ -54,111 +66,15 @@
             background-size: 100%;
             transition: 1s ease-in-out;
         }
-
         [data-theme=dark] .author-content-item.map {
             background: url([[${theme.config.about.map.backgroundDark}]]) no-repeat center;
             background-size: 100%;
         }
-        .author-content-item.map:hover {
-            background-size: 120%;
-            transition: 4s ease-in-out;
-            background-position-x: 0;
-            background-position-y: 36%;
-        }
-
-        .author-content-item.map .map-title {
-            position: absolute;
-            bottom: 0px;
-            left: 0px;
-            width: 100%;
-            background: var(--heo-maskbg);
-            padding: 0.5rem 2rem;
-            backdrop-filter: saturate(180%) blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            transition: 1s ease-in-out;
-            font-size: 20px;
-        }
-
-        .author-content-item.map:hover .map-title {
-            bottom: -100%;
-        }
-
-        .author-content-item.map .map-title b {
-            color: var(--heo-fontcolor);
-        }
-
-        @media screen and (max-width: 768px) {
-            .author-content-item.map.myphoto {
-                background-size: cover !important;
-            }
-
-            .author-content-item.map .map-title {
-                padding: 1rem;
-            }
-        }
+        .author-content-item.map:hover { background-size: 120%; transition: 4s ease-in-out; background-position-x: 0; background-position-y: 36%; }
+        .author-content-item.map .map-title { position: absolute; bottom: 0; left: 0; width: 100%; background: var(--heo-maskbg); padding: .5rem 2rem; backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: blur(20px); transition: 1s ease-in-out; font-size: 20px; }
+        .author-content-item.map:hover .map-title { bottom: -100%; }
+        .author-content-item.map .map-title b { color: var(--heo-fontcolor); }
+        @media screen and (max-width: 768px){ .author-content-item.map.myphoto{ background-size: cover !important;} .author-content-item.map .map-title{ padding:1rem; } }
     </style>
-    <!-- 关于统计 修复A：先解析，失败则用 iframe 托管官方挂件，保证不空白 -->
-    <script defer>
-    (function () {
-      const ID = '[[${theme.config.about.LingQueMonitorID}]]';
-      const box = document.getElementById('statistic');
-      if (!ID || !box) return;
-
-      function renderCustom(nums) {
-        const titles = ['最近活跃','今日人数','今日访问','昨日人数','昨日访问','本月访问','总访问量'];
-        box.innerHTML = titles.map((t,i) => (
-          '<div><span>' + t + '</span><span id="' + t + '">' + (nums[i] || '-') + '</span></div>'
-        )).join('');
-
-        // 若主题全局已引入 CountUp，则使用可视触发动画
-        if (typeof CountUp === 'function') {
-          const els = titles.map((t,i) => new CountUp(t, 0, (nums[i] || '').toString().replace(/,/g,''), 0, 2, {
-            useEasing: true, useGrouping: true, separator: ',', decimal: '.', prefix: '', suffix: ''
-          }));
-          const target = document.querySelector('.about-statistic.author-content-item');
-          if (!target) return;
-          const io = new IntersectionObserver((es, obs) => {
-            es.forEach(e => {
-              if (e.isIntersecting) { els.forEach(ins => ins && ins.start && ins.start()); obs.disconnect(); }
-            });
-          });
-          io.observe(target);
-        }
-      }
-
-      function iframeWidget() {
-        box.innerHTML = '';
-        var ifr = document.createElement('iframe');
-        ifr.setAttribute('frameborder','0');
-        ifr.style.width = '100%';
-        ifr.style.display = 'block';
-        ifr.style.overflow = 'hidden';
-        box.appendChild(ifr);
-        var doc = ifr.contentDocument || ifr.contentWindow.document;
-        doc.open();
-        doc.write('<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0">' +
-          '<script id="LA-DATA-WIDGET" crossOrigin="anonymous" src="https://v6-widget.51.la/v6/' + ID + '/quote.js"></' + 'script>' +
-          '</body></html>');
-        doc.close();
-        function resize(){ ifr.style.height = doc.body.scrollHeight + 'px'; }
-        setTimeout(resize, 600);
-        new MutationObserver(resize).observe(doc.body, {childList:true, subtree:true});
-      }
-
-      fetch('https://v6-widget.51.la/v6/' + ID + '/quote.js', { mode: 'cors' })
-        .then(function(r){ return r.text(); })
-        .then(function(txt){
-          // 兼容多种结构提取 7 个指标
-          var items = txt.match(/<\/span><span>(.*?)<\/span><\/p>/g) ||
-                      txt.match(/<p[^>]*>\s*<span[^>]*>.*?<\/span>\s*<span[^>]*>(.*?)<\/span>\s*<\/p>/g);
-          if (!items || items.length < 7) throw new Error('parse-fail');
-          var nums = items.map(function(s){ var m = s.match(/<span[^>]*>(.*?)<\/span>\s*<\/p>/); return m ? m[1] : ''; });
-          if (nums.length < 7) throw new Error('not-enough');
-          renderCustom(nums);
-        })
-        .catch(function(){ iframeWidget(); });
-    })();
-    </script>
 </div>
-
 </html>
