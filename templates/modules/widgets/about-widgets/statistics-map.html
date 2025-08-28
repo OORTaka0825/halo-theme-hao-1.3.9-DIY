@@ -97,77 +97,45 @@
             }
         }
     </style>
-    <!-- 关于统计-->
+    <!-- 关于统计修复版-->
     <script defer>
-        // 链接替换即可，不需要后面的参数
-        function initAboutPage() {
-            fetch("https://v6-widget.51.la/v6/[[${theme.config.about.LingQueMonitorID}]]/quote.js")
-                .then(res => res.text())
-                .then(data => {
-                    let title = ["最近活跃", "今日人数", "今日访问", "昨日人数", "昨日访问", "本月访问", "总访问量"];
-                    // let num = data.match(/(?<=<\/span><span>).*?(?=<\/span><\/p>)/g)
-                    let num = data.match(/(<\/span><span>).*?(\/span><\/p>)/g);
+    (function () {
+      const ID = '[[${theme.config.about.LingQueMonitorID}]]';
+      const box = document.getElementById('statistic');
+      if (!ID || !box) return;
 
-                    num = num.map(el => {
-                        let val = el.replace(/(<\/span><span>)/g, "");
-                        let str = val.replace(/(<\/span><\/p>)/g, "");
-                        return str;
-                    });
+      fetch(`https://v6-widget.51.la/v6/${ID}/quote.js`, { mode: 'cors' })
+        .then(r => r.text())
+        .then(txt => {
+          let items =
+            txt.match(/<\/span><span>(.*?)<\/span><\/p>/g) ||
+            txt.match(/<p[^>]*>\s*<span[^>]*>.*?<\/span>\s*<span[^>]*>(.*?)<\/span>\s*<\/p>/g);
 
-                    let statisticEl = document.getElementById("statistic");
+          if (!items) throw new Error('parse-fail');
 
-                    // 自定义不显示哪个或者显示哪个，如下为不显示 最近活跃访客 和 总访问量
-                    let statistic = [];
-                    for (let i = 0; i < num.length; i++) {
-                        if (!statisticEl) return;
-                        if (i == 0) continue;
-                        statisticEl.innerHTML +=
-                            "<div><span>" + title[i] + "</span><span id=" + title[i] + ">" + num[i] + "</span></div>";
-                        queueMicrotask(() => {
-                            statistic.push(
-                                new CountUp(title[i], 0, num[i], 0, 2, {
-                                    useEasing: true,
-                                    useGrouping: true,
-                                    separator: ",",
-                                    decimal: ".",
-                                    prefix: "",
-                                    suffix: "",
-                                })
-                            );
-                        });
-                    }
+          const nums = items.map(s => {
+            const m = s.match(/<span[^>]*>(.*?)<\/span>\s*<\/p>/);
+            return m ? m[1] : '';
+          });
 
-                    let statisticElement = document.querySelector(".about-statistic.author-content-item");
-                    function statisticUP() {
-                        if (!statisticElement) return;
+          if (nums.length < 7) throw new Error('not-enough');
 
-                        const callback = (entries, observer) => {
-                            entries.forEach(entry => {
-                                if (entry.isIntersecting) {
-                                    for (let i = 0; i < num.length; i++) {
-                                        if (i == 0) continue;
-                                        queueMicrotask(() => {
-                                            statistic[i - 1].start();
-                                        });
-                                    }
-                                    observer.disconnect(); // 停止观察元素，因为不再需要触发此回调
-                                }
-                            });
-                        };
-
-                        const options = {
-                            root: null,
-                            rootMargin: "0px",
-                            threshold: 0
-                        };
-                        const observer = new IntersectionObserver(callback, options);
-                        observer.observe(statisticElement);
-                    }
-                    statisticUP()
-                });
-        }
-        initAboutPage();
-
+          const titles = ['最近活跃','今日人数','今日访问','昨日人数','昨日访问','本月访问','总访问量'];
+          box.innerHTML = titles.map((t,i) => `
+            <div class="statistic__item">
+              <div class="statistic__title">${t}</div>
+              <div class="statistic__num">${nums[i] || '-'}</div>
+            </div>`).join('');
+        })
+        .catch(() => {
+          box.innerHTML = '';
+          const s = document.createElement('script');
+          s.id = 'LA-DATA-WIDGET';
+          s.crossOrigin = 'anonymous';
+          s.src = `https://v6-widget.51.la/v6/${ID}/quote.js`;
+          box.appendChild(s);
+        });
+    })();
     </script>
 </div>
 
