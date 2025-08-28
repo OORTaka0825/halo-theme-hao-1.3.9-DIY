@@ -24,12 +24,6 @@
         <th:block th:replace="${head}"/>
     </th:block>
 
-
-    <!-- ===== Mark NON-PJAX using theme setting (append-only) ===== -->
-    <script th:if="${!theme.config.other.pjax_enable}">
-      document.documentElement.classList.add('__pjax_off__');
-    </script>
-
 </head>
 
 <body>
@@ -151,10 +145,11 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     <script th:src="${assets_link + '/js/tw_cn.js' + theme_version}"></script>
 
 <!-- 
-    <!-- ===== Keep PJAX-like behavior when PJAX is OFF (append-only, v4) ===== -->
+    <!-- ===== Keep PJAX-like behavior when PJAX is OFF (append-only, v5) ===== -->
     <script th:if="${!theme.config.other.pjax_enable}">
     (function () {
       var KEY_PREFIX = 'hao:list:scroll:';
+      var NAV_FLAG = 'hao:from:index_pagination';
 
       if ('scrollRestoration' in history) try { history.scrollRestoration = 'manual'; } catch (e) {}
 
@@ -162,6 +157,8 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
         try {
           var key = KEY_PREFIX + location.pathname + location.search;
           sessionStorage.setItem(key, String(window.scrollY || document.documentElement.scrollTop || 0));
+          // 记录：当前是否为分页页，从而“上一页”跳回首页时也能下滚
+          sessionStorage.setItem(NAV_FLAG, isIndexPagination() ? '1' : '0');
         } catch (e) {}
       }
       addEventListener('beforeunload', saveScroll, { passive: true });
@@ -187,15 +184,13 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
       function scrollToListSmooth() {
         var el = pickListEl();
         if (!el) return;
-        // Prefer theme's own scrolling util to match easing/offset
         if (window.btf && typeof window.btf.scrollToDest === 'function') {
-          window.btf.scrollToDest(el.offsetTop, 500); // btf 内部会 -=70
+          window.btf.scrollToDest(el.offsetTop, 500); // 主题内部会 -70
           return;
         }
         if (window.heo && window.heo.scroll && typeof window.heo.scroll.homeToList === 'function'){
           try { window.heo.scroll.homeToList(); return; } catch(e){}
         }
-        // Fallback：按主题惯例 -70 偏移
         var y = el.getBoundingClientRect().top + pageYOffset - 70;
         try { scrollTo({ top: Math.max(0, y), behavior: 'smooth' }); }
         catch (e) { scrollTo(0, Math.max(0, y)); }
@@ -207,6 +202,20 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
         return false;
       }
 
+      function isHomeLike(){
+        // 首页（上一页可能从 /page/2 跳回 / 或 ?page=1）
+        if (location.pathname === '/' || location.pathname === '') return true;
+        if (/[?&]page=1\b/i.test(location.search)) return true;
+        return false;
+      }
+
+      function cameFromPagination(){
+        try { return sessionStorage.getItem(NAV_FLAG) === '1'; } catch(e){}
+        return false;
+      }
+
+      function clearNavFlag(){ try { sessionStorage.removeItem(NAV_FLAG); } catch(e){} }
+
       function isBackForwardNav() {
         try { 
           var entries = performance.getEntriesByType && performance.getEntriesByType('navigation');
@@ -216,12 +225,20 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
       }
 
       addEventListener('pageshow', function (ev) {
-        if (ev.persisted || isBackForwardNav()) { restoreScrollIfAny(); return; }
-        if (isIndexPagination()) setTimeout(scrollToListSmooth, 60);
+        // 回退：恢复滚动位置
+        if (ev.persisted || isBackForwardNav()) { restoreScrollIfAny(); clearNavFlag(); return; }
+
+        // 正常进入：分页页直接滚动；或者从分页回到首页也滚动
+        if (isIndexPagination() || (isHomeLike() && cameFromPagination())) {
+          setTimeout(scrollToListSmooth, 60);
+        }
+        clearNavFlag();
       }, { passive: true });
 
       document.addEventListener('DOMContentLoaded', function () {
-        if (isIndexPagination()) setTimeout(scrollToListSmooth, 0);
+        if (isIndexPagination() || (isHomeLike() && cameFromPagination())) {
+          setTimeout(scrollToListSmooth, 0);
+        }
       });
     })();
     </script>
@@ -645,10 +662,11 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 </script>
 
 
-    <!-- ===== Keep PJAX-like behavior when PJAX is OFF (append-only, v4) ===== -->
+    <!-- ===== Keep PJAX-like behavior when PJAX is OFF (append-only, v5) ===== -->
     <script th:if="${!theme.config.other.pjax_enable}">
     (function () {
       var KEY_PREFIX = 'hao:list:scroll:';
+      var NAV_FLAG = 'hao:from:index_pagination';
 
       if ('scrollRestoration' in history) try { history.scrollRestoration = 'manual'; } catch (e) {}
 
@@ -656,6 +674,8 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
         try {
           var key = KEY_PREFIX + location.pathname + location.search;
           sessionStorage.setItem(key, String(window.scrollY || document.documentElement.scrollTop || 0));
+          // 记录：当前是否为分页页，从而“上一页”跳回首页时也能下滚
+          sessionStorage.setItem(NAV_FLAG, isIndexPagination() ? '1' : '0');
         } catch (e) {}
       }
       addEventListener('beforeunload', saveScroll, { passive: true });
@@ -681,15 +701,13 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
       function scrollToListSmooth() {
         var el = pickListEl();
         if (!el) return;
-        // Prefer theme's own scrolling util to match easing/offset
         if (window.btf && typeof window.btf.scrollToDest === 'function') {
-          window.btf.scrollToDest(el.offsetTop, 500); // btf 内部会 -=70
+          window.btf.scrollToDest(el.offsetTop, 500); // 主题内部会 -70
           return;
         }
         if (window.heo && window.heo.scroll && typeof window.heo.scroll.homeToList === 'function'){
           try { window.heo.scroll.homeToList(); return; } catch(e){}
         }
-        // Fallback：按主题惯例 -70 偏移
         var y = el.getBoundingClientRect().top + pageYOffset - 70;
         try { scrollTo({ top: Math.max(0, y), behavior: 'smooth' }); }
         catch (e) { scrollTo(0, Math.max(0, y)); }
@@ -701,6 +719,20 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
         return false;
       }
 
+      function isHomeLike(){
+        // 首页（上一页可能从 /page/2 跳回 / 或 ?page=1）
+        if (location.pathname === '/' || location.pathname === '') return true;
+        if (/[?&]page=1\b/i.test(location.search)) return true;
+        return false;
+      }
+
+      function cameFromPagination(){
+        try { return sessionStorage.getItem(NAV_FLAG) === '1'; } catch(e){}
+        return false;
+      }
+
+      function clearNavFlag(){ try { sessionStorage.removeItem(NAV_FLAG); } catch(e){} }
+
       function isBackForwardNav() {
         try { 
           var entries = performance.getEntriesByType && performance.getEntriesByType('navigation');
@@ -710,12 +742,20 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
       }
 
       addEventListener('pageshow', function (ev) {
-        if (ev.persisted || isBackForwardNav()) { restoreScrollIfAny(); return; }
-        if (isIndexPagination()) setTimeout(scrollToListSmooth, 60);
+        // 回退：恢复滚动位置
+        if (ev.persisted || isBackForwardNav()) { restoreScrollIfAny(); clearNavFlag(); return; }
+
+        // 正常进入：分页页直接滚动；或者从分页回到首页也滚动
+        if (isIndexPagination() || (isHomeLike() && cameFromPagination())) {
+          setTimeout(scrollToListSmooth, 60);
+        }
+        clearNavFlag();
       }, { passive: true });
 
       document.addEventListener('DOMContentLoaded', function () {
-        if (isIndexPagination()) setTimeout(scrollToListSmooth, 0);
+        if (isIndexPagination() || (isHomeLike() && cameFromPagination())) {
+          setTimeout(scrollToListSmooth, 0);
+        }
       });
     })();
     </script>
