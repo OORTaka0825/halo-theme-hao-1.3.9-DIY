@@ -362,26 +362,27 @@
         }
     </style>
 
-    <script th:inline="javascript">
-
-        function toRandomPost() {
-            // 随机跳转首页的一篇文章
-            // 后续改成跳转全站的文章，可以从 sitemap 中获取所有文章
-            let posts = [[${posts}]];
-
-            let datum = posts.total < posts.size ? posts.total : posts.size;
-
-            let number = Math.floor(Math.random() * datum);
-
-            let post = posts.items[number];
-
-            // 当前窗口打开
-            //window.location.href = post.status.permalink;
-            pjax.loadUrl(post.status.permalink)
-            // window.open(post.status.permalink);
+<script th:inline="javascript"
+    th:with="allPostList=${postFinder.listAll()},
+    randomIndex=${T(java.lang.Math).floor(T(java.lang.Math).random()*#lists.size(allPostList))},
+    postPermalink=${allPostList[randomIndex].status.permalink}"
+>
+    function toRandomPost() {
+        // 随机跳转全站的一篇文章（兼容 PJAX 开/关）
+        var permalink = /*[[${postPermalink}]]*/ "/";
+        if (window.pjax && typeof pjax.loadUrl === 'function') {
+            pjax.loadUrl(permalink);        // 开 PJAX：无刷新跳转
+        } else {
+            window.location.href = permalink; // 关 PJAX：整页跳转
         }
+    }]]*/ "/";
+        // 当前窗口打开
+        //window.location.href = permalink;
+        pjax.loadUrl(permalink);
+        // window.open(permalink);
+    }
 
-    </script>
+</script>
 
 </div>
 </html>
