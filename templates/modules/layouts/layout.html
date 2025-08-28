@@ -97,35 +97,18 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     <script th:inline="javascript"
     th:with="allPostList=${postFinder.listAll()},
     randomIndex=${T(java.lang.Math).floor(T(java.lang.Math).random()*#lists.size(allPostList))},
-    postPermalink=${allPostList[randomIndex].status.permalink}"
->
-    
-    function toRandomPost() {
-        // 随机跳转全站的一篇文章
-        let permalink = /*[[${postPermalink}]]*/ "/";
-
-        if (window.pjax && typeof pjax.loadUrl === 'function') {
-            // 开启 PJAX：无刷新跳转
-            pjax.loadUrl(permalink);
-        } else {
-            // 关闭 PJAX：整页跳转
-            window.location.href = permalink;
-        }
+    postPermalink=${allPostList[randomIndex].status.permalink}">
+  function toRandomPost() {
+    var permalink = /*[[${postPermalink}]]*/ "/";
+    if (window.pjax && typeof pjax.loadUrl === 'function') {
+      // 开启 PJAX：无刷新跳转
+      pjax.loadUrl(permalink);
+    } else {
+      // 关闭 PJAX：整页跳转
+      window.location.href = permalink;
     }
-]]*/ "/";
-  if (window.pjax && typeof pjax.loadUrl === 'function') {
-
-  } else {
-    window.location.href = permalink;
   }
-}]]*/ "/";
-        // 当前窗口打开
-        //window.location.href = permalink;
-
-        // window.open(permalink);
-        }
-    
-    </script>
+</script>
     
     <!-- 网站背景 -->
     <div id="an_music_bg"></div>
