@@ -2366,7 +2366,7 @@ blockquote footer cite::before {
     display: inline-block;
     vertical-align: middle;
     font-weight: 700;
-    font-size: 1.43em;
+    font-size: 19px;
 }
 
 #post-comment .comment-head #comment-switch {
