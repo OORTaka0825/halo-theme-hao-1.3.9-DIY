@@ -1593,23 +1593,8 @@ blockquote footer cite::before {
     object-fit: cover;
 }
 
-@media screen and (min-width: 1300px) {
-    #recent-posts > .recent-post-item.col1.alternate .left_radius, #recent-posts > .recent-post-item.col1.alternate .right_radius {
-        width: 75%;
-        display: flex;
-        height: 220px
-    }
-}
-
 #recent-posts > .recent-post-item .post_cover img.post_bg:hover {
     transform: scale(1.1);
-}
-
-#recent-posts > .recent-post-item > .recent-post-info {
-    display: inline-block;
-    overflow: hidden;
-    padding: 0px 40px;
-    width: 55%;
 }
 
 #recent-posts > .recent-post-item > .recent-post-info.no-cover {
@@ -1629,9 +1614,10 @@ blockquote footer cite::before {
     color: rgb(48, 122, 246);
 }
 
-#recent-posts > .recent-post-item > .recent-post-info > .article-meta-wrap {
+#recent-posts>.recent-post-item>.recent-post-info>.article-meta-wrap {
     color: var(--heo-fontcolor);
     font-size: .7rem;
+    user-select: none
 }
 
 #recent-posts > .recent-post-item > .recent-post-info > .article-meta-wrap > .post-meta-date {
@@ -1642,12 +1628,12 @@ blockquote footer cite::before {
     color: rgb(255, 114, 66);
 }
 
-#recent-posts > .recent-post-item > .recent-post-info > .article-meta-wrap i {
-    margin: 0px 0.2rem 0px 0px;
+#recent-posts>.recent-post-item>.recent-post-info>.article-meta-wrap i {
+    margin: 0 .2rem 0 0
 }
 
-#recent-posts > .recent-post-item > .recent-post-info > .article-meta-wrap .article-meta-label {
-    padding-right: 0.2rem;
+#recent-posts>.recent-post-item>.recent-post-info>.article-meta-wrap .article-meta-label {
+    padding-right: .2rem
 }
 
 #recent-posts > .recent-post-item > .recent-post-info > .article-meta-wrap .article-meta__separator {
@@ -1666,20 +1652,9 @@ blockquote footer cite::before {
     display: none;
 }
 
-#recent-posts > .recent-post-item > .recent-post-info > .article-meta-wrap a {
-    color: rgb(133, 133, 133);
-}
-
-#recent-posts > .recent-post-item > .recent-post-info > .article-meta-wrap a:hover {
-    color: rgb(48, 122, 246);
-    cursor: pointer;
-    border-radius: 4px;
-    background-color: rgba(59, 130, 255, 0.25);
-}
-
-#recent-posts > .recent-post-item > .recent-post-info > .content {
-    margin-top: 0.3rem;
-    -webkit-line-clamp: 3;
+#recent-posts>.recent-post-item>.recent-post-info>.content {
+    margin-top: .3rem;
+    -webkit-line-clamp: 3
 }
 
 
