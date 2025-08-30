@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <!-- 导航栏菜单栏 -->
-<div id="nav-right">
+<div id="nav-right" th:fragment="nav-right">
 
     <!-- 功能都需要添加开关 -->
 
@@ -32,7 +32,7 @@
     <div class="nav-button" id="search-button" th:if="${pluginFinder.available('PluginSearchWidget')}">
         <a class="site-page social-icon search" href="javascript:SearchWidget.open();" rel="external nofollow"
            title="站内搜索">
-            <i class="haofont hao-icon-magnifying-glass" style="font-size: 1rem; font-weight: 700;"></i>
+            <i class="haofont hao-icon-search--line"></i>
         </a>
     </div>
 
@@ -47,12 +47,14 @@
         <div class="back-menu-list-groups">
             <div class="back-menu-list-group" style="margin: -4px -9px -4px -18px">
                 <div class="back-menu-list">
-                    <a sec:authorize="isAuthenticated()" class="back-menu-item" rel="external nofollow" target="_blank" href="/console">
-                        <span class="back-menu-item-text">控制台</span>
-                    </a>
-                     <a sec:authorize="isAuthenticated()" class="back-menu-item" rel="external nofollow" href="/logout">
-                        <span class="back-menu-item-text">退出</span>
-                    </a> 
+                    <th:block sec:authorize="isAuthenticated()">
+                        <a class="back-menu-item" rel="external nofollow" target="_blank" href="/console">
+                            <span class="back-menu-item-text">控制台</span>
+                        </a>
+                        <a class="back-menu-item" rel="external nofollow" href="/logout">
+                            <span class="back-menu-item-text">退出</span>
+                        </a>
+                    </th:block>
                     <a sec:authorize="isAnonymous()" class="back-menu-item" rel="external nofollow" target="_blank"
                        href="/login"
                        onclick="this.href = '/login?redirect_uri=' + encodeURIComponent(window.location.href)">
@@ -65,7 +67,7 @@
     <div th:if="${theme.config.nav.right.console.consoleEnable}" class="nav-button" id="nav-console">
         <a class="console_switchbutton" href="javascript:void(0);" onclick="heo.showConsole()" rel="external nofollow"
            title="显示中控台">
-            <i class="haofont hao-icon-dashboard" style="font-size: 1.12rem;"></i>
+            <i class="haofont hao-icon-dashboard"></i>
         </a>
     </div>
 
