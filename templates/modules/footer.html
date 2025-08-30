@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <!-- 页脚模块 -->
 <footer id="footer" xmlns:th="http://www.w3.org/1999/xhtml">
 
@@ -10,24 +12,19 @@
     <!-- 社交链接，需要填入 href class title -->
     <div id="footer_deal">
         <th:block th:with="socialMedias = ${theme.config.footer.social_media.socialMediaLeft}">
-            <a th:class="${socialMedia.option_social_data == 'custom' ? 'custom_socials' : 'deal_link'}" rel="external nofollow" target="_blank" th:each="socialMedia : ${socialMedias}"
+            <a class="deal_link" rel="external nofollow" target="_blank" th:each="socialMedia : ${socialMedias}"
                th:href="${socialMedia.url}" th:title="${socialMedia.name}">
-                <i th:if="${socialMedia.option_social_data == 'icon'  || #strings.isEmpty(socialMedia.option_social_data)}"
-                   th:class="${socialMedia.icon}"></i>
-                <th:block th:if="${socialMedia.option_social_data == 'custom'}" th:utext="${socialMedia.icon}"></th:block>
+                <i class="haofont " th:classappend="${socialMedia.icon}"></i>
             </a>
         </th:block>
 
         <img th:if="${not #strings.isEmpty(theme.config.footer.social_media.centerImg)}" class="footer_mini_logo"
              th:with="img = @{${theme.config.footer.social_media.centerImg}}" th:src="${isLazyload ? '' : img}"
              th:data-lazy-src="${ isLazyload ? img : ''}" title="返回顶部" onclick="btf.scrollToDest(0, 500)">
-
         <th:block th:with="socialMedias = ${theme.config.footer.social_media.socialMediaRight}">
-            <a th:class="${socialMedia.option_social_data == 'custom' ? 'custom_socials' : 'deal_link'}" rel="external nofollow" target="_blank" th:each="socialMedia : ${socialMedias}"
+            <a class="deal_link" rel="external nofollow" target="_blank" th:each="socialMedia : ${socialMedias}"
                th:href="${socialMedia.url}" th:title="${socialMedia.name}">
-                <i th:if="${socialMedia.option_social_data == 'icon' || #strings.isEmpty(socialMedia.option_social_data)}"
-                   th:class="${socialMedia.icon}"></i>
-                <th:block th:if="${socialMedia.option_social_data == 'custom'}" th:utext="${socialMedia.icon}"></th:block>
+                <i class="haofont " th:classappend="${socialMedia.icon}"></i>
             </a>
         </th:block>
     </div>
@@ -213,38 +210,6 @@
     <!--评论弹幕弹窗 -->
     <div class="comment-barrage needEndHide" style="display: none;"></div>
 
-    <style>
-        a.footer-banner-link.cloud {
-            display: flex;
-            align-items: center;
-        }
-        img.cloud-logo {
-            height: 32px;
-        }
-    </style>
-    
-    <th:block th:if="${theme.config.top.global_background.enable_global_background_img}">
-        <style>
-            @media screen and (min-width: 1300px) {
-                #footer {
-                    background: linear-gradient(180deg, var(--heo-card-bg-none) 0%, #fff0 25%);
-                    margin-top: 0.5rem;
-                    display: flex;
-                    flex-direction: column;
-                }
-            }
-            
-            @media screen and (max-width: 1300px) {
-                #footer {
-                    background: linear-gradient(180deg, var(--heo-background) 0%, #fff0 25%);
-                    margin-top: 0;
-                    z-index: 3;
-                }
-            }
-        
-        </style>
-    </th:block>
-    
 </footer>
 
-
+</html>
