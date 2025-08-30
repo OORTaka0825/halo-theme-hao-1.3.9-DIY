@@ -210,6 +210,38 @@
     <!--评论弹幕弹窗 -->
     <div class="comment-barrage needEndHide" style="display: none;"></div>
 
+    <style>
+        a.footer-banner-link.cloud {
+            display: flex;
+            align-items: center;
+        }
+        img.cloud-logo {
+            height: 32px;
+        }
+    </style>
+    
+    <th:block th:if="${theme.config.top.global_background.enable_global_background_img}">
+        <style>
+            @media screen and (min-width: 1300px) {
+                #footer {
+                    background: linear-gradient(180deg, var(--heo-card-bg-none) 0%, #fff0 25%);
+                    margin-top: 0.5rem;
+                    display: flex;
+                    flex-direction: column;
+                }
+            }
+            
+            @media screen and (max-width: 1300px) {
+                #footer {
+                    background: linear-gradient(180deg, var(--heo-background) 0%, #fff0 25%);
+                    margin-top: 0;
+                    z-index: 3;
+                }
+            }
+        
+        </style>
+    </th:block>
+    
 </footer>
 
 </html>
