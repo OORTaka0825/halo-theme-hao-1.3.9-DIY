@@ -1,6 +1,8 @@
 <!DOCTYPE html>
-<html th:lang="${#locale.toLanguageTag}" th:fragment="layout(content, htmlType, title, head)" xmlns:th="http://www.thymeleaf.org"
-      th:with="assets_link=${theme.config.other.staticResource.use == 'custom' ? theme.config.other.staticResource.cdn_link : #theme.assets('/')},
+<html lang="en" th:fragment="layout(content, htmlType, title)" xmlns:th="http://www.thymeleaf.org"
+      th:with="assets_link=${theme.config.other.staticResource.use == 'onmicrosoft' ? 'https://npm.onmicrosoft.cn/hao-theme-static@' + theme.spec.version +'/templates/assets' :
+      theme.config.other.staticResource.use == 'cbd' ? 'https://cdn.cbd.int/hao-theme-static@' + theme.spec.version +'/templates/assets' :
+      theme.config.other.staticResource.use == 'custom' ? theme.config.other.staticResource.cdn_link : #theme.assets('/')},
       theme_version = ${ theme.config.other.staticResource.use == 'local' ? '?v='+ theme.spec.version : ''},
       isLazyload = ${theme.config.other.vanillaLazyload.enable},
       loadingImg = ${theme.config.other.vanillaLazyload.loadingImg},
@@ -26,82 +28,95 @@
 
 <body>
 
-<!-- loading 页面 -->
-<th:block th:replace="~{modules/loading-box}"/>
-
-<!-- 网站背景 -->
-<div id="web_bg">
-    <div th:if="${theme.config.top.global_background.enable_global_background_img}">
-        <img th:if="${theme.config.top.global_background.enable_global_background_above_video == false}"
-             class="global_background_img"
-             th:src="${theme.config.top.global_background.global_background_img}"
-        />
-        <video th:if="${theme.config.top.global_background.enable_global_background_above_video}"
-               class="index-video"
-               id="index-video"
-               autoplay=""
-               th:src="${theme.config.top.global_background.global_background_video}"
-               loop=""
-               muted=""
-               playsinline=""
-               webkit-playsinline=""
-               style="display:block;object-fit:cover;width:100%;height:100%;pointer-events:none;">
-        </video>
-    </div>
-</div>
-
-<th:block th:if="${theme.config.top.global_background.enable_global_background_img}">
-    <style>
-        @media screen and (min-width: 1300px) {
-            .global_background_img {
-                width: 100%;
-                height: 100%;
-                top: 0;
-                left: 0;
-                opacity: 1;
-                position: fixed;
-                z-index: -999;
-                background: var(--heo-background);
-                background-attachment: fixed;
-                background-repeat: no-repeat;
-                background-size: cover;
-            }
-        }
-        
-        @media screen and (max-width: 1300px) {
-            .global_background_img {
-                display: none;
-            }
-        }
+    <!-- loading 页面 -->
+    <th:block th:replace="~{modules/loading-box}"/>
     
-    </style>
-</th:block>
+    <!-- 网站背景 -->
+    <div id="web_bg">
+        <div th:if="${theme.config.top.global_background.enable_global_background_img}">
+            <img th:if="${theme.config.top.global_background.enable_global_background_above_video == false}"
+                 class="global_background_img global_background_img--light"
+                 th:src="${theme.config.top.global_background.global_background_img_light}"
+            />
+            <img th:if="${theme.config.top.global_background.enable_global_background_above_video == false}"
+                 class="global_background_img global_background_img--dark"
+                 th:src="${theme.config.top.global_background.global_background_img_dark}"
+            />
+            <video th:if="${theme.config.top.global_background.enable_global_background_above_video}"
+                   class="index-video"
+                   id="index-video"
+                   autoplay=""
+                   th:src="${theme.config.top.global_background.global_background_video}"
+                   loop=""
+                   muted=""
+                   playsinline=""
+                   webkit-playsinline=""
+                   style="display:block;object-fit:cover;width:100%;height:100%;pointer-events:none;">
+            </video>
+        </div>
+    </div>
+    
+    <th:block th:if="${theme.config.top.global_background.enable_global_background_img}">
+        <style>
+            @media screen and (min-width: 1300px) {
+                .global_background_img {
 
-<script th:if="${not #lists.isEmpty(postFinder.listAll())}"
-        th:inline="javascript"
+
+                    width: 100%;
+                    height: 100%;
+                    top: 0;
+                    left: 0;
+                    opacity: 1;
+                    position: fixed;
+                    z-index: -999;
+                    
+                    background-attachment: fixed;
+                    background-repeat: no-repeat;
+                    background-size: cover;
+                }
+            }
+            
+            @media screen and (max-width: 1300px) {
+                .global_background_img {
+                    display: none;
+                }
+            }
+        
+        </style>
+<style>
+/* 明/暗主题切换不同背景图（不要放到 .global_background_img 的规则里） */
+:root[data-theme='light'] .global_background_img--dark { display: none !important; }
+:root[data-theme='dark']  .global_background_img--light { display: none !important; }
+/* 兜底：部分实现下，亮色时不设置 data-theme */
+html:not([data-theme='dark']) .global_background_img--dark { display: none !important; }
+html[data-theme='dark']      .global_background_img--light { display: none !important; }
+</style>
+
+    </th:block>
+    
+    <script th:inline="javascript"
     th:with="allPostList=${postFinder.listAll()},
     randomIndex=${T(java.lang.Math).floor(T(java.lang.Math).random()*#lists.size(allPostList))},
-    postPermalink=${allPostList[randomIndex].status.permalink}"
->
-    function toRandomPost() {
-        // 随机跳转全站的一篇文章
-        let permalink = /*[[${postPermalink}]]*/ "/";
-        
-        // 当前窗口打开
-        //window.location.href = permalink;
-        pjax.loadUrl(permalink);
-        // window.open(permalink);
+    postPermalink=${allPostList[randomIndex].status.permalink}">
+  function toRandomPost() {
+    var permalink = /*[[${postPermalink}]]*/ "/";
+    if (window.pjax && typeof pjax.loadUrl === 'function') {
+      // 开启 PJAX：无刷新跳转
+      pjax.loadUrl(permalink);
+    } else {
+      // 关闭 PJAX：整页跳转
+      window.location.href = permalink;
     }
-
+  }
 </script>
-
-<!-- 网站背景 -->
-<div id="an_music_bg"></div>
+    
+    <!-- 网站背景 -->
+    <div id="an_music_bg"></div>
 
 <!-- 控制台 -->
-<div th:replace="~{modules/widgets/console}"/>
+<div th:replace="~{modules/widgets/console :: console}"></div>
 
-<div th:replace="~{modules/sidebar}"/>
+<div th:replace="~{modules/sidebar :: sidebar}"></div>
 
 <!-- 左下角音乐 -->
 <th:block th:if="${theme.config.tool.nav_music.nav_musicEnable}">
@@ -113,91 +128,193 @@
 
 
 <!-- todo 右下角悬浮操作按钮 -->
-<th:block th:replace="~{modules/widgets/rightside}"/>
+<th:block th:replace="~{modules/common/rightside :: rightside}"></th:block>
 
 
-<div th:replace="~{modules/widgets/right-menu}"/>
+<div th:replace="~{modules/right-menu :: right-menu}"></div>
 
 <div>
     <script th:src="${assets_link + '/js/utils.js' + theme_version}"></script>
-    <script th:src="${assets_link + '/js/halo.js' + theme_version}"></script>
     <script th:src="${assets_link + '/js/main.js' + theme_version}"></script>
     <script charset="utf-8" data-pjax th:src="${assets_link + '/zhheo/blogex.js' + theme_version}"></script>
     <script th:src="${assets_link + '/js/tw_cn.js' + theme_version}"></script>
-    <!-- https://instant.page/ 网站预加载， 放在 </body> 之前 -->
-    <script th:src="${assets_link + '/libs/instantpage/instantpage.min.js'}"
-            type="module"></script>
-    
+
+<!-- 
+    <!-- ===== Keep PJAX-like behavior when PJAX is OFF (append-only, v5) ===== -->
+    <script th:if="${!theme.config.other.pjax_enable}">
+    (function () {
+      var KEY_PREFIX = 'hao:list:scroll:';
+      var NAV_FLAG = 'hao:from:index_pagination';
+
+      if ('scrollRestoration' in history) try { history.scrollRestoration = 'manual'; } catch (e) {}
+
+      function saveScroll() {
+        try {
+          var key = KEY_PREFIX + location.pathname + location.search;
+          sessionStorage.setItem(key, String(window.scrollY || document.documentElement.scrollTop || 0));
+          // 记录：当前是否为分页页，从而“上一页”跳回首页时也能下滚
+          sessionStorage.setItem(NAV_FLAG, isIndexPagination() ? '1' : '0');
+        } catch (e) {}
+      }
+      addEventListener('beforeunload', saveScroll, { passive: true });
+      addEventListener('pagehide', saveScroll, { passive: true });
+
+      function restoreScrollIfAny() {
+        try {
+          var key = KEY_PREFIX + location.pathname + location.search;
+          var y = sessionStorage.getItem(key);
+          if (y !== null) requestAnimationFrame(function(){ scrollTo(0, parseInt(y,10) || 0); });
+        } catch (e) {}
+      }
+
+      function pickListEl(){
+        var sels = ['#home_top', '#recent-posts', '.recent-posts', '#content-inner'];
+        for (var i=0;i<sels.length;i++){
+          var el = document.querySelector(sels[i]);
+          if (el) return el;
+        }
+        return null;
+      }
+
+      function scrollToListSmooth() {
+        var el = pickListEl();
+        if (!el) return;
+        if (window.btf && typeof window.btf.scrollToDest === 'function') {
+          window.btf.scrollToDest(el.offsetTop, 500); // 主题内部会 -70
+          return;
+        }
+        if (window.heo && window.heo.scroll && typeof window.heo.scroll.homeToList === 'function'){
+          try { window.heo.scroll.homeToList(); return; } catch(e){}
+        }
+        var y = el.getBoundingClientRect().top + pageYOffset - 70;
+        try { scrollTo({ top: Math.max(0, y), behavior: 'smooth' }); }
+        catch (e) { scrollTo(0, Math.max(0, y)); }
+      }
+
+      function isIndexPagination() {
+        if (/\/page\/\d+\/?$/i.test(location.pathname)) return true;
+        if (/[?&]page=\d+/i.test(location.search)) return true;
+        return false;
+      }
+
+      function isHomeLike(){
+        // 首页（上一页可能从 /page/2 跳回 / 或 ?page=1）
+        if (location.pathname === '/' || location.pathname === '') return true;
+        if (/[?&]page=1\b/i.test(location.search)) return true;
+        return false;
+      }
+
+      function cameFromPagination(){
+        try { return sessionStorage.getItem(NAV_FLAG) === '1'; } catch(e){}
+        return false;
+      }
+
+      function clearNavFlag(){ try { sessionStorage.removeItem(NAV_FLAG); } catch(e){} }
+
+      function isBackForwardNav() {
+        try { 
+          var entries = performance.getEntriesByType && performance.getEntriesByType('navigation');
+          if (entries && entries[0]) return entries[0].type === 'back_forward';
+        } catch (e) {}
+        return false;
+      }
+
+      addEventListener('pageshow', function (ev) {
+        // 回退：恢复滚动位置
+        if (ev.persisted || isBackForwardNav()) { restoreScrollIfAny(); clearNavFlag(); return; }
+
+        // 正常进入：分页页直接滚动；或者从分页回到首页也滚动
+        if (isIndexPagination() || (isHomeLike() && cameFromPagination())) {
+          setTimeout(scrollToListSmooth, 60);
+        }
+        clearNavFlag();
+      }, { passive: true });
+
+      document.addEventListener('DOMContentLoaded', function () {
+        if (isIndexPagination() || (isHomeLike() && cameFromPagination())) {
+          setTimeout(scrollToListSmooth, 0);
+        }
+      });
+    })();
+    </script>
+
+    <script src="/themes/theme-hao/assets/libs/instantpage.min.js" type="module"></script>
+
     <script th:src="${assets_link + '/libs/vanilla-lazyload/lazyload.iife.min.js'}"></script>
-    
-    <!-- 右下角通知 https://www.polonel.com/snackbar/ -->
+
+    <!-- 右下角通知 /themes/theme-hao/assets/libs/ -->
     <!-- todo head 中有它的 css，应该可以写一块，并改成后台可配置的功能，代码中应该还有他的 js -->
-    <script th:src="${assets_link + '/libs/node-snackbar/snackbar.min.js'}"></script>
-    
-    <div class="js-pjax">
-        <!-- 动态标题 -->
-        <script th:replace="~{modules/common/diytitle}"/>
-    </div>
-    
+    <script src="/themes/theme-hao/assets/libs/snackbar.min.js"></script>
+
+    <!-- 深色模式下添加粒子效果canvas -->
+    <canvas th:if="${theme.config.style.universe}" id="universe" width="1312" height="880"></canvas>
+    <script th:if="${theme.config.style.universe}" async="" th:src="${assets_link + '/libs/canvas/dark.js'}"></script>
+
+    <!-- https://davidshimjs.github.io/qrcodejs/ 生成二维码 -->
+    <!-- 应该是文章页分享使用 -->
+    <script data-pjax src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/qrcodejs/1.0.0/qrcode.min.js"></script>
+
     <!-- 评论 -->
     <th:block th:if="${theme.config.comments.use!='commentWidget' && theme.config.comments.commentsEnable }"
               th:with="use = ${theme.config.comments.use}">
         <th:block th:replace="~{'modules/comment/' + ${use}}"></th:block>
         <script th:if="${theme.config.comments.visitorMail.visitorMailEnable}">var visitorMail = "[(${theme.config.comments.visitorMail.mail})]";</script>
     </th:block>
-    
-    <!--音乐-->
-    <script>var meting_api = "[(${theme.config.tool.nav_music.meting_api})]"; </script>
-    
-    <!-- 深色模式下添加粒子效果canvas -->
-    <canvas th:if="${theme.config.style.universe}" id="universe" width="1312" height="880"></canvas>
-    <script th:if="${theme.config.style.universe}" async="" th:src="${assets_link + '/libs/canvas/dark.js'}"></script>
-    
-    <!-- https://davidshimjs.github.io/qrcodejs/ 生成二维码 -->
-    <!-- 应该是文章页分享使用 -->
-    <script data-pjax th:src="${assets_link + '/libs/qrcode/qrcode.min.js'}" ></script>
-    
     <!--  https://raphamorim.io/waterfall.js/  应该是这个 还有相关的 js 代码 是否可以调整-->
     <script th:src="${assets_link + '/libs/waterfall/waterfall.min.js'}"></script>
-    
+
     <!-- 获取主色 https://lokeshdhakar.com/projects/color-thief/ -->
     <!--<script th:src="@{/assets/libs/color-thief/color-thief.umd.js}"></script>-->
     <script th:src="${assets_link + '/libs/fast-average-color/index.browser.min.js'}"></script>
-    
+
     <script th:src="${assets_link + '/libs/view-image/view-image.min.js'}"></script>
+
+    <!--音乐-->
+    <script>var meting_api = "[(${theme.config.tool.nav_music.meting_api})]"; </script>
 
     <link rel="stylesheet" th:href="${assets_link + '/libs/aplayer/APlayer.min.css'}"
           media="all" onload="this.media='all'">
-    
+
     <script th:src="${assets_link + '/libs/aplayer/APlayer.min.js'}"></script>
     
     <script th:src="${assets_link + '/libs/aplayer/Meting2.min.js'}"></script>
     
-    <script th:src="${assets_link + '/libs/pjax/pjax.min.js'}"></script>
-    
+    <script th:if="${theme.config.other.pjax_enable}"
+        th:src="${assets_link + '/libs/pjax/pjax.min.js'}"></script>
+
     <!-- swiper 在瞬间滚动时会使用 -->
-    <script th:if="${theme.config.top.moment}" data-pjax
-            th:src="${assets_link + '/libs/swiper/swiper-bundle.min.js'}"></script>
-    
+    <script th:if="${theme.config.top.moment}" data-pjax  src="/themes/theme-hao/assets/libs/swiper-bundle.min.js"></script>
+
     <!-- 右键菜单 -->
-    <script th:if="${theme.config.tool.rightMenu.rightMenuEnable}"
-            th:src="${assets_link + '/zhheo/rightmenu.js'}"></script>
-    
+    <script th:if="${theme.config.tool.rightMenu.rightMenuEnable}" th:src="${assets_link + '/zhheo/rightmenu.js'}"></script>
+
     <!-- 评论弹幕 -->
-    <script th:if="${ ( ( not #strings.isEmpty(theme.config.comments.twikoos.envId)  && not #strings.isEmpty(theme.config.comments.twikoos.accessToken) ) ||
+    <script  th:if="${ ( ( not #strings.isEmpty(theme.config.comments.twikoos.envId)  && not #strings.isEmpty(theme.config.comments.twikoos.accessToken) ) ||
         ( not #strings.isEmpty(theme.config.comments.artalks.server) && not #strings.isEmpty(theme.config.comments.artalks.siteName)) ||
           (#strings.equals(theme.config.comments.use, 'Waline') && not #strings.isEmpty(theme.config.comments.walines.serverURL)) )
         && theme.config.comments.commentBarrageConfig.commentBarrageEnable
-        && theme.config.comments.commentsEnable}" data-pjax=""
-            th:src="${assets_link + '/zhheo/commentBarrage.js'}"></script>
-    
+        && theme.config.comments.commentsEnable}"  data-pjax=""
+             th:src="${assets_link + '/zhheo/commentBarrage.js'}"></script>
+
     <!-- Tocbot 目录生成 start -->
-    <th:block th:replace="~{modules/common/toc-bot}"/>
-    
+    <th:block th:replace="~{modules/common/toc-bot :: toc-bot}"></th:block>
+
     <!-- 51统计 -->
     <th:block th:replace="~{modules/common/51-la}"/>
-    
-    <script>
+
+    <!--官方评论插件js-->
+    <script th:if="${pluginFinder.available('PluginCommentWidget')}" src="/plugins/PluginCommentWidget/assets/static/comment-widget.iife.js"></script>
+
+    <div class="js-pjax">
+        <!-- 动态标题 -->
+        <script th:replace="~{modules/common/diytitle :: diytitle}"></script>
+    </div>
+
+    <script th:if="${theme.config.envelope_comment.enable_danmu}" th:src="${assets_link + '/libs/twikoo/easy-Danmaku.min.js'}" id="Danmaku"></script>
+
+
+
+    <th:block th:if="${theme.config.other.pjax_enable}"><script>
         let pjaxSelectors = ['title', '#config-diff', '#body-wrap', '#rightside-config-hide', '#rightside-config-show', '.js-pjax', '#site-config']
         
         pjaxSelectors.unshift('meta[property="og:type"]', 'meta[property="og:image"]', 'meta[property="og:title"]', 'meta[property="og:url"]', 'meta[property="og:description"]'
@@ -277,7 +394,7 @@
                     }
                 }
         )
-    </script>
+    </script></th:block>
 
 
 </div>
@@ -286,20 +403,357 @@
 <th:block th:replace="~{'modules/variables/layout'}"></th:block>
 
 <script data-pjax="">
-    
+
+    if ([[${ theme.config.other.loadingBoxs.loadingBoxEnable }]]) {
+        // 移除加载动画
+        removeLoading();
+    }
     //页脚友联
     GLOBAL_CONFIG.isFriendLinksInFooter && heo.addFriendLinksInFooter()
     //音乐页面切换歌曲调用
-    if (GLOBAL_CONFIG.isMusic) {
+    if(GLOBAL_CONFIG.isMusic){
         heo.changeMusicBg(false);
     }
     //代码块
-    if (GLOBAL_CONFIG.prism.enable) {
+    if(GLOBAL_CONFIG.prism.enable){
         halo.addPrismTool()
         halo.dataCodeTheme()
     }
+    if(document.querySelector('#danmu') &&
+        document.body.clientWidth > 768 &&
+        [[${theme.config.envelope_comment.enable_danmu}]]){
+        halo.addScript("Danmaku", "[[${assets_link + '/libs/twikoo/easy-Danmaku.min.js'}]]", halo.danmu())
+    }
 
 </script>
+<script src="/themes/theme-hao/assets/libs/welcome/welcome.js"></script>
+
+<script>
+(function(){
+  if (window._haoScrollNoFlashInit) return;
+  window._haoScrollNoFlashInit = true;
+
+  var POS_PREFIX = 'hao:scroll:';          // 每个 path 的位置
+  var STATE_KEY  = 'hao:restore_state';    // 是否处于“正在恢复”状态：'1'|'0'
+  var CURRENT_KEY = null;
+  var isPop = false;
+  var restoring = false;
+  var saveTicking = false;
+  var rafId = 0;
+  var timeoutIds = [];
+
+  function pageKey(){ return location.pathname + location.search; }
+  function getY(){ return window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0; }
+  function setPos(k,v){ try{ sessionStorage.setItem(POS_PREFIX + k, String(v)); }catch(e){} }
+  function getPos(k){ try{ return sessionStorage.getItem(POS_PREFIX + k); }catch(e){ return null; } }
+  function rmPos(k){ try{ sessionStorage.removeItem(POS_PREFIX + k); }catch(e){} }
+  function setState(v){ try{ sessionStorage.setItem(STATE_KEY, v ? '1':'0'); }catch(e){} }
+  function getState(){ try{ return sessionStorage.getItem(STATE_KEY) === '1'; }catch(e){ return false; } }
+
+  function isListPage(){
+    var bw = document.getElementById('body-wrap');
+    return !!(bw && bw.classList && bw.classList.contains('page'));
+  }
+  function isPostPage(){
+    var bw = document.getElementById('body-wrap');
+    return !!(bw && bw.classList && bw.classList.contains('post'));
+  }
+
+  function throttledSave(){
+    if (!isListPage()) return;     // 只在列表页保存
+    if (restoring) return;
+    if (saveTicking) return;
+    saveTicking = true;
+    requestAnimationFrame(function(){
+      var k = CURRENT_KEY || pageKey();
+      setPos(k, getY());
+      saveTicking = false;
+    });
+  }
+
+  function hardWrapScrollHelpers(){
+    try{
+      if (typeof window.scrollToPost === 'function' && !window._scrollToPostWrappedNoFlash){
+        var orig = window.scrollToPost;
+        window.scrollToPost = function(){
+          if (getState()) return;  // 仅在“正在恢复”时拦截；平时不拦
+          return orig.apply(this, arguments);
+        };
+        window._scrollToPostWrappedNoFlash = true;
+      }
+    }catch(e){}
+    try{
+      if (window.btf && typeof window.btf.scrollToDest === 'function' && !window.btf._scrollToDestWrappedNoFlash){
+        var orig2 = window.btf.scrollToDest;
+        window.btf.scrollToDest = function(){
+          if (getState()) return;
+          return orig2.apply(this, arguments);
+        };
+        window.btf._scrollToDestWrappedNoFlash = true;
+      }
+    }catch(e){}
+  }
+
+  function patchPjaxLoadUrl(){
+    try{
+      if (window.pjax && !window.pjax._haoSavePatchedNoFlash){
+        var orig = window.pjax.loadUrl;
+        window.pjax.loadUrl = function(url){
+          try{ if (isListPage()) setPos(pageKey(), getY()); }catch(e){}
+          cancelRestore(true);     // 新导航前取消任何恢复
+          setState(false);         // 普通前进导航，确保不拦截 scrollToPost
+          return orig.apply(this, arguments);
+        };
+        window.pjax._haoSavePatchedNoFlash = true;
+      }
+    }catch(e){}
+  }
+
+  function cancelRestore(fromNav){
+    restoring = false;
+    if (rafId) { try{ cancelAnimationFrame(rafId); }catch(e){} rafId = 0; }
+    while (timeoutIds.length) { try{ clearTimeout(timeoutIds.pop()); }catch(e){} }
+    // 只在“非用户主动操作”时还原 scroll-behavior；用户操作取消恢复会立即允许平滑滚动
+    if (!fromNav) { try { document.documentElement.style.scrollBehavior = ''; } catch(e){} }
+    setState(false);
+  }
+
+  // 用户主动滚动/键盘时，立即取消恢复，避免“抢拉动”感
+  ['wheel','touchstart','touchmove','keydown','mousedown'].forEach(function(evt){
+    window.addEventListener(evt, function(){
+      if (restoring) cancelRestore(false);
+    }, {passive:true});
+  });
+
+  // 检测浏览器后退/前进
+  window.addEventListener('popstate', function(){ isPop = true; }, true);
+
+  // 滚动保存（仅列表页）
+  window.addEventListener('scroll', throttledSave, {passive:true});
+
+  // 离开前再保存一次（仅列表页）
+  window.addEventListener('beforeunload', function(){ if (isListPage()) setPos(pageKey(), getY()); });
+
+  document.addEventListener('pjax:send', function(){
+    cancelRestore(true);   // 导航前取消遗留恢复，避免文章页打开在中间
+  });
+
+  document.addEventListener('pjax:complete', function(){
+    CURRENT_KEY = pageKey();
+    patchPjaxLoadUrl();
+    hardWrapScrollHelpers();
+
+    if (isPostPage()){
+      if (!location.hash){
+        window.scrollTo(0,0);
+        timeoutIds.push(setTimeout(function(){ window.scrollTo(0,0); }, 60));
+      }
+      return;
+    }
+
+    if (!isListPage()) return;
+
+    if (isPop){
+      var v = getPos(CURRENT_KEY);
+      if (v != null){
+        startRestore(parseInt(v,10) || 0);
+        rmPos(CURRENT_KEY);
+      }
+      isPop = false;
+    }
+  });
+
+  // 支持 BFCache
+  window.addEventListener('pageshow', function(ev){
+    CURRENT_KEY = pageKey();
+    patchPjaxLoadUrl();
+    hardWrapScrollHelpers();
+
+    if (isPostPage()){
+      if (!location.hash){
+        window.scrollTo(0,0);
+        timeoutIds.push(setTimeout(function(){ window.scrollTo(0,0); }, 60));
+      }
+      return;
+    }
+
+    if (!isListPage()) return;
+    if (ev && ev.persisted){
+      var v = getPos(CURRENT_KEY);
+      if (v != null){
+        startRestore(parseInt(v,10) || 0);
+        rmPos(CURRENT_KEY);
+      }
+    }
+  });
+
+  function startRestore(y){
+    restoring = true;
+    setState(true);  // 在恢复阶段屏蔽主题滚动动画
+
+    var prevBehavior = document.documentElement.style.scrollBehavior;
+    document.documentElement.style.scrollBehavior = 'auto';
+
+    var start = performance.now();
+    var lastHeight = document.body.scrollHeight;
+    var stableFrames = 0;
+    var EPS = 2;          // 误差阈值（像素）
+    var MAX_MS = 1200;    // 最长恢复时间
+    var MAX_RAF = 40;     // 最多帧数
+
+    function done(){
+      document.documentElement.style.scrollBehavior = prevBehavior || '';
+      restoring = false;
+      setState(false);
+      if (rafId) { try{ cancelAnimationFrame(rafId); }catch(e){} rafId = 0; }
+      while (timeoutIds.length) { try{ clearTimeout(timeoutIds.pop()); }catch(e){} }
+    }
+
+    function rafTick(){
+      var now = performance.now();
+      var cur = getY();
+      var h = document.body.scrollHeight;
+
+      // 若内容高度稳定且位置已接近目标，提前结束（避免继续“抢动”）
+      if (Math.abs(cur - y) <= EPS){
+        stableFrames++;
+        if (stableFrames >= 3){ return done(); }
+      } else {
+        stableFrames = 0;
+      }
+
+      // 若页面高度变化，说明懒加载/布局在动，继续校正
+      if (h !== lastHeight){
+        lastHeight = h;
+        stableFrames = 0;
+      }
+
+      window.scrollTo(0, y);
+
+      if ((now - start) >= MAX_MS) return done();
+      if (--MAX_RAF <= 0) return done();
+
+      rafId = requestAnimationFrame(rafTick);
+    }
+
+    rafId = requestAnimationFrame(rafTick);
+
+    // 少量兜底（不影响提前结束）：
+    [200, 500, 900].forEach(function(ms){
+      var tid = setTimeout(function(){
+        if (restoring) window.scrollTo(0, y);
+      }, ms);
+      timeoutIds.push(tid);
+    });
+  }
+
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  CURRENT_KEY = pageKey();
+  patchPjaxLoadUrl();
+  hardWrapScrollHelpers();
+  setState(false);
+})();
+</script>
+
+
+    <!-- ===== Keep PJAX-like behavior when PJAX is OFF (append-only, v5) ===== -->
+    <script th:if="${!theme.config.other.pjax_enable}">
+    (function () {
+      var KEY_PREFIX = 'hao:list:scroll:';
+      var NAV_FLAG = 'hao:from:index_pagination';
+
+      if ('scrollRestoration' in history) try { history.scrollRestoration = 'manual'; } catch (e) {}
+
+      function saveScroll() {
+        try {
+          var key = KEY_PREFIX + location.pathname + location.search;
+          sessionStorage.setItem(key, String(window.scrollY || document.documentElement.scrollTop || 0));
+          // 记录：当前是否为分页页，从而“上一页”跳回首页时也能下滚
+          sessionStorage.setItem(NAV_FLAG, isIndexPagination() ? '1' : '0');
+        } catch (e) {}
+      }
+      addEventListener('beforeunload', saveScroll, { passive: true });
+      addEventListener('pagehide', saveScroll, { passive: true });
+
+      function restoreScrollIfAny() {
+        try {
+          var key = KEY_PREFIX + location.pathname + location.search;
+          var y = sessionStorage.getItem(key);
+          if (y !== null) requestAnimationFrame(function(){ scrollTo(0, parseInt(y,10) || 0); });
+        } catch (e) {}
+      }
+
+      function pickListEl(){
+        var sels = ['#home_top', '#recent-posts', '.recent-posts', '#content-inner'];
+        for (var i=0;i<sels.length;i++){
+          var el = document.querySelector(sels[i]);
+          if (el) return el;
+        }
+        return null;
+      }
+
+      function scrollToListSmooth() {
+        var el = pickListEl();
+        if (!el) return;
+        if (window.btf && typeof window.btf.scrollToDest === 'function') {
+          window.btf.scrollToDest(el.offsetTop, 500); // 主题内部会 -70
+          return;
+        }
+        if (window.heo && window.heo.scroll && typeof window.heo.scroll.homeToList === 'function'){
+          try { window.heo.scroll.homeToList(); return; } catch(e){}
+        }
+        var y = el.getBoundingClientRect().top + pageYOffset - 70;
+        try { scrollTo({ top: Math.max(0, y), behavior: 'smooth' }); }
+        catch (e) { scrollTo(0, Math.max(0, y)); }
+      }
+
+      function isIndexPagination() {
+        if (/\/page\/\d+\/?$/i.test(location.pathname)) return true;
+        if (/[?&]page=\d+/i.test(location.search)) return true;
+        return false;
+      }
+
+      function isHomeLike(){
+        // 首页（上一页可能从 /page/2 跳回 / 或 ?page=1）
+        if (location.pathname === '/' || location.pathname === '') return true;
+        if (/[?&]page=1\b/i.test(location.search)) return true;
+        return false;
+      }
+
+      function cameFromPagination(){
+        try { return sessionStorage.getItem(NAV_FLAG) === '1'; } catch(e){}
+        return false;
+      }
+
+      function clearNavFlag(){ try { sessionStorage.removeItem(NAV_FLAG); } catch(e){} }
+
+      function isBackForwardNav() {
+        try { 
+          var entries = performance.getEntriesByType && performance.getEntriesByType('navigation');
+          if (entries && entries[0]) return entries[0].type === 'back_forward';
+        } catch (e) {}
+        return false;
+      }
+
+      addEventListener('pageshow', function (ev) {
+        // 回退：恢复滚动位置
+        if (ev.persisted || isBackForwardNav()) { restoreScrollIfAny(); clearNavFlag(); return; }
+
+        // 正常进入：分页页直接滚动；或者从分页回到首页也滚动
+        if (isIndexPagination() || (isHomeLike() && cameFromPagination())) {
+          setTimeout(scrollToListSmooth, 60);
+        }
+        clearNavFlag();
+      }, { passive: true });
+
+      document.addEventListener('DOMContentLoaded', function () {
+        if (isIndexPagination() || (isHomeLike() && cameFromPagination())) {
+          setTimeout(scrollToListSmooth, 0);
+        }
+      });
+    })();
+    </script>
+
 </body>
 
 </html>

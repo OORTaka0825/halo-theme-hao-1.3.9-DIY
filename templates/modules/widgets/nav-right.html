@@ -1,19 +1,22 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <!-- 导航栏菜单栏 -->
-<div id="nav-right">
+<div id="nav-right" th:fragment="nav-right">
 
     <!-- 功能都需要添加开关 -->
 
     <!-- 随机前往一个开往项目网站 -->
     <div class="nav-button only-home" id="travellings_button" title="随机前往一个开往项目网站" th:if="${theme.config.nav.right.travelling}">
-        <a class="site-page" href="https://www.travellings.cn/go.html"  rel="external nofollow"
+        <a class="site-page" onclick="totraveling()" href="javascript:void(0);"  rel="external nofollow"
            title="随机前往一个开往项目网站">
-            <i class="haofont hao-icon-eicon_train-line"></i>
+            <i class="haofont hao-icon-train" style="font-size: 1rem; font-weight: 700; "></i>
         </a>
     </div>
 
     <div class="nav-button" id="randomPost_button" th:if="${theme.config.nav.right.article}">
         <a class="site-page" href="javascript:void(0);" onclick="toRandomPost()" title="随机文章">
-            <i class="haofont hao-icon-signal-tower-fill"></i>
+            <i class="haofont hao-icon-dice" style="font-size: 1rem; font-weight: 700;"></i>
         </a>
     </div>
 
@@ -21,7 +24,7 @@
     <div class="nav-button" id="darkmode_button" th:if="${theme.config.nav.right.darkMode}">
         <a class="console_switchbutton" href="javascript:void(0);"  onclick="navFn.switchDarkMode();" rel="external nofollow"
            title="切换模式 - 日夜交替，黑白互换。">
-            <i class="haofont hao-icon-moon-clear-fill" style="font-size: 1rem;"></i>
+            <i class="haofont hao-icon-circle-half-stroke" style="font-size: 1rem; font-weight: 700;"></i>
         </a>
     </div>
 
@@ -29,14 +32,14 @@
     <div class="nav-button" id="search-button" th:if="${pluginFinder.available('PluginSearchWidget')}">
         <a class="site-page social-icon search" href="javascript:SearchWidget.open();" rel="external nofollow"
            title="站内搜索">
-            <i class="haofont hao-icon-search--line"></i>
+            <i class="haofont hao-icon-magnifying-glass" style="font-size: 1rem; font-weight: 700;"></i>
         </a>
     </div>
 
     <div th:if="${theme.config.nav.right.navLogin}" class="console-button" tabindex="-1"
          th:with="currentUser = ${contributorFinder.getContributor(#authentication.name)}">
         <span class="site-page nav-login">
-            <i sec:authorize="isAnonymous()" class="haofont hao-icon-zhanghao1 " style="font-size: 19.5px;"></i>
+            <i sec:authorize="isAnonymous()" class="haofont hao-icon-zhanghao1 " style="font-size: 1rem;font-weight: 700;"></i>
             <img sec:authorize="isAuthenticated()"  th:src="${currentUser.avatar}"
                  th:alt="${currentUser.displayName}"
                  style=" width: 24px; height: 24px; border-radius: 9999px" />
@@ -44,14 +47,12 @@
         <div class="back-menu-list-groups">
             <div class="back-menu-list-group" style="margin: -4px -9px -4px -18px">
                 <div class="back-menu-list">
-                    <th:block sec:authorize="isAuthenticated()">
-                        <a class="back-menu-item" rel="external nofollow" target="_blank" href="/console">
-                            <span class="back-menu-item-text">控制台</span>
-                        </a>
-                        <a class="back-menu-item" rel="external nofollow" href="/logout">
-                            <span class="back-menu-item-text">退出登录</span>
-                        </a>
-                    </th:block>
+                    <a sec:authorize="isAuthenticated()" class="back-menu-item" rel="external nofollow" target="_blank" href="/console">
+                        <span class="back-menu-item-text">控制台</span>
+                    </a>
+                     <a sec:authorize="isAuthenticated()" class="back-menu-item" rel="external nofollow" href="/logout">
+                        <span class="back-menu-item-text">退出</span>
+                    </a> 
                     <a sec:authorize="isAnonymous()" class="back-menu-item" rel="external nofollow" target="_blank"
                        href="/login"
                        onclick="this.href = '/login?redirect_uri=' + encodeURIComponent(window.location.href)">
@@ -64,7 +65,7 @@
     <div th:if="${theme.config.nav.right.console.consoleEnable}" class="nav-button" id="nav-console">
         <a class="console_switchbutton" href="javascript:void(0);" onclick="heo.showConsole()" rel="external nofollow"
            title="显示中控台">
-            <i class="haofont hao-icon-dashboard"></i>
+            <i class="haofont hao-icon-dashboard" style="font-size: 1.12rem;"></i>
         </a>
     </div>
 
@@ -80,3 +81,6 @@
         </a>
     </div>
 </div>
+
+
+</html>

@@ -1,6 +1,5 @@
-function checkOpen() {
-}
 
+function checkOpen() {}
 checkOpen.toString = function () {
     this.opened = true;
 };
@@ -14,7 +13,7 @@ function coverColor() {
         // 获取颜色 https://github.com/fast-average-color/fast-average-color
         const fac = new FastAverageColor();
 
-        fac.getColorAsync(path, {
+        fac.getColorAsync(path,{
             // 忽略白色
             ignoredColor: [255, 255, 255, 255]
         })
@@ -189,69 +188,112 @@ function showcopy() {
 // 获取时间
 var getTimeState = () => {
 
-        if (GLOBAL_CONFIG.profileStyle == 'default') {
-            // 获取当前时间
-            var timeNow = new Date();
-            // 获取当前小时
-            var hours = timeNow.getHours();
-            // 设置默认文字
-            var text = ``;
-            // 判断当前时间段
-            if (hours >= 0 && hours <= 5) {
-                text = `晚安`;
-            } else if (hours > 5 && hours <= 10) {
-                text = `早上好`;
-            } else if (hours > 10 && hours <= 14) {
-                text = `中午好`;
-            } else if (hours > 14 && hours <= 18) {
-                text = `下午好`;
-            } else if (hours > 18 && hours <= 24) {
-                text = `晚上好`;
-            }
-            // 返回当前时间段对应的状态
-            return text;
-
+    if (GLOBAL_CONFIG.profileStyle == 'default') {
+        // 获取当前时间
+        var timeNow = new Date();
+        // 获取当前小时
+        var hours = timeNow.getHours();
+        // 设置默认文字
+        var text = ``;
+        // 判断当前时间段
+        if (hours >= 0 && hours <= 5) {
+            text = `晚安`;
+        } else if (hours > 5 && hours <= 10) {
+            text = `早上好`;
+        } else if (hours > 10 && hours <= 14) {
+            text = `中午好`;
+        } else if (hours > 14 && hours <= 18) {
+            text = `下午好`;
+        } else if (hours > 18 && hours <= 24) {
+            text = `晚上好`;
         }
+        //    console.log(`hours >>>>>`, hours);
+        //    console.log(`text >>>>`, text);
+        // 返回当前时间段对应的状态
+        return text;
 
-        if (GLOBAL_CONFIG.profileStyle == 'one') {
-            var e = (new Date).getHours()
-                , t = "";
-            return e >= 0 && e <= 5 ? t = "睡个好觉，保证精力充沛" : e > 5 && e <= 10 ? t = "一日之计在于晨" : e > 10 && e <= 14 ? t = "吃饱了才有力气干活" : e > 14 && e <= 18 ? t = "集中精力，攻克难关" : e > 18 && e <= 24 && (t = "不要太劳累了，早睡更健康"),
-                t
-        }
+    }
 
-    },
+    if (GLOBAL_CONFIG.profileStyle == 'one') {
+        var e = (new Date).getHours()
+            , t = "";
+        return e >= 0 && e <= 5 ? t = "睡个好觉，保证精力充沛" : e > 5 && e <= 10 ? t = "一日之计在于晨" : e > 10 && e <= 14 ? t = "吃饱了才有力气干活" : e > 14 && e <= 18 ? t = "集中精力，攻克难关" : e > 18 && e <= 24 && (t = "不要太劳累了，早睡更健康"),
+            t
+    }
+
+};
+
+function fly_to_top() {
+    document.getElementById("guli_top").classList.add("open_wing");
+    setTimeout(function () {
+        document.getElementById("guli_top").classList.add("flying");
+        btf.scrollToDest(0, 300);
+    }, 300);
+    setTimeout(function () {
+        // 这里就是处理的事件
+        document.getElementById("guli_top").classList.remove("flying");
+        document.getElementById("guli_top").classList.remove("open_wing");
+        document.getElementById("guli_top").style.cssText = "opacity: ''; transform: ''";
+    }, 600)
+}
+
 //深色模式切换
-    switchDarkMode = () => {
-        "dark" === document.documentElement.getAttribute("data-theme") ? (activateLightMode(),
-            saveToLocal.set("theme", "light", 2),
-        void 0 !== GLOBAL_CONFIG.Snackbar && btf.snackbarShow(GLOBAL_CONFIG.Snackbar.night_to_day, false, 2000),
-            $(".menu-darkmode-text").text("深色模式")) : (activateDarkMode(),
-            saveToLocal.set("theme", "dark", 2),
-        void 0 !== GLOBAL_CONFIG.Snackbar && btf.snackbarShow(GLOBAL_CONFIG.Snackbar.day_to_night, false, 2000),
-            $(".menu-darkmode-text").text("浅色模式")),
-            handleCases()
+var navFn = {
+    switchDarkMode: () => { // Switch Between Light And Dark Mode
+        const nowMode = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'
+        if (nowMode === 'light') {
+            activateDarkMode()
+            saveToLocal.set('theme', 'dark', 2)
+            GLOBAL_CONFIG.Snackbar !== undefined && btf.snackbarShow(GLOBAL_CONFIG.Snackbar.day_to_night, false, 2000)
+        } else {
+            activateLightMode()
+            saveToLocal.set('theme', 'light', 2)
+            GLOBAL_CONFIG.Snackbar !== undefined && btf.snackbarShow(GLOBAL_CONFIG.Snackbar.night_to_day, false, 2000)
+        }
+        // handle some cases
+        typeof utterancesTheme === 'function' && utterancesTheme();
+        typeof FB === 'object' && window.loadFBComment();
+        window.DISQUS && document.getElementById('disqus_thread').children.length && setTimeout(() => window.disqusReset(), 200)
+
+        //统计图
+        let color = document.documentElement.getAttribute('data-theme') === 'light' ? '#363636' : '#F7F7FA'
+        if (document.getElementById('posts-chart')) {
+            let postsOptionNew = postsOption
+            postsOptionNew.textStyle.color = color
+            postsOptionNew.title.textStyle.color = color
+            postsOptionNew.xAxis.axisLine.lineStyle.color = color
+            postsOptionNew.yAxis.axisLine.lineStyle.color = color
+            postsChart.setOption(postsOptionNew)
+        }
+        if (document.getElementById('tags-chart')) {
+            let tagsOptionNew = tagsOption
+            tagsOptionNew.textStyle.color = color
+            tagsOptionNew.title.textStyle.color = color
+            tagsOptionNew.xAxis.axisLine.lineStyle.color = color
+            tagsOptionNew.yAxis.axisLine.lineStyle.color = color
+            tagsChart.setOption(tagsOptionNew)
+        }
+        if (document.getElementById('categories-chart')) {
+            let categoriesOptionNew = categoriesOption
+            categoriesOptionNew.textStyle.color = color
+            categoriesOptionNew.title.textStyle.color = color
+            categoriesOptionNew.legend.textStyle.color = color
+            categoriesChart.setOption(categoriesOptionNew)
+        }
         heo.darkModeStatus();
         //代码块
-        if (GLOBAL_CONFIG.prism.enable) {
+        if(GLOBAL_CONFIG.prism.enable){
             halo.dataCodeTheme();
         }
     }
-    , handleCases = () => {
-        "function" == typeof utterancesTheme && utterancesTheme(),
-        "object" == typeof FB && window.loadFBComment(),
-        window.DISQUS && document.getElementById("disqus_thread").children.length && setTimeout((() => window.disqusReset()), 200)
-    }
-    , navFn = {
-        switchDarkMode: switchDarkMode
-    };
+}
 
 //引用到评论
 function rightMenuCommentText(txt) {
     if (GLOBAL_CONFIG.rightMenuEnable) {
         rm.hideRightMenu();
     }
-    var input = document.getElementsByClassName(GLOBAL_CONFIG.source.comments.textarea)[0];
+    var input =  document.getElementsByClassName(GLOBAL_CONFIG.source.comments.textarea)[0];
     let evt = document.createEvent('HTMLEvents');
     evt.initEvent('input', true, true);
     let inputValue = replaceAll(txt, '\n', '\n> ')
@@ -265,7 +307,6 @@ function rightMenuCommentText(txt) {
         document.getElementById("comment-tips").classList.add("show");
     }
 }
-
 //替换所有内容
 function replaceAll(string, search, replace) {
     return string.split(search).join(replace);
@@ -285,6 +326,8 @@ function AddRewardMask() {
     document.getElementById("quit-box").style.display = "flex";
 }
 
+
+
 //监听蒙版关闭
 document.addEventListener('touchstart', e => {
     RemoveRewardMask()
@@ -303,6 +346,20 @@ $(document).unbind('keydown').bind('keydown', function (e) {
     }
 })
 
+//判断国内国外
+// var foreignTips = (function () {
+//   var fetchUrl = "https://api.ooomn.com/api/ip"
+//   fetch(fetchUrl)
+//     .then(res => res.json())
+//     .then(json =>{
+//       var country = json.country;
+//       console.log(country);
+//       if (country != '中国'){
+//         btf.snackbarShow('使用国外网络访问可能无法访问文章图片，敬请谅解。Blog pictures only serve mainland China.')
+//       }
+//     })
+// });
+
 //颜色
 document.addEventListener('scroll', btf.throttle(function () {
     heo.initThemeColor()
@@ -310,52 +367,35 @@ document.addEventListener('scroll', btf.throttle(function () {
 
 //友链随机传送
 function travelling() {
-    function getLinks() {
-        const links = "/apis/api.plugin.halo.run/v1alpha1/plugins/PluginLinks/links?keyword="
-        fetch(links)
-            .then(res => res.json())
-            .then(json => {
-                saveToLocal.set('links-data', JSON.stringify(json.items), 10 / (60 * 24))
-                renderer(json.items);
-            })
-    }
-
-    function renderer(data) {
-        var linksData = data
-        var name = ''
-        var link = ''
-        if (linksData.length > 0) {
-            var randomFriendLinks = getArrayItems(linksData, 1);
-            name = randomFriendLinks[0].spec.displayName;
-            link = randomFriendLinks[0].spec.url;
-        }
-        var msg = "点击前往按钮进入随机一个友链，不保证跳转网站的安全性和可用性。本次随机到的是本站友链：「" + name + "」";
-        const style = document.createElement('style');
-        document.head.appendChild(style);
-        const styleSheet = style.sheet;
-        styleSheet.insertRule(`:root{--heo-snackbar-time: 8000ms!important}`, styleSheet.cssRules.length);
-        Snackbar.show({
-            text: msg,
-            duration: 8000,
-            pos: 'top-center',
-            actionText: '前往',
-            onActionClick: function (element) {
-                $(element).css('opacity', 0);
-                window.open(link, '_blank');
+    const links = "/apis/api.plugin.halo.run/v1alpha1/plugins/PluginLinks/links?keyword=&sort=priority,asc"
+    fetch(links)
+        .then(res => res.json())
+        .then(json => {
+            var linksData = json.items
+            var name = ''
+            var link = ''
+            if(linksData.length>0){
+                var randomFriendLinks = getArrayItems(linksData, 1);
+                name = randomFriendLinks[0].spec.displayName;
+                link = randomFriendLinks[0].spec.url;
             }
-        });
-    }
-
-    function init() {
-        const data = saveToLocal.get('links-data')
-        if (data) {
-            renderer(JSON.parse(data))
-        } else {
-            getLinks()
-        }
-    }
-
-    init()
+            var msg = "点击前往按钮进入随机一个友链，不保证跳转网站的安全性和可用性。本次随机到的是本站友链：「" + name + "」";
+            const style = document.createElement('style');
+            document.head.appendChild(style);
+            const styleSheet = style.sheet;
+            styleSheet.insertRule(`:root{--heo-snackbar-time: 8000ms!important}`, styleSheet.cssRules.length);
+            Snackbar.show({
+                text: msg,
+                duration: 8000,
+                pos: 'top-center',
+                actionText: '前往',
+                onActionClick: function (element) {
+                    //Set opacity of element to 0 to close Snackbar
+                    $(element).css('opacity', 0);
+                    window.open(link, '_blank');
+                }
+            });
+        })
 }
 
 //前往黑洞
@@ -375,12 +415,12 @@ function toforeverblog() {
 }
 
 //前往开往项目
-function totraveling() {
-    btf.snackbarShow("即将跳转到「开往」项目的成员博客，不保证跳转网站的安全性和可用性", function (element) {
+function totraveling () {
+    btf.snackbarShow("即将跳转到「开往」项目的成员博客，不保证跳转网站的安全性和可用性", function(element) {
         element.style.opacity = 0,
         travellingsTimer && clearTimeout(travellingsTimer)
     }, 5000, "取消"),
-        travellingsTimer = setTimeout(function () {
+        travellingsTimer = setTimeout(function() {
             window.open("https://www.travellings.cn/go.html", "_blank")
         }, "5000")
 }
@@ -429,19 +469,9 @@ function getArrayItems(arr, num) {
     return return_array;
 }
 
-function bindTodayCardHoverEvent() {
-    $(".topGroup").hover((function() {}
-    ), (function() {
-            hoverOnCommentBarrage = !1,
-                document.getElementById("topGroup").classList.remove("hideCard"),
-                document.getElementById("topGroup").style.zIndex = 1
-        }
-    ))
-}
-
 //评论增加放大功能
 function owoBig() {
-    new MutationObserver((e => {
+    new MutationObserver((e=>{
             for (let t of e)
                 if ("childList" === t.type)
                     for (let e of t.addedNodes)
@@ -452,10 +482,10 @@ function owoBig() {
                                 , a = document.createElement("div");
                             a.id = "owo-big",
                                 document.querySelector("body").appendChild(a),
-                                t.addEventListener("contextmenu", (e => e.preventDefault())),
-                                t.addEventListener("mouseover", (e => {
+                                t.addEventListener("contextmenu", (e=>e.preventDefault())),
+                                t.addEventListener("mouseover", (e=>{
                                         "LI" === e.target.tagName && n && (n = !1,
-                                            o = setTimeout((() => {
+                                            o = setTimeout((()=>{
                                                     let t = 3 * e.target.clientWidth
                                                         , o = e.x - e.offsetX - (t - e.target.clientWidth) / 2
                                                         , n = e.y - e.offsetY;
@@ -469,7 +499,7 @@ function owoBig() {
                                             ), 300))
                                     }
                                 )),
-                                t.addEventListener("mouseout", (e => {
+                                t.addEventListener("mouseout", (e=>{
                                         a.style.display = "none",
                                             n = !0,
                                             clearTimeout(o)
@@ -494,7 +524,7 @@ window.onkeydown = function (e) {
 // document.querySelector('#algolia-search').addEventListener('wheel', (e) => {
 //   e.preventDefault()
 // })
-document.querySelector('#console') && document.querySelector('#console').addEventListener('wheel', (e) => {
+document.querySelector('#console').addEventListener('wheel', (e) => {
     e.preventDefault()
 })
 // document.querySelector('#loading-box').addEventListener('wheel', (e) => {
@@ -502,16 +532,30 @@ document.querySelector('#console') && document.querySelector('#console').addEven
 // })
 
 //自动调整即刻短文尺寸
-window.addEventListener("resize", (function () {
+window.addEventListener("resize", (function() {
         document.querySelector("#waterfall") && heo.reflashEssayWaterFall()
     }
 ));
 
+//首页大卡片恢复显示
+$(".topGroup").hover(function () {
+    // console.log("卡片悬浮");
+}, function () {
+    hoverOnCommentBarrage = false;
+
+    if (document.getElementById("todayCard")) {
+        document.getElementById("todayCard").classList.remove('hide');
+        document.getElementById('todayCard').style.zIndex = 1;
+        // console.log("卡片停止悬浮");
+    }
+});
+
+
 function initObserver() {
     var e = document.getElementById("post-comment")
         , t = document.getElementById("pagination");
-    e && new IntersectionObserver((function (e) {
-            e.forEach((function (e) {
+    e && new IntersectionObserver((function(e) {
+            e.forEach((function(e) {
                     e.isIntersecting ? (t && t.classList.add("show-window"),
                         document.querySelector(".comment-barrage").style.bottom = "-200px") : (t && t.classList.remove("show-window"),
                         document.querySelector(".comment-barrage").style.bottom = "0px")
@@ -524,8 +568,7 @@ function initObserver() {
 // 页面百分比
 function percent() {
     let e = document.documentElement.scrollTop || window.pageYOffset
-        ,
-        t = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight, document.body.offsetHeight, document.documentElement.offsetHeight, document.body.clientHeight, document.documentElement.clientHeight) - document.documentElement.clientHeight
+        , t = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight, document.body.offsetHeight, document.documentElement.offsetHeight, document.body.clientHeight, document.documentElement.clientHeight) - document.documentElement.clientHeight
         , o = Math.round(e / t * 100)
         , n = document.querySelector("#percent");
     var a = window.scrollY + document.documentElement.clientHeight
@@ -551,22 +594,21 @@ function checkUrlAndAddHideBanner() {
     }
 }
 
-function setBodyDataType() {
+function setBodyDataType(){
     var body = document.body;
     var att = document.createAttribute("data-type");
     att.value = GLOBAL_CONFIG.htmlType;
     body.setAttributeNode(att);
 }
-
 function listenToPageInputPress() {
     var e = document.getElementById("toPageText")
         , t = document.getElementById("toPageButton");
-    e && (e.addEventListener("keydown", (e => {
+    e && (e.addEventListener("keydown", (e=>{
             13 === e.keyCode && (heo.toPage(),
                 pjax.loadUrl(t.href))
         }
     )),
-        e.addEventListener("input", (function () {
+        e.addEventListener("input", (function() {
                 "" === e.value || "0" === e.value ? t.classList.remove("haveValue") : t.classList.add("haveValue");
                 var o = document.querySelectorAll(".page-number")
                     , n = +o[o.length - 1].innerHTML;
@@ -574,39 +616,29 @@ function listenToPageInputPress() {
             }
         )))
 }
-
 function initBlog() {
     // 图片主色
     GLOBAL_CONFIG.source.post.dynamicBackground && coverColor(),
     GLOBAL_CONFIG.rightMenuEnable && addRightMenuClickEvent(),
-        percent(),
-        listenToPageInputPress(),
-        setBodyDataType(),
-        heo.topPostScroll(),
-        heo.sayhi(),
-        heo.stopImgRightDrag(),
-        heo.addPowerLinksInPostRightSide(),
-        heo.qrcodeCreate(),
-        //右下角 snackbar 弹窗
+    percent(),
+    heo.topCategoriesBarScroll(),
+    heo.initIndexEssay(),
+    setBodyDataType(),
+    listenToPageInputPress(),
+    heo.topPostScroll(),
+    heo.sayhi(),
+    heo.qrcodeCreate(),
+    //右下角 snackbar 弹窗
     GLOBAL_CONFIG.source.tool.switch && heo.hidecookie(),
-        heo.onlyHome(),
-        heo.addNavBackgroundInit(),
-        heo.initIndexEssay(),
-        heo.reflashEssayWaterFall(),
-        heo.darkModeStatus(),
-        heo.categoriesBarActive(),
-        heo.initThemeColor(),
-        heo.topCategoriesBarScroll(),
-        //隐藏加载动画
-    GLOBAL_CONFIG.loadingBox && heo.hideLoading(),
-        heo.tagPageActive(),
-        initObserver(),
-        checkUrlAndAddHideBanner(),
-        bindTodayCardHoverEvent(),
-        halo.getTopSponsors(),
-        halo.checkAd()
-
-
+    heo.stopImgRightDrag(),
+    heo.onlyHome(),
+    heo.addNavBackgroundInit(),
+    heo.darkModeStatus(),
+    heo.initThemeColor(),
+    //隐藏加载动画
+    GLOBAL_CONFIG.loadingBox &&  heo.hideLoading(),
+    initObserver(),
+    checkUrlAndAddHideBanner()
 }
 
 // 如果当前页有评论就执行函数
@@ -790,13 +822,20 @@ if (getCookie('browsertc') != 1) {
 // };
 
 //注入函数
-document.addEventListener('pjax:click', function () {
+document.addEventListener('pjax:send', function () {
+
     //显示加载进度条
-    if (GLOBAL_CONFIG.loadProgressBar) {
+    if(GLOBAL_CONFIG.loadProgressBar){
         Pace.restart();
     }
     //显示加载动画
-    if (GLOBAL_CONFIG.loadingBox) {
+    if(GLOBAL_CONFIG.loadingBox){
         heo.showLoading();
     }
+
+
+})
+
+document.addEventListener('DOMContentLoaded', function () {
+    heo.reflashEssayWaterFall()
 })

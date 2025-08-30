@@ -24,32 +24,26 @@
                     
                     <div class="author-info">
                         <div class="author-tag-left"
-                             th:if="${not #lists.isEmpty(theme.config.about.author_info_left_tags)}"
-                             th:with="authorTags = ${theme.config.about.author_info_left_tags}">
+                             th:if="${not #lists.isEmpty(theme.config.about.authorInfoLeftTags)}"
+                             th:with="authorTags = ${theme.config.about.authorInfoLeftTags}">
                             <span class="author-tag" th:each="authorTag : ${authorTags}"
-                                  th:text="${authorTag}"></span>
+                                  th:text="${authorTag.tag}"></span>
                         </div>
                         <div class="author-img">
-                            <th:block th:with="
-                                    defaultImg = ${assets_link + '/images/hao-logo.jpg'},
-                                    finalImg = ${#strings.isEmpty(theme.config.about?.aboutAuthorImage)
-                                               ? defaultImg
-                                               : theme.config.about.aboutAuthorImage}
-                                ">
-                                <img th:src="${finalImg}">
-                            </th:block>
+                            <img
+                                    th:src="@{${#strings.isEmpty(site.logo) ?  assets_link + '/images/hao-logo.jpg' : site.logo}}">
                         </div>
                         <div class="author-tag-right"
-                             th:if="${not #lists.isEmpty(theme.config.about.author_info_right_tags)}"
-                             th:with="authorTags = ${theme.config.about.author_info_right_tags}">
+                             th:if="${not #lists.isEmpty(theme.config.about.authorInfoRightTags)}"
+                             th:with="authorTags = ${theme.config.about.authorInfoRightTags}">
                             <span class="author-tag" th:each="authorTag : ${authorTags}"
-                                  th:text="${authorTag}"></span>
+                                  th:text="${authorTag.tag}"></span>
                         </div>
                     </div>
                     <div class="author-title" th:text="${singlePage.spec.title}"></div>
                     
                     <th:block
-                            th:replace="~{modules/about-widgets :: about-widgets(${theme.config.about.widget_list})}"></th:block>
+                            th:replace="~{modules/about-widgets :: about-widgets(${theme.config.about.widgetList})}"></th:block>
                     
                     <div class="author-content">
                         <div class="create-site-post author-content-item single" th:utext="${theme.config.about.xjlc}">
