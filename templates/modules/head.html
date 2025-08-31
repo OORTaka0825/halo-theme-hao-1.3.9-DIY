@@ -182,50 +182,45 @@
     <!-- icon图标 -->
     <link rel="stylesheet" th:href="${assets_link + '/icon/iconfont.css' + theme_version}">
     
-    <th:block th:if="${theme.config.nav.menus.enable_ali_iconfont_symbol_header}">
+    <!-- iconfont symbol（防 pjax 闪烁版） -->
+<th:block th:if="${theme.config.nav.menus.enable_ali_iconfont_symbol_header}">
+  <!-- 预连接，减少首个页面的等待 -->
   <link rel="preconnect" href="https://at.alicdn.com">
   <link rel="dns-prefetch" href="https://at.alicdn.com">
 
-  <!-- 后台仍填 //at.alicdn.com/...；这里自动转成 https 并给脚本固定 id -->
-  <script id="iconfont-symbol" defer
-          th:src="${#strings.startsWith(theme.config.nav.menus.iconfont_js, '//')
-                    ? 'https:' + theme.config.nav.menus.iconfont_js
+  <!-- 后台仍填 //at.alicdn.com/...；这里统一转 https，并给 script 一个固定 id -->
+  <script id="iconfont-symbol"
+          defer
+          th:src="${#strings.startsWith(theme.config.nav.menus.iconfont_js, '//') 
+                    ? 'https:' + theme.config.nav.menus.iconfont_js 
                     : theme.config.nav.menus.iconfont_js}"></script>
 
+  <!-- 把 SVG 精灵容器移到 <body> 直下；PJAX 后仅在缺失时补加载 -->
   <script>
     (function () {
-      // 1) 若已存在 symbol，就把注入容器搬到 <body>，避免 PJAX 替换
-      function persistSprite() {
-        var spr = document.querySelector('[id^="__svg__icons__dom__"]');
-        if (spr && spr.parentNode !== document.body) document.body.appendChild(spr);
-        return !!spr;
+      function persistIconSprite() {
+        var sprite = document.getElementById('__svg__icons__dom__');
+        if (sprite && sprite.parentNode !== document.body) {
+          document.body.appendChild(sprite);
+        }
       }
-      // 2) 兜底：从 iconfont 脚本文本里直接抽第一个 <svg>…</svg> 注入 <body>
-      function injectFromScriptText(txt) {
-        var m = txt && txt.match(/<svg[\s\S]*?<\/svg>/i);
-        if (!m) return false;
-        var wrap = document.createElement('div'); wrap.innerHTML = m[0];
-        var svg = wrap.querySelector('svg'); if (!svg) return false;
-        svg.setAttribute('aria-hidden','true');
-        svg.style.position='absolute'; svg.style.width=0; svg.style.height=0; svg.style.overflow='hidden';
-        document.body.insertBefore(svg, document.body.firstChild || null);
-        return true;
-      }
-      function getSrc() {
-        return document.getElementById('iconfont-symbol')?.getAttribute('src') ||
-               Array.from(document.scripts).map(s=>s.src).find(x=>x.includes('at.alicdn.com') && x.includes('/font_')) || '';
-      }
-      function ensureSprite() {
-        if (persistSprite()) return;                             // 已有 -> 搬家
-        var src = getSrc(); if (!src) return;
-        fetch(src, {cache:'force-cache'})
-          .then(r=>r.text())
-          .then(t=>{ if (!persistSprite()) { injectFromScriptText(t); persistSprite(); } })
-          .catch(()=>{});
-      }
-      document.addEventListener('DOMContentLoaded', ensureSprite);
-      window.addEventListener('load', ensureSprite);
-      document.addEventListener('pjax:complete', ensureSprite);
+
+      // 首次进站 & 普通刷新
+      document.addEventListener('DOMContentLoaded', persistIconSprite);
+      window.addEventListener('load', persistIconSprite);
+
+      // PJAX 完成后：若精灵不存在则按需再加载一次；存在就只做“搬家”
+      document.addEventListener('pjax:complete', function () {
+        if (!document.getElementById('__svg__icons__dom__')) {
+          var s = document.createElement('script');
+          s.defer = true;
+          s.src = document.getElementById('iconfont-symbol').getAttribute('src');
+          s.onload = persistIconSprite;
+          document.head.appendChild(s);
+        } else {
+          persistIconSprite();
+        }
+      });
     })();
   </script>
 </th:block>
