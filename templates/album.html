@@ -18,34 +18,45 @@
         </header>
         <main class="layout hide-aside" id="content-inner">
             <div id="page">
+                <!-- 默认样式 -->
                 <div id="album" th:if="${#strings.equals(theme.config.photos.photosStyle, 'default')}">
-  <div th:replace="~{macro/author-content :: author-content(
-      background = ${#strings.isEmpty(theme.config.photos.backgroundImg) ? singlePage.spec.cover : theme.config.photos.backgroundImg},
-      smallTitle = ${theme.config.photos.smallTitle},
-      bigTitle   = ${theme.config.photos.bigTitle},
-      detail     = ${theme.config.photos.detail},
-      buttonUrl  = ${theme.config.photos.topLink},
-      buttonTitle= ${theme.config.photos.topTitle}
-  )}"></div>
+                  <div th:replace="~{macro/author-content :: author-content(
+                      background = ${#strings.isEmpty(theme.config.photos.backgroundImg) ? singlePage.spec.cover : theme.config.photos.backgroundImg},
+                      smallTitle = ${theme.config.photos.smallTitle},
+                      bigTitle   = ${theme.config.photos.bigTitle},
+                      detail     = ${theme.config.photos.detail},
+                      buttonUrl  = ${theme.config.photos.topLink},
+                      buttonTitle= ${theme.config.photos.topTitle}
+                  )}"></div>
 
-                    <div class="card-album">
-                        <th:block th:each="group : ${photoFinder.groupBy()}">
-                            <div class="card" th:onclick="pjax.loadUrl([['/photos?group='+${group.metadata.name}]])">
-                                <img class="card_cover"
-                                     th:src="${isLazyload ? loadingImg : #annotations.get(group, 'cover')}"
-                                     th:data-lazy-src="${ isLazyload ? #annotations.get(group, 'cover') : ''}"
-                                >
-                                <div class="card__content">
-                                    <p class="card__category" th:text="${group.spec.displayName}"></p>
-                                    <h3 class="card__heading" th:text="${#annotations.get(group, 'description')}"></h3>
-                                </div>
-                            </div>
-                        </th:block>
-                        <th:block th:each="photos : ${photoFinder.groupBy()}">
-                            <div class="album-content-nocover"></div>
-                        </th:block>
-                    </div>
+                  <div class="card-album">
+  <th:block th:each="group : ${photoFinder.groupBy()}">
+    <a class="album-card"
+       th:href="@{/photos?group={g}(g=${group.metadata.name})}"
+       th:onclick="|if(window.pjax && typeof pjax.loadUrl==='function'){
+                      pjax.loadUrl('@{/photos?group={g}(g=${group.metadata.name})}');
+                      return false;
+                    } return true;|">
+      <div class="card">
+        <img class="card_cover"
+             th:src="${isLazyload ? loadingImg : #annotations.get(group, 'cover')}"
+             th:data-lazy-src="${ isLazyload ? #annotations.get(group, 'cover') : ''}">
+        <div class="card__content">
+          <p class="card__category" th:text="${group.spec.displayName}"></p>
+          <h3 class="card__heading" th:text="${#annotations.get(group, 'description')}"></h3>
+        </div>
+      </div>
+    </a>
+  </th:block>
+</div>
+
+                    <th:block th:each="photos : ${photoFinder.groupBy()}">
+                      <div class="album-content-nocover"></div>
+                    </th:block>
+                  </div>
                 </div>
+
+                <!-- 样式一 -->
                 <div class="gallery-groups" th:if="${#strings.equals(theme.config.photos.photosStyle, 'one')}">
                     <h2 style="text-align:center;">[[${theme.config.photos.bigTitle}]]</h2>
                     <div class="gallery-group-main">
@@ -57,13 +68,21 @@
                                      alt="Group Image Gallery">
                                 <figcaption>
                                     <div class="gallery-group-name">[[${group.spec.displayName}]]</div>
-                                    <p>[[${#annotations.get(group, 'description')}]]</p><a target="_blank"
-                                                                                           rel="noopener" th:onclick="pjax.loadUrl([['/photos?group='+${group.metadata.name}]])"></a>
+                                    <p>[[${#annotations.get(group, 'description')}]]</p>
+                                    <!-- 给按钮补真实 href，并兼容 PJAX -->
+                                    <a class="gallery-group-link"
+                                       th:href="@{'/photos?group=' + ${group.metadata.name}}"
+                                       aria-label="查看 [[${group.spec.displayName}]]"
+                                       th:onclick="|if(window.pjax && typeof pjax.loadUrl==='function'){
+                                                      pjax.loadUrl('/photos?group=' + '[[${group.metadata.name}]]');
+                                                      return false;
+                                                    } return true;|"></a>
                                 </figcaption>
                             </figure>
                         </th:block>
                     </div>
                 </div>
+
                 <style>
                     .gallery-groups {
                         box-shadow: var(--heo-shadow-border);
@@ -94,6 +113,8 @@
                         justify-content: space-between;
                         margin: var(--album-spacing-xxl) 0 0
                     }
+
+                    #album .album-card { display: block; }
 
                     #album .card-album .album-content-nocover {
                         width: calc(100% / 4 - 40px)
@@ -175,6 +196,7 @@
                         }
                     }
                 </style>
+
                 <!--/* 评论组件 */-->
                 <th:block th:replace="~{modules/comment :: comment(group = 'content.halo.run',
                   kind = 'SinglePage',
@@ -191,5 +213,4 @@
     </div>
 
 </th:block>
-
 </html>
