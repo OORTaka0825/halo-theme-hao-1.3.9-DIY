@@ -32,9 +32,7 @@
                                         <div class="tips" th:text="${description}"></div>
                                     </div>
                                     <div class="banner-button-group">
-                                        <a class="banner-button"
-   th:href="${theme.config.photos.topLink}"
-   th:onclick="|if(window.pjax && typeof pjax.loadUrl==='function'){ pjax.loadUrl('${theme.config.photos.topLink}'); return false;} return true;|">
+                                        <a class="banner-button" th:href="${theme.config.photos.topLink}">
   <i class="haofont hao-icon-circle-arrow-right"></i>
   <span class="banner-button-text">返回</span>
 </a>
@@ -54,9 +52,7 @@
                                     <div class="tips"></div>
                                 </div>
                                 <div class="banner-button-group">
-                                    <a class="banner-button"
-   th:href="${theme.config.photos.topLink}"
-   th:onclick="|if(window.pjax && typeof pjax.loadUrl==='function'){ pjax.loadUrl('${theme.config.photos.topLink}'); return false;} return true;|">
+                                    <a class="banner-button" th:href="${theme.config.photos.topLink}">
   <i class="haofont hao-icon-circle-arrow-right"></i>
   <span class="banner-button-text">返回</span>
 </a>
