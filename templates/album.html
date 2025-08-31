@@ -30,25 +30,25 @@
                   )}"></div>
 
                   <div class="card-album">
-  <th:block th:each="group : ${photoFinder.groupBy()}">
-    <a class="album-card"
-       th:href="@{/photos?group={g}(g=${group.metadata.name})}"
-       th:onclick="|if(window.pjax && typeof pjax.loadUrl==='function'){
-                      pjax.loadUrl('@{/photos?group={g}(g=${group.metadata.name})}');
-                      return false;
-                    } return true;|">
-      <div class="card">
-        <img class="card_cover"
-             th:src="${isLazyload ? loadingImg : #annotations.get(group, 'cover')}"
-             th:data-lazy-src="${ isLazyload ? #annotations.get(group, 'cover') : ''}">
-        <div class="card__content">
-          <p class="card__category" th:text="${group.spec.displayName}"></p>
-          <h3 class="card__heading" th:text="${#annotations.get(group, 'description')}"></h3>
-        </div>
-      </div>
-    </a>
-  </th:block>
-</div>
+                    <th:block th:each="group : ${photoFinder.groupBy()}">
+                      <!-- 改为 <a>：关 PJAX 也能跳，开 PJAX 拦截无刷新 -->
+                      <a class="album-card"
+                         th:href="@{/photos?group={g}(g=${group.metadata.name})}"
+                         th:onclick="|if(window.pjax && typeof pjax.loadUrl==='function'){
+                                        pjax.loadUrl('@{/photos?group={g}(g=${group.metadata.name})}');
+                                        return false;
+                                      } return true;|">
+                        <div class="card">
+                          <img class="card_cover"
+                               th:src="${isLazyload ? loadingImg : #annotations.get(group, 'cover')}"
+                               th:data-lazy-src="${ isLazyload ? #annotations.get(group, 'cover') : ''}">
+                          <div class="card__content">
+                            <p class="card__category" th:text="${group.spec.displayName}"></p>
+                            <h3 class="card__heading" th:text="${#annotations.get(group, 'description')}"></h3>
+                          </div>
+                        </div>
+                      </a>
+                    </th:block>
 
                     <th:block th:each="photos : ${photoFinder.groupBy()}">
                       <div class="album-content-nocover"></div>
