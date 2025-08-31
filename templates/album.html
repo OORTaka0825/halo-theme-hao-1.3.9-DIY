@@ -29,7 +29,10 @@
   )}"></div>
 
                     <div class="card-album">
-                        <th:block th:each="group : ${photoFinder.groupBy()}">
+                        <a class="album-card" 
+   th:href="@{'/photos?group=' + ${group.metadata.name}}"
+   th:onclick="|if(window.pjax && typeof pjax.loadUrl==='function'){pjax.loadUrl('/photos?group='+[[${group.metadata.name}]]); return false;} return true;|">
+</a>
                             <div class="card" th:onclick="pjax.loadUrl([['/photos?group='+${group.metadata.name}]])">
                                 <img class="card_cover"
                                      th:src="${isLazyload ? loadingImg : #annotations.get(group, 'cover')}"
