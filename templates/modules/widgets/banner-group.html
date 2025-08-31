@@ -363,25 +363,26 @@
     </style>
 
 <script th:inline="javascript" th:with="allPostList=${postFinder.listAll()}">
-  // 前端随机：每次点击都重新抽取（开/关 PJAX 都生效）
+  // 前端随机（修正：不要在 /*[[...]]*/ 外再加引号，否则会变成带引号的 URL 并 404）
   var __permalinks = [];
   /*[# th:each="p : ${allPostList}"]*/
-  __permalinks.push('/*[[${p.status.permalink}]]*/');
+  __permalinks.push(/*[[${p.status.permalink}]]*/);
   /*[/]*/
 
   var __lastIndex = -1;
   function toRandomPost() {
-    if (!__permalinks || __permalinks.length === 0) return;
+    if (!Array.isArray(__permalinks) || __permalinks.length === 0) return;
 
     var idx = 0;
     if (__permalinks.length > 1) {
-      // 避免连续抽到同一篇
       do { idx = Math.floor(Math.random() * __permalinks.length); }
       while (idx === __lastIndex);
     }
     __lastIndex = idx;
 
     var permalink = __permalinks[idx];
+    if (typeof permalink !== 'string' || !permalink) return;
+
     if (window.pjax && typeof pjax.loadUrl === 'function') {
       pjax.loadUrl(permalink);        // 开启 PJAX：无刷新
     } else {
