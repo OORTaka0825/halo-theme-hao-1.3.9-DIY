@@ -1,9 +1,25 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <!-- 小板报 -->
+<script th:inline="javascript">
+  if (!window.GLOBAL_CONFIG) {
+    window.GLOBAL_CONFIG = {};
+  }
+  if (!GLOBAL_CONFIG.source) {
+    GLOBAL_CONFIG.source = {};
+  }
+  GLOBAL_CONFIG.source.welcome = {
+    key: "[(${theme.config.welcome.key})]",
+    locationLng: [[${theme.config.welcome.locationLng}]],
+    locationLat: [[${theme.config.welcome.locationLat}]]
+  };
+</script>
+
 <div class="card-widget card-announcement" th:fragment="welcome">
-    <div class="item-headline"><i class="haofont hao-icon-bullhorn"
-                                  style="font-size: 0.9rem;font-weight: 700;"></i><span>小板报</span></div>
+    <div class="item-headline">
+        <i class="haofont hao-icon-bullhorn" style="font-size: 0.9rem;font-weight: 700;"></i>
+        <span>小板报</span>
+    </div>
 
     <div id="welcome-info"></div>
 </div>
