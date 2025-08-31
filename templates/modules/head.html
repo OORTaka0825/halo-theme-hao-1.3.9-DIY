@@ -182,43 +182,95 @@
     <!-- icon图标 -->
     <link rel="stylesheet" th:href="${assets_link + '/icon/iconfont.css' + theme_version}">
     
-    <!-- icon后台填写JS链接配置 -->
-    <th:block th:if="${theme.config.nav.menus.enable_ali_iconfont_symbol_header}">
+    <!-- iconfont symbol（防闪烁·三合一兜底版） -->
+<th:block th:if="${theme.config.nav.menus.enable_ali_iconfont_symbol_header}">
   <link rel="preconnect" href="https://at.alicdn.com">
   <link rel="dns-prefetch" href="https://at.alicdn.com">
 
-  <script id="iconfont-symbol"
-          defer
+  <!-- 用后台的地址；若以 // 开头，这里自动转 https:// -->
+  <script id="iconfont-symbol" defer
           th:src="${#strings.startsWith(theme.config.nav.menus.iconfont_js, '//') 
                     ? 'https:' + theme.config.nav.menus.iconfont_js 
                     : theme.config.nav.menus.iconfont_js}"></script>
 
   <script>
     (function () {
-      function persistIconSprite() {
-        var sprite = document.getElementById('__svg__icons__dom__');
+      var ICON_ID_PREFIX = '__svg__icons__dom__';
+      var iconfontSrc = document.getElementById('iconfont-symbol')?.getAttribute('src');
+
+      function getSprite() {
+        return document.querySelector('[id^="' + ICON_ID_PREFIX + '"]');
+      }
+      function persistSprite() {
+        var sprite = getSprite();
         if (sprite && sprite.parentNode !== document.body) {
           document.body.appendChild(sprite);
         }
+        return !!sprite;
+      }
+      // 兜底：直接抓脚本里的 svgSprite 文本并手动注入
+      function injectFromJsText(jsText) {
+        try {
+          var m = jsText.match(/svgSprite\s*=\s*['"]([\s\S]*?)['"]\s*;/);
+          if (!m) return false;
+          var div = document.createElement('div');
+          div.innerHTML = m[1];
+          var svg = div.querySelector('svg');
+          if (!svg) return false;
+          svg.setAttribute('aria-hidden', 'true');
+          svg.style.position = 'absolute';
+          svg.style.width = 0; svg.style.height = 0; svg.style.overflow = 'hidden';
+          document.body.insertBefore(svg, document.body.firstChild || null);
+          return true;
+        } catch (e) { return false; }
+      }
+      // 兜底：按需再加载一次 iconfont 脚本（仅在缺失时）
+      function reloadIconfont(onload) {
+        if (!iconfontSrc) return onload && onload(false);
+        var s = document.createElement('script');
+        s.defer = true;
+        s.src = iconfontSrc;
+        s.onload = function(){ onload && onload(true); };
+        s.onerror = function(){ onload && onload(false); };
+        document.head.appendChild(s);
       }
 
-      document.addEventListener('DOMContentLoaded', persistIconSprite);
-      window.addEventListener('load', persistIconSprite);
+      function ensureSprite() {
+        // 1) 已有就搬家
+        if (persistSprite()) return;
 
-      document.addEventListener('pjax:complete', function () {
-        if (!document.getElementById('__svg__icons__dom__')) {
-          var s = document.createElement('script');
-          s.defer = true;
-          s.src = document.getElementById('iconfont-symbol').getAttribute('src');
-          s.onload = persistIconSprite;
-          document.head.appendChild(s);
-        } else {
-          persistIconSprite();
-        }
-      });
+        // 2) 缺失：尝试再加载一次脚本
+        reloadIconfont(function (ok) {
+          if (persistSprite()) return;
+          if (!ok) {
+            // 3) 连脚本都失败：fetch 文本手动注入
+            try {
+              fetch(iconfontSrc, { cache: 'force-cache' })
+                .then(function (r) { return r.text(); })
+                .then(function (t) { injectFromJsText(t); persistSprite(); })
+                .catch(function(){});
+            } catch (e) {}
+          } else {
+            // 加载成功但仍无：有些版本只监听 DOMContentLoaded，这里再从文本注入一遍
+            try {
+              fetch(iconfontSrc, { cache: 'force-cache' })
+                .then(function (r) { return r.text(); })
+                .then(function (t) { if (!persistSprite()) { injectFromJsText(t); persistSprite(); }})
+                .catch(function(){});
+            } catch (e) {}
+          }
+        });
+      }
+
+      // 首次进入
+      document.addEventListener('DOMContentLoaded', ensureSprite);
+      window.addEventListener('load', ensureSprite);
+      // PJAX 后
+      document.addEventListener('pjax:complete', ensureSprite);
     })();
   </script>
 </th:block>
+
 
     <th:block th:replace="~{modules/variables/site-config :: site-config}" />
 
