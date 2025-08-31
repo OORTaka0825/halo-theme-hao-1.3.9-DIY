@@ -182,90 +182,49 @@
     <!-- icon图标 -->
     <link rel="stylesheet" th:href="${assets_link + '/icon/iconfont.css' + theme_version}">
     
-    <!-- iconfont symbol（防闪烁·三合一兜底版） -->
-<th:block th:if="${theme.config.nav.menus.enable_ali_iconfont_symbol_header}">
+    <th:block th:if="${theme.config.nav.menus.enable_ali_iconfont_symbol_header}">
   <link rel="preconnect" href="https://at.alicdn.com">
   <link rel="dns-prefetch" href="https://at.alicdn.com">
 
-  <!-- 用后台的地址；若以 // 开头，这里自动转 https:// -->
+  <!-- 后台仍填 //at.alicdn.com/...；这里自动转成 https 并给脚本固定 id -->
   <script id="iconfont-symbol" defer
-          th:src="${#strings.startsWith(theme.config.nav.menus.iconfont_js, '//') 
-                    ? 'https:' + theme.config.nav.menus.iconfont_js 
+          th:src="${#strings.startsWith(theme.config.nav.menus.iconfont_js, '//')
+                    ? 'https:' + theme.config.nav.menus.iconfont_js
                     : theme.config.nav.menus.iconfont_js}"></script>
 
   <script>
     (function () {
-      var ICON_ID_PREFIX = '__svg__icons__dom__';
-      var iconfontSrc = document.getElementById('iconfont-symbol')?.getAttribute('src');
-
-      function getSprite() {
-        return document.querySelector('[id^="' + ICON_ID_PREFIX + '"]');
-      }
+      // 1) 若已存在 symbol，就把注入容器搬到 <body>，避免 PJAX 替换
       function persistSprite() {
-        var sprite = getSprite();
-        if (sprite && sprite.parentNode !== document.body) {
-          document.body.appendChild(sprite);
-        }
-        return !!sprite;
+        var spr = document.querySelector('[id^="__svg__icons__dom__"]');
+        if (spr && spr.parentNode !== document.body) document.body.appendChild(spr);
+        return !!spr;
       }
-      // 兜底：直接抓脚本里的 svgSprite 文本并手动注入
-      function injectFromJsText(jsText) {
-        try {
-          var m = jsText.match(/svgSprite\s*=\s*['"]([\s\S]*?)['"]\s*;/);
-          if (!m) return false;
-          var div = document.createElement('div');
-          div.innerHTML = m[1];
-          var svg = div.querySelector('svg');
-          if (!svg) return false;
-          svg.setAttribute('aria-hidden', 'true');
-          svg.style.position = 'absolute';
-          svg.style.width = 0; svg.style.height = 0; svg.style.overflow = 'hidden';
-          document.body.insertBefore(svg, document.body.firstChild || null);
-          return true;
-        } catch (e) { return false; }
+      // 2) 兜底：从 iconfont 脚本文本里直接抽第一个 <svg>…</svg> 注入 <body>
+      function injectFromScriptText(txt) {
+        var m = txt && txt.match(/<svg[\s\S]*?<\/svg>/i);
+        if (!m) return false;
+        var wrap = document.createElement('div'); wrap.innerHTML = m[0];
+        var svg = wrap.querySelector('svg'); if (!svg) return false;
+        svg.setAttribute('aria-hidden','true');
+        svg.style.position='absolute'; svg.style.width=0; svg.style.height=0; svg.style.overflow='hidden';
+        document.body.insertBefore(svg, document.body.firstChild || null);
+        return true;
       }
-      // 兜底：按需再加载一次 iconfont 脚本（仅在缺失时）
-      function reloadIconfont(onload) {
-        if (!iconfontSrc) return onload && onload(false);
-        var s = document.createElement('script');
-        s.defer = true;
-        s.src = iconfontSrc;
-        s.onload = function(){ onload && onload(true); };
-        s.onerror = function(){ onload && onload(false); };
-        document.head.appendChild(s);
+      function getSrc() {
+        return document.getElementById('iconfont-symbol')?.getAttribute('src') ||
+               Array.from(document.scripts).map(s=>s.src).find(x=>x.includes('at.alicdn.com') && x.includes('/font_')) || '';
       }
-
       function ensureSprite() {
-        // 1) 已有就搬家
-        if (persistSprite()) return;
-
-        // 2) 缺失：尝试再加载一次脚本
-        reloadIconfont(function (ok) {
-          if (persistSprite()) return;
-          if (!ok) {
-            // 3) 连脚本都失败：fetch 文本手动注入
-            try {
-              fetch(iconfontSrc, { cache: 'force-cache' })
-                .then(function (r) { return r.text(); })
-                .then(function (t) { injectFromJsText(t); persistSprite(); })
-                .catch(function(){});
-            } catch (e) {}
-          } else {
-            // 加载成功但仍无：有些版本只监听 DOMContentLoaded，这里再从文本注入一遍
-            try {
-              fetch(iconfontSrc, { cache: 'force-cache' })
-                .then(function (r) { return r.text(); })
-                .then(function (t) { if (!persistSprite()) { injectFromJsText(t); persistSprite(); }})
-                .catch(function(){});
-            } catch (e) {}
-          }
-        });
+        if (persistSprite()) return;                             // 已有 -> 搬家
+        var src = getSrc(); if (!src) return;
+        fetch(src, {cache:'force-cache'})
+          .then(r=>r.text())
+          .then(t=>{ if (!persistSprite()) { injectFromScriptText(t); persistSprite(); } })
+          .catch(()=>{});
       }
-
-      // 首次进入
       document.addEventListener('DOMContentLoaded', ensureSprite);
       window.addEventListener('load', ensureSprite);
-      // PJAX 后
       document.addEventListener('pjax:complete', ensureSprite);
     })();
   </script>
