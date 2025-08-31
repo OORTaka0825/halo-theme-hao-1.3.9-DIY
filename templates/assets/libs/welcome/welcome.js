@@ -1,4 +1,3 @@
-
 // 访客欢迎信息模块（NSMAO）
 let ipLocation;
 
@@ -24,7 +23,8 @@ function fetchIpLocation() {
         type: 'get',
         url: 'https://api.nsmao.net/api/ip/query',
         data: {
-            key: GLOBAL_CONFIG.source.welcome.key
+            // 修改①：安全读取 key，避免未定义时报错
+            key: (GLOBAL_CONFIG?.source?.welcome?.key || "")
         },
         dataType: 'json',
         success: function (res) {
@@ -77,7 +77,7 @@ function showWelcome() {
       switch (city) {
         case "南京市": desc = "这是我挺想去的城市啦"; break;
         case "苏州市": desc = "上有天堂，下有苏杭"; break;
-        默认: desc = "散装是必须要散装的"; break;
+        default: desc = "散装是必须要散装的"; break;  /* 修改②：把“默认”改回 JS 的 default */
       }
       break;
     case "广东省":
