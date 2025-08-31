@@ -19,12 +19,14 @@
         <main class="layout hide-aside" id="content-inner">
             <div id="page">
                 <div id="album" th:if="${#strings.equals(theme.config.photos.photosStyle, 'default')}">
-                    <div th:replace="~{macro/author-content :: author-content(background = ${singlePage.spec.cover},
-                        smallTitle = '相册集',
-                        bigTitle = ${singlePage.spec.title},
-                        detail = ${singlePage.spec.excerpt.raw},
-                        buttonUrl = '',
-                        buttonTitle = '')}"></div>
+  <div th:replace="~{macro/author-content :: author-content(
+      background = ${#strings.isEmpty(theme.config.photos.backgroundImg) ? singlePage.spec.cover : theme.config.photos.backgroundImg},
+      smallTitle = ${theme.config.photos.smallTitle},
+      bigTitle   = ${theme.config.photos.bigTitle},
+      detail     = ${theme.config.photos.detail},
+      buttonUrl  = ${theme.config.photos.topLink},
+      buttonTitle= ${theme.config.photos.topTitle}
+  )}"></div>
 
                     <div class="card-album">
                         <th:block th:each="group : ${photoFinder.groupBy()}">
