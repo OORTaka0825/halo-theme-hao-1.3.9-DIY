@@ -182,48 +182,51 @@
     <!-- icon图标 -->
     <link rel="stylesheet" th:href="${assets_link + '/icon/iconfont.css' + theme_version}">
     
-    <!-- iconfont symbol（防 pjax 闪烁版） -->
-<th:block th:if="${theme.config.nav.menus.enable_ali_iconfont_symbol_header}">
-  <!-- 预连接，减少首个页面的等待 -->
-  <link rel="preconnect" href="https://at.alicdn.com">
-  <link rel="dns-prefetch" href="https://at.alicdn.com">
+    <!-- 仍用后台的 //at.alicdn.com/... 地址，这里自动转 https 并固定 id -->
+<script id="iconfont-symbol" defer
+        th:src="${#strings.startsWith(theme.config.nav.menus.iconfont_js, '//') 
+                  ? 'https:' + theme.config.nav.menus.iconfont_js 
+                  : theme.config.nav.menus.iconfont_js}"></script>
 
-  <!-- 后台仍填 //at.alicdn.com/...；这里统一转 https，并给 script 一个固定 id -->
-  <script id="iconfont-symbol"
-          defer
-          th:src="${#strings.startsWith(theme.config.nav.menus.iconfont_js, '//') 
-                    ? 'https:' + theme.config.nav.menus.iconfont_js 
-                    : theme.config.nav.menus.iconfont_js}"></script>
+<script>
+  (function () {
+    // 防重复执行保险丝（整站只跑一次）
+    if (window.__ICONFONT_READY__) return;
+    window.__ICONFONT_READY__ = true;
 
-  <!-- 把 SVG 精灵容器移到 <body> 直下；PJAX 后仅在缺失时补加载 -->
-  <script>
-    (function () {
-      function persistIconSprite() {
-        var sprite = document.getElementById('__svg__icons__dom__');
-        if (sprite && sprite.parentNode !== document.body) {
-          document.body.appendChild(sprite);
-        }
+    function getSprite() {
+      // 阿里脚本生成的容器 id 前缀，版本不同可能带随机后缀，所以用前缀匹配
+      return document.querySelector('[id^="__svg__icons__dom__"]');
+    }
+    function persistSprite() {
+      var spr = getSprite();
+      if (spr && spr.parentNode !== document.body) {
+        document.body.appendChild(spr);         // 搬到 <body>，PJAX 不会删
       }
+      return !!spr;
+    }
+    function src() {
+      return document.getElementById('iconfont-symbol')?.getAttribute('src');
+    }
 
-      // 首次进站 & 普通刷新
-      document.addEventListener('DOMContentLoaded', persistIconSprite);
-      window.addEventListener('load', persistIconSprite);
+    // 兜底：缺失时再加载一次脚本；存在就绝不重复加载
+    function ensureSprite() {
+      if (persistSprite()) return;              // 已存在 -> 只搬家
+      var s = src(); if (!s) return;
+      var tag = document.createElement('script');
+      tag.defer = true; tag.src = s;
+      tag.onload = persistSprite;
+      document.head.appendChild(tag);
+    }
 
-      // PJAX 完成后：若精灵不存在则按需再加载一次；存在就只做“搬家”
-      document.addEventListener('pjax:complete', function () {
-        if (!document.getElementById('__svg__icons__dom__')) {
-          var s = document.createElement('script');
-          s.defer = true;
-          s.src = document.getElementById('iconfont-symbol').getAttribute('src');
-          s.onload = persistIconSprite;
-          document.head.appendChild(s);
-        } else {
-          persistIconSprite();
-        }
-      });
-    })();
-  </script>
-</th:block>
+    // 首次进入、整页刷新
+    document.addEventListener('DOMContentLoaded', ensureSprite);
+    window.addEventListener('load', ensureSprite);
+    // PJAX 完成后检查：存在就搬家，不存在才补一次
+    document.addEventListener('pjax:complete', ensureSprite);
+  })();
+</script>
+
 
 
     <th:block th:replace="~{modules/variables/site-config :: site-config}" />
