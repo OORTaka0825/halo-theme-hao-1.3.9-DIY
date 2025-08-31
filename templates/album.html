@@ -33,9 +33,9 @@
                     <th:block th:each="group : ${photoFinder.groupBy()}">
                       <!-- 改为 <a>：关 PJAX 也能跳，开 PJAX 拦截无刷新 -->
                       <a class="album-card"
-                         th:href="@{'/photos?group=' + ${group.metadata.name}}"
+                         th:href="@{/photos?group={g}(g=${group.metadata.name})}"
                          th:onclick="|if(window.pjax && typeof pjax.loadUrl==='function'){
-                                        pjax.loadUrl('/photos?group=' + '[[${group.metadata.name}]]');
+                                        pjax.loadUrl('@{/photos?group={g}(g=${group.metadata.name})}');
                                         return false;
                                       } return true;|">
                         <div class="card">
