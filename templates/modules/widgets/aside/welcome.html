@@ -2,10 +2,30 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <!-- 小板报 -->
 <div class="card-widget card-announcement" th:fragment="welcome">
-    <div class="item-headline"><i class="haofont hao-icon-bullhorn"
-                                  style="font-size: 0.9rem;font-weight: 700;"></i><span>小板报</span></div>
+    <div class="item-headline">
+        <i class="haofont hao-icon-bullhorn" style="font-size: 0.9rem;font-weight: 700;"></i>
+        <span>小板报</span>
+    </div>
 
     <div id="welcome-info"></div>
 </div>
 
+<!-- 小板报配置 -->
+<script th:inline="javascript">
+  window.GLOBAL_CONFIG = window.GLOBAL_CONFIG || {};
+  window.GLOBAL_CONFIG.source = window.GLOBAL_CONFIG.source || {};
+
+  // 全局 welcome 坐标
+  window.GLOBAL_CONFIG.source.welcome = {
+    lng: /*[[${theme.config.welcome.lng}]]*/ null,
+    lat: /*[[${theme.config.welcome.lat}]]*/ null
+  };
+
+  // 侧边栏 welcome（小板报）
+  window.GLOBAL_CONFIG.source.sidebarWelcome = {
+    key: "[(${theme.config.sidebar.welcome.key})]",
+    locationLng: /*[[${theme.config.sidebar.welcome.locationLng}]]*/ null,
+    locationLat: /*[[${theme.config.sidebar.welcome.locationLat}]]*/ null
+  };
+</script>
 </html>
