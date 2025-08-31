@@ -9200,11 +9200,12 @@ ins.adsbygoogle {
     overflow: hidden;
     overflow-x: auto;
     width: 100%;
-    margin-bottom: 0rem;
+    margin-bottom: 0;
+    -webkit-user-select: none
 }
 
-.recent-top-post-group.more-page, .climb.more-page {
-    display: none;
+.recent-top-post-group.more-page {
+    display: none
 }
 
 .recent-post-top {
@@ -9212,12 +9213,11 @@ ins.adsbygoogle {
     flex-direction: row;
     flex-wrap: nowrap;
     width: 100%;
-    overflow-x: scroll;
+    overflow-x: scroll
 }
 
 .recent-post-top::-webkit-scrollbar {
-    display: none;
-    /* Chrome Safari */
+    display: none
 }
 
 .recent-post-top .recent-post-item {
@@ -9225,17 +9225,16 @@ ins.adsbygoogle {
     width: 200px;
     flex-direction: column;
     align-items: flex-start;
-    margin-left: 0.5rem;
+    margin-left: .5rem;
     background: var(--heo-card-bg);
     border-radius: 12px;
     overflow: hidden;
-    min-width: 200px;
     height: 164px;
     max-height: 164px;
     border: var(--style-border-always);
-    transition: 0.3s;
+    transition: .3s;
     position: relative;
-    box-shadow: var(--heo-shadow-border);
+    box-shadow: var(--heo-shadow-border)
 }
 
 @media screen and (max-width: 768px) {
@@ -9250,14 +9249,10 @@ ins.adsbygoogle {
     }
 }
 
-@media screen and (min-width: 1300px) {
+@media screen and (min-width: 1200px) {
     .recent-post-top .recent-post-item {
-        width: calc(100% / 3 - .25rem);
+        width:calc(100% / 3 - .25rem);
         margin-left: 0
-    }
-
-    .recent-post-top .recent-post-item:active {
-        transform: scale(0.97);
     }
 
     .recent-post-top .recent-post-item {
@@ -9266,12 +9261,12 @@ ins.adsbygoogle {
     }
 
     .recent-post-top {
-        overflow-x: visible;
+        overflow-x: visible
     }
 
     .recent-top-post-group {
         overflow: visible;
-        overflow-x: visible;
+        overflow-x: visible
     }
 }
 
@@ -9281,7 +9276,7 @@ span.recent-post-top-text {
     left: -40px;
     display: flex;
     z-index: 1;
-    background: var(--heo-theme);
+    background: var(--heo-red);
     color: var(--heo-white);
     padding: 2px 8px;
     font-size: 0.6rem;
@@ -9293,19 +9288,6 @@ span.recent-post-top-text {
 .recent-post-item:hover .recent-post-top-text {
     left: 0;
 }
-
-@media screen and (min-width: 1300px) {
-    .recent-post-top .recent-post-item:hover {
-        border: var(--style-border-hover);
-        box-shadow: var(--heo-shadow-main);
-        transform: scale(1.03);
-    }
-
-    .recent-post-top .recent-post-item:active {
-        transform: scale(0.97);
-    }
-}
-
 @media screen and (max-width: 768px) {
     .recent-top-post-group {
         border-radius: 0;
