@@ -7820,45 +7820,36 @@ a.categoryButton:after {
 
 a.categoryButton i {
     font-size: 5rem;
-    opacity: 0.2;
+    opacity: .2;
     position: absolute;
-    right: 0%;
+    right: 0;
     top: 20%;
-    transition: 0.3s;
+    transition: .3s;
     width: 100px;
     text-align: center;
-    filter: blur(2px);
+    filter: blur(2px)
 }
 
-a.categoryButton img {
-    font-size: 5rem;
-    opacity: 0.2;
-    position: absolute;
-    right: 0%;
-    top: 20%;
-    transition: 0.3s;
-    width: 50px;
-    text-align: center;
-    filter: blur(2px);
-    margin-right: 1rem;
+.recent-post-group {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-content: space-between
 }
 
 @media screen and (max-width: 768px) {
     a.categoryButton i {
-        display: none;
-    }
-
-    a.categoryButton img {
-        display: none;
+        display:none
     }
 
     .recent-post-top .categoryGroup {
-        min-width: 130px !important;
-        margin-bottom: 0.5rem;
+        min-width: 130px!important;
+        margin-bottom: .5rem;
         margin-left: 1rem;
         max-height: 164px;
         overflow: hidden;
-        position: relative;
+        position: relative
     }
 }
 
@@ -7878,9 +7869,9 @@ div#banners {
     display: none;
 }
 
-@media screen and (min-width: 1300px) {
+@media screen and (min-width: 1200px) {
     .topGroup {
-        display: flex;
+        display:flex;
         flex-direction: row;
         flex-wrap: wrap;
         justify-content: space-between;
@@ -7892,20 +7883,19 @@ div#banners {
     }
 
     div#bannerGroup {
-        width: calc(50% - .25rem);
-        margin-right: .5rem;
+        width: calc(50% - .5rem);
+        margin-right: 1rem;
         height: calc(328px + .5rem);
         display: flex;
         flex-direction: column;
-        justify-content: space-between
+        justify-content: space-between;
     }
 
     div#banners {
         display: flex;
         width: 100%;
-        height: 76%;
+        height: 100%;
         background: var(--heo-card-bg);
-        margin-bottom: 0.5rem;
         border: var(--style-border);
         border-radius: 12px;
         overflow: hidden;
@@ -7913,24 +7903,20 @@ div#banners {
         box-shadow: var(--heo-shadow-border);
         flex-direction: column;
         overflow: hidden;
-        transition: 0.3s;
+        transition: .3s;
         will-change: transform;
-        animation: slide-in .6s .1s backwards;
-    }
-
-    div#banners:hover {
-        box-shadow: var(--heo-shadow-main);
+        animation: slide-in .6s .1s backwards
     }
 
     #banners.flink {
-        margin-bottom: 0.5rem;
+        margin-bottom: .5rem
     }
 
     #banners .banner-button-group {
         position: absolute;
         right: 2rem;
         top: 2rem;
-        display: flex;
+        display: flex
     }
 
     #banners .banner-button {
@@ -7980,7 +7966,7 @@ div#banners {
     .banners-title-big {
         font-size: 36px;
         line-height: 1;
-        font-weight: bold;
+        font-weight: 700;
         margin-bottom: 8px;
     }
 
@@ -7991,27 +7977,26 @@ div#banners {
         margin-top: 8px;
         margin-bottom: 0.5rem;
     }
-
     #banner-hover {
         position: absolute;
         width: 100%;
         height: 100%;
         top: 0;
         left: 0;
-        background: var(--heo-theme);
-        color: var(--heo-white);
-        padding-left: 0.5rem;
+        background: var(--heo-lighttext);
+        color: var(--heo-card-bg);
+        padding-left: .5rem;
         display: flex;
         flex-direction: column;
         justify-content: center;
         opacity: 0;
-        transition: cubic-bezier(0.71, 0.15, 0.16, 1.15) 0.6s;
+        transition: cubic-bezier(.71,.15,.16,1.15) .6s
     }
 
     .bannerText {
         font-size: 4rem;
         line-height: 4rem;
-        font-weight: bold;
+        font-weight: 700
     }
 
     .banner-righticon {
@@ -8025,11 +8010,12 @@ div#banners {
         background: var(--heo-theme-op-deep);
         backdrop-filter: blur(15px);
         -webkit-backdrop-filter: blur(15px);
+        transform: translateZ(0);
         -webkit-backface-visibility: hidden;
         -webkit-transform-style: preserve-3d;
-        transition: 0.3s;
+        transition: .3s;
         background-size: 200%;
-        cursor: pointer;
+        cursor: pointer
     }
 
     #banners #banner-hover i {
@@ -8046,12 +8032,13 @@ div#banners {
         right: 0;
         background: var(--heo-card-bg);
         border-radius: 12px;
-        margin-left: .5rem;
+        margin-left: 1rem;
         overflow: hidden;
         transition: .3s;
         display: flex;
         cursor: pointer;
-        pointer-events: all
+        pointer-events: all;
+        box-shadow: var(--heo-shadow-border)
     }
 
     .topGroup .todayCard::after {
@@ -8063,35 +8050,37 @@ div#banners {
         left: 0;
     }
 
-    .topGroup .todayCard.hide {
+    .topGroup.hideCard .todayCard {
         opacity: 0;
-        pointer-events: none;
+        pointer-events: none
     }
 
     .topGroup .todayCard .todayCard-info {
         position: absolute;
-        bottom: 2rem;
+        bottom: 1.5rem;
         left: 2rem;
         z-index: 2;
         color: var(--heo-white);
         max-width: 60%;
-        transition: 0.3s;
+        transition: .3s
     }
 
-    .topGroup .todayCard.hide .todayCard-info {
+    .topGroup.hideCard .todayCard .todayCard-info {
         bottom: 1rem;
-        opacity: 0;
+        opacity: 0
     }
 
     .topGroup .todayCard .todayCard-info .todayCard-tips {
-        opacity: 0.8;
-        font-size: 0.6rem;
+        opacity: .8;
+        font-size: .6rem;
+        margin-left: 3px;
+        margin-top: 4px
     }
 
     .topGroup .todayCard .todayCard-info .todayCard-title {
-        font-size: 28px;
-        font-weight: bold;
-        line-height: 36px;
+        font-size: 32px;
+        font-weight: 700;
+        line-height: 40px
     }
 
     .topGroup .banner-button-group {
@@ -8099,11 +8088,11 @@ div#banners {
         right: 2rem;
         bottom: 2rem;
         display: flex;
-        transition: 0.3s;
+        transition: .3s
     }
 
-    .topGroup .todayCard.hide .banner-button-group {
-        bottom: 1rem;
+    .topGroup.hideCard .todayCard .banner-button-group {
+        bottom: 1rem
     }
 
     .topGroup .banner-button {
@@ -8113,23 +8102,24 @@ div#banners {
         display: flex;
         align-items: center;
         z-index: 1;
-        transition: 0.3s;
+        transition: .3s;
         cursor: pointer;
         backdrop-filter: saturate(180%) blur(20px);
         -webkit-backdrop-filter: blur(20px);
+        transform: translateZ(0);
         height: 40px;
-        width: 124px;
-        justify-content: center;
+        width: 118px;
+        justify-content: center
     }
 
     .topGroup .banner-button:hover {
-        background: var(--heo-theme);
-        color: var(--heo-white);
+        background: var(--heo-lighttext);
+        color: var(--heo-card-bg)
     }
 
     .topGroup .banner-button i {
         margin-right: 8px;
-        font-size: 1rem;
+        font-size: 22px
     }
 
     .topGroup .todayCard .todayCard-cover {
@@ -8140,69 +8130,129 @@ div#banners {
         left: 0;
         background-size: cover;
         z-index: -1;
-        transition: 0.3s;
+        transition: .3s
     }
 
-    .topGroup .todayCard.hide .todayCard-cover {
-        transform: scale(1.2);
+    .topGroup.hideCard .todayCard .todayCard-cover {
+        transform: scale(1.2)
+    }
+
+    .topGroup.hideCard .recent-post-group {
+        display: flex
+    }
+
+    .recent-post-group {
+        flex-wrap: wrap
+    }
+
+    .banners-link {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        position: absolute;
+        bottom: 20px;
+        left: 40px
+    }
+
+    .banners-link-btn {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding: 8px 18px 8px 14px;
+        border-radius: 60px;
+        margin-bottom: 12px;
+        color: var(--heo-white);
+        max-width: 170px;
+        position: relative
+    }
+
+    .banners-link-title {
+        margin-left: auto;
+        padding-left: 5px;
+    }
+}
+
+@keyframes rowleft {
+    from {
+        transform: translateX(0)
+    }
+
+    to {
+        transform: translateX(-50%)
     }
 }
 
 @keyframes rowup {
     from {
-        transform: translateX(0%);
+        transform: translateY(0)
     }
 
     to {
-        transform: translateX(-50%);
+        transform: translateY(-50%)
     }
 }
 
 .tags-group-icon {
     width: 120px;
     height: 120px;
-    border-radius: 30px;
+    border-radius: 30px
 }
 
 .tags-group-all {
     display: flex;
-    transform: rotate(-30deg);
+    transform: rotate(0);
 }
 
 .tags-group-all.nowrapMove {
     transform: rotate(0);
-    padding-bottom: 2rem;
+    padding-bottom: 2rem
 }
 
-.tags-group-wrapper {
-    margin-top: 5rem;
+#bannerGroup .tags-group-wrapper {
+    margin-top: 0;
     display: flex;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     animation: rowup 60s linear infinite;
+    width: 320px;
+    margin-left: auto
 }
 
 .nowrapMove .tags-group-wrapper {
     margin-top: 7rem;
-    animation: rowup 120s linear infinite;
+    animation: rowleft 120s linear infinite;
+    display: flex
 }
 
 .tags-group-icon-pair .tags-group-icon:nth-child(even) {
     margin-top: 1rem;
-    transform: translate(-60px);
+    transform: translate(-60px)
+}
+
+#bannerGroup .tags-group-icon-pair {
+    display: flex
+}
+
+#bannerGroup .tags-group-icon-pair .tags-group-icon:nth-child(even) {
+    margin-left: 4rem
 }
 
 .tags-group-icon-pair {
     margin-left: 1rem;
+    user-select: none
+}
+
+.tags-group-icon-pair a img {
+    border-radius: 50%!important
 }
 
 .tags-group-icon {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
+    color: #fff;
     font-size: 66px;
-    font-weight: bold;
-    box-shadow: var(--heo-shadow-blackdeep);
+    font-weight: 700;
+    box-shadow: var(--heo-shadow-blackdeep)
 }
 
 .nowrapMove .tags-group-icon {
@@ -8211,6 +8261,7 @@ div#banners {
 
 .tags-group-icon img {
     width: 60%;
+    /*rotate: -50deg;*/
 }
 
 .nowrapMove .tags-group-icon img {
@@ -8241,21 +8292,8 @@ div#banners {
     filter: blur(0px);
 }
 
-.categoryItem:hover img {
-    opacity: 0.8;
-    transition: 0.8s;
-    transition-delay: 0.15s;
-    transform: scale(1.03) rotate(0deg);
-    font-size: 2.5rem;
-    filter: blur(0px);
-}
-
 @media screen and (min-width: 1300px) {
     .categoryItem:hover i {
-        transform: scale(1.03) rotate(0deg);
-    }
-
-    .categoryItem:hover img {
         transform: scale(1.03) rotate(0deg);
     }
 }
@@ -8274,7 +8312,6 @@ div#banners {
     }
 }
 
-/* 新主页分类 */
 .recent-post-top .categoryGroup {
     display: flex;
     flex-direction: column;
@@ -8282,15 +8319,16 @@ div#banners {
     min-width: 200px;
 }
 
-.categoryGroup .categoryItem:nth-child(4) {
-    display: none;
+.categoryGroup .categoryItem:nth-child(3) {
+    display: none
 }
 
-@media screen and (min-width: 1300px) {
+@media screen and (min-width: 1200px) {
     .recent-post-top .categoryGroup {
-        flex-direction: row;
+        flex-direction:row;
         height: 24%;
-        animation: slide-in .6s .2s backwards
+        animation: slide-in .6s .2s backwards;
+        display: none
     }
 
     .categoryItem {
