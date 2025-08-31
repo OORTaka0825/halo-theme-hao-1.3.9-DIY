@@ -9322,7 +9322,7 @@ span.recent-post-top-text {
 }
 
 .recent-post-item .post_cover {
-    -webkit-mask-image: -webkit-radial-gradient(center, rgb(255, 255, 255), rgb(0, 0, 0));
+    -webkit-mask-image: -webkit-radial-gradient(center,#fff,#000)
 }
 
 /* 标题 */
@@ -9339,6 +9339,12 @@ span.recent-post-top-text {
     .recent-post-top .recent-post-item:hover .recent-post-info a {
         color: var(--heo-theme);
         transition: 0.3s;
+    }
+}
+
+@media screen and (min-width: 768px) {
+    .recent-post-top .recent-post-item:hover .recent-post-info a {
+        color:var(--heo-fontcolor)
     }
 }
 
