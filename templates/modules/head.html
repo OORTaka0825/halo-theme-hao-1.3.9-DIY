@@ -183,11 +183,48 @@
     <link rel="stylesheet" th:href="${assets_link + '/icon/iconfont.css' + theme_version}">
     
     <!-- icon后台填写JS链接配置 -->
-    <th:block th:if="${theme.config.nav.menus.enable_ali_iconfont_symbol_header}">
-    <th:block th:if="${not #strings.isEmpty(theme.config.nav.menus.iconfont_js)}">
-        <script th:src="${theme.config.nav.menus.iconfont_js}"></script>
-    </th:block>
-    </th:block>
+    <!-- iconfont symbol（防 pjax 闪烁版） -->
+<th:block th:if="${theme.config.nav.menus.enable_ali_iconfont_symbol_header}">
+  <!-- 预连接，减少首个页面的等待 -->
+  <link rel="preconnect" href="https://at.alicdn.com">
+  <link rel="dns-prefetch" href="https://at.alicdn.com">
+
+  <!-- 后台仍填 //at.alicdn.com/...；这里统一转 https，并给 script 一个固定 id -->
+  <script id="iconfont-symbol"
+          defer
+          th:src="${#strings.startsWith(theme.config.nav.menus.iconfont_js, '//') 
+                    ? 'https:' + theme.config.nav.menus.iconfont_js 
+                    : theme.config.nav.menus.iconfont_js}"></script>
+
+  <!-- 把 SVG 精灵容器移到 <body> 直下；PJAX 后仅在缺失时补加载 -->
+  <script>
+    (function () {
+      function persistIconSprite() {
+        var sprite = document.getElementById('__svg__icons__dom__');
+        if (sprite && sprite.parentNode !== document.body) {
+          document.body.appendChild(sprite);
+        }
+      }
+
+      // 首次进站 & 普通刷新
+      document.addEventListener('DOMContentLoaded', persistIconSprite);
+      window.addEventListener('load', persistIconSprite);
+
+      // PJAX 完成后：若精灵不存在则按需再加载一次；存在就只做“搬家”
+      document.addEventListener('pjax:complete', function () {
+        if (!document.getElementById('__svg__icons__dom__')) {
+          var s = document.createElement('script');
+          s.defer = true;
+          s.src = document.getElementById('iconfont-symbol').getAttribute('src');
+          s.onload = persistIconSprite;
+          document.head.appendChild(s);
+        } else {
+          persistIconSprite();
+        }
+      });
+    })();
+  </script>
+</th:block>
 
     <th:block th:replace="~{modules/variables/site-config :: site-config}" />
 
