@@ -362,38 +362,27 @@
         }
     </style>
 
-
 <script th:inline="javascript"
-  th:with="allPostList=${postFinder.listAll()}">
-/* 生成全站文章链接数组（前端随机，每次点击都可能不同） */
-var __permalinks = [];
-/*[# th:each="p : ${allPostList}"]*/
-__permalinks.push('/*[[${p.status.permalink}]]*/');
-/*[/]*/
+    th:with="allPostList=${postFinder.listAll()},
+    randomIndex=${T(java.lang.Math).floor(T(java.lang.Math).random()*#lists.size(allPostList))},
+    postPermalink=${allPostList[randomIndex].status.permalink}"
+>
+    function toRandomPost() {
+        // 随机跳转全站的一篇文章（兼容 PJAX 开/关）
+        var permalink = /*[[${postPermalink}]]*/ "/";
+        if (window.pjax && typeof pjax.loadUrl === 'function') {
+            pjax.loadUrl(permalink);        // 开 PJAX：无刷新跳转
+        } else {
+            window.location.href = permalink; // 关 PJAX：整页跳转
+        }
+    }]]*/ "/";
+        // 当前窗口打开
+        //window.location.href = permalink;
+        pjax.loadUrl(permalink);
+        // window.open(permalink);
+    }
 
-var __lastIndex = -1;
-function toRandomPost() {
-  if (!__permalinks || __permalinks.length === 0) {
-    return; // 没有文章就不跳
-  }
-  var idx = 0;
-  if (__permalinks.length > 1) {
-    do { idx = Math.floor(Math.random() * __permalinks.length); }
-    while (idx === __lastIndex);
-  }
-  __lastIndex = idx;
-  var permalink = __permalinks[idx];
-
-  if (window.pjax && typeof pjax.loadUrl === 'function') {
-    // 开启 PJAX：无刷新跳转
-    pjax.loadUrl(permalink);
-  } else {
-    // 关闭 PJAX：整页跳转
-    window.location.href = permalink;
-  }
-}
 </script>
-
 
 </div>
 </html>
