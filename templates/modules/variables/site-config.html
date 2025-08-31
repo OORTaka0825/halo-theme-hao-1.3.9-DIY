@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <th:block th:fragment="site-config">
-        <!-- 声明一些公共信息 -->
-    <script id="site-config" th:inline="javascript">
-        var GLOBAL_CONFIG = {
-    source: {
+    <!-- 声明一些公共信息 -->
+<script id="site-config" th:inline="javascript">
+    var GLOBAL_CONFIG = {
+        source: {
         welcome: {
             lng: [[${theme.config.welcome.lng}]],
             lat: [[${theme.config.welcome.lat}]]
@@ -130,6 +130,11 @@
                 js: [[${not #strings.isEmpty(theme.config.comments.walines.walinesJs) ? theme.config.comments.walines.walinesJs : 'https://cdn.cbd.int/@waline/client@2.15.7/dist/waline.js' }]],
                 serverURL: "[(${theme.config.comments.walines.serverURL})]",
                 locale: [[${not #strings.isEmpty(theme.config.comments.walines.locale) ? theme.config.comments.walines.locale : '' }]]
+            },
+            welcome:{
+                key:"[(${theme.config.sidebar.welcome.key})]",
+                locationLng: [[${theme.config.sidebar.welcome.locationLng}]],
+                 locationLat: [[${theme.config.sidebar.welcome.locationLat}]]
             },
             footer: {
                 default_enable: [[${theme.config.footer.footerContent.default_enable_group.default_enable}]]
