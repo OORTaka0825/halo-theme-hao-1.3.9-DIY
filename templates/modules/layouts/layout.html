@@ -752,18 +752,15 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     })();
     </script>
 
-    <!-- ===== DIY: Plus 特效接线（基于样式分组的 9 个按钮） ===== -->
+    <!-- ===== DIY: Plus 特效接线（修正版：DreamConfig / URL 编码 / !important） ===== -->
 <script th:inline="javascript">
-  // 主题资源与版本（assets_link 已在 <html th:with=...> 中定义）
   const ASSETS = /*[[${assets_link}]]*/ '/assets';
   const THEME_VER = /*[[${theme_version}]]*/ '';
 
-  // 读取“样式”分组里的字段（就是你刚加在“全局字体”后面的那 9 个）
   const CFG = {
     cursor_style: /*[[${theme.config.style.cursor_style}]]*/ 'none',
     cursor_move:  /*[[${theme.config.style.cursor_move}]]*/  'none',
     cursor_click: /*[[${theme.config.style.cursor_click}]]*/ 'none',
-    // 显示模式：none / day / night / all
     effects_lantern_mode:        /*[[${theme.config.style.effects_lantern_mode}]]*/ 'none',
     effects_sakura_mode:         /*[[${theme.config.style.effects_sakura_mode}]]*/ 'none',
     effects_snowflake_mode:      /*[[${theme.config.style.effects_snowflake_mode}]]*/ 'none',
@@ -772,10 +769,9 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     effects_quantum_silk_thread_mode: /*[[${theme.config.style.effects_quantum_silk_thread_mode}]]*/ 'none'
   };
 
-  // 量子丝线图片（你的 DIY 放在 /assets/images/ 下，记住这个差异）
+  // 量子丝线图片（按你的 DIY 路径）
   window.DIY_WORDLINE_IMG = ASSETS + '/images/wordline.webp';
 
-  // 防重复加载（PJAX/换页等）
   if (!window.__DIY_PLUS_EFFECTS__) {
     window.__DIY_PLUS_EFFECTS__ = true;
 
@@ -787,7 +783,6 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     }
 
     function isNight() {
-      // HAO 主题的暗色判断基于 <html data-theme="dark">
       return document.documentElement.getAttribute('data-theme') === 'dark';
     }
     function showByMode(mode) {
@@ -798,27 +793,50 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
       return false;
     }
 
-    // 1) 鼠标风格（光标包）
-    // 值即包名：breeze / mellow / water_01 / overwatch / OwO / UwU / rainbow_rain / horse / debris / music_cat_01 / music_cat_02 / black_cat / marry / water_02 ...
+    // ---- 补齐 DreamConfig（Plus 的效果脚本依赖它） ----
+    window.DreamConfig = window.DreamConfig || {};
+    DreamConfig["cursor_move"]  = CFG.cursor_move;
+    DreamConfig["cursor_click"] = CFG.cursor_click;
+    DreamConfig["effects_lantern_mode"]       = CFG.effects_lantern_mode;
+    DreamConfig["effects_sakura_mode"]        = CFG.effects_sakura_mode;
+    DreamConfig["effects_snowflake_mode"]     = CFG.effects_snowflake_mode;
+    DreamConfig["effects_universe_mode"]      = CFG.effects_universe_mode;
+    DreamConfig["effects_circle_magic_mode"]  = CFG.effects_circle_magic_mode;
+    DreamConfig["effects_quantum_silk_thread_mode"] = CFG.effects_quantum_silk_thread_mode;
+
+    // 让脚本能识别当前明/暗（Plus 脚本会读取 localStorage 的 special-efficacy-scheme）
+    try {
+      var eff = localStorage.getItem('special-efficacy-scheme');
+      var should = isNight() ? 'dark' : 'light';
+      if (eff !== should) localStorage.setItem('special-efficacy-scheme', should);
+    } catch (e) {}
+
+    // 1) 鼠标风格（光标包）——修复空格文件名 & 增强匹配 & 提高优先级
     if (CFG.cursor_style && CFG.cursor_style !== 'none') {
-    var pack = CFG.cursor_style;
-    var base = ASSETS + '/cursor/' + pack + '/';
-    function urls(list){ return list.map(function(n){ return 'url('+base+n+')'; }).join(','); }
-    var css = `
-      html, body {
-        cursor: ${urls(['arrow.cur','Arrow.cur','Normal.cur','normal.cur','Arrow.ani','Normal.ani'])}, auto;
+      var pack = CFG.cursor_style;
+      var base = ASSETS + '/cursor/' + pack + '/';
+      function urlq(name) {
+        var full = base + name;
+        // 对包含空格/非 ASCII 的文件名进行 URL 编码（但不编码斜杠）
+        try { full = encodeURI(full); } catch(e) {}
+        return 'url("' + full + '")';
       }
-      a, button, [role="button"], input[type=button], input[type=submit] {
-        cursor: ${urls(['hand.cur','Hand.cur','link.cur','Link.cur','hand.ani','Link.ani'])}, pointer;
-      }
-      input[type=text], input[type=search], textarea, .text, .textbox, .input {
-        cursor: ${urls(['ibeam.cur','IBeam.cur','beam.cur','Beam.cur','text.cur','Text.cur','ibeam.ani'])}, text;
-      }
-    `;
-    var st = document.createElement('style');
-    st.textContent = css;
-    document.head.appendChild(st);
-  }
+      function urls(list){ return list.map(urlq).join(','); }
+      var css = `
+        html, body {
+          cursor: ${urls(['arrow.cur','Arrow.cur','Normal.cur','normal.cur','Arrow.ani','Normal.ani'])}, auto !important;
+        }
+        a, button, [role="button"], input[type=button], input[type=submit] {
+          cursor: ${urls(['hand.cur','Hand.cur','link.cur','Link.cur','hand.ani','Link.ani','Alternate Select.cur','alternate.cur'])}, pointer !important;
+        }
+        input[type=text], input[type=search], textarea, .text, .textbox, .input {
+          cursor: ${urls(['ibeam.cur','IBeam.cur','beam.cur','Beam.cur','text.cur','Text.cur','ibeam.ani','Escritura a Mano.cur','Handwriting.cur','texto.cur'])}, text !important;
+        }
+      `;
+      var st = document.createElement('style');
+      st.textContent = css;
+      document.head.appendChild(st);
+    }
 
     // 2) 鼠标移动特效
     if (CFG.cursor_move && CFG.cursor_move !== 'none') {
@@ -836,13 +854,10 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     if (showByMode(CFG.effects_snowflake_mode))    loadJS(ASSETS + '/js/effects/snowflake.min.js');
     if (showByMode(CFG.effects_universe_mode))     loadJS(ASSETS + '/js/effects/universe.min.js');
     if (showByMode(CFG.effects_circle_magic_mode)) loadJS(ASSETS + '/js/effects/circleMagic.min.js');
-    if (showByMode(CFG.effects_quantum_silk_thread_mode)) {
-      // 若量子丝线脚本内部需要图片，可从 window.DIY_WORDLINE_IMG 读取（我们已设置为 /assets/images/wordline.webp）
-      loadJS(ASSETS + '/js/effects/quantum.min.js');
-    }
+    if (showByMode(CFG.effects_quantum_silk_thread_mode)) loadJS(ASSETS + '/js/effects/quantum.min.js');
   }
 </script>
-<!-- ===== /DIY: Plus 特效接线 ===== -->
+<!-- ===== /DIY: Plus 特效接线（修正版） ===== -->
 
 
 </body>
