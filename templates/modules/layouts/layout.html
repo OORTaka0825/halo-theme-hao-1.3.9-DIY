@@ -752,6 +752,93 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     })();
     </script>
 
+    <!-- ===== DIY: Plus 特效接线（基于样式分组的 9 个按钮） ===== -->
+<script th:inline="javascript">
+  // 主题资源与版本（assets_link 已在 <html th:with=...> 中定义）
+  const ASSETS = /*[[${assets_link}]]*/ '/assets';
+  const THEME_VER = /*[[${theme_version}]]*/ '';
+
+  // 读取“样式”分组里的字段（就是你刚加在“全局字体”后面的那 9 个）
+  const CFG = {
+    cursor_style: /*[[${theme.config.style.cursor_style}]]*/ 'none',
+    cursor_move:  /*[[${theme.config.style.cursor_move}]]*/  'none',
+    cursor_click: /*[[${theme.config.style.cursor_click}]]*/ 'none',
+    // 显示模式：none / day / night / all
+    effects_lantern_mode:        /*[[${theme.config.style.effects_lantern_mode}]]*/ 'none',
+    effects_sakura_mode:         /*[[${theme.config.style.effects_sakura_mode}]]*/ 'none',
+    effects_snowflake_mode:      /*[[${theme.config.style.effects_snowflake_mode}]]*/ 'none',
+    effects_universe_mode:       /*[[${theme.config.style.effects_universe_mode}]]*/ 'none',
+    effects_circle_magic_mode:   /*[[${theme.config.style.effects_circle_magic_mode}]]*/ 'none',
+    effects_quantum_silk_thread_mode: /*[[${theme.config.style.effects_quantum_silk_thread_mode}]]*/ 'none'
+  };
+
+  // 量子丝线图片（你的 DIY 放在 /assets/images/ 下，记住这个差异）
+  window.DIY_WORDLINE_IMG = ASSETS + '/images/wordline.webp';
+
+  // 防重复加载（PJAX/换页等）
+  if (!window.__DIY_PLUS_EFFECTS__) {
+    window.__DIY_PLUS_EFFECTS__ = true;
+
+    function loadJS(src) {
+      var s = document.createElement('script');
+      s.src = src + THEME_VER;
+      s.defer = true;
+      document.body.appendChild(s);
+    }
+
+    function isNight() {
+      // HAO 主题的暗色判断基于 <html data-theme="dark">
+      return document.documentElement.getAttribute('data-theme') === 'dark';
+    }
+    function showByMode(mode) {
+      if (!mode || mode === 'none') return false;
+      if (mode === 'all') return true;
+      if (mode === 'day') return !isNight();
+      if (mode === 'night') return isNight();
+      return false;
+    }
+
+    // 1) 鼠标风格（光标包）
+    // 值即包名：breeze / mellow / water_01 / overwatch / OwO / UwU / rainbow_rain / horse / debris / music_cat_01 / music_cat_02 / black_cat / marry / water_02 ...
+    if (CFG.cursor_style && CFG.cursor_style !== 'none') {
+      var pack = CFG.cursor_style;
+      var base = ASSETS + '/cursor/' + pack + '/';
+      // 兼容不同包的文件命名：箭头/手型/文本，缺失则回退为系统默认
+      var css = `
+        html, body { cursor: url('${base}arrow.cur'), url('${base}normal.cur'), auto; }
+        a, button, [role="button"], input[type=button], input[type=submit] { cursor: url('${base}hand.cur'), pointer; }
+        input[type=text], input[type=search], textarea { cursor: url('${base}ibeam.cur'), url('${base}IBeam.cur'), url('${base}beam.cur'), text; }
+      `;
+      var st = document.createElement('style');
+      st.textContent = css;
+      document.head.appendChild(st);
+    }
+
+    // 2) 鼠标移动特效
+    if (CFG.cursor_move && CFG.cursor_move !== 'none') {
+      loadJS(ASSETS + '/js/cursor/move/' + CFG.cursor_move + '.min.js');
+    }
+
+    // 3) 鼠标点击特效
+    if (CFG.cursor_click && CFG.cursor_click !== 'none') {
+      loadJS(ASSETS + '/js/cursor/click/' + CFG.cursor_click + '.min.js');
+    }
+
+    // 4) 全局画布/飘落类特效（按显示模式 day/night/all/none）
+    if (showByMode(CFG.effects_lantern_mode))      loadJS(ASSETS + '/js/effects/lantern.min.js');
+    if (showByMode(CFG.effects_sakura_mode))       loadJS(ASSETS + '/js/effects/sakura.min.js');
+    if (showByMode(CFG.effects_snowflake_mode))    loadJS(ASSETS + '/js/effects/snowflake.min.js');
+    if (showByMode(CFG.effects_universe_mode))     loadJS(ASSETS + '/js/effects/universe.min.js');
+    if (showByMode(CFG.effects_circle_magic_mode)) loadJS(ASSETS + '/js/effects/circleMagic.min.js');
+    if (showByMode(CFG.effects_quantum_silk_thread_mode)) {
+      // 若量子丝线脚本内部需要图片，可从 window.DIY_WORDLINE_IMG 读取（我们已设置为 /assets/images/wordline.webp）
+      loadJS(ASSETS + '/js/effects/quantum.min.js');
+    }
+  }
+</script>
+<!-- ===== /DIY: Plus 特效接线 ===== -->
+
+
 </body>
 
 </html>
