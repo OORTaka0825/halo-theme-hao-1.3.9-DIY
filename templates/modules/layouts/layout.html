@@ -752,7 +752,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     })();
     </script>
 
-    <!-- ===== DIY: Plus 全部接线（v13：不清理鼠标画布；按需单次加载；切换仅显隐） ===== -->
+    <!-- ===== DIY: Plus 全部接线（v14：不再误伤鼠标；仅按关键词标记；切换即时显隐） ===== -->
 <script th:inline="javascript">
   const ASSETS = /*[[${assets_link}]]*/ '/assets';
   const THEME_VER = /*[[${theme_version}]]*/ '';
@@ -828,16 +828,19 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   const LOADED = {}; // 记录是否已加载过脚本（每个只加载一次）
   const TRACK  = {}; // key -> {until}
 
-  // ---- 动态标记新增节点（用于显隐；不再清理鼠标相关） ----
+  // ---- 动态标记新增节点（仅按关键词，不再用“全屏 canvas”启发式；避免误伤鼠标画布） ----
+  const MOUSE_EXCLUDE = ['mouse','cursor','trail','click','firework','ribbon','ribbons','spark','sparkle','particle','cursor-effects','canvascursor'];
+  function nameHit(el, words){
+    const id=(el.id||'').toLowerCase(), cls=(el.className||'').toString().toLowerCase();
+    return words.some(k=> id.includes(k) || cls.includes(k) );
+  }
   function startTrack(key,ms){ TRACK[key]={until:Date.now()+(ms||6000)}; }
   function tagIfMatch(el, key){
     if(!el || el.dataset.diyEffect) return;
-    const id=(el.id||'').toLowerCase(), cls=(el.className||'').toString().toLowerCase();
-    const kw=EFFECTS[key].keywords;
-    const isCanvas = el.tagName==='CANVAS';
-    const rect = isCanvas ? el.getBoundingClientRect() : {width:0,height:0};
-    const full = isCanvas && rect.width>=window.innerWidth*0.7 && rect.height>=window.innerHeight*0.5;
-    if (kw.some(k=>id.includes(k)||cls.includes(k)) || full){
+    // 鼠标相关排除
+    if (nameHit(el, MOUSE_EXCLUDE)) return;
+    // 仅按该效果的关键词命中
+    if (nameHit(el, EFFECTS[key].keywords)) {
       el.dataset.diyEffect = key;
       try{ el.style.pointerEvents='none'; }catch(e){}
     }
@@ -859,9 +862,8 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   observeBody();
 
   function getNodes(key){
-    const kw = EFFECTS[key].keywords.join('|');
-    const sel = '[data-diy-effect="'+key+'"], body > [id*="'+kw+'"], body > [class*="'+kw+'"]';
-    return Array.from(document.querySelectorAll(sel));
+    // 只找我们贴过标签的节点，避免误选到鼠标画布
+    return Array.from(document.querySelectorAll('[data-diy-effect="'+key+'"]'));
   }
 
   function shouldShow(mode, scheme){
@@ -873,35 +875,33 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     const scheme = getCurrentScheme();
     Object.keys(EFFECTS).forEach(key=>{
       const mode = MODES[key];
+      const show = shouldShow(mode, scheme);
+      const nodes = getNodes(key);
+
       if (mode==='none') {
-        // 不显示：隐藏（不删除，防止重建多次产生倍速）
-        getNodes(key).forEach(el=>{ el.style.display='none'; });
+        // 不显示：仅隐藏（不删除）
+        nodes.forEach(el=>{ el.style.display='none'; });
         return;
       }
-      const nodes = getNodes(key);
-      const show = shouldShow(mode, scheme);
       if (show) {
         if (nodes.length===0 && !LOADED[key]) {
-          // 需要显示但还没有节点：加载一次脚本并开启跟踪给它打标签
           startTrack(key, 6000);
           loadJS(ASSETS + EFFECTS[key].file);
           LOADED[key] = true;
         } else {
-          // 已存在：只需显示
           nodes.forEach(el=>{ el.style.display=''; });
         }
       } else {
-        // 当前不该显示：直接隐藏节点（不要移除，避免脚本重复实例叠加导致“加速”）
         nodes.forEach(el=>{ el.style.display='none'; });
       }
     });
   }
 
   // ---------- 主入口 ----------
-  if (!window.__DIY_ALL_EFFECTS_V13__) {
-    window.__DIY_ALL_EFFECTS_V13__ = true;
+  if (!window.__DIY_ALL_EFFECTS_V14__) {
+    window.__DIY_ALL_EFFECTS_V14__ = true;
     whenReady(function(){
-      // DreamConfig 提供给脚本（day/night/all/none）
+      // DreamConfig（供脚本内部读取）
       window.DreamConfig = window.DreamConfig || {};
       DreamConfig.effects_lantern_mode       = toDayNight(MODES.lantern);
       DreamConfig.effects_sakura_mode        = toDayNight(MODES.sakura);
@@ -910,7 +910,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
       DreamConfig.effects_circle_magic_mode  = toDayNight(MODES.circle);
       DreamConfig.effects_quantum_silk_thread_mode = toDayNight(MODES.quantum);
 
-      // 鼠标（与明暗无关；只初始化一次，不再清理它们的画布）
+      // 鼠标：与明暗无关，只初始化一次，也永不隐藏/清理
       if (CFG.cursor_style && CFG.cursor_style !== 'none') {
         var pack=CFG.cursor_style, base=ASSETS+'/cursor/'+pack+'/';
         function urlq(n){ try{return 'url(\"'+encodeURI(base+n)+'\")'}catch(e){return 'url('+base+n+')'} }
@@ -925,16 +925,22 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
       if (CFG.cursor_move  && CFG.cursor_move  !== 'none') loadJS(ASSETS + '/js/cursor/move/'  + CFG.cursor_move  + '.min.js');
       if (CFG.cursor_click && CFG.cursor_click !== 'none') loadJS(ASSETS + '/js/cursor/click/' + CFG.cursor_click + '.min.js');
 
-      // 初次运行 + 监听切换
+      // 初始化与监听（加入轮询兜底，确保第三方切换也能捕捉到）
       updateVisibilityAndLoadIfNeeded();
       const fire = () => { requestAnimationFrame(updateVisibilityAndLoadIfNeeded); };
       const mo = new MutationObserver(fire);
       mo.observe(document.documentElement, {attributes:true, attributeFilter:['class','data-theme','theme']});
       window.addEventListener('storage', fire);
+      // 兜底 polling
+      let last = getCurrentScheme();
+      setInterval(()=>{
+        const now = getCurrentScheme();
+        if (now !== last) { last = now; fire(); }
+      }, 500);
     });
   }
 </script>
-<!-- ===== /DIY: Plus 全部接线 v13 ===== -->
+<!-- ===== /DIY: Plus 全部接线 v14 ===== -->
 
 
 
