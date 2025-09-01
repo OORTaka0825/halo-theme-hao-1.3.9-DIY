@@ -218,5 +218,24 @@
 
     <th:block th:replace="~{modules/variables/site-config :: site-config}" />
 
+    <style id="diy-effects-guard">
+  /* 画布/飘落/灯笼类容器：固定定位 + 不参与点击，避免撑高页面 */
+  body > canvas,
+  body > [id*="universe"], body > [class*="universe"],
+  body > [id*="circle"],   body > [class*="circleMagic"],
+  body > [id*="quantum"],  body > [class*="quantum"],
+  body > [id*="sakura"],   body > [class*="sakura"],
+  body > [id*="snow"],     body > [class*="snow"],
+  body > [class*="lantern"], body > [id*="lantern"]{
+    position: fixed !important;
+    left: 0 !important; top: 0 !important;
+    width: 100vw !important; height: 100vh !important;
+    pointer-events: none !important;
+    z-index: 1;
+  }
+  /* 灯笼自身不挡点击 */
+  .lantern, .lantern * { pointer-events: none !important; }
+</style>
+
 
 </th:block>
