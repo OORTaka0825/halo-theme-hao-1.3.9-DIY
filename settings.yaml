@@ -3308,9 +3308,9 @@ spec:
           options:
             - value: none
               label: 不显示
-            - value: day
+            - value: light
               label: 明亮模式
-            - value: night
+            - value: dark
               label: 黑暗模式
             - value: all
               label: 全模式
@@ -3321,9 +3321,9 @@ spec:
           options:
             - value: none
               label: 不显示
-            - value: day
+            - value: light
               label: 明亮模式
-            - value: night
+            - value: dark
               label: 黑暗模式
             - value: all
               label: 全模式
@@ -3334,22 +3334,22 @@ spec:
           options:
             - value: none
               label: 不显示
-            - value: day
+            - value: light
               label: 明亮模式
-            - value: night
+            - value: dark
               label: 黑暗模式
             - value: all
               label: 全模式
         - $formkit: radio
           name: effects_universe_mode
           label: 宇宙星空特效显示模式
-          value: night
+          value: dark
           options:
             - value: none
               label: 不显示
-            - value: day
+            - value: light
               label: 明亮模式
-            - value: night
+            - value: dark
               label: 黑暗模式
             - value: all
               label: 全模式
@@ -3360,9 +3360,9 @@ spec:
           options:
             - value: none
               label: 不显示
-            - value: day
+            - value: light
               label: 明亮模式
-            - value: night
+            - value: dark
               label: 黑暗模式
             - value: all
               label: 全模式
@@ -3373,9 +3373,9 @@ spec:
           options:
             - value: none
               label: 不显示
-            - value: day
+            - value: light
               label: 明亮模式
-            - value: night
+            - value: dark
               label: 黑暗模式
             - value: all
               label: 全模式
