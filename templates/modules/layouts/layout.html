@@ -752,10 +752,11 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     })();
     </script>
 
-    <!-- ===== DIY: Plus 特效接线（等待主题设置好 data-theme，再加载；并兜底 DreamConfig） ===== -->
+    <!-- ===== DIY: Plus 特效接线（light/dark 修正版 v2） ===== -->
 <script th:inline="javascript">
   const ASSETS = /*[[${assets_link}]]*/ '/assets';
   const THEME_VER = /*[[${theme_version}]]*/ '';
+
   const CFG = {
     cursor_style: /*[[${theme.config.style.cursor_style}]]*/ 'none',
     cursor_move:  /*[[${theme.config.style.cursor_move}]]*/  'none',
@@ -767,57 +768,76 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     effects_circle_magic_mode:   /*[[${theme.config.style.effects_circle_magic_mode}]]*/ 'none',
     effects_quantum_silk_thread_mode: /*[[${theme.config.style.effects_quantum_silk_thread_mode}]]*/ 'none'
   };
+
+  // 量子丝线图片路径（你的 DIY 在 /assets/images/）
   window.DIY_WORDLINE_IMG = ASSETS + '/images/wordline.webp';
 
-  function nowScheme(){
-    const attr = document.documentElement.getAttribute('data-theme');
+  // --- helpers --- //
+  function normMode(v){
+    const s = (v || '').toString().trim().toLowerCase();
+    if (['明亮模式','亮','light','day','浅色','白天'].includes(s)) return 'light';
+    if (['黑暗模式','暗','dark','night','深色','夜间'].includes(s)) return 'dark';
+    if (['全模式','全部','all'].includes(s)) return 'all';
+    if (['不显示','关闭','none','off'].includes(s)) return 'none';
+    return s || 'none';
+  }
+  function toDayNight(v){ return v==='light'?'day':(v==='dark'?'night':v); }
+
+  function currentScheme(){
+    const html = document.documentElement;
+    const attr = (html.getAttribute('data-theme') || html.getAttribute('theme') || '').toLowerCase();
     if (attr === 'dark') return 'dark';
-    const ls = (localStorage.getItem('theme') || localStorage.getItem('special-efficacy-scheme') || '').toLowerCase();
-    return ls === 'dark' ? 'dark' : 'light';
+    if (html.classList.contains('dark')) return 'dark';
+    const bodyAttr = (document.body && document.body.getAttribute('data-theme') || '').toLowerCase();
+    if (bodyAttr === 'dark') return 'dark';
+    const keys = ['theme','color-scheme','special-efficacy-scheme','halo_theme','halo_color_scheme'];
+    for (const k of keys) {
+      const v = (localStorage.getItem(k) || '').toLowerCase();
+      if (v === 'dark' || v === 'night') return 'dark';
+      if (v === 'light' || v === 'day')  return 'light';
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';
+    return 'light';
   }
   function showByMode(mode){
-    if (!mode || mode==='none') return false;
-    const s = nowScheme();
-    if (mode==='all')  return true;
-    if (mode==='day')  return s==='light';
-    if (mode==='night')return s==='dark';
-    return false;
+    const m = normMode(mode);
+    if (m === 'none') return false;
+    if (m === 'all')  return true;
+    return m === currentScheme(); // light/dark 对齐
   }
   function loadJS(src){ const s=document.createElement('script'); s.src=src+THEME_VER; s.defer=true; document.body.appendChild(s); }
-
-  // 等待 data-theme 就绪（最多等 ~1s）
   function whenThemeReady(cb){
-    let t=0;
+    let tries=0;
     (function tick(){
-      const has = !!document.documentElement.getAttribute('data-theme');
-      if (has || t>20) return cb();
-      t++; setTimeout(tick, 50);
+      const ready = document.documentElement.getAttribute('data-theme') ||
+                    document.documentElement.classList.contains('dark') ||
+                    localStorage.getItem('theme') || localStorage.getItem('special-efficacy-scheme');
+      if (ready || tries>40) return cb();
+      tries++; setTimeout(tick, 50);
     })();
   }
 
-  // 只加载一次
-  if(!window.__DIY_PLUS_EFFECTS__){
+  if (!window.__DIY_PLUS_EFFECTS__) {
     window.__DIY_PLUS_EFFECTS__ = true;
 
     whenThemeReady(function(){
-      // 同步 special-efficacy-scheme，保证 Plus 脚本内部逻辑一致
-      try { localStorage.setItem('special-efficacy-scheme', nowScheme()); } catch(e){}
+      // 统一给 Plus 脚本：special-efficacy-scheme = light/dark
+      try { localStorage.setItem('special-efficacy-scheme', currentScheme()); } catch(e){}
 
-      // DreamConfig 兜底（Plus 效果脚本读取）
+      // DreamConfig 兼容（把 light/dark -> day/night，Plus 脚本里偶尔会读取）
       window.DreamConfig = window.DreamConfig || {};
       DreamConfig.cursor_move  = CFG.cursor_move;
       DreamConfig.cursor_click = CFG.cursor_click;
-      DreamConfig.effects_lantern_mode       = CFG.effects_lantern_mode;
-      DreamConfig.effects_sakura_mode        = CFG.effects_sakura_mode;
-      DreamConfig.effects_snowflake_mode     = CFG.effects_snowflake_mode;
-      DreamConfig.effects_universe_mode      = CFG.effects_universe_mode;
-      DreamConfig.effects_circle_magic_mode  = CFG.effects_circle_magic_mode;
-      DreamConfig.effects_quantum_silk_thread_mode = CFG.effects_quantum_silk_thread_mode;
-      // 避免灯笼显示 “undefined”
+      DreamConfig.effects_lantern_mode       = toDayNight(normMode(CFG.effects_lantern_mode));
+      DreamConfig.effects_sakura_mode        = toDayNight(normMode(CFG.effects_sakura_mode));
+      DreamConfig.effects_snowflake_mode     = toDayNight(normMode(CFG.effects_snowflake_mode));
+      DreamConfig.effects_universe_mode      = toDayNight(normMode(CFG.effects_universe_mode));
+      DreamConfig.effects_circle_magic_mode  = toDayNight(normMode(CFG.effects_circle_magic_mode));
+      DreamConfig.effects_quantum_silk_thread_mode = toDayNight(normMode(CFG.effects_quantum_silk_thread_mode));
       DreamConfig.lantern_left_text = DreamConfig.lantern_left_text || '';
       DreamConfig.lantern_right_text= DreamConfig.lantern_right_text|| '';
 
-      // 1) 鼠标风格（兼容不同包命名 + 空格文件名）
+      // 1) 鼠标风格（文件名差异/含空格，统一处理）
       if (CFG.cursor_style && CFG.cursor_style !== 'none') {
         var pack = CFG.cursor_style;
         var base = ASSETS + '/cursor/' + pack + '/';
@@ -834,14 +854,13 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
         var st=document.createElement('style'); st.textContent=css; document.head.appendChild(st);
       }
 
-      // 2) 鼠标移动特效
+      // 2) 鼠标移动/点击特效（与明暗无关，始终按选择加载）
       if (CFG.cursor_move && CFG.cursor_move !== 'none')
         loadJS(ASSETS + '/js/cursor/move/' + CFG.cursor_move + '.min.js');
-      // 3) 鼠标点击特效
       if (CFG.cursor_click && CFG.cursor_click !== 'none')
         loadJS(ASSETS + '/js/cursor/click/' + CFG.cursor_click + '.min.js');
 
-      // 4) 画布/飘落类（严格按模式）
+      // 3) 画布/飘落/灯笼类（严格按模式）
       if (showByMode(CFG.effects_lantern_mode))      loadJS(ASSETS + '/js/effects/lantern.min.js');
       if (showByMode(CFG.effects_sakura_mode))       loadJS(ASSETS + '/js/effects/sakura.min.js');
       if (showByMode(CFG.effects_snowflake_mode))    loadJS(ASSETS + '/js/effects/snowflake.min.js');
@@ -851,7 +870,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     });
   }
 </script>
-<!-- ===== /DIY: Plus 特效接线 ===== -->
+<!-- ===== /DIY: Plus 特效接线（light/dark 修正版 v2） ===== -->
 
 
 
