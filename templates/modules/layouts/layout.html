@@ -801,18 +801,24 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     // 1) 鼠标风格（光标包）
     // 值即包名：breeze / mellow / water_01 / overwatch / OwO / UwU / rainbow_rain / horse / debris / music_cat_01 / music_cat_02 / black_cat / marry / water_02 ...
     if (CFG.cursor_style && CFG.cursor_style !== 'none') {
-      var pack = CFG.cursor_style;
-      var base = ASSETS + '/cursor/' + pack + '/';
-      // 兼容不同包的文件命名：箭头/手型/文本，缺失则回退为系统默认
-      var css = `
-        html, body { cursor: url('${base}arrow.cur'), url('${base}normal.cur'), auto; }
-        a, button, [role="button"], input[type=button], input[type=submit] { cursor: url('${base}hand.cur'), pointer; }
-        input[type=text], input[type=search], textarea { cursor: url('${base}ibeam.cur'), url('${base}IBeam.cur'), url('${base}beam.cur'), text; }
-      `;
-      var st = document.createElement('style');
-      st.textContent = css;
-      document.head.appendChild(st);
-    }
+    var pack = CFG.cursor_style;
+    var base = ASSETS + '/cursor/' + pack + '/';
+    function urls(list){ return list.map(function(n){ return 'url('+base+n+')'; }).join(','); }
+    var css = `
+      html, body {
+        cursor: ${urls(['arrow.cur','Arrow.cur','Normal.cur','normal.cur','Arrow.ani','Normal.ani'])}, auto;
+      }
+      a, button, [role="button"], input[type=button], input[type=submit] {
+        cursor: ${urls(['hand.cur','Hand.cur','link.cur','Link.cur','hand.ani','Link.ani'])}, pointer;
+      }
+      input[type=text], input[type=search], textarea, .text, .textbox, .input {
+        cursor: ${urls(['ibeam.cur','IBeam.cur','beam.cur','Beam.cur','text.cur','Text.cur','ibeam.ani'])}, text;
+      }
+    `;
+    var st = document.createElement('style');
+    st.textContent = css;
+    document.head.appendChild(st);
+  }
 
     // 2) 鼠标移动特效
     if (CFG.cursor_move && CFG.cursor_move !== 'none') {
