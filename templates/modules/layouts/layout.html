@@ -752,7 +752,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     })();
     </script>
 
-    <!-- ===== DIY: Plus 全部接线（v10：首屏预加载 + 实时显隐；鼠标特效不受明暗） ===== -->
+    <!-- ===== DIY: Plus 全部接线（v11：切换=清理不匹配并重建匹配；鼠标不受明暗） ===== -->
 <script th:inline="javascript">
   const ASSETS = /*[[${assets_link}]]*/ '/assets';
   const THEME_VER = /*[[${theme_version}]]*/ '';
@@ -769,10 +769,8 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     effects_quantum_silk_thread_mode: /*[[${theme.config.style.effects_quantum_silk_thread_mode}]]*/ 'none'
   };
 
-  // 量子丝线图片路径（DIY）
   window.DIY_WORDLINE_IMG = ASSETS + '/images/wordline.webp';
 
-  // ---------- helpers ----------
   function normMode(v){
     const s=(v||'').toString().trim().toLowerCase();
     if(['明亮模式','亮','light','day','浅色','白天'].includes(s)) return 'light';
@@ -793,9 +791,9 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     if(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';
     return 'light';
   }
-  function applySchemeSync(){
-    const isDark = getCurrentScheme() === 'dark';
-    document.documentElement.classList.toggle('night', isDark); // Plus 习惯依赖 .night
+  function syncScheme(){
+    const isDark = getCurrentScheme()==='dark';
+    document.documentElement.classList.toggle('night', isDark);
     try{ localStorage.setItem('special-efficacy-scheme', isDark ? 'dark' : 'light'); }catch(e){}
   }
   function whenReady(cb){
@@ -809,7 +807,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   }
   function loadJS(src){ const s=document.createElement('script'); s.src=src+THEME_VER; s.defer=true; document.body.appendChild(s); }
 
-  // ---------- 特效信息 / 模式 / 运行态 ----------
+  // effects meta
   const EFFECTS = {
     lantern:  { file: '/js/effects/lantern.min.js',  keywords: ['lantern'] },
     sakura:   { file: '/js/effects/sakura.min.js',   keywords: ['sakura','cherry','petal'] },
@@ -826,11 +824,10 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     circle:   normMode(CFG.effects_circle_magic_mode),
     quantum:  normMode(CFG.effects_quantum_silk_thread_mode),
   };
-  const LOADED = {}; // key -> true once script loaded
-  const TRACK  = {}; // key -> {until:timestamp}
+  const LOADED = {}; // which scripts are loaded
+  const TRACK  = {}; // key -> {until}
 
-  // ---------- 动态标记新增的特效节点（防闪烁 + 切换显隐） ----------
-  function startTrack(key, ms){ TRACK[key]={until:Date.now()+(ms||5000)}; }
+  function startTrack(key, ms){ TRACK[key]={until:Date.now()+(ms||6000)}; }
   function tagIfMatch(el, key){
     if(!el || el.dataset.diyEffect) return;
     const id=(el.id||'').toLowerCase(), cls=(el.className||'').toString().toLowerCase();
@@ -841,11 +838,6 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     if (kw.some(k=>id.includes(k)||cls.includes(k)) || full){
       el.dataset.diyEffect = key;
       try{ el.style.pointerEvents='none'; }catch(e){}
-      // 初次进来就根据当前模式立即隐藏/显示，避免一帧闪烁
-      const scheme = getCurrentScheme();
-      const mode = MODES[key];
-      const show = mode==='all' || (mode==='light'&&scheme==='light') || (mode==='dark'&&scheme==='dark');
-      el.style.display = show ? '' : 'none';
     }
   }
   const bodyObserver=new MutationObserver((muts)=>{
@@ -864,62 +856,56 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   function observeBody(){ if(document.body) bodyObserver.observe(document.body,{childList:true,subtree:true}); else document.addEventListener('DOMContentLoaded',observeBody); }
   observeBody();
 
-  function updateEffectVisibility(){
-    const scheme = getCurrentScheme(); // 'light' | 'dark'
-    function shouldShow(mode){
-      return mode==='all' || (mode==='light'&&scheme==='light') || (mode==='dark'&&scheme==='dark');
-    }
-    Object.keys(EFFECTS).forEach(key=>{
-      document.querySelectorAll('[data-diy-effect="'+key+'"]').forEach(el=>{
-        el.style.display = shouldShow(MODES[key]) ? '' : 'none';
-      });
-    });
+  function getNodes(key){
+    return Array.from(document.querySelectorAll('[data-diy-effect="'+key+'"]'))
+      .concat(Array.from(document.querySelectorAll('body > [id*="'+key+'"], body > [class*="'+key+'"]')));
   }
-
-  // ---------- 预加载（无需刷新） ----------
-  function preloadAllNeeded(){
-    // 这一步：只要不是 none 的都预加载（all/light/dark），避免切换后才加载导致需要刷新
-    Object.keys(EFFECTS).forEach(key=>{
-      if (MODES[key] === 'none') return;
-      if (LOADED[key]) return;
+  function purgeEffect(key){ // remove DOM nodes for a given effect
+    getNodes(key).forEach(el=>{ try{ el.remove(); }catch(e){} });
+  }
+  function ensureEffectRunning(key){ // if no nodes exist, reload its script
+    if (getNodes(key).length===0) {
       startTrack(key, 6000);
       loadJS(ASSETS + EFFECTS[key].file);
-      LOADED[key] = true;
-    });
-    // 预加载后立即做几次显隐校准
-    setTimeout(updateEffectVisibility, 400);
-    setTimeout(updateEffectVisibility, 1200);
-    setTimeout(updateEffectVisibility, 2500);
+      LOADED[key]=true;
+    }
   }
 
-  // ---------- 主入口 ----------
-  if (!window.__DIY_ALL_EFFECTS_V10__) {
-    window.__DIY_ALL_EFFECTS_V10__ = true;
+  function applyVisibilityAndRebuild(){
+    const scheme = getCurrentScheme();
+    const shouldShow = (mode) => mode==='all' || (mode==='light'&&scheme==='light') || (mode==='dark'&&scheme==='dark');
+
+    Object.keys(EFFECTS).forEach(key=>{
+      const mode = MODES[key];
+      if (mode==='none') { purgeEffect(key); return; }
+
+      if (shouldShow(mode)) {
+        // 目标是显示：如果没有节点就重建；若有节点则确保显示
+        ensureEffectRunning(key);
+        getNodes(key).forEach(el=>{ el.style.display=''; });
+      } else {
+        // 目标是不显示：直接清理（避免“静态残影”）
+        purgeEffect(key);
+      }
+    });
+  }
+
+  if (!window.__DIY_ALL_EFFECTS_V11__) {
+    window.__DIY_ALL_EFFECTS_V11__ = true;
     whenReady(function(){
-      // 1) 同步主题（.night + localStorage）
-      applySchemeSync();
-      // 也监听切换：只需刷新显隐（不再补加载，因为已预加载）
-      const syncAndRefresh = () => { applySchemeSync(); updateEffectVisibility(); };
-      const mo = new MutationObserver(syncAndRefresh);
-      mo.observe(document.documentElement, {attributes:true, attributeFilter:['class','data-theme','theme']});
-      window.addEventListener('storage', syncAndRefresh);
-      // 再加一个轻量轮询，确保第三方切换也能被捕捉
-      let last = getCurrentScheme();
-      setInterval(()=>{
-        const now = getCurrentScheme();
-        if (now !== last) { last = now; syncAndRefresh(); }
-      }, 600);
+      // 同步主题态
+      syncScheme();
 
-      // 2) DreamConfig（day/night/all/none），供脚本内部判断
+      // DreamConfig（供部分脚本读取）
       window.DreamConfig = window.DreamConfig || {};
-      DreamConfig.effects_lantern_mode       = toDayNight(MODES.lantern);
-      DreamConfig.effects_sakura_mode        = toDayNight(MODES.sakura);
-      DreamConfig.effects_snowflake_mode     = toDayNight(MODES.snow);
-      DreamConfig.effects_universe_mode      = toDayNight(MODES.universe);
-      DreamConfig.effects_circle_magic_mode  = toDayNight(MODES.circle);
-      DreamConfig.effects_quantum_silk_thread_mode = toDayNight(MODES.quantum);
+      window.DreamConfig.effects_lantern_mode       = toDayNight(MODES.lantern);
+      window.DreamConfig.effects_sakura_mode        = toDayNight(MODES.sakura);
+      window.DreamConfig.effects_snowflake_mode     = toDayNight(MODES.snow);
+      window.DreamConfig.effects_universe_mode      = toDayNight(MODES.universe);
+      window.DreamConfig.effects_circle_magic_mode  = toDayNight(MODES.circle);
+      window.DreamConfig.effects_quantum_silk_thread_mode = toDayNight(MODES.quantum);
 
-      // 3) 鼠标（不受明暗控制）
+      // 鼠标：不受明暗控制
       if (CFG.cursor_style && CFG.cursor_style !== 'none') {
         var pack=CFG.cursor_style, base=ASSETS+'/cursor/'+pack+'/';
         function urlq(n){ try{return 'url(\"'+encodeURI(base+n)+'\")'}catch(e){return 'url('+base+n+')'} }
@@ -934,12 +920,21 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
       if (CFG.cursor_move  && CFG.cursor_move  !== 'none') loadJS(ASSETS + '/js/cursor/move/'  + CFG.cursor_move  + '.min.js');
       if (CFG.cursor_click && CFG.cursor_click !== 'none') loadJS(ASSETS + '/js/cursor/click/' + CFG.cursor_click + '.min.js');
 
-      // 4) 预加载所有需要的特效脚本（all/light/dark），切换时只做显隐，无需刷新
-      preloadAllNeeded();
+      // 首次构建
+      applyVisibilityAndRebuild();
+
+      // 监听主题切换：清理不匹配并重建匹配（无需刷新）
+      const onChange = () => { syncScheme(); applyVisibilityAndRebuild(); };
+      const mo = new MutationObserver(onChange);
+      mo.observe(document.documentElement, {attributes:true, attributeFilter:['class','data-theme','theme']});
+      window.addEventListener('storage', onChange);
+      // 兜底轮询
+      let last = getCurrentScheme();
+      setInterval(()=>{ const now=getCurrentScheme(); if(now!==last){ last=now; onChange(); } }, 600);
     });
   }
 </script>
-<!-- ===== /DIY: Plus 全部接线 v10 ===== -->
+<!-- ===== /DIY: Plus 全部接线 v11 ===== -->
 
 
 
