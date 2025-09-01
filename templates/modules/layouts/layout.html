@@ -752,7 +752,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     })();
     </script>
 
-    <!-- ===== DIY: Plus 全部接线（v6：主题切换实时隐藏/显示效果） ===== -->
+    <!-- ===== DIY: Plus 全部接线（v7：动态标记特效节点，切换即刻隐藏/显示） ===== -->
 <script th:inline="javascript">
   const ASSETS = /*[[${assets_link}]]*/ '/assets';
   const THEME_VER = /*[[${theme_version}]]*/ '';
@@ -761,7 +761,6 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     cursor_style: /*[[${theme.config.style.cursor_style}]]*/ 'none',
     cursor_move:  /*[[${theme.config.style.cursor_move}]]*/  'none',
     cursor_click: /*[[${theme.config.style.cursor_click}]]*/ 'none',
-
     effects_lantern_mode:        /*[[${theme.config.style.effects_lantern_mode}]]*/ 'none',
     effects_sakura_mode:         /*[[${theme.config.style.effects_sakura_mode}]]*/ 'none',
     effects_snowflake_mode:      /*[[${theme.config.style.effects_snowflake_mode}]]*/ 'none',
@@ -792,7 +791,82 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     if(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';
     return 'light';
   }
+
   function loadJS(src){ const s=document.createElement('script'); s.src=src+THEME_VER; s.defer=true; document.body.appendChild(s); }
+
+  // ====== 动态标记新增的特效节点 ======
+  const EFFECT_KEYS = ['lantern','sakura','snow','universe','circle','quantum'];
+  const KEYWORDS = {
+    lantern:  ['lantern'],
+    sakura:   ['sakura','cherry','petal'],
+    snow:     ['snow','snowflake'],
+    universe: ['universe','star','galaxy'],
+    circle:   ['circle','circlemagic'],
+    quantum:  ['quantum']
+  };
+  const TRACK = {}; // {key: {until:number}}
+  function startTrack(key, ms){
+    const until = Date.now() + (ms||4000);
+    TRACK[key] = { until };
+  }
+  // 观察 body 新增节点，若命中关键词或是全屏 canvas，则标记 data-diy-effect=key
+  const bodyObserver = new MutationObserver((mutations)=>{
+    const now = Date.now();
+    mutations.forEach(m=>{
+      m.addedNodes && m.addedNodes.forEach(node=>{
+        if (!(node instanceof HTMLElement) && !(node instanceof HTMLCanvasElement)) return;
+        // 只处理在 body 下的直接或间接新增
+        const el = (node.nodeType===1) ? node : null;
+        EFFECT_KEYS.forEach(key=>{
+          const tk = TRACK[key];
+          if (!tk || tk.until < now) return;
+          tagIfMatch(el, key);
+          if (el) el.querySelectorAll('*').forEach(child=>tagIfMatch(child, key));
+        });
+      });
+    });
+  });
+  bodyObserver.observe(document.body, { childList:true, subtree:true });
+
+  function hasKeyword(el, arr){
+    const id=(el.id||'').toLowerCase(), cls=(el.className||'').toString().toLowerCase();
+    return arr.some(k=> id.includes(k) || cls.includes(k));
+  }
+  function isFullCanvas(el){
+    if (!(el instanceof HTMLCanvasElement)) return false;
+    const r = el.getBoundingClientRect();
+    return r.width>=window.innerWidth*0.9 && r.height>=window.innerHeight*0.6;
+  }
+  function tagIfMatch(el, key){
+    if(!el || el.dataset.diyEffect) return;
+    const kws = KEYWORDS[key];
+    if (hasKeyword(el, kws) || isFullCanvas(el) ) {
+      el.dataset.diyEffect = key;
+      // 不挡交互
+      try { el.style.pointerEvents = 'none'; } catch(e){}
+    }
+  }
+
+  function updateEffectVisibility(){
+    const scheme = getCurrentScheme(); // 'light' | 'dark'
+    const modes = {
+      lantern:  normMode(CFG.effects_lantern_mode),
+      sakura:   normMode(CFG.effects_sakura_mode),
+      snow:     normMode(CFG.effects_snowflake_mode),
+      universe: normMode(CFG.effects_universe_mode),
+      circle:   normMode(CFG.effects_circle_magic_mode),
+      quantum:  normMode(CFG.effects_quantum_silk_thread_mode),
+    };
+    function shouldShow(mode){
+      return mode==='all' || (mode==='light'&&scheme==='light') || (mode==='dark'&&scheme==='dark');
+    }
+    EFFECT_KEYS.forEach(key=>{
+      document.querySelectorAll('[data-diy-effect="'+key+'"]').forEach(el=>{
+        el.style.display = shouldShow(modes[key]) ? '' : 'none';
+      });
+    });
+  }
+
   function whenReady(cb){
     let tries=0;(function tick(){
       const ready=document.documentElement.getAttribute('data-theme')
@@ -803,54 +877,11 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     })();
   }
 
-  // 根据模式显示/隐藏已创建的节点（不刷新不重载）
-  function updateEffectVisibility(){
-    const scheme = getCurrentScheme(); // 'light' | 'dark'
-    const need = {
-      lantern:  normMode(CFG.effects_lantern_mode),
-      sakura:   normMode(CFG.effects_sakura_mode),
-      snow:     normMode(CFG.effects_snowflake_mode),
-      universe: normMode(CFG.effects_universe_mode),
-      circle:   normMode(CFG.effects_circle_magic_mode),
-      quantum:  normMode(CFG.effects_quantum_silk_thread_mode),
-    };
-    function on(mode){ return mode==='all' || (mode==='light'&&scheme==='light') || (mode==='dark'&&scheme==='dark'); }
-
-    const maps = {
-      lantern:  'body > .lantern, body > [class*="lantern"]',
-      sakura:   'body > [id*="sakura"], body > [class*="sakura"]',
-      snow:     'body > [id*="snow"], body > [class*="snowflake"], body > [class*="snow"]',
-      universe: 'body > [id*="universe"], body > [class*="universe"]',
-      circle:   'body > [id*="circle"], body > [class*="circleMagic"], body > [class*="circlemagic"]',
-      quantum:  'body > [id*="quantum"], body > [class*="quantum"]'
-    };
-    Object.keys(maps).forEach(key=>{
-      const show = on(need[key]);
-      document.querySelectorAll(maps[key]).forEach(el=>{
-        el.style.display = show ? '' : 'none';
-      });
-    });
-  }
-
-  // 将当前主题同步成 html.night（Plus 脚本习惯用它判断昼夜）并在变更时刷新可见性
-  function syncNightAndWatch(){
-    function sync(){
-      const isDark = getCurrentScheme()==='dark';
-      document.documentElement.classList.toggle('night', isDark);
-      try{ localStorage.setItem('special-efficacy-scheme', isDark ? 'dark' : 'light'); }catch(e){}
-      // 同步后立刻刷新可见性
-      updateEffectVisibility();
-    }
-    const obs = new MutationObserver(sync);
-    obs.observe(document.documentElement,{attributes:true,attributeFilter:['class','data-theme','theme']});
-    window.addEventListener('storage', sync);
-    setTimeout(sync,0); setTimeout(sync,200); setTimeout(sync,600);
-  }
-
-  if(!window.__DIY_ALL_EFFECTS_V6__){
-    window.__DIY_ALL_EFFECTS_V6__=true;
+  if(!window.__DIY_ALL_EFFECTS_V7__){
+    window.__DIY_ALL_EFFECTS_V7__=true;
     whenReady(function(){
-      // DreamConfig 仅给 6 个显示模式（供脚本读取，一律 day/night/all/none）
+
+      // DreamConfig 给 Plus 脚本（day/night/all/none）
       window.DreamConfig = window.DreamConfig || {};
       DreamConfig.effects_lantern_mode       = toDayNight(normMode(CFG.effects_lantern_mode));
       DreamConfig.effects_sakura_mode        = toDayNight(normMode(CFG.effects_sakura_mode));
@@ -858,10 +889,10 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
       DreamConfig.effects_universe_mode      = toDayNight(normMode(CFG.effects_universe_mode));
       DreamConfig.effects_circle_magic_mode  = toDayNight(normMode(CFG.effects_circle_magic_mode));
       DreamConfig.effects_quantum_silk_thread_mode = toDayNight(normMode(CFG.effects_quantum_silk_thread_mode));
-      DreamConfig.lantern_left_text  = DreamConfig.lantern_left_text  || '';
-      DreamConfig.lantern_right_text = DreamConfig.lantern_right_text || '';
 
-      // 1) 鼠标风格
+      try { localStorage.setItem('special-efficacy-scheme', getCurrentScheme()); } catch(e){}
+
+      // 光标风格
       if (CFG.cursor_style && CFG.cursor_style !== 'none') {
         var pack = CFG.cursor_style;
         var base = ASSETS + '/cursor/' + pack + '/';
@@ -875,11 +906,11 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
         var st=document.createElement('style'); st.textContent=css; document.head.appendChild(st);
       }
 
-      // 2) 鼠标移动/点击（与明暗无关）
+      // 鼠标移动/点击（独立于明暗）
       if (CFG.cursor_move && CFG.cursor_move !== 'none')  loadJS(ASSETS + '/js/cursor/move/' + CFG.cursor_move + '.min.js');
       if (CFG.cursor_click && CFG.cursor_click !== 'none') loadJS(ASSETS + '/js/cursor/click/' + CFG.cursor_click + '.min.js');
 
-      // 3) 6 项显示模式：mode=none 不加载；其余加载一次
+      // 6 项显示模式：mode = none 不加载，其余加载 + 开启2s跟踪窗口，标记新增节点
       const modes = {
         lantern:  normMode(CFG.effects_lantern_mode),
         sakura:   normMode(CFG.effects_sakura_mode),
@@ -888,23 +919,28 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
         circle:   normMode(CFG.effects_circle_magic_mode),
         quantum:  normMode(CFG.effects_quantum_silk_thread_mode),
       };
-      if (modes.lantern  !== 'none') loadJS(ASSETS + '/js/effects/lantern.min.js');
-      if (modes.sakura   !== 'none') loadJS(ASSETS + '/js/effects/sakura.min.js');
-      if (modes.snow     !== 'none') loadJS(ASSETS + '/js/effects/snowflake.min.js');
-      if (modes.universe !== 'none') loadJS(ASSETS + '/js/effects/universe.min.js');
-      if (modes.circle   !== 'none') loadJS(ASSETS + '/js/effects/circleMagic.min.js');
-      if (modes.quantum  !== 'none') loadJS(ASSETS + '/js/effects/quantum.min.js');
+      function boot(key, file){
+        if (modes[key]==='none') return;
+        startTrack(key, 4000);
+        loadJS(file);
+      }
+      boot('lantern',  ASSETS + '/js/effects/lantern.min.js');
+      boot('sakura',   ASSETS + '/js/effects/sakura.min.js');
+      boot('snow',     ASSETS + '/js/effects/snowflake.min.js');
+      boot('universe', ASSETS + '/js/effects/universe.min.js');
+      boot('circle',   ASSETS + '/js/effects/circleMagic.min.js');
+      boot('quantum',  ASSETS + '/js/effects/quantum.min.js');
 
-      // 4) 同步 night 类并在切换时立即更新可见性
-      syncNightAndWatch();
-      // 初次创建后稍等脚本把节点插入，再刷新几次可见性
-      setTimeout(updateEffectVisibility, 300);
-      setTimeout(updateEffectVisibility, 1000);
-      setTimeout(updateEffectVisibility, 2000);
+      // 首次渲染完成后刷新一次可见性；主题切换时也刷新
+      setTimeout(updateEffectVisibility, 1200);
+      setTimeout(updateEffectVisibility, 2500);
+      window.addEventListener('storage', updateEffectVisibility);
+      const obs = new MutationObserver(updateEffectVisibility);
+      obs.observe(document.documentElement,{attributes:true,attributeFilter:['class','data-theme','theme']});
     });
   }
 </script>
-<!-- ===== /DIY: Plus 全部接线 v6 ===== -->
+<!-- ===== /DIY: Plus 全部接线 v7 ===== -->
 
 
 
