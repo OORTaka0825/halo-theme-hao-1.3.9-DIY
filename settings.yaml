@@ -3227,6 +3227,158 @@ spec:
           label: 全局字体
           placeholder: '"PingFang SC", "Hiragino Sans GB", "Microsoft YaHei"'
 
+        - $formkit: select
+          name: cursor_style
+          label: 鼠标风格
+          value: none
+          options:
+            - value: none
+              label: 关闭
+            - value: OwO
+              label: OwO
+            - value: UwU
+              label: UwU
+            - value: breeze
+              label: 清风（深色）
+            - value: mellow
+              label: 卡通圆润
+            - value: water_01
+              label: 彩虹水滴（一）
+            - value: water_02
+              label: 彩虹水滴（二）
+            - value: horse
+              label: 彩虹小马
+            - value: debris
+              label: 彩色碎片
+            - value: overwatch
+              label: 守望先锋
+            - value: rainbow_rain
+              label: 彩虹云雨
+            - value: marry
+              label: 小樱茉莉
+            - value: black_cat
+              label: 黑色小猫
+            - value: music_cat_01
+              label: 音乐小猫（一）
+            - value: music_cat_02
+              label: 音乐小猫（二）
+        - $formkit: select
+          name: cursor_move
+          label: 鼠标移动特效
+          value: none
+          options:
+            - value: none
+              label: 关闭
+            - value: bubbleCursor
+              label: 气泡跟随
+            - value: emojiCursor
+              label: 表情包跟随
+            - value: springyEmojiCursor
+              label: 弹性表情包跟随
+            - value: fairyDustCursor
+              label: 仙女棒效果
+            - value: snowflakeCursor
+              label: 雪花跟随
+            - value: followingDotCursor
+              label: 圆点跟随
+            - value: ghostCursor
+              label: 移动残影（疏）
+            - value: trailingCursor
+              label: 移动残影（密）
+        - $formkit: select
+          name: cursor_click
+          label: 鼠标点击特效
+          value: none
+          options:
+            - value: none
+              label: 关闭
+            - value: firework
+              label: 烟花特效
+            - value: granule
+              label: 粒子爆炸
+            - value: prosperous
+              label: 富强民主
+            - value: heart
+              label: 爱心特效
+        - $formkit: radio
+          name: effects_lantern_mode
+          id: effects_lantern_mode
+          label: 灯笼特效显示模式
+          value: none
+          options:
+            - value: none
+              label: 不显示
+            - value: day
+              label: 明亮模式
+            - value: night
+              label: 黑暗模式
+            - value: all
+              label: 全模式
+        - $formkit: radio
+          name: effects_sakura_mode
+          label: 樱花飘落特效显示模式
+          value: none
+          options:
+            - value: none
+              label: 不显示
+            - value: day
+              label: 明亮模式
+            - value: night
+              label: 黑暗模式
+            - value: all
+              label: 全模式
+        - $formkit: radio
+          name: effects_snowflake_mode
+          label: 雪花飘落特效显示模式
+          value: none
+          options:
+            - value: none
+              label: 不显示
+            - value: day
+              label: 明亮模式
+            - value: night
+              label: 黑暗模式
+            - value: all
+              label: 全模式
+        - $formkit: radio
+          name: effects_universe_mode
+          label: 宇宙星空特效显示模式
+          value: night
+          options:
+            - value: none
+              label: 不显示
+            - value: day
+              label: 明亮模式
+            - value: night
+              label: 黑暗模式
+            - value: all
+              label: 全模式
+        - $formkit: radio
+          name: effects_circle_magic_mode
+          label: 上升圆点特效显示模式
+          value: none
+          options:
+            - value: none
+              label: 不显示
+            - value: day
+              label: 明亮模式
+            - value: night
+              label: 黑暗模式
+            - value: all
+              label: 全模式
+        - $formkit: radio
+          name: effects_quantum_silk_thread_mode
+          label: 量子丝线特效显示模式
+          value: none
+          options:
+            - value: none
+              label: 不显示
+            - value: day
+              label: 明亮模式
+            - value: night
+              label: 黑暗模式
+            - value: all
+              label: 全模式
     - group: code
       label: 代码块
       formSchema:
