@@ -752,12 +752,11 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     })();
     </script>
 
-    <!-- ===== DIY: Plus 全部接线（v5：修复 day/night，mode=none 不加载） ===== -->
+    <!-- ===== DIY: Plus 全部接线（v6：主题切换实时隐藏/显示效果） ===== -->
 <script th:inline="javascript">
   const ASSETS = /*[[${assets_link}]]*/ '/assets';
   const THEME_VER = /*[[${theme_version}]]*/ '';
 
-  // 后台配置
   const CFG = {
     cursor_style: /*[[${theme.config.style.cursor_style}]]*/ 'none',
     cursor_move:  /*[[${theme.config.style.cursor_move}]]*/  'none',
@@ -771,68 +770,87 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     effects_quantum_silk_thread_mode: /*[[${theme.config.style.effects_quantum_silk_thread_mode}]]*/ 'none'
   };
 
-  // 量子丝线图片
   window.DIY_WORDLINE_IMG = ASSETS + '/images/wordline.webp';
 
-  // ===== helpers =====
   function normMode(v){
-    const s = (v || '').toString().trim().toLowerCase();
-    if (['明亮模式','亮','light','day','浅色','白天'].includes(s)) return 'light';
-    if (['黑暗模式','暗','dark','night','深色','夜间'].includes(s)) return 'dark';
-    if (['全模式','全部','all'].includes(s)) return 'all';
-    if (['不显示','关闭','none','off'].includes(s)) return 'none';
-    return s || 'none';
+    const s=(v||'').toString().trim().toLowerCase();
+    if(['明亮模式','亮','light','day','浅色','白天'].includes(s)) return 'light';
+    if(['黑暗模式','暗','dark','night','深色','夜间'].includes(s)) return 'dark';
+    if(['全模式','全部','all'].includes(s)) return 'all';
+    if(['不显示','关闭','none','off'].includes(s)) return 'none';
+    return s||'none';
   }
-  const toDayNight = (m) => (m==='light' ? 'day' : (m==='dark' ? 'night' : m));
+  const toDayNight = m => (m==='light'?'day':(m==='dark'?'night':m));
 
   function getCurrentScheme(){
-    const html = document.documentElement;
-    const attr = (html.getAttribute('data-theme') || html.getAttribute('theme') || '').toLowerCase();
-    if (attr === 'dark') return 'dark';
-    if (html.classList.contains('dark')) return 'dark';
-    const ls = (localStorage.getItem('theme') || localStorage.getItem('special-efficacy-scheme') || '').toLowerCase();
-    if (ls === 'dark' || ls === 'night') return 'dark';
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';
+    const html=document.documentElement;
+    const attr=(html.getAttribute('data-theme')||html.getAttribute('theme')||'').toLowerCase();
+    if(attr==='dark') return 'dark';
+    if(html.classList.contains('dark')) return 'dark';
+    const ls=(localStorage.getItem('theme')||localStorage.getItem('special-efficacy-scheme')||'').toLowerCase();
+    if(ls==='dark'||ls==='night') return 'dark';
+    if(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';
     return 'light';
   }
-  function syncNightClass(){
-    const html = document.documentElement;
-    const isDark = getCurrentScheme() === 'dark';
-    html.classList.toggle('night', isDark);
-    try { localStorage.setItem('special-efficacy-scheme', isDark ? 'dark' : 'light'); } catch(e){}
-  }
-  function observeThemeChanges(){
-    const html = document.documentElement;
-    const obs = new MutationObserver(syncNightClass);
-    obs.observe(html, { attributes: true, attributeFilter: ['class','data-theme','theme'] });
-    window.addEventListener('storage', syncNightClass);
-    // 兜底：部分主题切换用脚本直接改样式，定时同步一次
-    setTimeout(syncNightClass, 0);
-    setTimeout(syncNightClass, 200);
-    setTimeout(syncNightClass, 600);
-  }
-
   function loadJS(src){ const s=document.createElement('script'); s.src=src+THEME_VER; s.defer=true; document.body.appendChild(s); }
   function whenReady(cb){
     let tries=0;(function tick(){
-      const ready = document.documentElement.getAttribute('data-theme')
-               || document.documentElement.classList.contains('dark')
-               || localStorage.getItem('theme')
-               || localStorage.getItem('special-efficacy-scheme');
-      if (ready || tries>40) return cb(); tries++; setTimeout(tick, 50);
+      const ready=document.documentElement.getAttribute('data-theme')
+            ||document.documentElement.classList.contains('dark')
+            ||localStorage.getItem('theme')
+            ||localStorage.getItem('special-efficacy-scheme');
+      if(ready||tries>40) return cb(); tries++; setTimeout(tick,50);
     })();
   }
 
-  // ===== main =====
-  if (!window.__DIY_ALL_EFFECTS_V5__) {
-    window.__DIY_ALL_EFFECTS_V5__ = true;
+  // 根据模式显示/隐藏已创建的节点（不刷新不重载）
+  function updateEffectVisibility(){
+    const scheme = getCurrentScheme(); // 'light' | 'dark'
+    const need = {
+      lantern:  normMode(CFG.effects_lantern_mode),
+      sakura:   normMode(CFG.effects_sakura_mode),
+      snow:     normMode(CFG.effects_snowflake_mode),
+      universe: normMode(CFG.effects_universe_mode),
+      circle:   normMode(CFG.effects_circle_magic_mode),
+      quantum:  normMode(CFG.effects_quantum_silk_thread_mode),
+    };
+    function on(mode){ return mode==='all' || (mode==='light'&&scheme==='light') || (mode==='dark'&&scheme==='dark'); }
 
+    const maps = {
+      lantern:  'body > .lantern, body > [class*="lantern"]',
+      sakura:   'body > [id*="sakura"], body > [class*="sakura"]',
+      snow:     'body > [id*="snow"], body > [class*="snowflake"], body > [class*="snow"]',
+      universe: 'body > [id*="universe"], body > [class*="universe"]',
+      circle:   'body > [id*="circle"], body > [class*="circleMagic"], body > [class*="circlemagic"]',
+      quantum:  'body > [id*="quantum"], body > [class*="quantum"]'
+    };
+    Object.keys(maps).forEach(key=>{
+      const show = on(need[key]);
+      document.querySelectorAll(maps[key]).forEach(el=>{
+        el.style.display = show ? '' : 'none';
+      });
+    });
+  }
+
+  // 将当前主题同步成 html.night（Plus 脚本习惯用它判断昼夜）并在变更时刷新可见性
+  function syncNightAndWatch(){
+    function sync(){
+      const isDark = getCurrentScheme()==='dark';
+      document.documentElement.classList.toggle('night', isDark);
+      try{ localStorage.setItem('special-efficacy-scheme', isDark ? 'dark' : 'light'); }catch(e){}
+      // 同步后立刻刷新可见性
+      updateEffectVisibility();
+    }
+    const obs = new MutationObserver(sync);
+    obs.observe(document.documentElement,{attributes:true,attributeFilter:['class','data-theme','theme']});
+    window.addEventListener('storage', sync);
+    setTimeout(sync,0); setTimeout(sync,200); setTimeout(sync,600);
+  }
+
+  if(!window.__DIY_ALL_EFFECTS_V6__){
+    window.__DIY_ALL_EFFECTS_V6__=true;
     whenReady(function(){
-      // 同步 night 类（Plus 特效脚本用 .night 判定昼夜）
-      syncNightClass();
-      observeThemeChanges();
-
-      // DreamConfig：仅 6 项显示模式（供 Plus 脚本读取）
+      // DreamConfig 仅给 6 个显示模式（供脚本读取，一律 day/night/all/none）
       window.DreamConfig = window.DreamConfig || {};
       DreamConfig.effects_lantern_mode       = toDayNight(normMode(CFG.effects_lantern_mode));
       DreamConfig.effects_sakura_mode        = toDayNight(normMode(CFG.effects_sakura_mode));
@@ -843,7 +861,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
       DreamConfig.lantern_left_text  = DreamConfig.lantern_left_text  || '';
       DreamConfig.lantern_right_text = DreamConfig.lantern_right_text || '';
 
-      // 1) 鼠标风格（光标包）
+      // 1) 鼠标风格
       if (CFG.cursor_style && CFG.cursor_style !== 'none') {
         var pack = CFG.cursor_style;
         var base = ASSETS + '/cursor/' + pack + '/';
@@ -854,34 +872,39 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
           'a, button, [role=\"button\"], input[type=button], input[type=submit] { cursor: ' + urls(['hand.cur','Hand.cur','link.cur','Link.cur','hand.ani','Link.ani','Alternate Select.cur','alternate.cur']) + ', pointer !important; }',
           'input[type=text], input[type=search], textarea, .text, .textbox, .input { cursor: ' + urls(['ibeam.cur','IBeam.cur','beam.cur','Beam.cur','text.cur','Text.cur','ibeam.ani','Escritura a Mano.cur','Handwriting.cur','texto.cur']) + ', text !important; }'
         ].join('\\n');
-        var st = document.createElement('style');
-        st.textContent = css;
-        document.head.appendChild(st);
+        var st=document.createElement('style'); st.textContent=css; document.head.appendChild(st);
       }
 
-      // 2) 鼠标移动/点击（不受明暗控制）
+      // 2) 鼠标移动/点击（与明暗无关）
       if (CFG.cursor_move && CFG.cursor_move !== 'none')  loadJS(ASSETS + '/js/cursor/move/' + CFG.cursor_move + '.min.js');
       if (CFG.cursor_click && CFG.cursor_click !== 'none') loadJS(ASSETS + '/js/cursor/click/' + CFG.cursor_click + '.min.js');
 
-      // 3) 6个显示模式：mode=none 不加载；light/dark/all 则加载，由脚本内部结合 .night 决定是否渲染
+      // 3) 6 项显示模式：mode=none 不加载；其余加载一次
       const modes = {
         lantern:  normMode(CFG.effects_lantern_mode),
         sakura:   normMode(CFG.effects_sakura_mode),
-        snowflake:normMode(CFG.effects_snowflake_mode),
+        snow:     normMode(CFG.effects_snowflake_mode),
         universe: normMode(CFG.effects_universe_mode),
         circle:   normMode(CFG.effects_circle_magic_mode),
         quantum:  normMode(CFG.effects_quantum_silk_thread_mode),
       };
       if (modes.lantern  !== 'none') loadJS(ASSETS + '/js/effects/lantern.min.js');
       if (modes.sakura   !== 'none') loadJS(ASSETS + '/js/effects/sakura.min.js');
-      if (modes.snowflake!== 'none') loadJS(ASSETS + '/js/effects/snowflake.min.js');
+      if (modes.snow     !== 'none') loadJS(ASSETS + '/js/effects/snowflake.min.js');
       if (modes.universe !== 'none') loadJS(ASSETS + '/js/effects/universe.min.js');
       if (modes.circle   !== 'none') loadJS(ASSETS + '/js/effects/circleMagic.min.js');
       if (modes.quantum  !== 'none') loadJS(ASSETS + '/js/effects/quantum.min.js');
+
+      // 4) 同步 night 类并在切换时立即更新可见性
+      syncNightAndWatch();
+      // 初次创建后稍等脚本把节点插入，再刷新几次可见性
+      setTimeout(updateEffectVisibility, 300);
+      setTimeout(updateEffectVisibility, 1000);
+      setTimeout(updateEffectVisibility, 2000);
     });
   }
 </script>
-<!-- ===== /DIY: Plus 全部接线 v5 ===== -->
+<!-- ===== /DIY: Plus 全部接线 v6 ===== -->
 
 
 
