@@ -654,7 +654,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 </script>
 
 
-    <!-- DIY × PLUS 一体化 Loader · v12-merge + DreamConfig · SnowOnce(切换必显&不加速) -->
+    <!-- DIY × PLUS 一体化 Loader · v12-merge + DreamConfig + SnowRebuildSafe（仅修雪花加速） -->
 <script th:inline="javascript">
 (function(){
   /* ========= 基础 ========= */
@@ -733,7 +733,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   DreamConfig.cursor_click  = (CFG.cursor_click && CFG.cursor_click !=='none') ? CFG.cursor_click : '';
   DreamConfig.effects_lantern_mode             = CFG.effects_lantern_mode;
   DreamConfig.effects_sakura_mode              = CFG.effects_sakura_mode;
-  DreamConfig.effects_snowflake_mode           = CFG.effects_snowflake_mode;  // ← 关键只读一次
+  DreamConfig.effects_snowflake_mode           = CFG.effects_snowflake_mode;
   DreamConfig.effects_universe_mode            = CFG.effects_universe_mode;
   DreamConfig.effects_circle_magic_mode        = CFG.effects_circle_magic_mode;
   DreamConfig.effects_quantum_silk_thread_mode = CFG.effects_quantum_silk_thread_mode;
@@ -812,47 +812,84 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     st.textContent = css;
   }
 
-  /* ========= 只修“雪花” —— 单实例 + 强制显隐（切换必显 & 不加速） ========= */
-  const SnowOnce = (function(){
-    let loaded  = false;   // 是否已成功执行过雪花脚本
-    let loading = false;   // 正在加载中
-    let mo      = null;    // 监听器（等待脚本创建容器）
+  /* ========= 雪花：重建但不加速（只拦截“来自 snowflake 脚本”的句柄） ========= */
+  const SnowRebuilder = (function(){
+    const Orig = {
+      setInterval: window.setInterval,
+      clearInterval: window.clearInterval,
+      setTimeout: window.setTimeout,
+      clearTimeout: window.clearTimeout,
+      requestAnimationFrame: window.requestAnimationFrame,
+      cancelAnimationFrame: window.cancelAnimationFrame,
+      addEventListener: window.addEventListener,
+      removeEventListener: window.removeEventListener,
+      docAdd: document.addEventListener,
+      docRemove: document.removeEventListener
+    };
+    let records = { timers:[], timeouts:[], rafs:[], listeners:[] };
+    let capturing = false;
+
+    function isFromSnow(){
+      try{
+        const st = (new Error()).stack || '';
+        return /snowflake/i.test(st);
+      }catch(e){ return false; }
+    }
+
+    function hookStart(){
+      if (capturing) return;
+      capturing = true;
+
+      window.setInterval = function(fn,ms){ const id=Orig.setInterval(fn,ms); if (isFromSnow()) records.timers.push(id); return id; };
+      window.setTimeout  = function(fn,ms){ const id=Orig.setTimeout(fn,ms);  if (isFromSnow()) records.timeouts.push(id); return id; };
+      window.requestAnimationFrame = function(cb){ const id=Orig.requestAnimationFrame(cb); if (isFromSnow()) records.rafs.push(id); return id; };
+
+      window.addEventListener = function(type,handler,opts){ Orig.addEventListener.call(window,type,handler,opts); if (isFromSnow()) records.listeners.push({t:window,type,handler,opts}); };
+      document.addEventListener = function(type,handler,opts){ Orig.docAdd.call(document,type,handler,opts); if (isFromSnow()) records.listeners.push({t:document,type,handler,opts}); };
+    }
+
+    function hookStop(){
+      if (!capturing) return;
+      capturing = false;
+      window.setInterval = Orig.setInterval;
+      window.clearInterval = Orig.clearInterval;
+      window.setTimeout = Orig.setTimeout;
+      window.clearTimeout = Orig.clearTimeout;
+      window.requestAnimationFrame = Orig.requestAnimationFrame;
+      window.cancelAnimationFrame  = Orig.cancelAnimationFrame;
+      window.addEventListener = Orig.addEventListener;
+      window.removeEventListener = Orig.removeEventListener;
+      document.addEventListener = Orig.docAdd;
+      document.removeEventListener = Orig.docRemove;
+    }
+
+    function killPrev(){
+      try{
+        records.timers.forEach(id=>Orig.clearInterval(id));
+        records.timeouts.forEach(id=>Orig.clearTimeout(id));
+        records.rafs.forEach(id=>Orig.cancelAnimationFrame(id));
+        records.listeners.forEach(it=>{ try{ it.t.removeEventListener(it.type, it.handler, it.opts); }catch(e){} });
+      }catch(e){}
+      records = { timers:[], timeouts:[], rafs:[], listeners:[] };
+      // 移除 DOM & 旧脚本
+      document.querySelectorAll('#Snow,[id*="snow"],[class*="snow"]').forEach(el=>{ try{ el.remove(); }catch(e){} });
+      const old = document.getElementById('fx-snow'); if (old) try{ old.remove(); }catch(e){}
+      // 同时把任何 src 含 snowflake 的脚本都清一遍（保险）
+      document.querySelectorAll('script[src*="snowflake"]').forEach(s=>{ try{s.remove();}catch(e){} });
+    }
 
     function buildCandidates(){
-      const out = [];
+      const list = [];
       ASSET_BASES.forEach(base=>{
         ['js/effects/snowflake','effects/snowflake'].forEach(rp=>{
           const p = (base.replace(/\/+$/,'') + '/' + rp).replace(/\/{2,}/g,'/');
-          out.push(p + '.min.js'); out.push(p + '.js');
+          list.push(p + '.min.js'); list.push(p + '.js');
         });
       });
-      return out;
+      return list;
     }
-    function snowNodes(){
-      return Array.from(document.querySelectorAll('#Snow,[id*="snow"],[class*="snow"]'))
-        .filter(el => el && el !== document.body && el !== document.documentElement);
-    }
-    function styleAsOverlay(el){
-      el.style.position = 'fixed';
-      el.style.left = '0'; el.style.top = '0';
-      el.style.width = '100vw'; el.style.height = '100vh';
-      el.style.pointerEvents = 'none';
-      el.style.zIndex = '1';
-      el.style.background = 'transparent';
-    }
-    function forceShowNow(){
-      const nodes = snowNodes();
-      nodes.forEach(el=>{
-        el.style.display   = 'block';
-        el.style.opacity   = '1';
-        el.style.visibility= 'visible';
-        styleAsOverlay(el);
-      });
-    }
-    function hideNow(){
-      snowNodes().forEach(el=>{ el.style.display = 'none'; });
-    }
-    function needNow(){
+
+    function shouldLoadNow(){
       const m = DreamConfig.effects_snowflake_mode || '';
       if (!m) return false;
       const dark = document.documentElement.classList.contains('night');
@@ -861,49 +898,40 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
       if (m==='night')return dark;
       return false;
     }
-    function ensureLoadedThenShow(){
-      if (loaded){ forceShowNow(); return; }
-      if (loading) return; // 等待中
 
-      loading = true;
+    function start(){
+      if (!shouldLoadNow()){ killPrev(); return; }
+
+      // 先干净清掉上一次
+      killPrev();
+
+      // 非常短的捕获窗口（只记录“来自 snowflake 脚本”的句柄）
+      hookStart();
+
       const cand = buildCandidates();
-      let i=0;
-
-      // 建立一个短期 MutationObserver，确保脚本异步创建容器时能立刻显示
-      if (mo) { try{ mo.disconnect(); }catch(e){} mo = null; }
-      mo = new MutationObserver(()=>{ forceShowNow(); });
-      mo.observe(document.body, {childList:true, subtree:true});
-
-      (function tryNext(){
-        if (i >= cand.length){ loading=false; return; }
-        const s = document.createElement('script');
-        s.defer = true;
-        s.src = cand[i++] + '?v=' + encodeURIComponent(THEME_VER || '') + '&r=' + Date.now();
+      let i=0, s=document.createElement('script'); s.defer=true; s.id='fx-snow';
+      function tryNext(){
+        if (i>=cand.length){ hookStop(); return; }
+        s = document.createElement('script'); s.defer=true; s.id='fx-snow';
+        s.src = cand[i++] + '?v=' + encodeURIComponent(DreamConfig.theme_version) + '&r=' + Date.now();
         s.onload = function(){
-          // 脚本已执行；给它一点时间创建 DOM，再强制显一次
-          loaded  = true;
-          loading = false;
-          setTimeout(forceShowNow, 20);
-          setTimeout(forceShowNow, 150);
-          setTimeout(()=>{ if (mo){ try{ mo.disconnect(); }catch(e){} mo=null; } }, 1200);
+          // 给脚本一点时间创建 DOM/计时器，然后停止捕获
+          setTimeout(hookStop, 120);
+          // 再补一次兜底（避免某些情况下 onload 早于内部初始化）
+          setTimeout(hookStop, 300);
         };
         s.onerror = function(){ s.remove(); tryNext(); };
         document.body.appendChild(s);
-      })();
-    }
-    function update(){
-      if (needNow()){
-        ensureLoadedThenShow();  // 需要 → 若未加载就加载；加载后/已加载 → 强制显示
-      }else{
-        hideNow();               // 不需要 → 仅隐藏（不销毁，不重复注入脚本）
       }
+      tryNext();
     }
-    return { update };
+
+    return { start };
   })();
 
   /* ========= 其它公共 ========= */
   function cleanEffectLayers(){
-    // 不动雪花（单实例复用）；其它按原逻辑清理
+    // 不动雪花；其它按原逻辑清理
     document.querySelectorAll('.canvas_effects,#universe_canvas,#quantum_c_n,.j-china-lantern,[id^=sakura]')
       .forEach(el=>{ try{ el.remove(); }catch(e){} });
     ['fx-sakura','fx-universe','fx-circle','fx-quantum','fx-lantern'].forEach(id=>{
@@ -920,7 +948,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     if (isMobile()) return;
     if (shouldLoad(DreamConfig.effects_lantern_mode))             loadFromBases('fx-lantern',['js/effects/lantern','effects/lantern']);
     if (shouldLoad(DreamConfig.effects_sakura_mode))              loadFromBases('fx-sakura', ['js/effects/sakura','effects/sakura']);
-    SnowOnce.update();                                            // ★ 雪花：单实例 + 切换必显
+    SnowRebuilder.start();                                       // ★ 雪花：重建但不叠速
     if (shouldLoad(DreamConfig.effects_universe_mode))            loadFromBases('fx-universe',['js/effects/universe','effects/universe']);
     if (shouldLoad(DreamConfig.effects_circle_magic_mode))        loadFromBases('fx-circle',  ['js/effects/circleMagic','effects/circleMagic']);
     if (shouldLoad(DreamConfig.effects_quantum_silk_thread_mode)) loadFromBases('fx-quantum', ['js/effects/quantum','effects/quantum']);
@@ -936,7 +964,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   window.addEventListener('pjax:complete', ()=>{ syncNightClass(); initAll(); });
   window.addEventListener('hao:mode-change', ()=>{
     cleanEffectLayers();
-    initCanvasEffects();   // 雪花会在这里“必显示”，且只加载一次，不会越切越快
+    initCanvasEffects();   // 每次切换都会重建雪花，但不会越切越快
   });
 
   try{
