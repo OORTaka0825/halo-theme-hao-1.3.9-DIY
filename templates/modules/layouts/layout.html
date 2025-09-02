@@ -752,36 +752,35 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     })();
     </script>
 
-    <!-- DIY × PLUS 特效与光标一体化 Loader · v12-merge -->
+    <!-- DIY × PLUS 特效/光标一体化 Loader · v12-merge + DreamConfig -->
 <script th:inline="javascript">
-(function () {
-  /* ================= 基础变量 ================= */
+(function(){
+  /* ========== 基础 ========= */
   const THEME_VER  = /*[[${theme.spec.version}]]*/ '';
   const RAW_ASSETS = /*[[${assets_link}]]*/ '';
 
-  /* ============ 自动探测 /themes/<id>/assets ============ */
-  function detectAssetBases() {
+  // 自动探测真实 /themes/<id>/assets
+  function detectAssetBases(){
     const set = new Set();
-    if (RAW_ASSETS) {
+    if (RAW_ASSETS){
       const a = String(RAW_ASSETS).replace(/\/+$/,'');
       set.add(a);
       set.add(a + '/assets');
     }
-    // 从已加载的主题 CSS/JS 推断
     document.querySelectorAll('link[href*="/themes/"],script[src*="/themes/"]').forEach(n=>{
-      const url = n.getAttribute('href') || n.getAttribute('src') || '';
-      const m1 = url.match(/(\/themes\/[^/]+)\/assets\//);
+      const u = n.getAttribute('href') || n.getAttribute('src') || '';
+      const m1 = u.match(/(\/themes\/[^/]+)\/assets\//);
       if (m1 && m1[1]) set.add(m1[1] + '/assets');
-      const m2 = url.match(/(\/themes\/[^/]+)\//);
+      const m2 = u.match(/(\/themes\/[^/]+)\//);
       if (m2 && m2[1]) set.add(m2[1] + '/assets');
     });
     const arr = Array.from(set).filter(Boolean);
-    return arr.length ? arr : ['/themes/halo-theme-hao/assets']; // 兜底
+    return arr.length ? arr : ['/themes/halo-theme-hao/assets'];
   }
   const ASSET_BASES = detectAssetBases();
+  const FIRST_ASSETS = ASSET_BASES[0].replace(/\/+$/,'');
 
-  /* ============ 读取配置（enhance 优先，style 兜底） ============ */
-  // 先取一份 enhance 值
+  /* ========== 读取配置（enhance 优先，style 兜底） ========= */
   const _e = {
     cursor_style: /*[[${theme.config.enhance.cursor_style}]]*/ null,
     cursor_move:  /*[[${theme.config.enhance.cursor_move}]]*/ null,
@@ -797,7 +796,6 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     effects_lantern_left:  /*[[${theme.config.enhance.effects_lantern.effects_lantern_left}]]*/ null,
     effects_lantern_right: /*[[${theme.config.enhance.effects_lantern.effects_lantern_right}]]*/ null
   };
-  // 再取一份 style 值
   const _s = {
     cursor_style: /*[[${theme.config.style.cursor_style}]]*/ null,
     cursor_move:  /*[[${theme.config.style.cursor_move}]]*/ null,
@@ -813,133 +811,156 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     effects_lantern_left:  /*[[${theme.config.style.effects_lantern.effects_lantern_left}]]*/ null,
     effects_lantern_right: /*[[${theme.config.style.effects_lantern.effects_lantern_right}]]*/ null
   };
-  // 选取：优先 enhance -> 回退 style -> 默认
-  function pick(a, b, defVal) { return (a || b || defVal); }
+  const pick = (a,b,def)=> (a||b||def);
+
   function normalizeMode(m){
-    if (!m || m==='none') return '';
-    if (m==='light') return 'day';
-    if (m==='dark')  return 'night';
+    if(!m || m==='none') return '';
+    if(m==='light') return 'day';
+    if(m==='dark')  return 'night';
     return m; // 已是 day/night/all
   }
 
   const CFG = {
-    cursor_style: pick(_e.cursor_style, _s.cursor_style, 'none'),
-    cursor_move:  pick(_e.cursor_move,  _s.cursor_move,  'none'),
-    cursor_click: pick(_e.cursor_click, _s.cursor_click, 'none'),
+    cursor_style: pick(_e.cursor_style,_s.cursor_style,'none'),
+    cursor_move:  pick(_e.cursor_move,_s.cursor_move,'none'),
+    cursor_click: pick(_e.cursor_click,_s.cursor_click,'none'),
 
-    effects_lantern_mode:             normalizeMode(pick(_e.effects_lantern_mode,             _s.effects_lantern_mode,             'none')),
-    effects_sakura_mode:              normalizeMode(pick(_e.effects_sakura_mode,              _s.effects_sakura_mode,              'none')),
-    effects_snowflake_mode:           normalizeMode(pick(_e.effects_snowflake_mode,           _s.effects_snowflake_mode,           'none')),
-    effects_universe_mode:            normalizeMode(pick(_e.effects_universe_mode,            _s.effects_universe_mode,            'none')),
-    effects_circle_magic_mode:        normalizeMode(pick(_e.effects_circle_magic_mode,        _s.effects_circle_magic_mode,        'none')),
-    effects_quantum_silk_thread_mode: normalizeMode(pick(_e.effects_quantum_silk_thread_mode, _s.effects_quantum_silk_thread_mode, 'none')),
+    effects_lantern_mode:             normalizeMode(pick(_e.effects_lantern_mode,_s.effects_lantern_mode,'none')),
+    effects_sakura_mode:              normalizeMode(pick(_e.effects_sakura_mode,_s.effects_sakura_mode,'none')),
+    effects_snowflake_mode:           normalizeMode(pick(_e.effects_snowflake_mode,_s.effects_snowflake_mode,'none')),
+    effects_universe_mode:            normalizeMode(pick(_e.effects_universe_mode,_s.effects_universe_mode,'none')),
+    effects_circle_magic_mode:        normalizeMode(pick(_e.effects_circle_magic_mode,_s.effects_circle_magic_mode,'none')),
+    effects_quantum_silk_thread_mode: normalizeMode(pick(_e.effects_quantum_silk_thread_mode,_s.effects_quantum_silk_thread_mode,'none')),
 
-    effects_lantern_left:  pick(_e.effects_lantern_left,  _s.effects_lantern_left,  ''),
-    effects_lantern_right: pick(_e.effects_lantern_right, _s.effects_lantern_right, '')
+    effects_lantern_left:  pick(_e.effects_lantern_left,_s.effects_lantern_left,''),
+    effects_lantern_right: pick(_e.effects_lantern_right,_s.effects_lantern_right,'')
   };
 
-  /* ============ 明暗模式兼容（DIY: data-theme=dark → .night） ============ */
+  /* ========== 关键：给 PLUS 脚本看的 DreamConfig ==========
+     —— 很多特效(樱花/雪花/宇宙/量子/灯笼)会读取它来判断是否渲染 */
+  const DreamConfig = window.DreamConfig || (window.DreamConfig = {});
+  DreamConfig.theme_version = THEME_VER || '';
+  // assets_base：给 PLUS 里的脚本用的“js 根”
+  DreamConfig.assets_base   = FIRST_ASSETS + '/js';
+  // 鼠标
+  DreamConfig.cursor_style  = (CFG.cursor_style && CFG.cursor_style!=='none') ? CFG.cursor_style : '';
+  DreamConfig.cursor_move   = (CFG.cursor_move  && CFG.cursor_move  !=='none') ? CFG.cursor_move  : '';
+  DreamConfig.cursor_click  = (CFG.cursor_click && CFG.cursor_click !=='none') ? CFG.cursor_click : '';
+  // 模式
+  DreamConfig.effects_lantern_mode             = CFG.effects_lantern_mode;
+  DreamConfig.effects_sakura_mode              = CFG.effects_sakura_mode;
+  DreamConfig.effects_snowflake_mode           = CFG.effects_snowflake_mode;
+  DreamConfig.effects_universe_mode            = CFG.effects_universe_mode;
+  DreamConfig.effects_circle_magic_mode        = CFG.effects_circle_magic_mode;
+  DreamConfig.effects_quantum_silk_thread_mode = CFG.effects_quantum_silk_thread_mode;
+  DreamConfig.effects_lantern_left             = CFG.effects_lantern_left;
+  DreamConfig.effects_lantern_right            = CFG.effects_lantern_right;
+
+  /* ========== 夜间兼容：DIY data-theme=dark → .night ========= */
   function syncNightClass(){
     const html = document.documentElement;
-    const dark = html.getAttribute('data-theme') === 'dark';
+    const dark = html.getAttribute('data-theme')==='dark';
     html.classList.toggle('night', dark);
-    window.specialEfficacyScheme = dark ? 'dark' : 'light';
+    window.specialEfficacyScheme = dark ? 'dark' : 'light'; // 少数脚本会用
   }
   syncNightClass();
   new MutationObserver(function(){
-    const was = document.documentElement.classList.contains('night');
+    const before = document.documentElement.classList.contains('night');
     syncNightClass();
-    const now = document.documentElement.classList.contains('night');
-    if (was !== now) window.dispatchEvent(new Event('hao:mode-change'));
-  }).observe(document.documentElement, { attributes:true, attributeFilter:['data-theme','class'] });
+    const after  = document.documentElement.classList.contains('night');
+    if (before !== after) window.dispatchEvent(new Event('hao:mode-change'));
+  }).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme','class']});
 
-  /* ============ 脚本加载（遍历所有 base × 多路径） ============ */
+  /* ========== 工具：遍历 bases 加载脚本 ========= */
   function loadFromBases(id, relList){
     if (document.getElementById(id)) return;
     const cand = [];
-    ASSET_BASES.forEach(base => {
-      relList.forEach(rp => {
+    ASSET_BASES.forEach(base=>{
+      relList.forEach(rp=>{
         const p = (base.replace(/\/+$/,'') + '/' + rp.replace(/^\/+/,'')).replace(/\/{2,}/g,'/');
         cand.push(p.replace(/\.js$/,'') + '.min.js');
         cand.push(p.replace(/\.js$/,'') + '.js');
       });
     });
-    let i = 0;
-    let s = document.createElement('script');
-    s.defer = true; s.id = id;
+    let i=0, s=document.createElement('script'); s.defer=true; s.id=id;
     function tryNext(){
-      if (i >= cand.length) return;
-      s.src = cand[i++] + '?v=' + encodeURIComponent(THEME_VER || '');
+      if(i>=cand.length) return;
+      s.src = cand[i++] + '?v=' + encodeURIComponent(DreamConfig.theme_version);
       document.body.appendChild(s);
     }
-    s.onerror = function(){ s.remove(); s = document.createElement('script'); s.defer = true; s.id = id; tryNext(); };
+    s.onerror=function(){ s.remove(); s=document.createElement('script'); s.defer=true; s.id=id; tryNext(); };
     tryNext();
   }
+  const isMobile = ()=> /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-  function isMobile(){ return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent); }
-
-  /* ============ 鼠标风格（精准文件表，减少 404） ============ */
+  /* ========== 鼠标风格（精准文件表，!important 保障覆盖） ========== */
   function applyCursorStyle(){
-    const pack = CFG.cursor_style;
-    if (!pack || pack === 'none') return;
-
-    // 常用包的精确文件映射（可按需补充）
+    const pack = DreamConfig.cursor_style;
+    if(!pack) return;
     const MAP = {
-      breeze:     { default:['Arrow.cur'],        pointer:['Hand.cur'],         text:['IBeam.cur'] },
-      overwatch:  { default:['cross.cur'],        pointer:['link.cur'],         text:['handwriting.cur'] },
-      black_cat:  { default:['normal.cur'],       pointer:['Alternative.cur'],  text:['Escritura a Mano.cur'] }
+      breeze:     { default:['Arrow.cur'],       pointer:['Hand.cur'],         text:['IBeam.cur'] },
+      overwatch:  { default:['cross.cur'],       pointer:['link.cur'],         text:['handwriting.cur'] },
+      black_cat:  { default:['normal.cur'],      pointer:['Alternative.cur'],  text:['Escritura a Mano.cur'] }
     };
     const files = MAP[pack] || {
       default:['Arrow.cur','Normal.cur'],
       pointer:['Hand.cur','Link.cur'],
       text:['IBeam.cur','Text.cur']
     };
-
-    // 组装所有 base 的候选 URL（有空格的文件名要 encodeURI）
     const bases = ASSET_BASES.map(b => (b.replace(/\/+$/,'') + '/cursor/' + pack).replace(/\/{2,}/g,'/'));
     const toUrls = list => {
-      const u = [];
-      bases.forEach(base => list.forEach(name => u.push("url('" + encodeURI(base + '/' + name) + "')")));
+      const u=[]; bases.forEach(base=>list.forEach(name=>u.push("url('"+encodeURI(base+'/'+name)+"')")));
       return u.join(',') + ', auto';
     };
-
     const css = [
       'html, body { cursor: ' + toUrls(files.default) + ' !important; }',
       'a, button, [role="button"], input[type=button], input[type=submit] { cursor: ' + toUrls(files.pointer) + ' !important; }',
       'input[type=text], input[type=search], textarea, .text, .textbox, .input { cursor: ' + toUrls(files.text) + ' !important; }'
     ].join('\n');
-
     let st = document.getElementById('hao-cursor-style');
-    if (!st) { st = document.createElement('style'); st.id = 'hao-cursor-style'; document.head.appendChild(st); }
+    if(!st){ st=document.createElement('style'); st.id='hao-cursor-style'; document.head.appendChild(st); }
     st.textContent = css;
   }
 
-  /* ============ 清理与初始化 ============ */
+  /* ========== 清理 & 初始化 ========= */
   function cleanEffectLayers(){
     document.querySelectorAll('.canvas_effects,#universe_canvas,#quantum_c_n,.j-china-lantern,[id^=sakura],#Snow')
-      .forEach(el => { try{ el.remove(); }catch(e){} });
+      .forEach(el=>{ try{ el.remove(); }catch(e){} });
   }
 
   function initCursorEffects(){
     if (isMobile()) return;
-    if (CFG.cursor_move && CFG.cursor_move !== 'none') {
-      loadFromBases('cursor-move',  ['js/cursor/move/'  + CFG.cursor_move]);
+    if (DreamConfig.cursor_move){
+      loadFromBases('cursor-move',  ['js/cursor/move/'  + DreamConfig.cursor_move]);
     }
-    if (CFG.cursor_click && CFG.cursor_click !== 'none') {
-      loadFromBases('cursor-click', ['js/cursor/click/' + CFG.cursor_click]);
+    if (DreamConfig.cursor_click){
+      loadFromBases('cursor-click', ['js/cursor/click/' + DreamConfig.cursor_click]);
     }
   }
 
+  // 只有在需要的模式下才加载（避免脚本内部再判断导致“看起来没反应”）
+  function shouldLoad(mode){
+    if (!mode) return false; // none
+    const dark = document.documentElement.classList.contains('night');
+    if (mode==='all') return true;
+    if (mode==='day')   return !dark;
+    if (mode==='night') return dark;
+    return true;
+  }
   function initCanvasEffects(){
     if (isMobile()) return;
-    function on(m){ return !!m; }
-
-    if (on(CFG.effects_lantern_mode))             loadFromBases('fx-lantern', ['js/effects/lantern','effects/lantern']);
-    if (on(CFG.effects_sakura_mode))              loadFromBases('fx-sakura',  ['js/effects/sakura','effects/sakura']);
-    if (on(CFG.effects_snowflake_mode))           loadFromBases('fx-snow',    ['js/effects/snowflake','effects/snowflake']);
-    if (on(CFG.effects_universe_mode))            loadFromBases('fx-universe',['js/effects/universe','effects/universe']);
-    if (on(CFG.effects_circle_magic_mode))        loadFromBases('fx-circle',  ['js/effects/circleMagic','effects/circleMagic']);
-    if (on(CFG.effects_quantum_silk_thread_mode)) loadFromBases('fx-quantum', ['js/effects/quantum','effects/quantum']);
+    if (shouldLoad(DreamConfig.effects_lantern_mode))
+      loadFromBases('fx-lantern',['js/effects/lantern','effects/lantern']);
+    if (shouldLoad(DreamConfig.effects_sakura_mode))
+      loadFromBases('fx-sakura',['js/effects/sakura','effects/sakura']);
+    if (shouldLoad(DreamConfig.effects_snowflake_mode))
+      loadFromBases('fx-snow',['js/effects/snowflake','effects/snowflake']);
+    if (shouldLoad(DreamConfig.effects_universe_mode))
+      loadFromBases('fx-universe',['js/effects/universe','effects/universe']);
+    if (shouldLoad(DreamConfig.effects_circle_magic_mode))
+      loadFromBases('fx-circle',['js/effects/circleMagic','effects/circleMagic']);
+    if (shouldLoad(DreamConfig.effects_quantum_silk_thread_mode))
+      loadFromBases('fx-quantum',['js/effects/quantum','effects/quantum']);
   }
 
   function initAll(){
@@ -949,19 +970,19 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   }
 
   document.addEventListener('DOMContentLoaded', initAll);
-  window.addEventListener('pjax:complete', () => { syncNightClass(); initAll(); });
-  window.addEventListener('hao:mode-change', () => {
+  window.addEventListener('pjax:complete', ()=>{ syncNightClass(); initAll(); });
+  window.addEventListener('hao:mode-change', ()=>{
     cleanEffectLayers();
-    ['fx-sakura','fx-snow','fx-universe','fx-circle','fx-quantum','fx-lantern'].forEach(id => {
+    ['fx-sakura','fx-snow','fx-universe','fx-circle','fx-quantum','fx-lantern'].forEach(id=>{
       const s = document.getElementById(id); if (s) s.remove();
     });
     initCanvasEffects();
   });
 
-  try {
+  try{
     console.log('[Hao Effects bases]', ASSET_BASES);
-    console.log('[Hao Effects cfg]', JSON.parse(JSON.stringify(CFG)));
-  } catch (e) {}
+    console.log('[Hao Effects DreamConfig]', JSON.parse(JSON.stringify(DreamConfig)));
+  }catch(e){}
 })();
 </script>
 
