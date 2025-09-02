@@ -752,8 +752,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     })();
     </script>
 
-    
-<!-- ===== DIY: Plus 全部接线（v12-snowmouse-fix：鼠标独立；雪花不反复重载） ===== -->
+    <!-- ===== DIY: Plus 全部接线（v12：强力清理 Canvas + 每次切换强制重建；鼠标不受明暗） ===== -->
 <script th:inline="javascript">
   const ASSETS = /*[[${assets_link}]]*/ '/assets';
   const THEME_VER = /*[[${theme_version}]]*/ '';
@@ -770,7 +769,6 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     effects_quantum_silk_thread_mode: /*[[${theme.config.style.effects_quantum_silk_thread_mode}]]*/ 'none'
   };
 
-  // 量子丝线图片路径（DIY）
   window.DIY_WORDLINE_IMG = ASSETS + '/images/wordline.webp';
 
   // ---------- helpers ----------
@@ -865,23 +863,15 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     const sel = '[data-diy-effect="'+key+'"], body > [id*="'+kw+'"], body > [class*="'+kw+'"]';
     return Array.from(document.querySelectorAll(sel));
   }
-
-  // 鼠标白名单（确保清理时不影响鼠标移动/点击）
-  function isMouseCanvas(el){
-    if (!el || el.tagName!=='CANVAS') return false;
-    const s = ((el.id||'')+' '+(el.className||'')).toLowerCase();
-    return ['mouse','cursor','trail','click','firework','ribbon','spark','particle','cursor-effects','canvascursor'].some(k=>s.includes(k));
-  }
-
   function purgeEffect(key){
     // 1) 标签/关键字节点
     getNodes(key).forEach(el=>{ try{ el.remove(); }catch(e){} });
 
-    // 2) 兜底：超大 Canvas（常见于这些特效），防止漏网 —— 但跳过鼠标相关
+    // 2) 兜底：超大 Canvas（常见于这些特效），防止漏网
     document.querySelectorAll('body canvas').forEach(cv=>{
       const r = cv.getBoundingClientRect();
       const huge = r.width>=window.innerWidth*0.6 && r.height>=window.innerHeight*0.4;
-      if (huge && !isMouseCanvas(cv)) {
+      if (huge && !cv.closest('[data-keep-canvas]')) {
         try{ cv.remove(); }catch(e){}
       }
     });
@@ -898,9 +888,9 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     document.body.appendChild(s);
   }
 
-  // ---- 构建（除“雪花”外：仍然清理+重建；雪花：只创建一次，之后显隐） ----
+  // ---- 构建（每次切换都“强制清理 + 需要则重建”） ----
   let rebuildLock = false;
-  function applyVisibility(){
+  function applyVisibilityAndRebuild(){
     if (rebuildLock) return;
     rebuildLock = true;
     try {
@@ -910,46 +900,28 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 
       Object.keys(EFFECTS).forEach(key=>{
         const mode = MODES[key];
-        const nodes = getNodes(key);
-
-        if (key==='snow') {
-          // —— 雪花：不反复重载 ——
-          if (mode==='none') {
-            nodes.forEach(el=>{ el.style.display='none'; });
-            return;
-          }
-          if (shouldShow(mode)) {
-            if (nodes.length === 0) {
-              createEffect(key); // 首次创建
-            } else {
-              nodes.forEach(el=>{ el.style.display=''; }); // 只显示
-            }
-          } else {
-            nodes.forEach(el=>{ el.style.display='none'; }); // 只隐藏
-          }
-          return;
-        }
-
-        // 其他效果：保持 v12 的“清理 + 重建”
         if (mode==='none') {
           purgeEffect(key);
           return;
         }
         if (shouldShow(mode)) {
+          // 目标需要显示：先清理旧的，再重建，避免“第三次第四次不动”
           purgeEffect(key);
           createEffect(key);
         } else {
+          // 不需要：彻底清理
           purgeEffect(key);
         }
       });
     } finally {
+      // 多次切换时节流一下，避免重复加载
       setTimeout(()=>{ rebuildLock=false; }, 100);
     }
   }
 
   // ---------- 主入口 ----------
-  if (!window.__DIY_ALL_EFFECTS_V12_SNOWMOUSE_FIX__) {
-    window.__DIY_ALL_EFFECTS_V12_SNOWMOUSE_FIX__ = true;
+  if (!window.__DIY_ALL_EFFECTS_V12__) {
+    window.__DIY_ALL_EFFECTS_V12__ = true;
     whenReady(function(){
       // DreamConfig 供脚本内部读取（day/night/all/none）
       window.DreamConfig = window.DreamConfig || {};
@@ -960,7 +932,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
       DreamConfig.effects_circle_magic_mode  = toDayNight(MODES.circle);
       DreamConfig.effects_quantum_silk_thread_mode = toDayNight(MODES.quantum);
 
-      // 鼠标（与明暗无关；只在启用时加载一次；永不清理）
+      // 鼠标（与明暗无关）
       if (CFG.cursor_style && CFG.cursor_style !== 'none') {
         var pack=CFG.cursor_style, base=ASSETS+'/cursor/'+pack+'/';
         function urlq(n){ try{return 'url(\"'+encodeURI(base+n)+'\")'}catch(e){return 'url('+base+n+')'} }
@@ -976,19 +948,18 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
       if (CFG.cursor_click && CFG.cursor_click !== 'none') loadJS(ASSETS + '/js/cursor/click/' + CFG.cursor_click + '.min.js');
 
       // 初次构建
-      applyVisibility();
+      applyVisibilityAndRebuild();
 
-      // 监听主题切换
+      // 监听主题切换：每次都“强制清理 + 重建匹配”的效果
       let rafToken = 0;
-      const fire = ()=>{ cancelAnimationFrame(rafToken); rafToken = requestAnimationFrame(applyVisibility); };
+      const fire = ()=>{ cancelAnimationFrame(rafToken); rafToken = requestAnimationFrame(applyVisibilityAndRebuild); };
       const mo = new MutationObserver(fire);
       mo.observe(document.documentElement, {attributes:true, attributeFilter:['class','data-theme','theme']});
       window.addEventListener('storage', fire);
     });
   }
 </script>
-<!-- ===== /DIY: Plus 全部接线 v12-snowmouse-fix ===== -->
-
+<!-- ===== /DIY: Plus 全部接线 v12 ===== -->
 
 
 
