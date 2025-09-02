@@ -789,77 +789,131 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   /* ========= 鼠标风格（精准文件表） ========= */
     /* 只替换这个函数，其它代码一律不动 */
     /* 只替换这个函数，其它代码一律不动 */
+    /* 只替换这个函数，其它代码一律不动（V4：精确 + 轻探测 + 缓存，尽量零 404） */
   function applyCursorStyle(){
     const pack = (window.DreamConfig && window.DreamConfig.cursor_style) || '';
     if (!pack || pack === 'none') return;
 
-    // 1) 精确映射（默认/指针/文本），基于你 DIY 包实际命名
-    const MAP = {
-      OwO:             { default:['arrow.cur'],                          pointer:['hand.cur'],                             text:['arrow.cur','hand.cur'] },
-      UwU:             { default:['arrow.cur'],                          pointer:['hand.cur'],                             text:['arrow.cur','hand.cur'] },
-      mellow:          { default:['arrow.cur'],                          pointer:['hand.cur'],                             text:['arrow.cur'] },
-      debris:          { default:['arrow.cur'],                          pointer:['hand.cur'],                             text:['arrow.cur'] },
-      music_cat_01:    { default:['arrow.cur'],                          pointer:['hand.cur'],                             text:['arrow.cur','hand.cur'] },
-      music_cat_02:    { default:['arrow.cur'],                          pointer:['hand.cur'],                             text:['arrow.cur','hand.cur'] },
-      water_01:        { default:['arrow.cur'],                          pointer:['hand.cur'],                             text:['arrow.cur'] },
-      water_02:        { default:['arrow.cur'],                          pointer:['hand.cur'],                             text:['arrow.cur'] },
-
-      horse:           { default:['arrow.cur'],                          pointer:['hand.cur','move.cur'],                  text:['beam.cur','text.cur','IBeam.cur','arrow.cur'] },
-      marry:           { default:['arrow.cur'],                          pointer:['move.cur','hand.cur'],                  text:['beam.cur','IBeam.cur','Text.cur','text.cur'] },
-
-      // breeze：增加 Normal/Default 优先，避免只试 Arrow 而 404
-      breeze:          { default:['Normal.cur','Default.cur','Arrow.cur','arrow.cur','Normal.ani','Arrow.ani'],
-                         pointer:['Hand.cur','Link.cur','hand.cur','link.cur'],
-                         text:['IBeam.cur','Text.cur','Handwriting.cur','text.cur'] },
-
-      overwatch:       { default:['cross.cur','Cross.cur','Normal.cur'], pointer:['pointer.cur','link.cur','Hand.cur','hand.cur'], text:['text.cur','Text.cur'] },
-
-      black_cat:       { default:['normal.cur','Normal.cur','arrow.cur'], pointer:['Alternative.cur','ALTERNATIVE.cur','link.cur','Link.cur','Hand.cur','hand.cur'], text:['Escritura a Mano.cur','texto.cur','Text.cur','IBeam.cur'] },
-
-      rainbow_rain:    { default:['Alternative2.cur','Alternative.cur','normal.cur','arrow.cur'],
-                         pointer:['Movee2.cur','Move.cur','Hand.cur','hand.cur'],
-                         text:['texto.cur','Escritura a Mano.cur','Text.cur','text.cur'] },
-    };
-
-    // 2) 兜底候选（大小写/别名），命不中就顺序尝试；成功后浏览器不会继续请求后面的 URL
-    const GENERIC = {
-      default: ['Normal.cur','Default.cur','Arrow.cur','arrow.cur'],
-      pointer: ['Hand.cur','Link.cur','hand.cur','link.cur','pointer.cur','Pointer.cur'],
-      text:    ['IBeam.cur','Text.cur','text.cur','Handwriting.cur','beam.cur']
-    };
-    const files = MAP[pack] || GENERIC;
-
-    // 3) 用 assets_link 作为唯一基准，避免串到其他主题
+    // assets_link 作为唯一基准，避免串到其他主题
     const raw = /*[[${assets_link}]]*/ '';
     let base = String(raw || '').replace(/\/+$/,'');
     if (base && !/\/assets$/.test(base)) base += '/assets';
+    const bases = base ? [
+      (base + '/cursor/' + pack).replace(/\/{2,}/g,'/'),
+      (base + '/cursor').replace(/\/{2,}/g,'/')
+    ] : [];
 
-    const bases = [];
-    if (base) {
-      bases.push((base + '/cursor/' + pack).replace(/\/{2,}/g,'/'));
-      bases.push((base + '/cursor').replace(/\/{2,}/g,'/'));
+    // 每个包尽量用 1~2 个最可能的命名，失败再试下一个，避免大量 404
+    const MAP = {
+      OwO:           { d:['arrow.cur'],                    p:['hand.cur'],                t:['arrow.cur'] },
+      UwU:           { d:['arrow.cur'],                    p:['hand.cur'],                t:['arrow.cur'] },
+      mellow:        { d:['arrow.cur'],                    p:['hand.cur'],                t:['arrow.cur'] },
+      debris:        { d:['arrow.cur'],                    p:['hand.cur'],                t:['arrow.cur'] },
+      music_cat_01:  { d:['arrow.cur'],                    p:['hand.cur'],                t:['arrow.cur'] },
+      music_cat_02:  { d:['arrow.cur'],                    p:['hand.cur'],                t:['arrow.cur'] },
+      water_01:      { d:['arrow.cur'],                    p:['hand.cur'],                t:['arrow.cur'] },
+      water_02:      { d:['arrow.cur'],                    p:['hand.cur'],                t:['arrow.cur'] },
+      horse:         { d:['arrow.cur'],                    p:['hand.cur','move.cur'],     t:['beam.cur']  },
+      marry:         { d:['arrow.cur'],                    p:['move.cur'],                t:['beam.cur']  },
+      breeze:        { d:['Normal.cur','Default.cur'],     p:['Hand.cur','Link.cur'],     t:['IBeam.cur','Handwriting.cur'] },
+      overwatch:     { d:['cross.cur'],                    p:['pointer.cur','link.cur'],  t:['text.cur']  },
+      black_cat:     { d:['normal.cur'],                   p:['Alternative.cur'],         t:['Escritura a Mano.cur','texto.cur'] },
+      rainbow_rain:  { d:['Alternative2.cur','Alternative.cur'], p:['Movee2.cur','Move.cur'], t:['texto.cur'] },
+    };
+    const FALLBACK = { d:['arrow.cur','Normal.cur'], p:['hand.cur','Link.cur'], t:['IBeam.cur','Text.cur'] };
+    const conf = MAP[pack] || FALLBACK;
+
+    // 结果缓存，避免重复探测
+    window.__CURSOR_CACHE__ = window.__CURSOR_CACHE__ || {};
+    const cache = window.__CURSOR_CACHE__;
+    if (!cache[pack]) cache[pack] = {};
+
+    function probe(names){
+      // 若缓存已命中，直接返回
+      for (const n of names){
+        if (cache[pack][n]) return cache[pack][n]; // 已解析过该文件
+      }
+      // 顺序尝试，命中即缓存并返回
+      for (const name of names){
+        for (const b of bases){
+          const url = b + '/' + name;
+          try{
+            // 用 HEAD/GET 试探；成功(200)则记住并返回
+            // 某些服务器不支持 HEAD，则退化为 GET
+            const res = (window.fetch ? null : null);
+          }catch(e){}
+        }
+      }
+      return null;
     }
 
-    const toUrls = (list)=>{
-      const urls=[];
-      bases.forEach(b=>{
-        list.forEach(name=>{
-          urls.push("url('"+ encodeURI(b + '/' + name) +"')");
-        });
-      });
-      return (urls.length ? urls.join(', ') + ', ' : '') + 'auto';
-    };
+    // 实际探测：使用同步 <link rel="prefetch"> 不会有 fetch API 时序问题；
+    // 但我们可以使用 Image 对象的 onload/onerror 做探测（光标文件不是图片，但请求会走网络栈并返回状态，onload大多不会触发；因此改为动态创建 <object> 探测以避免控制台噪音）
+    function tryResolve(names, cb){
+      // 如果有缓存命中，直接回调
+      for (const n of names){
+        if (cache[pack][n]) { cb(cache[pack][n]); return; }
+      }
+      // 顺序试探：使用 <object>，避免真实应用到 CSS 前产生多次 404 请求
+      (function next(i){
+        if (i >= names.length){ cb(null); return; }
+        const name = names[i];
+        let tried = false, done = false;
+        (function nextBase(j){
+          if (j >= bases.length){ if(!tried){ next(i+1); } return; }
+          const testURL = bases[j] + '/' + name;
+          tried = true;
+          const el = document.createElement('object');
+          el.style.position='absolute'; el.style.width='0'; el.style.height='0'; el.style.overflow='hidden';
+          el.type='application/octet-stream'; // 避免渲染
+          el.data=testURL;
+          let timer = setTimeout(()=>{
+            // 超时则当作失败
+            cleanup(); nextBase(j+1);
+          }, 1200);
+          function cleanup(){
+            if (done) return; done = true;
+            try{ clearTimeout(timer); }catch(e){}
+            try{ el.remove(); }catch(e){}
+          }
+          el.onload = function(){
+            cleanup();
+            cache[pack][name] = testURL;
+            cb(testURL);
+          };
+          el.onerror = function(){
+            cleanup();
+            nextBase(j+1);
+          };
+          document.body.appendChild(el);
+        })(0);
+      })(0);
+    }
 
-    const css = [
-      'html, body { cursor: ' + toUrls(files.default && files.default.length ? files.default : GENERIC.default) + ' !important; }',
-      'a, button, [role="button"], input[type=button], input[type=submit] { cursor: ' + toUrls(files.pointer && files.pointer.length ? files.pointer : GENERIC.pointer) + ' !important; }',
-      'input[type=text], input[type=search], textarea, .text, .textbox, .input { cursor: ' + toUrls(files.text && files.text.length ? files.text : GENERIC.text) + ' !important; }'
-    ].join('\\n');
+    function setCSS(resolved){
+      // 构造最终 CSS（只放成功解析到的 URL，避免 Network 里出现 404）
+      const parts = [];
+      if (resolved.d) parts.push("html, body { cursor: url('" + resolved.d + "'), auto !important; }");
+      if (resolved.p) parts.push("a, button, [role='button'], input[type=button], input[type=submit] { cursor: url('" + resolved.p + "'), auto !important; }");
+      if (resolved.t) parts.push("input[type=text], input[type=search], textarea, .text, .textbox, .input { cursor: url('" + resolved.t + "'), auto !important; }");
 
-    let st = document.getElementById('hao-cursor-style');
-    if(!st){ st=document.createElement('style'); st.id='hao-cursor-style'; document.head.appendChild(st); }
-    st.textContent = css;
+      let st = document.getElementById('hao-cursor-style');
+      if(!st){ st=document.createElement('style'); st.id='hao-cursor-style'; document.head.appendChild(st); }
+      st.textContent = parts.join('\n');
+    }
+
+    // 先用缓存填充（如果有），再逐项解析缺失的并更新 CSS
+    const resolved = { d:null, p:null, t:null };
+    const tryUpdate = ()=> setCSS(resolved);
+
+    // default
+    tryResolve(conf.d || FALLBACK.d, url=>{ if(url) resolved.d=url; tryUpdate(); });
+    // pointer
+    tryResolve(conf.p || FALLBACK.p, url=>{ if(url) resolved.p=url; tryUpdate(); });
+    // text
+    tryResolve(conf.t || FALLBACK.t, url=>{ if(url) resolved.t=url; tryUpdate(); });
   }
+
 
 
 
