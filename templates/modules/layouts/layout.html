@@ -752,10 +752,11 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     })();
     </script>
 
-    <!-- ===== DIY: Plus 特效接线（等待主题设置好 data-theme，再加载；并兜底 DreamConfig） ===== -->
+    <!-- ===== DIY: Plus 全部接线（v12：强力清理 Canvas + 每次切换强制重建；鼠标不受明暗） ===== -->
 <script th:inline="javascript">
   const ASSETS = /*[[${assets_link}]]*/ '/assets';
   const THEME_VER = /*[[${theme_version}]]*/ '';
+
   const CFG = {
     cursor_style: /*[[${theme.config.style.cursor_style}]]*/ 'none',
     cursor_move:  /*[[${theme.config.style.cursor_move}]]*/  'none',
@@ -767,91 +768,198 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     effects_circle_magic_mode:   /*[[${theme.config.style.effects_circle_magic_mode}]]*/ 'none',
     effects_quantum_silk_thread_mode: /*[[${theme.config.style.effects_quantum_silk_thread_mode}]]*/ 'none'
   };
+
   window.DIY_WORDLINE_IMG = ASSETS + '/images/wordline.webp';
 
-  function nowScheme(){
-    const attr = document.documentElement.getAttribute('data-theme');
-    if (attr === 'dark') return 'dark';
-    const ls = (localStorage.getItem('theme') || localStorage.getItem('special-efficacy-scheme') || '').toLowerCase();
-    return ls === 'dark' ? 'dark' : 'light';
+  // ---------- helpers ----------
+  function normMode(v){
+    const s=(v||'').toString().trim().toLowerCase();
+    if(['明亮模式','亮','light','day','浅色','白天'].includes(s)) return 'light';
+    if(['黑暗模式','暗','dark','night','深色','夜间'].includes(s)) return 'dark';
+    if(['全模式','全部','all'].includes(s)) return 'all';
+    if(['不显示','关闭','none','off'].includes(s)) return 'none';
+    return s||'none';
   }
-  function showByMode(mode){
-    if (!mode || mode==='none') return false;
-    const s = nowScheme();
-    if (mode==='all')  return true;
-    if (mode==='day')  return s==='light';
-    if (mode==='night')return s==='dark';
-    return false;
-  }
-  function loadJS(src){ const s=document.createElement('script'); s.src=src+THEME_VER; s.defer=true; document.body.appendChild(s); }
+  const toDayNight = m => (m==='light'?'day':(m==='dark'?'night':m));
 
-  // 等待 data-theme 就绪（最多等 ~1s）
-  function whenThemeReady(cb){
-    let t=0;
-    (function tick(){
-      const has = !!document.documentElement.getAttribute('data-theme');
-      if (has || t>20) return cb();
-      t++; setTimeout(tick, 50);
+  function getCurrentScheme(){
+    const html=document.documentElement;
+    const attr=(html.getAttribute('data-theme')||html.getAttribute('theme')||'').toLowerCase();
+    if(attr==='dark') return 'dark';
+    if(html.classList.contains('dark')) return 'dark';
+    const ls=(localStorage.getItem('theme')||localStorage.getItem('special-efficacy-scheme')||'').toLowerCase();
+    if(ls==='dark'||ls==='night') return 'dark';
+    if(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';
+    return 'light';
+  }
+  function syncScheme(){
+    const isDark = getCurrentScheme()==='dark';
+    document.documentElement.classList.toggle('night', isDark);
+    try{ localStorage.setItem('special-efficacy-scheme', isDark ? 'dark' : 'light'); }catch(e){}
+  }
+  function whenReady(cb){
+    let tries=0;(function tick(){
+      const ready=document.documentElement.getAttribute('data-theme')
+            ||document.documentElement.classList.contains('dark')
+            ||localStorage.getItem('theme')
+            ||localStorage.getItem('special-efficacy-scheme');
+      if(ready||tries>40) return cb(); tries++; setTimeout(tick,50);
     })();
   }
+  function loadJS(src){ const s=document.createElement('script'); s.src=src+THEME_VER+'&r='+(Math.random().toString(36).slice(2)); s.defer=true; document.body.appendChild(s); }
 
-  // 只加载一次
-  if(!window.__DIY_PLUS_EFFECTS__){
-    window.__DIY_PLUS_EFFECTS__ = true;
+  // effects meta
+  const EFFECTS = {
+    lantern:  { file: '/js/effects/lantern.min.js',  keywords: ['lantern'] },
+    sakura:   { file: '/js/effects/sakura.min.js',   keywords: ['sakura','cherry','petal'] },
+    snow:     { file: '/js/effects/snowflake.min.js',keywords: ['snow','snowflake'] },
+    universe: { file: '/js/effects/universe.min.js', keywords: ['universe','star','galaxy'] },
+    circle:   { file: '/js/effects/circleMagic.min.js', keywords: ['circle','circlemagic'] },
+    quantum:  { file: '/js/effects/quantum.min.js',  keywords: ['quantum'] },
+  };
+  const MODES = {
+    lantern:  normMode(CFG.effects_lantern_mode),
+    sakura:   normMode(CFG.effects_sakura_mode),
+    snow:     normMode(CFG.effects_snowflake_mode),
+    universe: normMode(CFG.effects_universe_mode),
+    circle:   normMode(CFG.effects_circle_magic_mode),
+    quantum:  normMode(CFG.effects_quantum_silk_thread_mode),
+  };
 
-    whenThemeReady(function(){
-      // 同步 special-efficacy-scheme，保证 Plus 脚本内部逻辑一致
-      try { localStorage.setItem('special-efficacy-scheme', nowScheme()); } catch(e){}
+  // ---- 动态标记新增节点（方便显隐/清理） ----
+  const TRACK={};
+  function startTrack(key,ms){ TRACK[key]={until:Date.now()+(ms||8000)}; }
+  function tagIfMatch(el, key){
+    if(!el || el.dataset.diyEffect) return;
+    const id=(el.id||'').toLowerCase(), cls=(el.className||'').toString().toLowerCase();
+    const kw=EFFECTS[key].keywords;
+    const isCanvas = el.tagName==='CANVAS';
+    const rect = isCanvas ? el.getBoundingClientRect() : {width:0,height:0};
+    const full = isCanvas && rect.width>=window.innerWidth*0.6 && rect.height>=window.innerHeight*0.4;
+    if (kw.some(k=>id.includes(k)||cls.includes(k)) || full){
+      el.dataset.diyEffect = key;
+      try{ el.style.pointerEvents='none'; }catch(e){}
+    }
+  }
+  const bodyObserver=new MutationObserver((muts)=>{
+    const now=Date.now();
+    muts.forEach(m=>{
+      m.addedNodes && m.addedNodes.forEach(node=>{
+        if(!(node instanceof HTMLElement) && !(node instanceof HTMLCanvasElement)) return;
+        Object.keys(TRACK).forEach(key=>{
+          const tk=TRACK[key]; if(!tk || tk.until<now) return;
+          tagIfMatch(node,key);
+          if(node.querySelectorAll) node.querySelectorAll('*').forEach(ch=>tagIfMatch(ch,key));
+        });
+      });
+    });
+  });
+  function observeBody(){ if(document.body) bodyObserver.observe(document.body,{childList:true,subtree:true}); else document.addEventListener('DOMContentLoaded',observeBody); }
+  observeBody();
 
-      // DreamConfig 兜底（Plus 效果脚本读取）
+  // ---- 获取 / 清理 ----
+  function getNodes(key){
+    const kw = EFFECTS[key].keywords.join('|');
+    const sel = '[data-diy-effect="'+key+'"], body > [id*="'+kw+'"], body > [class*="'+kw+'"]';
+    return Array.from(document.querySelectorAll(sel));
+  }
+  function purgeEffect(key){
+    // 1) 标签/关键字节点
+    getNodes(key).forEach(el=>{ try{ el.remove(); }catch(e){} });
+
+    // 2) 兜底：超大 Canvas（常见于这些特效），防止漏网
+    document.querySelectorAll('body canvas').forEach(cv=>{
+      const r = cv.getBoundingClientRect();
+      const huge = r.width>=window.innerWidth*0.6 && r.height>=window.innerHeight*0.4;
+      if (huge && !cv.closest('[data-keep-canvas]')) {
+        try{ cv.remove(); }catch(e){}
+      }
+    });
+
+    // 3) 清理可能的 script 标签（强制后续可重建）
+    document.querySelectorAll('script[data-diy-effect-script="'+key+'"]').forEach(s=>{ try{s.remove();}catch(e){} });
+  }
+  function createEffect(key){
+    startTrack(key, 8000);
+    const s = document.createElement('script');
+    s.src = ASSETS + EFFECTS[key].file + THEME_VER + '&r=' + Math.random().toString(36).slice(2);
+    s.defer = true;
+    s.setAttribute('data-diy-effect-script', key);
+    document.body.appendChild(s);
+  }
+
+  // ---- 构建（每次切换都“强制清理 + 需要则重建”） ----
+  let rebuildLock = false;
+  function applyVisibilityAndRebuild(){
+    if (rebuildLock) return;
+    rebuildLock = true;
+    try {
+      syncScheme();
+      const scheme = getCurrentScheme();
+      const shouldShow = (mode) => mode==='all' || (mode==='light'&&scheme==='light') || (mode==='dark'&&scheme==='dark');
+
+      Object.keys(EFFECTS).forEach(key=>{
+        const mode = MODES[key];
+        if (mode==='none') {
+          purgeEffect(key);
+          return;
+        }
+        if (shouldShow(mode)) {
+          // 目标需要显示：先清理旧的，再重建，避免“第三次第四次不动”
+          purgeEffect(key);
+          createEffect(key);
+        } else {
+          // 不需要：彻底清理
+          purgeEffect(key);
+        }
+      });
+    } finally {
+      // 多次切换时节流一下，避免重复加载
+      setTimeout(()=>{ rebuildLock=false; }, 100);
+    }
+  }
+
+  // ---------- 主入口 ----------
+  if (!window.__DIY_ALL_EFFECTS_V12__) {
+    window.__DIY_ALL_EFFECTS_V12__ = true;
+    whenReady(function(){
+      // DreamConfig 供脚本内部读取（day/night/all/none）
       window.DreamConfig = window.DreamConfig || {};
-      DreamConfig.cursor_move  = CFG.cursor_move;
-      DreamConfig.cursor_click = CFG.cursor_click;
-      DreamConfig.effects_lantern_mode       = CFG.effects_lantern_mode;
-      DreamConfig.effects_sakura_mode        = CFG.effects_sakura_mode;
-      DreamConfig.effects_snowflake_mode     = CFG.effects_snowflake_mode;
-      DreamConfig.effects_universe_mode      = CFG.effects_universe_mode;
-      DreamConfig.effects_circle_magic_mode  = CFG.effects_circle_magic_mode;
-      DreamConfig.effects_quantum_silk_thread_mode = CFG.effects_quantum_silk_thread_mode;
-      // 避免灯笼显示 “undefined”
-      DreamConfig.lantern_left_text = DreamConfig.lantern_left_text || '';
-      DreamConfig.lantern_right_text= DreamConfig.lantern_right_text|| '';
+      DreamConfig.effects_lantern_mode       = toDayNight(MODES.lantern);
+      DreamConfig.effects_sakura_mode        = toDayNight(MODES.sakura);
+      DreamConfig.effects_snowflake_mode     = toDayNight(MODES.snow);
+      DreamConfig.effects_universe_mode      = toDayNight(MODES.universe);
+      DreamConfig.effects_circle_magic_mode  = toDayNight(MODES.circle);
+      DreamConfig.effects_quantum_silk_thread_mode = toDayNight(MODES.quantum);
 
-      // 1) 鼠标风格（兼容不同包命名 + 空格文件名）
+      // 鼠标（与明暗无关）
       if (CFG.cursor_style && CFG.cursor_style !== 'none') {
-        var pack = CFG.cursor_style;
-        var base = ASSETS + '/cursor/' + pack + '/';
+        var pack=CFG.cursor_style, base=ASSETS+'/cursor/'+pack+'/';
         function urlq(n){ try{return 'url(\"'+encodeURI(base+n)+'\")'}catch(e){return 'url('+base+n+')'} }
         function urls(list){ return list.map(urlq).join(','); }
-        var css = `
-          html, body { cursor: ${urls(['arrow.cur','Arrow.cur','Normal.cur','normal.cur','Arrow.ani','Normal.ani'])}, auto !important; }
-          a, button, [role="button"], input[type=button], input[type=submit] {
-            cursor: ${urls(['hand.cur','Hand.cur','link.cur','Link.cur','hand.ani','Link.ani','Alternate Select.cur','alternate.cur'])}, pointer !important;
-          }
-          input[type=text], input[type=search], textarea, .text, .textbox, .input {
-            cursor: ${urls(['ibeam.cur','IBeam.cur','beam.cur','Beam.cur','text.cur','Text.cur','ibeam.ani','Escritura a Mano.cur','Handwriting.cur','texto.cur'])}, text !important;
-          }`;
+        var css=[
+          'html, body { cursor: '+urls(['arrow.cur','Arrow.cur','Normal.cur','normal.cur','Arrow.ani','Normal.ani'])+', auto !important; }',
+          'a, button, [role=\"button\"], input[type=button], input[type=submit] { cursor: '+urls(['hand.cur','Hand.cur','link.cur','Link.cur','hand.ani','Link.ani','Alternate Select.cur','alternate.cur'])+', pointer !important; }',
+          'input[type=text], input[type=search], textarea, .text, .textbox, .input { cursor: '+urls(['ibeam.cur','IBeam.cur','beam.cur','Beam.cur','text.cur','Text.cur','ibeam.ani','Escritura a Mano.cur','Handwriting.cur','texto.cur'])+', text !important; }'
+        ].join('\\n');
         var st=document.createElement('style'); st.textContent=css; document.head.appendChild(st);
       }
+      if (CFG.cursor_move  && CFG.cursor_move  !== 'none') loadJS(ASSETS + '/js/cursor/move/'  + CFG.cursor_move  + '.min.js');
+      if (CFG.cursor_click && CFG.cursor_click !== 'none') loadJS(ASSETS + '/js/cursor/click/' + CFG.cursor_click + '.min.js');
 
-      // 2) 鼠标移动特效
-      if (CFG.cursor_move && CFG.cursor_move !== 'none')
-        loadJS(ASSETS + '/js/cursor/move/' + CFG.cursor_move + '.min.js');
-      // 3) 鼠标点击特效
-      if (CFG.cursor_click && CFG.cursor_click !== 'none')
-        loadJS(ASSETS + '/js/cursor/click/' + CFG.cursor_click + '.min.js');
+      // 初次构建
+      applyVisibilityAndRebuild();
 
-      // 4) 画布/飘落类（严格按模式）
-      if (showByMode(CFG.effects_lantern_mode))      loadJS(ASSETS + '/js/effects/lantern.min.js');
-      if (showByMode(CFG.effects_sakura_mode))       loadJS(ASSETS + '/js/effects/sakura.min.js');
-      if (showByMode(CFG.effects_snowflake_mode))    loadJS(ASSETS + '/js/effects/snowflake.min.js');
-      if (showByMode(CFG.effects_universe_mode))     loadJS(ASSETS + '/js/effects/universe.min.js');
-      if (showByMode(CFG.effects_circle_magic_mode)) loadJS(ASSETS + '/js/effects/circleMagic.min.js');
-      if (showByMode(CFG.effects_quantum_silk_thread_mode)) loadJS(ASSETS + '/js/effects/quantum.min.js');
+      // 监听主题切换：每次都“强制清理 + 重建匹配”的效果
+      let rafToken = 0;
+      const fire = ()=>{ cancelAnimationFrame(rafToken); rafToken = requestAnimationFrame(applyVisibilityAndRebuild); };
+      const mo = new MutationObserver(fire);
+      mo.observe(document.documentElement, {attributes:true, attributeFilter:['class','data-theme','theme']});
+      window.addEventListener('storage', fire);
     });
   }
 </script>
-<!-- ===== /DIY: Plus 特效接线 ===== -->
+<!-- ===== /DIY: Plus 全部接线 v12 ===== -->
 
 
 
