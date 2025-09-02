@@ -787,31 +787,89 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   };
 
   /* ========= 鼠标风格（精准文件表） ========= */
+    /* 只替换这个函数，其它代码一律不动 */
   function applyCursorStyle(){
-    const pack = DreamConfig.cursor_style;
-    if(!pack) return;
+    const pack = (window.DreamConfig && window.DreamConfig.cursor_style) || '';
+    if (!pack || pack === 'none') return;
+
+    // 1) 按你的实际光标包做的精确映射（默认/指针/文本）
     const MAP = {
-      breeze:     { default:['Arrow.cur'],       pointer:['Hand.cur'],         text:['IBeam.cur'] },
-      overwatch:  { default:['cross.cur'],       pointer:['link.cur'],         text:['handwriting.cur'] },
-      black_cat:  { default:['normal.cur'],      pointer:['Alternative.cur'],  text:['Escritura a Mano.cur'] }
+      // 基础/卡通类：普遍只有 arrow/hand
+      OwO:             { default:['arrow.cur'],                          pointer:['hand.cur'],                             text:['arrow.cur','hand.cur'] },
+      UwU:             { default:['arrow.cur'],                          pointer:['hand.cur'],                             text:['arrow.cur','hand.cur'] },
+      mellow:          { default:['arrow.cur'],                          pointer:['hand.cur'],                             text:['arrow.cur'] },
+      debris:          { default:['arrow.cur'],                          pointer:['hand.cur'],                             text:['arrow.cur'] },
+      music_cat_01:    { default:['arrow.cur'],                          pointer:['hand.cur'],                             text:['arrow.cur','hand.cur'] },
+      music_cat_02:    { default:['arrow.cur'],                          pointer:['hand.cur'],                             text:['arrow.cur','hand.cur'] },
+      water_01:        { default:['arrow.cur'],                          pointer:['hand.cur'],                             text:['arrow.cur'] },
+      water_02:        { default:['arrow.cur'],                          pointer:['hand.cur'],                             text:['arrow.cur'] },
+
+      // 含更多指针/文本文件名的包
+      horse:           { default:['arrow.cur'],                          pointer:['hand.cur','move.cur'],                  text:['beam.cur','text.cur','IBeam.cur','arrow.cur'] },
+      marry:           { default:['arrow.cur'],                          pointer:['move.cur','hand.cur'],                  text:['beam.cur','IBeam.cur','Text.cur','text.cur'] },
+
+      // breeze：首字母大写常见
+      breeze:          { default:['Arrow.cur','arrow.cur'],              pointer:['Hand.cur','hand.cur'],                  text:['Handwriting.cur','IBeam.cur','Text.cur','text.cur'] },
+
+      // overwatch：有 cross/pointer/text
+      overwatch:       { default:['cross.cur','Cross.cur'],              pointer:['pointer.cur','link.cur','Hand.cur','hand.cur'], text:['text.cur','Text.cur'] },
+
+      // black_cat：西语命名
+      black_cat:       { default:['normal.cur','Normal.cur','arrow.cur'], pointer:['Alternative.cur','ALTERNATIVE.cur','link.cur','Link.cur','Hand.cur','hand.cur'], text:['Escritura a Mano.cur','texto.cur','Text.cur','IBeam.cur'] },
+
+      // rainbow_rain：Alternative2/Movee2/文本为 texto
+      rainbow_rain:    { default:['Alternative2.cur','Alternative.cur','normal.cur','arrow.cur'],
+                         pointer:['Movee2.cur','Move.cur','Hand.cur','hand.cur'],
+                         text:['texto.cur','Escritura a Mano.cur','Text.cur','text.cur'] },
     };
-    const files = MAP[pack] || {
-      default:['Arrow.cur','Normal.cur'], pointer:['Hand.cur','Link.cur'], text:['IBeam.cur','Text.cur']
+
+    // 2) 兜底候选（大小写 & 少量别名），命不中就顺序尝试下个；最终回退到 auto
+    const GENERIC = {
+      default: ['Arrow.cur','arrow.cur','Normal.cur','normal.cur','Default.cur','DEFAULT.cur'],
+      pointer: ['Hand.cur','hand.cur','Link.cur','link.cur','pointer.cur','Pointer.cur','Alternative.cur','ALTERNATIVE.cur','Move.cur','move.cur'],
+      text:    ['IBeam.cur','Ibeam.cur','IBEAM.cur','Text.cur','text.cur','Handwriting.cur','Escritura a Mano.cur','beam.cur','texto.cur']
     };
-    const bases = ASSET_BASES.map(b => (b.replace(/\/+$/,'') + '/cursor/' + pack).replace(/\/{2,}/g,'/'));
-    const toUrls = list => {
-      const u=[]; bases.forEach(base=>list.forEach(name=>u.push("url('"+encodeURI(base+'/'+name)+"')")));
-      return u.join(',') + ', auto';
+    const files = MAP[pack] || GENERIC;
+
+    // 3) 生成可用的 URL 列表：优先 /assets/cursor/<pack>/X.cur；兜底 /assets/cursor/X.cur
+    const bases = [];
+    (window.ASSET_BASES || (function(){
+      const set = new Set();
+      const raw = /*[[${assets_link}]]*/ '';
+      if (raw) { const a = String(raw).replace(/\/+$/,''); set.add(a); set.add(a + '/assets'); }
+      document.querySelectorAll('link[href*="/themes/"],script[src*="/themes/"]').forEach(n=>{
+        const u = n.getAttribute('href') || n.getAttribute('src') || '';
+        const m1 = u.match(/(\/themes\/[^/]+)\/assets\//); if (m1 && m1[1]) set.add(m1[1] + '/assets');
+        const m2 = u.match(/(\/themes\/[^/]+)\//);         if (m2 && m2[1]) set.add(m2[1] + '/assets');
+      });
+      return Array.from(set).filter(Boolean);
+    })()).forEach(b=>{
+      const root = b.replace(/\/+$/,'');
+      bases.push((root + '/cursor/' + pack).replace(/\/{2,}/g,'/'));
+      bases.push((root + '/cursor').replace(/\/{2,}/g,'/')); // 兜底
+    });
+
+    const toUrls = (list)=>{
+      const urls=[];
+      bases.forEach(base=>{
+        list.forEach(name=>{
+          urls.push("url('"+ encodeURI(base + '/' + name) +"')");
+        });
+      });
+      return urls.join(', ') + ', auto';
     };
+
     const css = [
-      'html, body { cursor: ' + toUrls(files.default) + ' !important; }',
-      'a, button, [role="button"], input[type=button], input[type=submit] { cursor: ' + toUrls(files.pointer) + ' !important; }',
-      'input[type=text], input[type=search], textarea, .text, .textbox, .input { cursor: ' + toUrls(files.text) + ' !important; }'
-    ].join('\n');
+      'html, body { cursor: ' + toUrls(files.default && files.default.length ? files.default : GENERIC.default) + ' !important; }',
+      'a, button, [role="button"], input[type=button], input[type=submit] { cursor: ' + toUrls(files.pointer && files.pointer.length ? files.pointer : GENERIC.pointer) + ' !important; }',
+      'input[type=text], input[type=search], textarea, .text, .textbox, .input { cursor: ' + toUrls(files.text && files.text.length ? files.text : GENERIC.text) + ' !important; }'
+    ].join('\\n');
+
     let st = document.getElementById('hao-cursor-style');
     if(!st){ st=document.createElement('style'); st.id='hao-cursor-style'; document.head.appendChild(st); }
     st.textContent = css;
   }
+
 
   /* ========= 只修“雪花加速” —— 计时器 ID 区间法 ========= */
   const SnowRange = (function(){
