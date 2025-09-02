@@ -752,7 +752,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     })();
     </script>
 
-    <!-- DIY × PLUS 特效/光标一体化 Loader · v12-merge + DreamConfig + SnowSandbox -->
+    <!-- DIY × PLUS 特效/光标一体化 Loader · v12-merge + DreamConfig · Snow fixed -->
 <script th:inline="javascript">
 (function(){
   /* ========= 基础 ========= */
@@ -778,7 +778,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   const ASSET_BASES  = detectAssetBases();
   const FIRST_ASSETS = ASSET_BASES[0].replace(/\/+$/,'');
 
-  /* ========= 读取配置（enhance 优先，style 兜底） ========= */
+  /* ========= 配置（enhance 优先，style 兜底） ========= */
   const _e = {
     cursor_style: /*[[${theme.config.enhance.cursor_style}]]*/ null,
     cursor_move:  /*[[${theme.config.enhance.cursor_move}]]*/ null,
@@ -822,7 +822,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     effects_lantern_right: pick(_e.effects_lantern_right,_s.effects_lantern_right,'')
   };
 
-  /* ========= DreamConfig（给 PLUS 脚本读取） ========= */
+  /* ========= DreamConfig ========= */
   const DreamConfig = window.DreamConfig || (window.DreamConfig = {});
   DreamConfig.theme_version = THEME_VER || '';
   DreamConfig.assets_base   = FIRST_ASSETS + '/js';
@@ -831,7 +831,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   DreamConfig.cursor_click  = (CFG.cursor_click && CFG.cursor_click !=='none') ? CFG.cursor_click : '';
   DreamConfig.effects_lantern_mode             = CFG.effects_lantern_mode;
   DreamConfig.effects_sakura_mode              = CFG.effects_sakura_mode;
-  DreamConfig.effects_snowflake_mode           = CFG.effects_snowflake_mode;
+  DreamConfig.effects_snowflake_mode           = CFG.effects_snowflake_mode;  // ← 只读一次
   DreamConfig.effects_universe_mode            = CFG.effects_universe_mode;
   DreamConfig.effects_circle_magic_mode        = CFG.effects_circle_magic_mode;
   DreamConfig.effects_quantum_silk_thread_mode = CFG.effects_quantum_silk_thread_mode;
@@ -910,93 +910,91 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     st.textContent = css;
   }
 
-  /* ========= 雪花：iframe 沙盒（零侵入、可显隐、不卡、不加速） ========= */
-  function buildSnowCandidates(){
-    const list = [];
-    ASSET_BASES.forEach(base=>{
-      ['js/effects/snowflake','effects/snowflake'].forEach(rp=>{
-        const p = (base.replace(/\/+$/,'') + '/' + rp).replace(/\/{2,}/g,'/');
-        list.push(p + '.min.js'); list.push(p + '.js');
+  /* ========= 只修“雪花加速” —— 单实例 + 显隐 ========= */
+  const SnowOnce = (function(){
+    let loaded = false;            // 是否已经加载过脚本
+    let tried  = false;            // 是否尝试加载过（避免在不需要时频繁探测）
+    let onloadMarked = false;      // 记录脚本 onload
+
+    function buildCandidates(){
+      const list = [];
+      ASSET_BASES.forEach(base=>{
+        ['js/effects/snowflake','effects/snowflake'].forEach(rp=>{
+          const p = (base.replace(/\/+$/,'') + '/' + rp).replace(/\/{2,}/g,'/');
+          list.push(p + '.min.js'); list.push(p + '.js');
+        });
       });
-    });
-    return list;
-  }
-
-  function ensureSnowIframe(){
-    let ifr = document.getElementById('hao-snow-iframe');
-    if (ifr) return ifr;
-    ifr = document.createElement('iframe');
-    ifr.id = 'hao-snow-iframe';
-    ifr.setAttribute('aria-hidden', 'true');
-    // 透明全屏覆盖，不接管鼠标事件
-    Object.assign(ifr.style, {
-      position:'fixed', left:'0', top:'0',
-      width:'100vw', height:'100vh',
-      border:'0', pointerEvents:'none', zIndex:'1',
-      display:'none'
-    });
-    // 初始空白文档（透明背景）
-    ifr.srcdoc = `
-      <!doctype html><html><head>
-        <meta charset="utf-8">
-        <style>
-          html,body{margin:0;padding:0;overflow:hidden;background:transparent!important}
-          *{pointer-events:none!important}
-          #log{position:fixed;left:-9999px;top:-9999px}
-        </style>
-      </head><body>
-        <div id="log"></div>
-      </body></html>`;
-    document.body.appendChild(ifr);
-    return ifr;
-  }
-
-  function loadSnowInIframe(){
-    const ifr = ensureSnowIframe();
-    const doc = ifr.contentDocument;
-    const win = ifr.contentWindow;
-    if (!doc || !win) return;
-
-    // 若已加载过成功脚本，直接返回（只切显隐，不重复加载）
-    if (doc.getElementById('snow-loaded-flag')) return;
-
-    const candidates = buildSnowCandidates();
-    let i = 0;
-    function tryNext(){
-      if (i >= candidates.length) return; // 不再尝试
-      const src = candidates[i++] + '?v=' + encodeURIComponent(DreamConfig.theme_version);
-      const s = doc.createElement('script');
-      s.defer = true; s.src = src;
-      s.onload = function(){
-        const flag = doc.createElement('meta');
-        flag.id = 'snow-loaded-flag';
-        doc.head.appendChild(flag);
-      };
-      s.onerror = function(){ s.remove(); tryNext(); };
-      doc.body.appendChild(s);
+      return list;
     }
-    tryNext();
-  }
-
-  function updateSnowVisibility(){
-    const mode = DreamConfig.effects_snowflake_mode || '';
-    const need = shouldLoad(mode);
-    const ifr  = ensureSnowIframe();
-    // 需要时先确保已加载，再显示；不需要则隐藏
-    if (need){
-      loadSnowInIframe();
-      ifr.style.display = 'block';
-    } else {
-      ifr.style.display = 'none';
+    function findNodes(){
+      // 常见命名：#Snow / [id*=snow] / [class*=snow]
+      // 排除 body/html
+      const nodes = Array.from(document.querySelectorAll('#Snow, [id*="snow"], [class*="snow"]'))
+        .filter(el => el && el !== document.body && el !== document.documentElement);
+      return nodes;
     }
-  }
+    function show(){
+      const nodes = findNodes();
+      nodes.forEach(el=>{
+        el.style.display = 'block';
+        el.style.opacity = '1';
+        el.style.visibility = 'visible';
+        el.style.pointerEvents = 'none';
+        // 确保全屏固定，不撑页面（你 head.css 的守卫也会兜底）
+        el.style.position = 'fixed';
+        el.style.left = '0'; el.style.top = '0';
+        el.style.width = '100vw'; el.style.height = '100vh';
+        el.style.zIndex = '1';
+      });
+    }
+    function hide(){
+      findNodes().forEach(el=>{ el.style.display = 'none'; });
+    }
+    function needNow(){
+      const m = DreamConfig.effects_snowflake_mode || '';
+      if (!m) return false;
+      const dark = document.documentElement.classList.contains('night');
+      if (m === 'all') return true;
+      if (m === 'day') return !dark;
+      if (m === 'night') return dark;
+      return false;
+    }
+    function ensureLoaded(cb){
+      if (loaded) { cb && cb(); return; }
+      if (tried)  { cb && cb(); return; } // 已尝试过但可能未命中路径，直接回调避免卡住
+      tried = true;
+      const cand = buildCandidates();
+      let i=0;
+      (function tryNext(){
+        if (i >= cand.length) { cb && cb(); return; }
+        const src = cand[i++] + '?v=' + encodeURIComponent(THEME_VER || '');
+        const s = document.createElement('script');
+        s.defer = true; s.id = 'fx-snow-once'; s.src = src;
+        s.onload = function(){ loaded = true; onloadMarked = true; cb && cb(); };
+        s.onerror = function(){ s.remove(); tryNext(); };
+        document.body.appendChild(s);
+      })();
+      // 保险：脚本 onload 某些打包方式不触发，这里再延迟确认一次
+      setTimeout(function(){
+        if (!onloadMarked && findNodes().length) { loaded = true; cb && cb(); }
+      }, 1000);
+    }
+
+    function update(){
+      if (needNow()){
+        ensureLoaded(show);   // 需要时：若未加载过→加载一次并显示；已加载→直接显示
+      } else {
+        hide();               // 不需要时：只隐藏，不销毁、不再加载
+      }
+    }
+    return { update };
+  })();
 
   /* ========= 其它公共 ========= */
   function cleanEffectLayers(){
-    // 保持你 head.html 已加的固定定位守卫；这里只清其它特效层（不动雪花 iframe）
+    // 不动雪花（避免重建导致加速）；其它照旧清理
     document.querySelectorAll('.canvas_effects,#universe_canvas,#quantum_c_n,.j-china-lantern,[id^=sakura]')
       .forEach(el=>{ try{ el.remove(); }catch(e){} });
-    // 移除已注入的特效脚本标签（避免重复执行）
     ['fx-sakura','fx-universe','fx-circle','fx-quantum','fx-lantern'].forEach(id=>{
       const s = document.getElementById(id); if (s) s.remove();
     });
@@ -1011,11 +1009,11 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     if (isMobile()) return;
     if (shouldLoad(DreamConfig.effects_lantern_mode))             loadFromBases('fx-lantern',['js/effects/lantern','effects/lantern']);
     if (shouldLoad(DreamConfig.effects_sakura_mode))              loadFromBases('fx-sakura', ['js/effects/sakura','effects/sakura']);
+    // ★ 雪花：单实例 + 显隐（不会重建，不会叠速）
+    SnowOnce.update();
     if (shouldLoad(DreamConfig.effects_universe_mode))            loadFromBases('fx-universe',['js/effects/universe','effects/universe']);
     if (shouldLoad(DreamConfig.effects_circle_magic_mode))        loadFromBases('fx-circle',  ['js/effects/circleMagic','effects/circleMagic']);
     if (shouldLoad(DreamConfig.effects_quantum_silk_thread_mode)) loadFromBases('fx-quantum', ['js/effects/quantum','effects/quantum']);
-    // ★ 雪花独立于其它：用 iframe 沙盒 + 显隐
-    updateSnowVisibility();
   }
 
   function initAll(){
@@ -1026,10 +1024,10 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 
   document.addEventListener('DOMContentLoaded', initAll);
   window.addEventListener('pjax:complete', ()=>{ syncNightClass(); initAll(); });
-  // 明暗切换：其它特效按原逻辑重建；雪花只切显隐
+  // 明暗切换：其它特效按原逻辑重建；雪花只做显隐切换（不重复加载）
   window.addEventListener('hao:mode-change', ()=>{
     cleanEffectLayers();
-    initCanvasEffects(); // 重新判断各特效是否需要加载
+    initCanvasEffects();
   });
 
   try{
