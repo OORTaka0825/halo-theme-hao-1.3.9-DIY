@@ -752,14 +752,13 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     })();
     </script>
 
-    <!-- DIY × PLUS 特效/光标一体化 Loader · v12-merge + DreamConfig + SnowGuard -->
+    <!-- DIY × PLUS 特效/光标一体化 Loader · v12-merge + DreamConfig + SnowOnce -->
 <script th:inline="javascript">
 (function(){
-  /* ========== 基础 ========= */
+  /* ========= 基础 ========= */
   const THEME_VER  = /*[[${theme.spec.version}]]*/ '';
   const RAW_ASSETS = /*[[${assets_link}]]*/ '';
 
-  // 自动探测真实 /themes/<id>/assets
   function detectAssetBases(){
     const set = new Set();
     if (RAW_ASSETS){
@@ -779,7 +778,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   const ASSET_BASES  = detectAssetBases();
   const FIRST_ASSETS = ASSET_BASES[0].replace(/\/+$/,'');
 
-  /* ========== 读取配置（enhance 优先，style 兜底） ========= */
+  /* ========= 读取配置（enhance 优先，style 兜底） ========= */
   const _e = {
     cursor_style: /*[[${theme.config.enhance.cursor_style}]]*/ null,
     cursor_move:  /*[[${theme.config.enhance.cursor_move}]]*/ null,
@@ -807,31 +806,23 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     effects_lantern_right: /*[[${theme.config.style.effects_lantern.effects_lantern_right}]]*/ null
   };
   const pick = (a,b,d)=> (a||b||d);
-
-  function normalizeMode(m){
-    if(!m || m==='none') return '';
-    if(m==='light') return 'day';
-    if(m==='dark')  return 'night';
-    return m; // 已是 day/night/all
-  }
+  const normalizeMode = m => (!m||m==='none') ? '' : (m==='light'?'day':(m==='dark'?'night':m));
 
   const CFG = {
     cursor_style: pick(_e.cursor_style,_s.cursor_style,'none'),
     cursor_move:  pick(_e.cursor_move,_s.cursor_move,'none'),
     cursor_click: pick(_e.cursor_click,_s.cursor_click,'none'),
-
     effects_lantern_mode:             normalizeMode(pick(_e.effects_lantern_mode,_s.effects_lantern_mode,'none')),
     effects_sakura_mode:              normalizeMode(pick(_e.effects_sakura_mode,_s.effects_sakura_mode,'none')),
     effects_snowflake_mode:           normalizeMode(pick(_e.effects_snowflake_mode,_s.effects_snowflake_mode,'none')),
     effects_universe_mode:            normalizeMode(pick(_e.effects_universe_mode,_s.effects_universe_mode,'none')),
     effects_circle_magic_mode:        normalizeMode(pick(_e.effects_circle_magic_mode,_s.effects_circle_magic_mode,'none')),
     effects_quantum_silk_thread_mode: normalizeMode(pick(_e.effects_quantum_silk_thread_mode,_s.effects_quantum_silk_thread_mode,'none')),
-
     effects_lantern_left:  pick(_e.effects_lantern_left,_s.effects_lantern_left,''),
     effects_lantern_right: pick(_e.effects_lantern_right,_s.effects_lantern_right,'')
   };
 
-  /* ========== 关键：给 PLUS 脚本看的 DreamConfig ========= */
+  /* ========= DreamConfig（给 PLUS 脚本读取） ========= */
   const DreamConfig = window.DreamConfig || (window.DreamConfig = {});
   DreamConfig.theme_version = THEME_VER || '';
   DreamConfig.assets_base   = FIRST_ASSETS + '/js';
@@ -847,7 +838,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   DreamConfig.effects_lantern_left             = CFG.effects_lantern_left;
   DreamConfig.effects_lantern_right            = CFG.effects_lantern_right;
 
-  /* ========== 夜间兼容 ========= */
+  /* ========= 明暗兼容 ========= */
   function syncNightClass(){
     const html = document.documentElement;
     const dark = html.getAttribute('data-theme')==='dark';
@@ -862,7 +853,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     if (was !== now) window.dispatchEvent(new Event('hao:mode-change'));
   }).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme','class']});
 
-  /* ========== 工具：遍历 bases 加载脚本 ========= */
+  /* ========= 工具 ========= */
   function loadFromBases(id, relList){
     if (document.getElementById(id)) return;
     const cand = [];
@@ -884,7 +875,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   }
   const isMobile = ()=> /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-  /* ========== 鼠标风格（精准文件表，!important 保障覆盖） ========== */
+  /* ========= 鼠标风格（精准文件表） ========= */
   function applyCursorStyle(){
     const pack = DreamConfig.cursor_style;
     if(!pack) return;
@@ -894,9 +885,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
       black_cat:  { default:['normal.cur'],      pointer:['Alternative.cur'],  text:['Escritura a Mano.cur'] }
     };
     const files = MAP[pack] || {
-      default:['Arrow.cur','Normal.cur'],
-      pointer:['Hand.cur','Link.cur'],
-      text:['IBeam.cur','Text.cur']
+      default:['Arrow.cur','Normal.cur'], pointer:['Hand.cur','Link.cur'], text:['IBeam.cur','Text.cur']
     };
     const bases = ASSET_BASES.map(b => (b.replace(/\/+$/,'') + '/cursor/' + pack).replace(/\/{2,}/g,'/'));
     const toUrls = list => {
@@ -905,7 +894,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     };
     const css = [
       'html, body { cursor: ' + toUrls(files.default) + ' !important; }',
-      'a, button, [role="button"], input[type=button], input[type=submit] { cursor: ' + toUrls(files.pointer) + ' !important; }',
+      'a, button, [role=\"button\"], input[type=button], input[type=submit] { cursor: ' + toUrls(files.pointer) + ' !important; }',
       'input[type=text], input[type=search], textarea, .text, .textbox, .input { cursor: ' + toUrls(files.text) + ' !important; }'
     ].join('\n');
     let st = document.getElementById('hao-cursor-style');
@@ -913,89 +902,37 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     st.textContent = css;
   }
 
-  /* ========== SnowGuard：只托管“雪花”清理计时器/RAF/监听，防叠加加速 ========= */
-  function loadSnowflakeManaged(){
-    // 1) 先干净杀掉上一次雪花的计时器/监听
-    if (window.__haoSnowflakeGuard && typeof window.__haoSnowflakeGuard.kill === 'function') {
-      try { window.__haoSnowflakeGuard.kill(); } catch(e){}
-    }
-
-    // 2) 只在需要的模式下加载
-    if (!shouldLoad(DreamConfig.effects_snowflake_mode)) return;
-
-    // 3) 在“加载雪花脚本期间”挂钩，收集它创建的 interval/timeout/RAF 和事件监听
-    const G = window.__haoSnowflakeGuard = {
-      timers: [], timeouts: [], rafs: [], listeners: [],
-      _orig: {
-        setInterval: window.setInterval,
-        clearInterval: window.clearInterval,
-        setTimeout: window.setTimeout,
-        clearTimeout: window.clearTimeout,
-        requestAnimationFrame: window.requestAnimationFrame,
-        cancelAnimationFrame: window.cancelAnimationFrame,
-        winAdd: window.addEventListener,
-        winRemove: window.removeEventListener,
-        docAdd: document.addEventListener,
-        docRemove: document.removeEventListener
-      },
-      kill(){
-        this.timers.forEach(id => { try{ this._orig.clearInterval(id); }catch(e){} });
-        this.timeouts.forEach(id=> { try{ this._orig.clearTimeout(id); }catch(e){} });
-        this.rafs.forEach(id    => { try{ this._orig.cancelAnimationFrame(id); }catch(e){} });
-        this.listeners.forEach(it=>{ try{ it.target.removeEventListener(it.type, it.handler, it.opts); }catch(e){} });
-        this.timers.length = this.timeouts.length = this.rafs.length = this.listeners.length = 0;
-        // 移除雪花相关层
-        document.querySelectorAll('#Snow,[id*="snow"],[class*="snow"]').forEach(el=>{ try{ el.remove(); }catch(e){} });
-      }
-    };
-    let capturing = true;
-
-    // 覆盖期间的 API（只在捕获时记录）
-    window.setInterval = function(fn,ms){ const id = G._orig.setInterval(fn,ms); if(capturing) G.timers.push(id); return id; };
-    window.setTimeout  = function(fn,ms){ const id = G._orig.setTimeout(fn,ms);  if(capturing) G.timeouts.push(id); return id; };
-    window.requestAnimationFrame = function(cb){ const id=G._orig.requestAnimationFrame(cb); if(capturing) G.rafs.push(id); return id; };
-    window.addEventListener = function(type,handler,opts){ G._orig.winAdd.call(window,type,handler,opts); if(capturing) G.listeners.push({target:window,type,handler,opts}); };
-    document.addEventListener = function(type,handler,opts){ G._orig.docAdd.call(document,type,handler,opts); if(capturing) G.listeners.push({target:document,type,handler,opts}); };
-
-    // 4) 实际加载雪花脚本（命中任意一个即可）
-    const candidates = [];
-    ASSET_BASES.forEach(base=>{
-      ['js/effects/snowflake','effects/snowflake'].forEach(rp=>{
-        const p = (base.replace(/\/+$/,'') + '/' + rp).replace(/\/{2,}/g,'/');
-        candidates.push(p + '.min.js'); candidates.push(p + '.js');
-      });
-    });
-    let i=0;
-    (function tryNext(){
-      if (i>=candidates.length) { restoreHooks(); return; }
-      const src = candidates[i++] + '?v=' + encodeURIComponent(DreamConfig.theme_version);
-      const s   = document.createElement('script');
-      s.defer = true; s.src = src;
-      s.onload = function(){ restoreHooks(); };
-      s.onerror = function(){ s.remove(); tryNext(); };
-      document.body.appendChild(s);
-    })();
-
-    function restoreHooks(){
-      if (!capturing) return;
-      capturing = false;
-      // 还原 API
-      window.setInterval = G._orig.setInterval;
-      window.clearInterval = G._orig.clearInterval;
-      window.setTimeout = G._orig.setTimeout;
-      window.clearTimeout = G._orig.clearTimeout;
-      window.requestAnimationFrame = G._orig.requestAnimationFrame;
-      window.cancelAnimationFrame  = G._orig.cancelAnimationFrame;
-      window.addEventListener = G._orig.winAdd;
-      window.removeEventListener = G._orig.winRemove;
-      document.addEventListener = G._orig.docAdd;
-      document.removeEventListener = G._orig.docRemove;
-    }
+  /* ========= 只针对“雪花”的稳定方案：只加载一次 + CSS 显隐 ========= */
+  function installSnowVisibilityCSS(){
+    let st = document.getElementById('hao-snow-visibility');
+    if (st) return;
+    st = document.createElement('style'); st.id='hao-snow-visibility';
+    st.textContent = `
+      /* 根据 html 的 data-snow-mode 与 .night 来控制显示 */
+      html[data-snow-mode="none"] [id*="snow"], html[data-snow-mode="none"] #Snow { display: none !important; }
+      html[data-snow-mode="night"]:not(.night) [id*="snow"], html[data-snow-mode="night"]:not(.night) #Snow { display: none !important; }
+      html[data-snow-mode="day"].night [id*="snow"], html[data-snow-mode="day"].night #Snow { display: none !important; }
+      /* 其它情况（all 或匹配的明/暗）让脚本的默认显示生效 */
+    `.trim();
+    document.head.appendChild(st);
+  }
+  function updateSnowVisibility(){
+    document.documentElement.setAttribute('data-snow-mode', DreamConfig.effects_snowflake_mode || 'none');
+    // 等新节点挂上后再同步一次（雪花脚本异步创建容器）
+    setTimeout(()=>document.documentElement.setAttribute('data-snow-mode', DreamConfig.effects_snowflake_mode || 'none'), 120);
+  }
+  function ensureSnowOnce(){
+    installSnowVisibilityCSS();
+    updateSnowVisibility();
+    if (window.__haoSnowLoaded) return; // 已经加载过
+    window.__haoSnowLoaded = true;
+    loadFromBases('fx-snow', ['js/effects/snowflake','effects/snowflake']);
   }
 
-  /* ========== 其它公共工具 ========= */
+  /* ========= 其它公共 ========= */
   function cleanEffectLayers(){
-    document.querySelectorAll('.canvas_effects,#universe_canvas,#quantum_c_n,.j-china-lantern,[id^=sakura],#Snow')
+    // 注意：这里不再删除雪花相关层，避免丢失已加载实例
+    document.querySelectorAll('.canvas_effects,#universe_canvas,#quantum_c_n,.j-china-lantern,[id^=sakura]')
       .forEach(el=>{ try{ el.remove(); }catch(e){} });
   }
   const shouldLoad = (mode)=>{
@@ -1016,8 +953,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     if (isMobile()) return;
     if (shouldLoad(DreamConfig.effects_lantern_mode))             loadFromBases('fx-lantern',['js/effects/lantern','effects/lantern']);
     if (shouldLoad(DreamConfig.effects_sakura_mode))              loadFromBases('fx-sakura', ['js/effects/sakura','effects/sakura']);
-    // ★ 雪花用“托管加载”，防止重复计时器叠加
-    loadSnowflakeManaged();
+    ensureSnowOnce();                                            // ★ 雪花：只加载一次
     if (shouldLoad(DreamConfig.effects_universe_mode))            loadFromBases('fx-universe',['js/effects/universe','effects/universe']);
     if (shouldLoad(DreamConfig.effects_circle_magic_mode))        loadFromBases('fx-circle',  ['js/effects/circleMagic','effects/circleMagic']);
     if (shouldLoad(DreamConfig.effects_quantum_silk_thread_mode)) loadFromBases('fx-quantum', ['js/effects/quantum','effects/quantum']);
@@ -1031,16 +967,13 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 
   document.addEventListener('DOMContentLoaded', initAll);
   window.addEventListener('pjax:complete', ()=>{ syncNightClass(); initAll(); });
-
-  // 明暗切换：先杀掉雪花的计时器，再重建需要的效果
   window.addEventListener('hao:mode-change', ()=>{
-    if (window.__haoSnowflakeGuard && typeof window.__haoSnowflakeGuard.kill === 'function') {
-      try { window.__haoSnowflakeGuard.kill(); } catch(e){}
-    }
+    // 切换明/暗：其它特效重建；雪花只切可见性，不重建
     cleanEffectLayers();
     ['fx-sakura','fx-universe','fx-circle','fx-quantum','fx-lantern'].forEach(id=>{
       const s = document.getElementById(id); if (s) s.remove();
     });
+    updateSnowVisibility();
     initCanvasEffects();
   });
 
