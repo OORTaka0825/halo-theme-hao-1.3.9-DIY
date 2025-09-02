@@ -788,6 +788,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 
   /* ========= 鼠标风格（精准文件表） ========= */
     /* 只替换这个函数，其它代码一律不动 */
+    /* 只替换这个函数，其它代码一律不动 */
   function applyCursorStyle(){
     const pack = (window.DreamConfig && window.DreamConfig.cursor_style) || '';
     if (!pack || pack === 'none') return;
@@ -802,11 +803,19 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
       music_cat_02:    { default:['arrow.cur'],                          pointer:['hand.cur'],                             text:['arrow.cur','hand.cur'] },
       water_01:        { default:['arrow.cur'],                          pointer:['hand.cur'],                             text:['arrow.cur'] },
       water_02:        { default:['arrow.cur'],                          pointer:['hand.cur'],                             text:['arrow.cur'] },
+
       horse:           { default:['arrow.cur'],                          pointer:['hand.cur','move.cur'],                  text:['beam.cur','text.cur','IBeam.cur','arrow.cur'] },
       marry:           { default:['arrow.cur'],                          pointer:['move.cur','hand.cur'],                  text:['beam.cur','IBeam.cur','Text.cur','text.cur'] },
-      breeze:          { default:['Arrow.cur','arrow.cur'],              pointer:['Hand.cur','hand.cur'],                  text:['Handwriting.cur','IBeam.cur','Text.cur','text.cur'] },
-      overwatch:       { default:['cross.cur','Cross.cur'],              pointer:['pointer.cur','link.cur','Hand.cur','hand.cur'], text:['text.cur','Text.cur'] },
+
+      // breeze：增加 Normal/Default 优先，避免只试 Arrow 而 404
+      breeze:          { default:['Normal.cur','Default.cur','Arrow.cur','arrow.cur','Normal.ani','Arrow.ani'],
+                         pointer:['Hand.cur','Link.cur','hand.cur','link.cur'],
+                         text:['IBeam.cur','Text.cur','Handwriting.cur','text.cur'] },
+
+      overwatch:       { default:['cross.cur','Cross.cur','Normal.cur'], pointer:['pointer.cur','link.cur','Hand.cur','hand.cur'], text:['text.cur','Text.cur'] },
+
       black_cat:       { default:['normal.cur','Normal.cur','arrow.cur'], pointer:['Alternative.cur','ALTERNATIVE.cur','link.cur','Link.cur','Hand.cur','hand.cur'], text:['Escritura a Mano.cur','texto.cur','Text.cur','IBeam.cur'] },
+
       rainbow_rain:    { default:['Alternative2.cur','Alternative.cur','normal.cur','arrow.cur'],
                          pointer:['Movee2.cur','Move.cur','Hand.cur','hand.cur'],
                          text:['texto.cur','Escritura a Mano.cur','Text.cur','text.cur'] },
@@ -814,19 +823,17 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 
     // 2) 兜底候选（大小写/别名），命不中就顺序尝试；成功后浏览器不会继续请求后面的 URL
     const GENERIC = {
-      default: ['Arrow.cur','arrow.cur','Normal.cur','normal.cur','Default.cur','DEFAULT.cur'],
-      pointer: ['Hand.cur','hand.cur','Link.cur','link.cur','pointer.cur','Pointer.cur','Alternative.cur','ALTERNATIVE.cur','Move.cur','move.cur'],
-      text:    ['IBeam.cur','Ibeam.cur','IBEAM.cur','Text.cur','text.cur','Handwriting.cur','Escritura a Mano.cur','beam.cur','texto.cur']
+      default: ['Normal.cur','Default.cur','Arrow.cur','arrow.cur'],
+      pointer: ['Hand.cur','Link.cur','hand.cur','link.cur','pointer.cur','Pointer.cur'],
+      text:    ['IBeam.cur','Text.cur','text.cur','Handwriting.cur','beam.cur']
     };
     const files = MAP[pack] || GENERIC;
 
-    // 3) 只用 assets_link 作为首选基准，避免误命中 /themes/theme-hao/
-    //    assets_link 在 th:inline="javascript" 下会被模板引擎替换为当前主题的正确路径
+    // 3) 用 assets_link 作为唯一基准，避免串到其他主题
     const raw = /*[[${assets_link}]]*/ '';
     let base = String(raw || '').replace(/\/+$/,'');
     if (base && !/\/assets$/.test(base)) base += '/assets';
 
-    // 只保留两种基准：/assets/cursor/<pack> 和 /assets/cursor（减少 404 噪音）
     const bases = [];
     if (base) {
       bases.push((base + '/cursor/' + pack).replace(/\/{2,}/g,'/'));
@@ -840,7 +847,6 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
           urls.push("url('"+ encodeURI(b + '/' + name) +"')");
         });
       });
-      // 保底：若 base 不可用，仍让系统指针可用
       return (urls.length ? urls.join(', ') + ', ' : '') + 'auto';
     };
 
@@ -854,6 +860,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     if(!st){ st=document.createElement('style'); st.id='hao-cursor-style'; document.head.appendChild(st); }
     st.textContent = css;
   }
+
 
 
   /* ========= 只修“雪花加速” —— 计时器 ID 区间法 ========= */
