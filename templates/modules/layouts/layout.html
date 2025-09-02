@@ -752,37 +752,50 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     })();
     </script>
 
-    <!-- 统一特效桥（DIY 专用，兼容 light/dark 与 PLUS 的 day/night） -->
+    <!-- 统一特效桥 v2（DIY × PLUS：支持 enhance / style，支持 light/dark & day/night） -->
 <script th:inline="javascript">
 (function () {
-  /* ===================== 读取主题配置 ===================== */
-  var assetsLink = '[[${assets_link}]]';                // DIY 已在 layout.html 顶部 th:with 里定义
+  var assetsLink = '[[${assets_link}]]';
   var version    = '[[${theme.spec.version}]]';
 
-  // 从 DIY 的 settings.yaml（style 分组）读取
+  // 读取增强组（优先）+ 兼容 style 组兜底
+  function gv(pathEnhance, pathStyle){
+    var a = '[[${' + pathEnhance + '}]]', b = '[[${' + pathStyle + '}]]';
+    // Thymeleaf 不存在时会渲染为空串，JS 用 || 兜底
+    return a || b || '';
+  }
+
+  // === 从 settings 取值（优先 enhance） ===
   var cfg = {
-    cursor_move: '[[${theme.config.style.cursor_move}]]',
-    cursor_click: '[[${theme.config.style.cursor_click}]]',
-    effects_lantern_mode: '[[${theme.config.style.effects_lantern_mode}]]',
-    effects_sakura_mode: '[[${theme.config.style.effects_sakura_mode}]]',
-    effects_snowflake_mode: '[[${theme.config.style.effects_snowflake_mode}]]',
-    effects_universe_mode: '[[${theme.config.style.effects_universe_mode}]]',
-    effects_circle_magic_mode: '[[${theme.config.style.effects_circle_magic_mode}]]',
-    effects_quantum_silk_thread_mode: '[[${theme.config.style.effects_quantum_silk_thread_mode}]]'
+    cursor_style: gv('theme.config.enhance.cursor_style', 'theme.config.style.cursor_style'),
+    cursor_move:  gv('theme.config.enhance.cursor_move',  'theme.config.style.cursor_move'),
+    cursor_click: gv('theme.config.enhance.cursor_click', 'theme.config.style.cursor_click'),
+
+    effects_lantern_mode:             gv('theme.config.enhance.effects_lantern_mode',             'theme.config.style.effects_lantern_mode'),
+    effects_sakura_mode:              gv('theme.config.enhance.effects_sakura_mode',              'theme.config.style.effects_sakura_mode'),
+    effects_snowflake_mode:           gv('theme.config.enhance.effects_snowflake_mode',           'theme.config.style.effects_snowflake_mode'),
+    effects_universe_mode:            gv('theme.config.enhance.effects_universe_mode',            'theme.config.style.effects_universe_mode'),
+    effects_circle_magic_mode:        gv('theme.config.enhance.effects_circle_magic_mode',        'theme.config.style.effects_circle_magic_mode'),
+    effects_quantum_silk_thread_mode: gv('theme.config.enhance.effects_quantum_silk_thread_mode', 'theme.config.style.effects_quantum_silk_thread_mode'),
+
+    // 灯笼文字可选（存在才用）
+    effects_lantern_left:  gv('theme.config.enhance.effects_lantern.effects_lantern_left',  'theme.config.style.effects_lantern.effects_lantern_left'),
+    effects_lantern_right: gv('theme.config.enhance.effects_lantern.effects_lantern_right', 'theme.config.style.effects_lantern.effects_lantern_right'),
   };
 
-  // 将 light/dark 转为 day/night（PLUS 脚本使用 day/night）
   function normalizeMode(m) {
     if (!m || m === 'none') return '';
     if (m === 'light') return 'day';
     if (m === 'dark')  return 'night';
-    return m; // all
+    return m; // 已是 day/night/all
   }
 
-  // 给 PLUS 的特效脚本用的全局配置（名称沿用 DreamConfig，省去改脚本）
+  // 给效果脚本看的全局配置
   var DreamConfig = window.DreamConfig || (window.DreamConfig = {});
   DreamConfig.theme_version = version;
   DreamConfig.assets_base   = assetsLink.replace(/\/$/, '') + '/js';
+
+  DreamConfig.cursor_style  = (cfg.cursor_style && cfg.cursor_style !== 'none') ? cfg.cursor_style : '';
   DreamConfig.cursor_move   = (cfg.cursor_move  && cfg.cursor_move  !== 'none') ? cfg.cursor_move  : '';
   DreamConfig.cursor_click  = (cfg.cursor_click && cfg.cursor_click !== 'none') ? cfg.cursor_click : '';
 
@@ -793,100 +806,138 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   DreamConfig.effects_circle_magic_mode        = normalizeMode(cfg.effects_circle_magic_mode);
   DreamConfig.effects_quantum_silk_thread_mode = normalizeMode(cfg.effects_quantum_silk_thread_mode);
 
-  /* ============ 兼容 PLUS 的夜间判断（night） ============ */
-  // DIY 用 html[data-theme="dark"]，PLUS 脚本看的是 html.night
+  DreamConfig.effects_lantern_left  = cfg.effects_lantern_left  || '';
+  DreamConfig.effects_lantern_right = cfg.effects_lantern_right || '';
+
+  // === 同步 night 类（DIY 是 data-theme=dark，PLUS 代码看 .night） ===
   function syncNightClass() {
     var html   = document.documentElement;
     var isDark = html.getAttribute('data-theme') === 'dark';
-    html.classList.toggle('night', isDark);                   // 给 html 补上/移除 night
-    window.specialEfficacyScheme = isDark ? 'dark' : 'light'; // 少数脚本会读这个变量
+    html.classList.toggle('night', isDark);
+    window.specialEfficacyScheme = isDark ? 'dark' : 'light';
   }
   syncNightClass();
-  // 监听主题切换（data-theme 变化时触发）
-  (new MutationObserver(function () {
+  new MutationObserver(function () {
     var oldIsDark = document.documentElement.classList.contains('night');
     syncNightClass();
     var newIsDark = document.documentElement.classList.contains('night');
-    if (oldIsDark !== newIsDark) {
-      // 触发一次自定义事件，供重建特效用
-      window.dispatchEvent(new Event('hao:mode-change'));
-    }
-  })).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme','class'] });
+    if (oldIsDark !== newIsDark) window.dispatchEvent(new Event('hao:mode-change'));
+  }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme','class'] });
 
-  /* ===================== 工具函数 ===================== */
-  function isMobile() { return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent); }
-
-  // 只加载一次（用 id 防重复），需要重载时先移除再加
-  function loadOnce(id, src) {
+  // === 工具：带回退路径的加载器 ===
+  function loadWithFallback(id, paths) {
     if (document.getElementById(id)) return;
-    var s = document.createElement('script');
-    s.id  = id;
-    s.src = src + (src.indexOf('?')>-1?'&':'?') + 'mew=' + version;
-    s.defer = true;
-    document.body.appendChild(s);
+    var idx = 0, s = document.createElement('script');
+    s.defer = true; s.id = id;
+    function tryNext() {
+      if (idx >= paths.length) return;
+      s.src = paths[idx++] + (paths[idx-1].includes('?')?'&':'?') + 'mew=' + version;
+      document.body.appendChild(s);
+    }
+    s.onerror = function(){ s.remove(); s = document.createElement('script'); s.defer = true; s.id = id; tryNext(); };
+    tryNext();
   }
 
-  // 清理可能存在的画布/容器（用于模式切换时先干净再重建）
-  function cleanEffectLayers() {
-    document.querySelectorAll('.canvas_effects, #quantum_c_n, .j-china-lantern')
-      .forEach(function (el) { try { el.remove(); } catch(e){} });
+  function isMobile(){ return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent); }
+
+  // === 鼠标风格（用 JS 动态应用，避免 CSS 条件内联不生效） ===
+  function applyCursorStyle() {
+    var cs = DreamConfig.cursor_style;
+    if (!cs) return;
+    var root = document.documentElement;
+    var base = assetsLink + '/cursor/' + cs;
+    function setVar(name, file, fallback){
+      root.style.setProperty(name, file ? "url('"+base+"/"+file+"'), auto" : fallback || 'auto');
+    }
+    // 三个常用位：默认/手型/文本（其余光标位大多数主题不会用到）
+    // 不同包的文件命名不同，尽量通用：Arrow/normal/cross -> 默认；Hand/link/pointer -> 手型；IBeam/text/handwriting -> 文本
+    var map = {
+      default: ['Arrow.cur','normal.cur','cross.cur'],
+      pointer: ['Hand.cur','link.cur','pointer.cur'],
+      text:    ['IBeam.cur','text.cur','handwriting.cur']
+    };
+    function pick(files){ return files.find(Boolean); }
+    setVar('--cursor-default', pick(map.default));
+    setVar('--cursor-pointer', pick(map.pointer), 'pointer');
+    setVar('--cursor-text',    pick(map.text),    'text');
+
+    // 挂载基础选择器
+    var css = document.getElementById('hao-cursor-style');
+    if (!css){
+      css = document.createElement('style');
+      css.id = 'hao-cursor-style';
+      css.textContent = 'html,body{cursor:var(--cursor-default)}a,button,[role="button"],input[type=submit]{cursor:var(--cursor-pointer)}pre,code,textarea,input[type=text],input[type=search]{cursor:var(--cursor-text)}';
+      document.head.appendChild(css);
+    }
   }
 
-  /* ===================== 初始化：鼠标移动/点击 ===================== */
-  function initCursorEffects() {
+  // === 清理画布层（切换模式时用） ===
+  function cleanEffectLayers(){
+    document.querySelectorAll('.canvas_effects,#quantum_c_n,.j-china-lantern,#universe_canvas,#Snow','[id^=sakura]')
+      .forEach(function(el){ try{ el.remove(); }catch(e){} });
+  }
+
+  // === 初始化光标特效 ===
+  function initCursorEffects(){
     if (isMobile()) return;
     if (DreamConfig.cursor_move) {
-      loadOnce('cursor-move', assetsLink + '/js/cursor/move/'  + DreamConfig.cursor_move  + '.min.js');
+      loadWithFallback('cursor-move', [
+        assetsLink + '/js/cursor/move/'  + DreamConfig.cursor_move  + '.min.js'
+      ]);
     }
     if (DreamConfig.cursor_click) {
-      loadOnce('cursor-click', assetsLink + '/js/cursor/click/' + DreamConfig.cursor_click + '.min.js');
+      loadWithFallback('cursor-click', [
+        assetsLink + '/js/cursor/click/' + DreamConfig.cursor_click + '.min.js'
+      ]);
     }
   }
 
-  /* ===================== 初始化：全屏画布类特效 ===================== */
-  function initCanvasEffects() {
+  // === 初始化画布类特效 ===
+  function initCanvasEffects(){
     if (isMobile()) return;
 
-    if (DreamConfig.effects_lantern_mode) {
-      loadOnce('fx-lantern', assetsLink + '/js/effects/lantern.min.js');
+    function on(mode){ return !!mode; }
+
+    if (on(DreamConfig.effects_lantern_mode)) {
+      // 灯笼脚本内部会读 DreamConfig.effects_lantern_* 文本
+      loadWithFallback('fx-lantern', [ assetsLink + '/js/effects/lantern.min.js' ]);
     }
-    if (DreamConfig.effects_sakura_mode) {
-      loadOnce('fx-sakura', assetsLink + '/js/effects/sakura.min.js');
+    if (on(DreamConfig.effects_sakura_mode)) {
+      loadWithFallback('fx-sakura',  [ assetsLink + '/js/effects/sakura.min.js'  ]);
     }
-    if (DreamConfig.effects_snowflake_mode) {
-      loadOnce('fx-snow', assetsLink + '/js/effects/snowflake.min.js');
+    if (on(DreamConfig.effects_snowflake_mode)) {
+      loadWithFallback('fx-snow',    [ assetsLink + '/js/effects/snowflake.min.js' ]);
     }
-    if (DreamConfig.effects_universe_mode) {
-      loadOnce('fx-universe', assetsLink + '/js/effects/universe.min.js');
+    if (on(DreamConfig.effects_universe_mode)) {
+      loadWithFallback('fx-universe',[ assetsLink + '/js/effects/universe.min.js' ]);
     }
-    if (DreamConfig.effects_circle_magic_mode) {
-      loadOnce('fx-circleMagic', assetsLink + '/js/effects/circleMagic.min.js');
+    if (on(DreamConfig.effects_circle_magic_mode)) {
+      loadWithFallback('fx-circle',  [ assetsLink + '/js/effects/circleMagic.min.js' ]);
     }
-    if (DreamConfig.effects_quantum_silk_thread_mode) {
-      loadOnce('fx-quantum', assetsLink + '/js/effects/quantum.min.js');
+    if (on(DreamConfig.effects_quantum_silk_thread_mode)) {
+      loadWithFallback('fx-quantum', [ assetsLink + '/js/effects/quantum.min.js' ]);
     }
   }
 
-  function initAll() {
+  function initAll(){
+    applyCursorStyle();
     initCursorEffects();
     initCanvasEffects();
   }
 
-  // 首次进入
   document.addEventListener('DOMContentLoaded', initAll);
-  // PJAX 完成后也再执行一次（若没开 PJAX 也没关系）
-  window.addEventListener('pjax:complete', function () { syncNightClass(); initAll(); });
+  window.addEventListener('pjax:complete', function(){ syncNightClass(); initAll(); });
 
-  // 主题模式切换：清理并重建能自执行的画布特效
-  window.addEventListener('hao:mode-change', function () {
+  window.addEventListener('hao:mode-change', function(){
     cleanEffectLayers();
-    // 为了让自执行脚本重新跑一遍，把它们的 <script> 先移除再按需添加
-    ['fx-sakura','fx-snow','fx-universe','fx-circleMagic','fx-quantum','fx-lantern'].forEach(function (id) {
-      var old = document.getElementById(id);
-      if (old) old.remove();
+    ['fx-sakura','fx-snow','fx-universe','fx-circle','fx-quantum','fx-lantern'].forEach(function(id){
+      var s = document.getElementById(id); if (s) s.remove();
     });
     initCanvasEffects();
   });
+
+  // 调试：在控制台能看到当前读取到的配置
+  try { console.log('[Hao Effects]', JSON.parse(JSON.stringify(DreamConfig))); } catch(e){}
 })();
 </script>
 

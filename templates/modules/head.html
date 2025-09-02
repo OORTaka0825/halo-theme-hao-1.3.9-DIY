@@ -216,44 +216,5 @@
 
     <th:block th:replace="~{modules/variables/site-config :: site-config}" />
 
-<!-- 鼠标风格（示例：breeze / overwatch / black_cat） -->
-<style th:inline="css">
-  /* 默认指针（未选择风格或选择“关闭”时） */
-  :root {
-    --cursor-default: auto;
-    --cursor-pointer: pointer;
-    --cursor-text: text;
-  }
-
-  /* breeze */
-  [(${theme.config.style.cursor_style == 'breeze' ? '
-    :root{
-      --cursor-default: url(' + assets_link + '/cursor/breeze/Arrow.cur), auto;
-      --cursor-pointer: url(' + assets_link + '/cursor/breeze/Hand.cur), pointer;
-      --cursor-text:    url(' + assets_link + '/cursor/breeze/IBeam.cur), text;
-    }' : ''})]
-
-  /* overwatch */
-  [(${theme.config.style.cursor_style == 'overwatch' ? '
-    :root{
-      --cursor-default: url(' + assets_link + '/cursor/overwatch/cross.cur), auto;
-      --cursor-pointer: url(' + assets_link + '/cursor/overwatch/link.cur), pointer;
-      --cursor-text:    url(' + assets_link + '/cursor/overwatch/handwriting.cur), text;
-    }' : ''})]
-
-  /* black_cat */
-  [(${theme.config.style.cursor_style == 'black_cat' ? '
-    :root{
-      --cursor-default: url(' + assets_link + '/cursor/black_cat/normal.cur), auto;
-      --cursor-pointer: url(' + assets_link + '/cursor/black_cat/Alternative.cur), pointer;
-      --cursor-text:    url(' + assets_link + '/cursor/black_cat/Escritura a Mano.cur), text;
-    }' : ''})]
-
-  /* 全局应用 */
-  html, body { cursor: var(--cursor-default); }
-  a, button, [role="button"], input[type="submit"] { cursor: var(--cursor-pointer); }
-  pre, code, textarea, input[type="text"], input[type="search"] { cursor: var(--cursor-text); }
-</style>
-
 
 </th:block>
