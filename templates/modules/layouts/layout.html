@@ -781,294 +781,39 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   })();
 </script>
 
-<!-- 鼠标移动和点击特效 -->
-<script th:inline="javascript">
-(function(){
-  // 仅处理鼠标移动/点击两项（不要动显示模式）
-  const ASSETS = /*[[${assets_link}]]*/ '/assets';
-  const THEME_VER = /*[[${theme_version}]]*/ '';
-  const CFG = {
-    cursor_move:  /*[[${theme.config.style.cursor_move}]]*/  'none',
-    cursor_click: /*[[${theme.config.style.cursor_click}]]*/ 'none'
-  };
-
-  // 避免重复初始化
-  if (window.__DIY_CURSOR_MOVE_CLICK__) return;
-  window.__DIY_CURSOR_MOVE_CLICK__ = true;
-
-  // 加载脚本（只加载一次）
-  function 加载(路径){
-    const s = document.createElement('script');
-    s.src = 路径 + THEME_VER;
-    s.defer = true;
-    document.body.appendChild(s);
-  }
-
-  // 从配置 / 已加载 <script> 推断包名（和 Plus 一样按路径推断）
-  function 取包名(){
-    let 移动 = CFG.cursor_move || '', 点击 = CFG.cursor_click || '';
-    // 如果没配，尝试从已加载脚本里推断
-    if (!移动 || !点击){
-      Array.from(document.scripts).forEach(s=>{
-        const src = s.getAttribute('src')||'';
-        if (!移动){
-          const m = src.match(/\/js\/cursor\/move\/([^\/]+)\.min\.js/i);
-          if (m) 移动 = m[1];
-        }
-        if (!点击){
-          const c = src.match(/\/js\/cursor\/click\/([^\/]+)\.min\.js/i);
-          if (c) 点击 = c[1];
-        }
-      });
-    }
-    return { 移动, 点击 };
-  }
-
-  // 标记鼠标画布（给它加 data-keep-canvas="mouse"，让你的 v12 清理逻辑跳过）
-  function 标记鼠标画布(cv){
-    try{
-      const s = ((cv.id||'')+' '+(cv.className||'')).toLowerCase();
-      const 是移动  = /cursor|trail|ribbon/.test(s);
-      const 是点击  = /click|firework|particle|spark/.test(s);
-      if (是移动) cv.dataset.diyMouse = 'move';
-      if (是点击) cv.dataset.diyMouse = 'click';
-      if (是移动 || 是点击){
-        cv.setAttribute('data-keep-canvas','mouse'); // 关键：v12 的 purge 会跳过带这个属性的节点
-        cv.style.pointerEvents = 'none';
-      }
-    }catch(e){}
-  }
-
-  // 启动时先把现有 canvas 过一遍
-  function 初始扫描(){
-    document.querySelectorAll('canvas').forEach(标记鼠标画布);
-  }
-
-  // 监听后续新增节点（脚本创建的画布能及时被标记）
-  const 观察 = new MutationObserver(muts=>{
-    muts.forEach(m=>{
-      (m.addedNodes||[]).forEach(n=>{
-        if (n instanceof HTMLCanvasElement) 标记鼠标画布(n);
-        else if (n instanceof HTMLElement && n.querySelectorAll){
-          n.querySelectorAll('canvas').forEach(标记鼠标画布);
-        }
-      });
-    });
-  });
-
-  // 初始化：只加载一次脚本，然后标记画布（不随明暗切换）
-  function 启动(){
-    const { 移动, 点击 } = 取包名();
-    if (移动 && 移动 !== 'none')  加载(ASSETS + '/js/cursor/move/'  + 移动  + '.min.js');
-    if (点击 && 点击 !== 'none')  加载(ASSETS + '/js/cursor/click/' + 点击 + '.min.js');
-
-    初始扫描();
-    try{ 观察.observe(document.body, {childList:true, subtree:true}); }catch(e){}
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', 启动);
-  } else {
-    启动();
-  }
-})();
-</script>
-
-
-<!-- 6个显示模式 -->
+<!-- ===== 鼠标移动点击特效 -->
 <script th:inline="javascript">
   (function(){
     const ASSETS = /*[[${assets_link}]]*/ '/assets';
     const THEME_VER = /*[[${theme_version}]]*/ '';
-
     const CFG = {
-      effects_lantern_mode:        /*[[${theme.config.style.effects_lantern_mode}]]*/ 'none',
-      effects_sakura_mode:         /*[[${theme.config.style.effects_sakura_mode}]]*/ 'none',
-      effects_snowflake_mode:      /*[[${theme.config.style.effects_snowflake_mode}]]*/ 'none',
-      effects_universe_mode:       /*[[${theme.config.style.effects_universe_mode}]]*/ 'none',
-      effects_circle_magic_mode:   /*[[${theme.config.style.effects_circle_magic_mode}]]*/ 'none',
-      effects_quantum_silk_thread_mode: /*[[${theme.config.style.effects_quantum_silk_thread_mode}]]*/ 'none'
+      cursor_move:  /*[[${theme.config.style.cursor_move}]]*/  'none',
+      cursor_click: /*[[${theme.config.style.cursor_click}]]*/ 'none'
     };
 
-    // 量子丝线图片（DIY 主题路径）
-    window.DIY_WORDLINE_IMG = ASSETS + '/images/wordline.webp';
+    if (window.__DIY_CURSOR_EFFECTS_V12__) return;
+    window.__DIY_CURSOR_EFFECTS_V12__ = true;
 
-    // ---------- helpers ----------
-    function normMode(v){
-      const s=(v||'').toString().trim().toLowerCase();
-      if(['明亮模式','亮','light','day','浅色','白天'].includes(s)) return 'light';
-      if(['黑暗模式','暗','dark','night','深色','夜间'].includes(s)) return 'dark';
-      if(['全模式','全部','all'].includes(s)) return 'all';
-      if(['不显示','关闭','none','off'].includes(s)) return 'none';
-      return s||'none';
-    }
-    const toDayNight = m => (m==='light'?'day':(m==='dark'?'night':m));
-
-    function getCurrentScheme(){
-      const html=document.documentElement;
-      const attr=(html.getAttribute('data-theme')||html.getAttribute('theme')||'').toLowerCase();
-      if(attr==='dark') return 'dark';
-      if(html.classList.contains('dark')) return 'dark';
-      const ls=(localStorage.getItem('theme')||localStorage.getItem('special-efficacy-scheme')||'').toLowerCase();
-      if(ls==='dark'||ls==='night') return 'dark';
-      if(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';
-      return 'light';
-    }
-    function syncScheme(){
-      const isDark = getCurrentScheme()==='dark';
-      document.documentElement.classList.toggle('night', isDark);
-      try{ localStorage.setItem('special-efficacy-scheme', isDark ? 'dark' : 'light'); }catch(e){}
-    }
-    function whenReady(cb){
-      let tries=0;(function tick(){
-        const ready=document.documentElement.getAttribute('data-theme')
-              ||document.documentElement.classList.contains('dark')
-              ||localStorage.getItem('theme')
-              ||localStorage.getItem('special-efficacy-scheme');
-        if(ready||tries>40) return cb(); tries++; setTimeout(tick,50);
-      })();
-    }
     function loadJS(src){
-      const s=document.createElement('script');
-      s.src=src+THEME_VER+'&r='+(Math.random().toString(36).slice(2));
-      s.defer=true;
-      document.body.appendChild(s);
-    }
-
-    // effects meta
-    const EFFECTS = {
-      lantern:  { file: '/js/effects/lantern.min.js',  keywords: ['lantern'] },
-      sakura:   { file: '/js/effects/sakura.min.js',   keywords: ['sakura','cherry','petal'] },
-      snow:     { file: '/js/effects/snowflake.min.js',keywords: ['snow','snowflake'] },
-      universe: { file: '/js/effects/universe.min.js', keywords: ['universe','star','galaxy'] },
-      circle:   { file: '/js/effects/circleMagic.min.js', keywords: ['circle','circlemagic'] },
-      quantum:  { file: '/js/effects/quantum.min.js',  keywords: ['quantum'] },
-    };
-    const MODES = {
-      lantern:  normMode(CFG.effects_lantern_mode),
-      sakura:   normMode(CFG.effects_sakura_mode),
-      snow:     normMode(CFG.effects_snowflake_mode),
-      universe: normMode(CFG.effects_universe_mode),
-      circle:   normMode(CFG.effects_circle_magic_mode),
-      quantum:  normMode(CFG.effects_quantum_silk_thread_mode),
-    };
-
-    // ---- 动态标记新增节点（方便显隐/清理） ----
-    const TRACK={};
-    function startTrack(key,ms){ TRACK[key]={until:Date.now()+(ms||8000)}; }
-    function tagIfMatch(el, key){
-      if(!el || el.dataset.diyEffect) return;
-      const id=(el.id||'').toLowerCase(), cls=(el.className||'').toString().toLowerCase();
-      const kw=EFFECTS[key].keywords;
-      const isCanvas = el.tagName==='CANVAS';
-      const rect = isCanvas ? el.getBoundingClientRect() : {width:0,height:0};
-      const full = isCanvas && rect.width>=window.innerWidth*0.6 && rect.height>=window.innerHeight*0.4;
-      if (kw.some(k=>id.includes(k)||cls.includes(k)) || full){
-        el.dataset.diyEffect = key;
-        try{ el.style.pointerEvents='none'; }catch(e){}
-      }
-    }
-    const bodyObserver=new MutationObserver((muts)=>{
-      const now=Date.now();
-      muts.forEach(m=>{
-        m.addedNodes && m.addedNodes.forEach(node=>{
-          if(!(node instanceof HTMLElement) && !(node instanceof HTMLCanvasElement)) return;
-          Object.keys(TRACK).forEach(key=>{
-            const tk=TRACK[key]; if(!tk || tk.until<now) return;
-            tagIfMatch(node,key);
-            if(node.querySelectorAll) node.querySelectorAll('*').forEach(ch=>tagIfMatch(ch,key));
-          });
-        });
-      });
-    });
-    function observeBody(){ if(document.body) bodyObserver.observe(document.body,{childList:true,subtree:true}); else document.addEventListener('DOMContentLoaded',observeBody); }
-    observeBody();
-
-    // ---- 获取 / 清理 ----
-    function getNodes(key){
-      const kw = EFFECTS[key].keywords.join('|');
-      const sel = '[data-diy-effect="'+key+'"], body > [id*="'+kw+'"], body > [class*="'+kw+'"]';
-      return Array.from(document.querySelectorAll(sel));
-    }
-    function purgeEffect(key){
-      // 1) 标签/关键字节点
-      getNodes(key).forEach(el=>{ try{ el.remove(); }catch(e){} });
-
-      // 2) 兜底：超大 Canvas（常见于这些特效），防止漏网
-      document.querySelectorAll('body canvas').forEach(cv=>{
-        const r = cv.getBoundingClientRect();
-        const huge = r.width>=window.innerWidth*0.6 && r.height>=window.innerHeight*0.4;
-        if (huge && !cv.closest('[data-keep-canvas]')) {
-          try{ cv.remove(); }catch(e){}
-        }
-      });
-
-      // 3) 清理可能的 script 标签（强制后续可重建）
-      document.querySelectorAll('script[data-diy-effect-script="'+key+'"]').forEach(s=>{ try{s.remove();}catch(e){} });
-    }
-    function createEffect(key){
-      startTrack(key, 8000);
       const s = document.createElement('script');
-      s.src = ASSETS + EFFECTS[key].file + THEME_VER + '&r=' + Math.random().toString(36).slice(2);
+      s.src = src + THEME_VER + '&r=' + (Math.random().toString(36).slice(2));
       s.defer = true;
-      s.setAttribute('data-diy-effect-script', key);
       document.body.appendChild(s);
     }
 
-    // ---- 构建（每次切换都“强制清理 + 需要则重建”） ----
-    let rebuildLock = false;
-    function applyVisibilityAndRebuild(){
-      if (rebuildLock) return;
-      rebuildLock = true;
-      try {
-        syncScheme();
-        const scheme = getCurrentScheme();
-        const shouldShow = (mode) => mode==='all' || (mode==='light'&&scheme==='light') || (mode==='dark'&&scheme==='dark');
-
-        Object.keys(EFFECTS).forEach(key=>{
-          const mode = MODES[key];
-          if (mode==='none') {
-            purgeEffect(key);
-            return;
-          }
-          if (shouldShow(mode)) {
-            purgeEffect(key);
-            createEffect(key);
-          } else {
-            purgeEffect(key);
-          }
-        });
-      } finally {
-        setTimeout(()=>{ rebuildLock=false; }, 100);
-      }
+    function whenReady(cb){
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', cb);
+      else cb();
     }
 
-    // ---------- 主入口（仅六个显示模式） ----------
-    if (!window.__DIY_DISPLAY_MODES_V12__) {
-      window.__DIY_DISPLAY_MODES_V12__ = true;
-      whenReady(function(){
-        // DreamConfig 供脚本内部读取（day/night/all/none）
-        window.DreamConfig = window.DreamConfig || {};
-        DreamConfig.effects_lantern_mode       = toDayNight(MODES.lantern);
-        DreamConfig.effects_sakura_mode        = toDayNight(MODES.sakura);
-        DreamConfig.effects_snowflake_mode     = toDayNight(MODES.snow);
-        DreamConfig.effects_universe_mode      = toDayNight(MODES.universe);
-        DreamConfig.effects_circle_magic_mode  = toDayNight(MODES.circle);
-        DreamConfig.effects_quantum_silk_thread_mode = toDayNight(MODES.quantum);
-
-        // 初次构建
-        applyVisibilityAndRebuild();
-
-        // 监听主题切换（保持 v12 的“清理 + 重建”策略）
-        let rafToken = 0;
-        const fire = ()=>{ cancelAnimationFrame(rafToken); rafToken = requestAnimationFrame(applyVisibilityAndRebuild); };
-        const mo = new MutationObserver(fire);
-        mo.observe(document.documentElement, {attributes:true, attributeFilter:['class','data-theme','theme']});
-        window.addEventListener('storage', fire);
-      });
-    }
+    whenReady(function(){
+      if (CFG.cursor_move  && CFG.cursor_move  !== 'none') loadJS(ASSETS + '/js/cursor/move/'  + CFG.cursor_move  + '.min.js');
+      if (CFG.cursor_click && CFG.cursor_click !== 'none') loadJS(ASSETS + '/js/cursor/click/' + CFG.cursor_click + '.min.js');
+    });
   })();
 </script>
+
+
 
 
 </body>
