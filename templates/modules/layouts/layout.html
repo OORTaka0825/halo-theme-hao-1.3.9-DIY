@@ -752,7 +752,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     })();
     </script>
 
-    <!-- DIY × PLUS 特效/光标一体化 Loader · v12-merge + DreamConfig + SnowManagerReload -->
+    <!-- DIY × PLUS 特效/光标一体化 Loader · v12-merge + DreamConfig + SnowSandbox -->
 <script th:inline="javascript">
 (function(){
   /* ========= 基础 ========= */
@@ -854,9 +854,8 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   }).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme','class']});
 
   /* ========= 工具 ========= */
-  function loadFromBases(id, relList, cacheBustKey){
-    const existed = document.getElementById(id);
-    if (existed) existed.remove(); // 关键：保证每次重建确实重新加载脚本
+  function loadFromBases(id, relList){
+    if (document.getElementById(id)) return;
     const cand = [];
     ASSET_BASES.forEach(base=>{
       relList.forEach(rp=>{
@@ -868,17 +867,23 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     let i=0, s=document.createElement('script'); s.defer=true; s.id=id;
     function tryNext(){
       if(i>=cand.length) return;
-      const bust = (cacheBustKey ? ('&r=' + cacheBustKey) : '');
-      s.src = cand[i++] + '?v=' + encodeURIComponent(DreamConfig.theme_version) + bust;
+      s.src = cand[i++] + '?v=' + encodeURIComponent(DreamConfig.theme_version);
       document.body.appendChild(s);
     }
     s.onerror=function(){ s.remove(); s=document.createElement('script'); s.defer=true; s.id=id; tryNext(); };
-    s.onload=function(){ /* 加载成功 */ };
     tryNext();
   }
   const isMobile = ()=> /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  function shouldLoad(mode){
+    if (!mode) return false;
+    const dark = document.documentElement.classList.contains('night');
+    if (mode==='all') return true;
+    if (mode==='day')   return !dark;
+    if (mode==='night') return dark;
+    return true;
+  }
 
-  /* ========= 鼠标风格（精准文件表） ========= */
+  /* ========= 鼠标风格（精准文件表，零 404 噪音） ========= */
   function applyCursorStyle(){
     const pack = DreamConfig.cursor_style;
     if(!pack) return;
@@ -897,7 +902,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     };
     const css = [
       'html, body { cursor: ' + toUrls(files.default) + ' !important; }',
-      'a, button, [role=\"button\"], input[type=button], input[type=submit] { cursor: ' + toUrls(files.pointer) + ' !important; }',
+      'a, button, [role="button"], input[type=button], input[type=submit] { cursor: ' + toUrls(files.pointer) + ' !important; }',
       'input[type=text], input[type=search], textarea, .text, .textbox, .input { cursor: ' + toUrls(files.text) + ' !important; }'
     ].join('\n');
     let st = document.getElementById('hao-cursor-style');
@@ -905,108 +910,97 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     st.textContent = css;
   }
 
-  /* ========= 雪花：像樱花一样可重建（先清理再加载），防加速 ========= */
-  const SnowManager = (function(){
-    const Orig = {
-      setInterval: window.setInterval,
-      clearInterval: window.clearInterval,
-      setTimeout: window.setTimeout,
-      clearTimeout: window.clearTimeout,
-      requestAnimationFrame: window.requestAnimationFrame,
-      cancelAnimationFrame: window.cancelAnimationFrame,
-      addEventListener: window.addEventListener,
-      removeEventListener: window.removeEventListener,
-      docAdd: document.addEventListener,
-      docRemove: document.removeEventListener
-    };
-    const state = { timers:[], timeouts:[], rafs:[], listeners:[], capturing:false, run:0 };
+  /* ========= 雪花：iframe 沙盒（零侵入、可显隐、不卡、不加速） ========= */
+  function buildSnowCandidates(){
+    const list = [];
+    ASSET_BASES.forEach(base=>{
+      ['js/effects/snowflake','effects/snowflake'].forEach(rp=>{
+        const p = (base.replace(/\/+$/,'') + '/' + rp).replace(/\/{2,}/g,'/');
+        list.push(p + '.min.js'); list.push(p + '.js');
+      });
+    });
+    return list;
+  }
 
-    function hookStart(){
-      if (state.capturing) return;
-      state.capturing = true;
-      window.setInterval = function(fn,ms){ const id=Orig.setInterval(fn,ms); state.timers.push(id); return id; };
-      window.setTimeout  = function(fn,ms){ const id=Orig.setTimeout(fn,ms);  state.timeouts.push(id); return id; };
-      window.requestAnimationFrame = function(cb){ const id=Orig.requestAnimationFrame(cb); state.rafs.push(id); return id; };
-      window.addEventListener = function(type,handler,opts){ Orig.addEventListener.call(window,type,handler,opts); state.listeners.push({t:window,type,handler,opts}); };
-      document.addEventListener = function(type,handler,opts){ Orig.docAdd.call(document,type,handler,opts); state.listeners.push({t:document,type,handler,opts}); };
+  function ensureSnowIframe(){
+    let ifr = document.getElementById('hao-snow-iframe');
+    if (ifr) return ifr;
+    ifr = document.createElement('iframe');
+    ifr.id = 'hao-snow-iframe';
+    ifr.setAttribute('aria-hidden', 'true');
+    // 透明全屏覆盖，不接管鼠标事件
+    Object.assign(ifr.style, {
+      position:'fixed', left:'0', top:'0',
+      width:'100vw', height:'100vh',
+      border:'0', pointerEvents:'none', zIndex:'1',
+      display:'none'
+    });
+    // 初始空白文档（透明背景）
+    ifr.srcdoc = `
+      <!doctype html><html><head>
+        <meta charset="utf-8">
+        <style>
+          html,body{margin:0;padding:0;overflow:hidden;background:transparent!important}
+          *{pointer-events:none!important}
+          #log{position:fixed;left:-9999px;top:-9999px}
+        </style>
+      </head><body>
+        <div id="log"></div>
+      </body></html>`;
+    document.body.appendChild(ifr);
+    return ifr;
+  }
+
+  function loadSnowInIframe(){
+    const ifr = ensureSnowIframe();
+    const doc = ifr.contentDocument;
+    const win = ifr.contentWindow;
+    if (!doc || !win) return;
+
+    // 若已加载过成功脚本，直接返回（只切显隐，不重复加载）
+    if (doc.getElementById('snow-loaded-flag')) return;
+
+    const candidates = buildSnowCandidates();
+    let i = 0;
+    function tryNext(){
+      if (i >= candidates.length) return; // 不再尝试
+      const src = candidates[i++] + '?v=' + encodeURIComponent(DreamConfig.theme_version);
+      const s = doc.createElement('script');
+      s.defer = true; s.src = src;
+      s.onload = function(){
+        const flag = doc.createElement('meta');
+        flag.id = 'snow-loaded-flag';
+        doc.head.appendChild(flag);
+      };
+      s.onerror = function(){ s.remove(); tryNext(); };
+      doc.body.appendChild(s);
     }
-    function hookStop(){
-      if (!state.capturing) return;
-      state.capturing = false;
-      window.setInterval = Orig.setInterval;
-      window.clearInterval = Orig.clearInterval;
-      window.setTimeout = Orig.setTimeout;
-      window.clearTimeout = Orig.clearTimeout;
-      window.requestAnimationFrame = Orig.requestAnimationFrame;
-      window.cancelAnimationFrame = Orig.cancelAnimationFrame;
-      window.addEventListener = Orig.addEventListener;
-      window.removeEventListener = Orig.removeEventListener;
-      document.addEventListener = Orig.docAdd;
-      document.removeEventListener = Orig.docRemove;
+    tryNext();
+  }
+
+  function updateSnowVisibility(){
+    const mode = DreamConfig.effects_snowflake_mode || '';
+    const need = shouldLoad(mode);
+    const ifr  = ensureSnowIframe();
+    // 需要时先确保已加载，再显示；不需要则隐藏
+    if (need){
+      loadSnowInIframe();
+      ifr.style.display = 'block';
+    } else {
+      ifr.style.display = 'none';
     }
-    function killAll(){
-      // 清掉上次的计时器/RAF/监听 + DOM
-      state.timers.forEach(id=>{ try{ Orig.clearInterval(id); }catch(e){} });
-      state.timeouts.forEach(id=>{ try{ Orig.clearTimeout(id); }catch(e){} });
-      state.rafs.forEach(id=>{ try{ Orig.cancelAnimationFrame(id); }catch(e){} });
-      state.listeners.forEach(it=>{ try{ it.t.removeEventListener(it.type, it.handler, it.opts); }catch(e){} });
-      state.timers.length = state.timeouts.length = state.rafs.length = state.listeners.length = 0;
-      document.querySelectorAll('#Snow,[id*="snow"],[class*="snow"]').forEach(el=>{ try{ el.remove(); }catch(e){} });
-      const prevScript = document.getElementById('fx-snow'); if (prevScript) prevScript.remove();
-    }
-
-    function shouldLoad(mode){
-      if (!mode) return false;
-      const dark = document.documentElement.classList.contains('night');
-      if (mode==='all') return true;
-      if (mode==='day')   return !dark;
-      if (mode==='night') return dark;
-      return true;
-    }
-
-    function start(){
-      // 1) 不需要就直接停
-      if (!shouldLoad(DreamConfig.effects_snowflake_mode)) { stop(); return; }
-
-      // 2) 清理上次
-      killAll();
-
-      // 3) 短暂捕获（只在雪花脚本初始化这段时间记录它创建的计时器/RAF/监听）
-      hookStart();
-
-      // 4) 强制重新加载脚本（带运行计数的cache bust，保证每次切换都会重新执行雪花）
-      state.run += 1;
-      loadFromBases('fx-snow', ['js/effects/snowflake','effects/snowflake'], String(state.run));
-
-      // 5) 两帧后自动解除捕获（确保脚本的初始化已完成）
-      //    用原生 RAF，避免被我们自己的 hook 记录进去
-      try {
-        Orig.requestAnimationFrame(()=>Orig.requestAnimationFrame(()=>{ hookStop(); }));
-      } catch(e) { setTimeout(hookStop, 200); }
-    }
-
-    function stop(){
-      hookStop();
-      killAll();
-    }
-
-    return { start, stop };
-  })();
+  }
 
   /* ========= 其它公共 ========= */
   function cleanEffectLayers(){
-    // 不清雪花（由 SnowManager 接管）
+    // 保持你 head.html 已加的固定定位守卫；这里只清其它特效层（不动雪花 iframe）
     document.querySelectorAll('.canvas_effects,#universe_canvas,#quantum_c_n,.j-china-lantern,[id^=sakura]')
       .forEach(el=>{ try{ el.remove(); }catch(e){} });
+    // 移除已注入的特效脚本标签（避免重复执行）
+    ['fx-sakura','fx-universe','fx-circle','fx-quantum','fx-lantern'].forEach(id=>{
+      const s = document.getElementById(id); if (s) s.remove();
+    });
   }
-  const shouldLoad = (mode)=>{
-    if (!mode) return false;
-    const dark = document.documentElement.classList.contains('night');
-    if (mode==='all') return true;
-    if (mode==='day')   return !dark;
-    if (mode==='night') return dark;
-    return true;
-  };
 
   function initCursorEffects(){
     if (isMobile()) return;
@@ -1017,10 +1011,11 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     if (isMobile()) return;
     if (shouldLoad(DreamConfig.effects_lantern_mode))             loadFromBases('fx-lantern',['js/effects/lantern','effects/lantern']);
     if (shouldLoad(DreamConfig.effects_sakura_mode))              loadFromBases('fx-sakura', ['js/effects/sakura','effects/sakura']);
-    SnowManager.start();                                         // ★ 雪花：像樱花一样重建
     if (shouldLoad(DreamConfig.effects_universe_mode))            loadFromBases('fx-universe',['js/effects/universe','effects/universe']);
     if (shouldLoad(DreamConfig.effects_circle_magic_mode))        loadFromBases('fx-circle',  ['js/effects/circleMagic','effects/circleMagic']);
     if (shouldLoad(DreamConfig.effects_quantum_silk_thread_mode)) loadFromBases('fx-quantum', ['js/effects/quantum','effects/quantum']);
+    // ★ 雪花独立于其它：用 iframe 沙盒 + 显隐
+    updateSnowVisibility();
   }
 
   function initAll(){
@@ -1031,20 +1026,10 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 
   document.addEventListener('DOMContentLoaded', initAll);
   window.addEventListener('pjax:complete', ()=>{ syncNightClass(); initAll(); });
-
-  // 明暗切换：其它特效按原逻辑重建；雪花交给 SnowManager 统一处理
+  // 明暗切换：其它特效按原逻辑重建；雪花只切显隐
   window.addEventListener('hao:mode-change', ()=>{
     cleanEffectLayers();
-    ['fx-sakura','fx-universe','fx-circle','fx-quantum','fx-lantern'].forEach(id=>{
-      const s = document.getElementById(id); if (s) s.remove();
-    });
-    SnowManager.start();
-    // 其它特效按需再加载
-    if (shouldLoad(DreamConfig.effects_sakura_mode))   loadFromBases('fx-sakura', ['js/effects/sakura','effects/sakura']);
-    if (shouldLoad(DreamConfig.effects_universe_mode)) loadFromBases('fx-universe',['js/effects/universe','effects/universe']);
-    if (shouldLoad(DreamConfig.effects_circle_magic_mode)) loadFromBases('fx-circle',  ['js/effects/circleMagic','effects/circleMagic']);
-    if (shouldLoad(DreamConfig.effects_quantum_silk_thread_mode)) loadFromBases('fx-quantum', ['js/effects/quantum','effects/quantum']);
-    if (shouldLoad(DreamConfig.effects_lantern_mode))  loadFromBases('fx-lantern',['js/effects/lantern','effects/lantern']);
+    initCanvasEffects(); // 重新判断各特效是否需要加载
   });
 
   try{
