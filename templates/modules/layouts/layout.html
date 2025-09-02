@@ -781,10 +781,13 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   })();
 </script>
 
-<!-- 鼠标移动和点击特效（仅第二段；与明暗无关；避免被第三段清理） -->
+<!-- 鼠标移动和点击特效（影子DOM容器隔离，避免被第三段清理；与明暗无关） -->
 <script th:inline="javascript">
 (function(){
-  // —— 只处理鼠标移动/点击，不改显示模式 —— 
+  if (window.__DIY_MOUSE_SEG2_SHADOW__) return;
+  window.__DIY_MOUSE_SEG2_SHADOW__ = true;
+
+  // 仅处理鼠标移动/点击，不碰显示模式
   const ASSETS = /*[[${assets_link}]]*/ '/assets';
   const THEME_VER = /*[[${theme_version}]]*/ '';
   const CFG = {
@@ -792,125 +795,86 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     cursor_click: /*[[${theme.config.style.cursor_click}]]*/ 'none'
   };
 
-  if (window.__DIY_MOUSE_SEG2__) return;
-  window.__DIY_MOUSE_SEG2__ = true;
-
-  // 1) 建一个“鼠标容器”，带 data-keep-canvas，第三段的清理会自动跳过它
-  function 确保鼠标容器(){
-    let box = document.getElementById('diy-mouse-box');
-    if (!box){
-      box = document.createElement('div');
-      box.id = 'diy-mouse-box';
-      box.setAttribute('data-keep-canvas','mouse');     // 关键：让第三段 purge 跳过
-      box.style.cssText='pointer-events:none;position:fixed;inset:0;z-index:0';
-      document.body.appendChild(box);
+  // 1) 建“鼠标宿主”并挂载影子DOM（第三段在 document 下查不到影子里的 canvas）
+  function 建宿主(){
+    let host = document.getElementById('diy-mouse-host');
+    if (!host){
+      host = document.createElement('div');
+      host.id = 'diy-mouse-host';
+      host.style.cssText = 'position:fixed;inset:0;z-index:0;pointer-events:none;';
+      // 可选：给宿主一个标记，万一第三段改成 closest('[data-keep-canvas]') 也能跳过
+      host.setAttribute('data-keep-canvas','mouse');
+      document.body.appendChild(host);
     }
-    return box;
+    if (!host.__root){
+      host.__root = host.attachShadow ? host.attachShadow({mode:'open'}) : host; // 老浏览器回退到自身
+    }
+    return host;
   }
+  function 影子根(){ return 建宿主().__root || 建宿主(); }
 
-  // 2) 只在短时间内“拦截”新节点，把鼠标画布收入容器（避免先被第三段清掉）
-  function 短时拦截追加(ms){
-    const 截止 = Date.now() + (ms||3000);
-    const 原append = Node.prototype.appendChild;
-    const 原insert = Node.prototype.insertBefore;
-    const 盒 = 确保鼠标容器();
-
-    function 是鼠标节点(n){
-      if (!(n instanceof HTMLElement) && !(n instanceof HTMLCanvasElement)) return false;
-      const s = ((n.id||'')+' '+(n.className||'')).toLowerCase();
-      return /cursor|trail|ribbon|click|firework|particle|spark/.test(s) || n.tagName==='CANVAS';
-    }
-    function 路由(node,parent){
-      if (Date.now()>截止) return false;
-      if (parent!==document.body) return false;
-      if (!是鼠标节点(node)) return false;
-      // 到这里基本是鼠标画布或相关容器
-      盒.appendChild(node);
-      if (node.tagName==='CANVAS'){
-        标记鼠标画布(node);
-      }else{
-        // 如果是 div/svg，内部的 canvas 也标一下
-        try{ node.querySelectorAll && node.querySelectorAll('canvas').forEach(标记鼠标画布); }catch(e){}
-      }
-      return true;
-    }
-
-    Node.prototype.appendChild = function(n){
-      if (路由(n,this)) return n;
-      return 原append.call(this,n);
-    };
-    Node.prototype.insertBefore = function(n,ref){
-      if (路由(n,this)) return n;
-      return 原insert.call(this,n,ref);
-    };
-
-    // 到时还原
-    setTimeout(function(){
-      Node.prototype.appendChild = 原append;
-      Node.prototype.insertBefore = 原insert;
-    }, (ms||3000)+50);
+  // 2) 将鼠标相关的 canvas 收编到影子DOM，并打上标记（防止脚本自身逻辑误操作）
+  function 是鼠标类名(s){
+    s = s.toLowerCase();
+    return /cursor|trail|ribbon|click|firework|particle|spark/.test(s);
   }
-
-  // 3) 标记鼠标画布（让第三段的“大画布兜底删除”也跳过）
-  function 标记鼠标画布(cv){
+  function 标记并收编(canvasOrNode){
     try{
-      const s = ((cv.id||'')+' '+(cv.className||'')).toLowerCase();
-      if (/cursor|trail|ribbon/.test(s)) cv.dataset.diyMouse = 'move';
-      if (/click|firework|particle|spark/.test(s)) cv.dataset.diyMouse = 'click';
-      cv.setAttribute('data-keep-canvas','mouse');   // 关键
-      cv.style.pointerEvents='none';
+      const root = 影子根();
+      if (canvasOrNode instanceof HTMLCanvasElement){
+        const s = ((canvasOrNode.id||'')+' '+(canvasOrNode.className||''));
+        if (!是鼠标类名(s)) return;
+        // 标记
+        if (/cursor|trail|ribbon/i.test(s)) canvasOrNode.dataset.diyMouse = 'move';
+        if (/click|firework|particle|spark/i.test(s)) canvasOrNode.dataset.diyMouse = 'click';
+        canvasOrNode.setAttribute('data-keep-canvas','mouse');
+        canvasOrNode.style.pointerEvents = 'none';
+        // 收编进影子DOM（避免被第三段的 body 查询到）
+        if (canvasOrNode.getRootNode() !== root){
+          try{ root.appendChild(canvasOrNode); }catch(e){}
+        }
+      }else if (canvasOrNode instanceof HTMLElement){
+        // 容器类节点里可能嵌着 canvas，一起收编
+        const s = ((canvasOrNode.id||'')+' '+(canvasOrNode.className||''));
+        if (!是鼠标类名(s)) return;
+        canvasOrNode.querySelectorAll && canvasOrNode.querySelectorAll('canvas').forEach(标记并收编);
+      }
     }catch(e){}
   }
 
-  // 4) 把页面上已有的鼠标画布收编进容器
-  function 初始收编(){
-    const 盒 = 确保鼠标容器();
-    document.querySelectorAll('canvas').forEach(function(cv){
-      const s = ((cv.id||'')+' '+(cv.className||'')).toLowerCase();
-      if (/cursor|trail|ribbon|click|firework|particle|spark/.test(s)){
-        标记鼠标画布(cv);
-        if (cv.parentNode===document.body) 盒.appendChild(cv);
-      }
-    });
+  // 3) 初始扫描（把已存在的鼠标画布搬进影子DOM）
+  function 初始扫描(){
+    document.querySelectorAll('canvas').forEach(标记并收编);
   }
 
-  // 5) 监听后续新增，把鼠标画布移入容器并打标
-  const 观察 = new MutationObserver(function(muts){
-    const 盒 = document.getElementById('diy-mouse-box') || 确保鼠标容器();
-    muts.forEach(function(m){
-      (m.addedNodes||[]).forEach(function(n){
-        if (n instanceof HTMLCanvasElement){
-          标记鼠标画布(n);
-          if (n.parentNode===document.body) 盒.appendChild(n);
-        }else if (n instanceof HTMLElement && n.querySelectorAll){
-          n.querySelectorAll('canvas').forEach(function(cv){
-            const s = ((cv.id||'')+' '+(cv.className||'')).toLowerCase();
-            if (/cursor|trail|ribbon|click|firework|particle|spark/.test(s)){
-              标记鼠标画布(cv);
-              if (cv.parentNode===document.body) 盒.appendChild(cv);
-            }
-          });
+  // 4) 监听新增节点，第一时间把鼠标画布搬进影子DOM（比第三段 purge 更稳）
+  const 观察 = new MutationObserver(muts=>{
+    muts.forEach(m=>{
+      (m.addedNodes||[]).forEach(n=>{
+        if (n instanceof HTMLCanvasElement) 标记并收编(n);
+        else if (n instanceof HTMLElement && n.querySelectorAll){
+          // 先快筛：类名/ID里带关键词再深入
+          const s = ((n.id||'')+' '+(n.className||''));
+          if (是鼠标类名(s)){ 标记并收编(n); }
+          else {
+            // 有些脚本先加容器再异步加 canvas，兜底检索一次
+            n.querySelectorAll('canvas').forEach(标记并收编);
+          }
         }
       });
     });
   });
 
-  // 6) 只在缺失时加载一次脚本（与明暗无关）
-  function 已有移动画布(){
-    return !!document.querySelector('#diy-mouse-box canvas[data-diyMouse="move"], #diy-mouse-box canvas[id*="cursor"], #diy-mouse-box canvas[class*="cursor"], #diy-mouse-box canvas[id*="trail"], #diy-mouse-box canvas[class*="trail"], #diy-mouse-box canvas[id*="ribbon"], #diy-mouse-box canvas[class*="ribbon"]');
+  // 5) 只在“缺失时”加载一次脚本（与明暗无关，不重复叠加）
+  function 宿主内有移动(){
+    const root = 影子根();
+    const sel = 'canvas[data-diyMouse="move"], canvas[id*="cursor"], canvas[class*="cursor"], canvas[id*="trail"], canvas[class*="trail"], canvas[id*="ribbon"], canvas[class*="ribbon"]';
+    return root.querySelector ? !!root.querySelector(sel) : !!document.querySelector(sel);
   }
-  function 已有点击画布(){
-    return !!document.querySelector('#diy-mouse-box canvas[data-diyMouse="click"], #diy-mouse-box canvas[id*="click"], #diy-mouse-box canvas[class*="click"], #diy-mouse-box canvas[id*="firework"], #diy-mouse-box canvas[class*="firework"], #diy-mouse-box canvas[id*="particle"], #diy-mouse-box canvas[class*="particle"], #diy-mouse-box canvas[id*="spark"], #diy-mouse-box canvas[class*="spark"]');
-  }
-  function 加载一次(类型, 名称){
-    if (!名称 || 名称==='none') return;
-    const 键 = '__DIY_MOUSE_LOAD__'+类型;
-    if (window[键]) return;
-    window[键] = 1;
-    const s = document.createElement('script');
-    s.defer = true;
-    s.src = ASSETS + (类型==='move' ? '/js/cursor/move/'+名称+'.min.js' : '/js/cursor/click/'+名称+'.min.js') + THEME_VER;
-    document.body.appendChild(s);
+  function 宿主内有点击(){
+    const root = 影子根();
+    const sel = 'canvas[data-diyMouse="click"], canvas[id*="click"], canvas[class*="click"], canvas[id*="firework"], canvas[class*="firework"], canvas[id*="particle"], canvas[class*="particle"], canvas[id*="spark"], canvas[class*="spark"]';
+    return root.querySelector ? !!root.querySelector(sel) : !!document.querySelector(sel);
   }
   function 取包名(){
     let 移动 = CFG.cursor_move || '', 点击 = CFG.cursor_click || '';
@@ -919,7 +883,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
       if (!点击 && window.DreamConfig.cursor_click) 点击 = window.DreamConfig.cursor_click;
     }
     if (!移动 || !点击){
-      Array.from(document.scripts).forEach(function(s){
+      Array.from(document.scripts).forEach(s=>{
         const src = s.getAttribute('src')||'';
         if (!移动){
           const m = src.match(/\/js\/cursor\/move\/([^\/]+)\.min\.js/i);
@@ -933,30 +897,35 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     }
     return {移动, 点击};
   }
+  function 只在缺失时加载(类型, 名称){
+    if (!名称 || 名称==='none') return;
+    const 键 = '__DIY_MOUSE_LOADED__' + 类型;
+    if (window[键]) return;
+    window[键] = 1;
+    const s = document.createElement('script');
+    s.defer = true;
+    s.src = ASSETS + (类型==='move' ? '/js/cursor/move/'+名称+'.min.js' : '/js/cursor/click/'+名称+'.min.js') + THEME_VER + '&r=' + Math.random().toString(36).slice(2);
+    document.body.appendChild(s);
+  }
   function 保活(){
     const {移动, 点击} = 取包名();
-    if (!已有移动画布()  && 移动) 加载一次('move',  移动);
-    if (!已有点击画布() && 点击) 加载一次('click', 点击);
+    if (!宿主内有移动()  && 移动)  只在缺失时加载('move',  移动);
+    if (!宿主内有点击() && 点击)  只在缺失时加载('click', 点击);
   }
 
-  // 7) 启动顺序：先建容器→短时拦截→加载脚本→初始收编→监听→保活
+  // 6) 启动：先建宿主→初始扫描→监听→保活
   function 启动(){
-    确保鼠标容器();
-    短时拦截追加(3000);           // 保证鼠标脚本创建的画布直接进容器
-    const {移动, 点击} = 取包名();
-    if (移动 && 移动!=='none') 加载一次('move', 移动);
-    if (点击 && 点击!=='none') 加载一次('click', 点击);
-
-    初始收编();
-    try{ 观察.observe(document.body,{childList:true,subtree:true}); }catch(e){}
+    建宿主();
+    初始扫描();
+    try{ 观察.observe(document.body, {childList:true,subtree:true}); }catch(e){}
     保活();
 
-    // 主题切换或 storage 变化时，只做保活（不触碰显示模式）
-    const moTheme = new MutationObserver(function(){ requestAnimationFrame(保活); });
-    moTheme.observe(document.documentElement,{attributes:true,attributeFilter:['class','data-theme','theme']});
-    window.addEventListener('storage', function(){ requestAnimationFrame(保活); });
+    // 主题切换或 storage 变化时，仅做“保活”（不触碰显示模式）
+    const moTheme = new MutationObserver(()=>{ requestAnimationFrame(保活); });
+    moTheme.observe(document.documentElement, {attributes:true, attributeFilter:['class','data-theme','theme']});
+    window.addEventListener('storage', ()=>{ requestAnimationFrame(保活); });
 
-    // 兜底定时
+    // 兜底：轻量周期检查（缺才补）
     setInterval(保活, 1500);
   }
 
