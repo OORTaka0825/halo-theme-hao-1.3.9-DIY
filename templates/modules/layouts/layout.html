@@ -752,44 +752,15 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     })();
     </script>
 
-    
-<!-- ===== Mouse Always-On (separate from 6 modes) ===== -->
-<script th:inline="javascript">
-  (function(){
-    const ASSETS = /*[[${assets_link}]]*/ '/assets';
-    const CFG = {
-      cursor_style: /*[[${theme.config.style.cursor_style}]]*/ 'none',
-      cursor_move:  /*[[${theme.config.style.cursor_move}]]*/  'none',
-      cursor_click: /*[[${theme.config.style.cursor_click}]]*/ 'none',
-    };
-    if (window.__DIY_MOUSE_INIT__) return; window.__DIY_MOUSE_INIT__ = true;
-
-    function loadJS(src){ const s=document.createElement('script'); s.src=src; s.defer=true; document.body.appendChild(s); }
-
-    // 光标包
-    if (CFG.cursor_style && CFG.cursor_style !== 'none') {
-      var pack=CFG.cursor_style, base=ASSETS+'/cursor/'+pack+'/';
-      function urlq(n){ try{return 'url(\"'+encodeURI(base+n)+'\")'}catch(e){return 'url('+base+n+')'} }
-      function urls(list){ return list.map(urlq).join(','); }
-      var css=[
-        'html, body { cursor: '+urls(['arrow.cur','Arrow.cur','Normal.cur','normal.cur','Arrow.ani','Normal.ani'])+', auto !important; }',
-        'a, button, [role=\"button\"], input[type=button], input[type=submit] { cursor: '+urls(['hand.cur','Hand.cur','link.cur','Link.cur','hand.ani','Link.ani','Alternate Select.cur','alternate.cur'])+', pointer !important; }',
-        'input[type=text], input[type=search], textarea, .text, .textbox, .input { cursor: '+urls(['ibeam.cur','IBeam.cur','beam.cur','Beam.cur','text.cur','Text.cur','ibeam.ani'])+', text !important; }'
-      ].join('\\n');
-      var st=document.createElement('style'); st.textContent=css; document.head.appendChild(st);
-    }
-    // 移动 & 点击特效（不受明暗影响）
-    if (CFG.cursor_move  && CFG.cursor_move  !== 'none') loadJS(ASSETS + '/js/cursor/move/'  + CFG.cursor_move  + '.min.js');
-    if (CFG.cursor_click && CFG.cursor_click !== 'none') loadJS(ASSETS + '/js/cursor/click/' + CFG.cursor_click + '.min.js');
-  })();
-</script>
-
-<!-- ===== DIY: Plus 接线（v12-twofix：雪花单次加载；其它保持 v12） ===== -->
+    <!-- ===== DIY: Plus 全部接线（v12：强力清理 Canvas + 每次切换强制重建；鼠标不受明暗） ===== -->
 <script th:inline="javascript">
   const ASSETS = /*[[${assets_link}]]*/ '/assets';
   const THEME_VER = /*[[${theme_version}]]*/ '';
 
   const CFG = {
+    cursor_style: /*[[${theme.config.style.cursor_style}]]*/ 'none',
+    cursor_move:  /*[[${theme.config.style.cursor_move}]]*/  'none',
+    cursor_click: /*[[${theme.config.style.cursor_click}]]*/ 'none',
     effects_lantern_mode:        /*[[${theme.config.style.effects_lantern_mode}]]*/ 'none',
     effects_sakura_mode:         /*[[${theme.config.style.effects_sakura_mode}]]*/ 'none',
     effects_snowflake_mode:      /*[[${theme.config.style.effects_snowflake_mode}]]*/ 'none',
@@ -800,6 +771,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 
   window.DIY_WORDLINE_IMG = ASSETS + '/images/wordline.webp';
 
+  // ---------- helpers ----------
   function normMode(v){
     const s=(v||'').toString().trim().toLowerCase();
     if(['明亮模式','亮','light','day','浅色','白天'].includes(s)) return 'light';
@@ -814,7 +786,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     const html=document.documentElement;
     const attr=(html.getAttribute('data-theme')||html.getAttribute('theme')||'').toLowerCase();
     if(attr==='dark') return 'dark';
-    if(html.classList.contains('dark') || html.classList.contains('night')) return 'dark';
+    if(html.classList.contains('dark')) return 'dark';
     const ls=(localStorage.getItem('theme')||localStorage.getItem('special-efficacy-scheme')||'').toLowerCase();
     if(ls==='dark'||ls==='night') return 'dark';
     if(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';
@@ -836,6 +808,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   }
   function loadJS(src){ const s=document.createElement('script'); s.src=src+THEME_VER+'&r='+(Math.random().toString(36).slice(2)); s.defer=true; document.body.appendChild(s); }
 
+  // effects meta
   const EFFECTS = {
     lantern:  { file: '/js/effects/lantern.min.js',  keywords: ['lantern'] },
     sakura:   { file: '/js/effects/sakura.min.js',   keywords: ['sakura','cherry','petal'] },
@@ -853,7 +826,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     quantum:  normMode(CFG.effects_quantum_silk_thread_mode),
   };
 
-  // 标记窗口
+  // ---- 动态标记新增节点（方便显隐/清理） ----
   const TRACK={};
   function startTrack(key,ms){ TRACK[key]={until:Date.now()+(ms||8000)}; }
   function tagIfMatch(el, key){
@@ -881,24 +854,29 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
       });
     });
   });
-  (function observeBody(){ if(document.body) bodyObserver.observe(document.body,{childList:true,subtree:true}); else document.addEventListener('DOMContentLoaded',observeBody); })();
+  function observeBody(){ if(document.body) bodyObserver.observe(document.body,{childList:true,subtree:true}); else document.addEventListener('DOMContentLoaded',observeBody); }
+  observeBody();
 
+  // ---- 获取 / 清理 ----
   function getNodes(key){
     const kw = EFFECTS[key].keywords.join('|');
     const sel = '[data-diy-effect="'+key+'"], body > [id*="'+kw+'"], body > [class*="'+kw+'"]';
     return Array.from(document.querySelectorAll(sel));
   }
-
   function purgeEffect(key){
-    // 雪花不清理
-    if (key==='snow') return;
-    // 其他效果：清理标签/关键字节点 + 巨画布
+    // 1) 标签/关键字节点
     getNodes(key).forEach(el=>{ try{ el.remove(); }catch(e){} });
+
+    // 2) 兜底：超大 Canvas（常见于这些特效），防止漏网
     document.querySelectorAll('body canvas').forEach(cv=>{
       const r = cv.getBoundingClientRect();
       const huge = r.width>=window.innerWidth*0.6 && r.height>=window.innerHeight*0.4;
-      if (huge) { try{ cv.remove(); }catch(e){} }
+      if (huge && !cv.closest('[data-keep-canvas]')) {
+        try{ cv.remove(); }catch(e){}
+      }
     });
+
+    // 3) 清理可能的 script 标签（强制后续可重建）
     document.querySelectorAll('script[data-diy-effect-script="'+key+'"]').forEach(s=>{ try{s.remove();}catch(e){} });
   }
   function createEffect(key){
@@ -910,41 +888,42 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     document.body.appendChild(s);
   }
 
-  // 雪花只加载一次
-  let SNOW_CREATED = false;
+  // ---- 构建（每次切换都“强制清理 + 需要则重建”） ----
+  let rebuildLock = false;
+  function applyVisibilityAndRebuild(){
+    if (rebuildLock) return;
+    rebuildLock = true;
+    try {
+      syncScheme();
+      const scheme = getCurrentScheme();
+      const shouldShow = (mode) => mode==='all' || (mode==='light'&&scheme==='light') || (mode==='dark'&&scheme==='dark');
 
-  function applyVisibility(){
-    syncScheme();
-    const scheme = getCurrentScheme();
-    const shouldShow = (mode) => mode==='all' || (mode==='light'&&scheme==='light') || (mode==='dark'&&scheme==='dark');
-
-    Object.keys(EFFECTS).forEach(key=>{
-      const mode = MODES[key];
-      const nodes = getNodes(key);
-
-      if (key==='snow') {
-        if (mode==='none') { nodes.forEach(el=>{ el.style.display='none'; }); return; }
-        if (shouldShow(mode)) {
-          if (!SNOW_CREATED) { createEffect('snow'); SNOW_CREATED=true; }
-          // 显示已存在节点
-          getNodes('snow').forEach(el=>{ el.style.display=''; });
-        } else {
-          // 仅隐藏
-          getNodes('snow').forEach(el=>{ el.style.display='none'; });
+      Object.keys(EFFECTS).forEach(key=>{
+        const mode = MODES[key];
+        if (mode==='none') {
+          purgeEffect(key);
+          return;
         }
-        return;
-      }
-
-      // 其他效果：保持 v12 的“清理+重建”节奏
-      if (mode==='none') { purgeEffect(key); return; }
-      if (shouldShow(mode)) { purgeEffect(key); createEffect(key); }
-      else { purgeEffect(key); }
-    });
+        if (shouldShow(mode)) {
+          // 目标需要显示：先清理旧的，再重建，避免“第三次第四次不动”
+          purgeEffect(key);
+          createEffect(key);
+        } else {
+          // 不需要：彻底清理
+          purgeEffect(key);
+        }
+      });
+    } finally {
+      // 多次切换时节流一下，避免重复加载
+      setTimeout(()=>{ rebuildLock=false; }, 100);
+    }
   }
 
-  if (!window.__DIY_ALL_EFFECTS_V12_TWOFIX__) {
-    window.__DIY_ALL_EFFECTS_V12_TWOFIX__ = true;
+  // ---------- 主入口 ----------
+  if (!window.__DIY_ALL_EFFECTS_V12__) {
+    window.__DIY_ALL_EFFECTS_V12__ = true;
     whenReady(function(){
+      // DreamConfig 供脚本内部读取（day/night/all/none）
       window.DreamConfig = window.DreamConfig || {};
       DreamConfig.effects_lantern_mode       = toDayNight(MODES.lantern);
       DreamConfig.effects_sakura_mode        = toDayNight(MODES.sakura);
@@ -953,15 +932,34 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
       DreamConfig.effects_circle_magic_mode  = toDayNight(MODES.circle);
       DreamConfig.effects_quantum_silk_thread_mode = toDayNight(MODES.quantum);
 
-      applyVisibility();
-      let raf=0; const fire=()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(applyVisibility);};
+      // 鼠标（与明暗无关）
+      if (CFG.cursor_style && CFG.cursor_style !== 'none') {
+        var pack=CFG.cursor_style, base=ASSETS+'/cursor/'+pack+'/';
+        function urlq(n){ try{return 'url(\"'+encodeURI(base+n)+'\")'}catch(e){return 'url('+base+n+')'} }
+        function urls(list){ return list.map(urlq).join(','); }
+        var css=[
+          'html, body { cursor: '+urls(['arrow.cur','Arrow.cur','Normal.cur','normal.cur','Arrow.ani','Normal.ani'])+', auto !important; }',
+          'a, button, [role=\"button\"], input[type=button], input[type=submit] { cursor: '+urls(['hand.cur','Hand.cur','link.cur','Link.cur','hand.ani','Link.ani','Alternate Select.cur','alternate.cur'])+', pointer !important; }',
+          'input[type=text], input[type=search], textarea, .text, .textbox, .input { cursor: '+urls(['ibeam.cur','IBeam.cur','beam.cur','Beam.cur','text.cur','Text.cur','ibeam.ani','Escritura a Mano.cur','Handwriting.cur','texto.cur'])+', text !important; }'
+        ].join('\\n');
+        var st=document.createElement('style'); st.textContent=css; document.head.appendChild(st);
+      }
+      if (CFG.cursor_move  && CFG.cursor_move  !== 'none') loadJS(ASSETS + '/js/cursor/move/'  + CFG.cursor_move  + '.min.js');
+      if (CFG.cursor_click && CFG.cursor_click !== 'none') loadJS(ASSETS + '/js/cursor/click/' + CFG.cursor_click + '.min.js');
+
+      // 初次构建
+      applyVisibilityAndRebuild();
+
+      // 监听主题切换：每次都“强制清理 + 重建匹配”的效果
+      let rafToken = 0;
+      const fire = ()=>{ cancelAnimationFrame(rafToken); rafToken = requestAnimationFrame(applyVisibilityAndRebuild); };
       const mo = new MutationObserver(fire);
-      mo.observe(document.documentElement,{attributes:true,attributeFilter:['class','data-theme','theme']});
+      mo.observe(document.documentElement, {attributes:true, attributeFilter:['class','data-theme','theme']});
       window.addEventListener('storage', fire);
     });
   }
 </script>
-
+<!-- ===== /DIY: Plus 全部接线 v12 ===== -->
 
 
 
