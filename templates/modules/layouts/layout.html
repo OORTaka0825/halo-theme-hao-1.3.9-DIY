@@ -781,37 +781,190 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   })();
 </script>
 
-<!-- ===== 鼠标移动点击特效 -->
+<!-- 鼠标移动和点击特效（仅第二段；与明暗无关；避免被第三段清理） -->
 <script th:inline="javascript">
-  (function(){
-    const ASSETS = /*[[${assets_link}]]*/ '/assets';
-    const THEME_VER = /*[[${theme_version}]]*/ '';
-    const CFG = {
-      cursor_move:  /*[[${theme.config.style.cursor_move}]]*/  'none',
-      cursor_click: /*[[${theme.config.style.cursor_click}]]*/ 'none'
+(function(){
+  // —— 只处理鼠标移动/点击，不改显示模式 —— 
+  const ASSETS = /*[[${assets_link}]]*/ '/assets';
+  const THEME_VER = /*[[${theme_version}]]*/ '';
+  const CFG = {
+    cursor_move:  /*[[${theme.config.style.cursor_move}]]*/  'none',
+    cursor_click: /*[[${theme.config.style.cursor_click}]]*/ 'none'
+  };
+
+  if (window.__DIY_MOUSE_SEG2__) return;
+  window.__DIY_MOUSE_SEG2__ = true;
+
+  // 1) 建一个“鼠标容器”，带 data-keep-canvas，第三段的清理会自动跳过它
+  function 确保鼠标容器(){
+    let box = document.getElementById('diy-mouse-box');
+    if (!box){
+      box = document.createElement('div');
+      box.id = 'diy-mouse-box';
+      box.setAttribute('data-keep-canvas','mouse');     // 关键：让第三段 purge 跳过
+      box.style.cssText='pointer-events:none;position:fixed;inset:0;z-index:0';
+      document.body.appendChild(box);
+    }
+    return box;
+  }
+
+  // 2) 只在短时间内“拦截”新节点，把鼠标画布收入容器（避免先被第三段清掉）
+  function 短时拦截追加(ms){
+    const 截止 = Date.now() + (ms||3000);
+    const 原append = Node.prototype.appendChild;
+    const 原insert = Node.prototype.insertBefore;
+    const 盒 = 确保鼠标容器();
+
+    function 是鼠标节点(n){
+      if (!(n instanceof HTMLElement) && !(n instanceof HTMLCanvasElement)) return false;
+      const s = ((n.id||'')+' '+(n.className||'')).toLowerCase();
+      return /cursor|trail|ribbon|click|firework|particle|spark/.test(s) || n.tagName==='CANVAS';
+    }
+    function 路由(node,parent){
+      if (Date.now()>截止) return false;
+      if (parent!==document.body) return false;
+      if (!是鼠标节点(node)) return false;
+      // 到这里基本是鼠标画布或相关容器
+      盒.appendChild(node);
+      if (node.tagName==='CANVAS'){
+        标记鼠标画布(node);
+      }else{
+        // 如果是 div/svg，内部的 canvas 也标一下
+        try{ node.querySelectorAll && node.querySelectorAll('canvas').forEach(标记鼠标画布); }catch(e){}
+      }
+      return true;
+    }
+
+    Node.prototype.appendChild = function(n){
+      if (路由(n,this)) return n;
+      return 原append.call(this,n);
+    };
+    Node.prototype.insertBefore = function(n,ref){
+      if (路由(n,this)) return n;
+      return 原insert.call(this,n,ref);
     };
 
-    if (window.__DIY_CURSOR_EFFECTS_V12__) return;
-    window.__DIY_CURSOR_EFFECTS_V12__ = true;
+    // 到时还原
+    setTimeout(function(){
+      Node.prototype.appendChild = 原append;
+      Node.prototype.insertBefore = 原insert;
+    }, (ms||3000)+50);
+  }
 
-    function loadJS(src){
-      const s = document.createElement('script');
-      s.src = src + THEME_VER + '&r=' + (Math.random().toString(36).slice(2));
-      s.defer = true;
-      document.body.appendChild(s);
-    }
+  // 3) 标记鼠标画布（让第三段的“大画布兜底删除”也跳过）
+  function 标记鼠标画布(cv){
+    try{
+      const s = ((cv.id||'')+' '+(cv.className||'')).toLowerCase();
+      if (/cursor|trail|ribbon/.test(s)) cv.dataset.diyMouse = 'move';
+      if (/click|firework|particle|spark/.test(s)) cv.dataset.diyMouse = 'click';
+      cv.setAttribute('data-keep-canvas','mouse');   // 关键
+      cv.style.pointerEvents='none';
+    }catch(e){}
+  }
 
-    function whenReady(cb){
-      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', cb);
-      else cb();
-    }
-
-    whenReady(function(){
-      if (CFG.cursor_move  && CFG.cursor_move  !== 'none') loadJS(ASSETS + '/js/cursor/move/'  + CFG.cursor_move  + '.min.js');
-      if (CFG.cursor_click && CFG.cursor_click !== 'none') loadJS(ASSETS + '/js/cursor/click/' + CFG.cursor_click + '.min.js');
+  // 4) 把页面上已有的鼠标画布收编进容器
+  function 初始收编(){
+    const 盒 = 确保鼠标容器();
+    document.querySelectorAll('canvas').forEach(function(cv){
+      const s = ((cv.id||'')+' '+(cv.className||'')).toLowerCase();
+      if (/cursor|trail|ribbon|click|firework|particle|spark/.test(s)){
+        标记鼠标画布(cv);
+        if (cv.parentNode===document.body) 盒.appendChild(cv);
+      }
     });
-  })();
+  }
+
+  // 5) 监听后续新增，把鼠标画布移入容器并打标
+  const 观察 = new MutationObserver(function(muts){
+    const 盒 = document.getElementById('diy-mouse-box') || 确保鼠标容器();
+    muts.forEach(function(m){
+      (m.addedNodes||[]).forEach(function(n){
+        if (n instanceof HTMLCanvasElement){
+          标记鼠标画布(n);
+          if (n.parentNode===document.body) 盒.appendChild(n);
+        }else if (n instanceof HTMLElement && n.querySelectorAll){
+          n.querySelectorAll('canvas').forEach(function(cv){
+            const s = ((cv.id||'')+' '+(cv.className||'')).toLowerCase();
+            if (/cursor|trail|ribbon|click|firework|particle|spark/.test(s)){
+              标记鼠标画布(cv);
+              if (cv.parentNode===document.body) 盒.appendChild(cv);
+            }
+          });
+        }
+      });
+    });
+  });
+
+  // 6) 只在缺失时加载一次脚本（与明暗无关）
+  function 已有移动画布(){
+    return !!document.querySelector('#diy-mouse-box canvas[data-diyMouse="move"], #diy-mouse-box canvas[id*="cursor"], #diy-mouse-box canvas[class*="cursor"], #diy-mouse-box canvas[id*="trail"], #diy-mouse-box canvas[class*="trail"], #diy-mouse-box canvas[id*="ribbon"], #diy-mouse-box canvas[class*="ribbon"]');
+  }
+  function 已有点击画布(){
+    return !!document.querySelector('#diy-mouse-box canvas[data-diyMouse="click"], #diy-mouse-box canvas[id*="click"], #diy-mouse-box canvas[class*="click"], #diy-mouse-box canvas[id*="firework"], #diy-mouse-box canvas[class*="firework"], #diy-mouse-box canvas[id*="particle"], #diy-mouse-box canvas[class*="particle"], #diy-mouse-box canvas[id*="spark"], #diy-mouse-box canvas[class*="spark"]');
+  }
+  function 加载一次(类型, 名称){
+    if (!名称 || 名称==='none') return;
+    const 键 = '__DIY_MOUSE_LOAD__'+类型;
+    if (window[键]) return;
+    window[键] = 1;
+    const s = document.createElement('script');
+    s.defer = true;
+    s.src = ASSETS + (类型==='move' ? '/js/cursor/move/'+名称+'.min.js' : '/js/cursor/click/'+名称+'.min.js') + THEME_VER;
+    document.body.appendChild(s);
+  }
+  function 取包名(){
+    let 移动 = CFG.cursor_move || '', 点击 = CFG.cursor_click || '';
+    if ((!移动 || !点击) && window.DreamConfig){
+      if (!移动 && window.DreamConfig.cursor_move)  移动 = window.DreamConfig.cursor_move;
+      if (!点击 && window.DreamConfig.cursor_click) 点击 = window.DreamConfig.cursor_click;
+    }
+    if (!移动 || !点击){
+      Array.from(document.scripts).forEach(function(s){
+        const src = s.getAttribute('src')||'';
+        if (!移动){
+          const m = src.match(/\/js\/cursor\/move\/([^\/]+)\.min\.js/i);
+          if (m) 移动 = m[1];
+        }
+        if (!点击){
+          const c = src.match(/\/js\/cursor\/click\/([^\/]+)\.min\.js/i);
+          if (c) 点击 = c[1];
+        }
+      });
+    }
+    return {移动, 点击};
+  }
+  function 保活(){
+    const {移动, 点击} = 取包名();
+    if (!已有移动画布()  && 移动) 加载一次('move',  移动);
+    if (!已有点击画布() && 点击) 加载一次('click', 点击);
+  }
+
+  // 7) 启动顺序：先建容器→短时拦截→加载脚本→初始收编→监听→保活
+  function 启动(){
+    确保鼠标容器();
+    短时拦截追加(3000);           // 保证鼠标脚本创建的画布直接进容器
+    const {移动, 点击} = 取包名();
+    if (移动 && 移动!=='none') 加载一次('move', 移动);
+    if (点击 && 点击!=='none') 加载一次('click', 点击);
+
+    初始收编();
+    try{ 观察.observe(document.body,{childList:true,subtree:true}); }catch(e){}
+    保活();
+
+    // 主题切换或 storage 变化时，只做保活（不触碰显示模式）
+    const moTheme = new MutationObserver(function(){ requestAnimationFrame(保活); });
+    moTheme.observe(document.documentElement,{attributes:true,attributeFilter:['class','data-theme','theme']});
+    window.addEventListener('storage', function(){ requestAnimationFrame(保活); });
+
+    // 兜底定时
+    setInterval(保活, 1500);
+  }
+
+  if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', 启动);
+  else 启动();
+})();
 </script>
+
 
 <!-- 6个显示模式 -->
 <script th:inline="javascript">
