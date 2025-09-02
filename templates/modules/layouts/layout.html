@@ -752,7 +752,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     })();
     </script>
 
-    <!-- ===== DIY: Plus 全部接线（v16：持续打标，无扫帚；鼠标独立；灯笼文字修正） ===== -->
+    <!-- ===== DIY: Plus 全部接线（v12：强力清理 Canvas + 每次切换强制重建；鼠标不受明暗） ===== -->
 <script th:inline="javascript">
   const ASSETS = /*[[${assets_link}]]*/ '/assets';
   const THEME_VER = /*[[${theme_version}]]*/ '';
@@ -769,7 +769,6 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     effects_quantum_silk_thread_mode: /*[[${theme.config.style.effects_quantum_silk_thread_mode}]]*/ 'none'
   };
 
-  // 量子丝线图片路径（DIY）
   window.DIY_WORDLINE_IMG = ASSETS + '/images/wordline.webp';
 
   // ---------- helpers ----------
@@ -785,10 +784,9 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 
   function getCurrentScheme(){
     const html=document.documentElement;
-    const body=document.body || document.documentElement;
-    const attr=(html.getAttribute('data-theme')||html.getAttribute('theme')||body.getAttribute('data-theme')||'').toLowerCase();
+    const attr=(html.getAttribute('data-theme')||html.getAttribute('theme')||'').toLowerCase();
     if(attr==='dark') return 'dark';
-    if(html.classList.contains('dark') || body.classList.contains('dark') || html.classList.contains('night') ) return 'dark';
+    if(html.classList.contains('dark')) return 'dark';
     const ls=(localStorage.getItem('theme')||localStorage.getItem('special-efficacy-scheme')||'').toLowerCase();
     if(ls==='dark'||ls==='night') return 'dark';
     if(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';
@@ -803,22 +801,21 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     let tries=0;(function tick(){
       const ready=document.documentElement.getAttribute('data-theme')
             ||document.documentElement.classList.contains('dark')
-            ||document.body && document.body.classList.contains('dark')
             ||localStorage.getItem('theme')
             ||localStorage.getItem('special-efficacy-scheme');
       if(ready||tries>40) return cb(); tries++; setTimeout(tick,50);
     })();
   }
-  function loadJS(src){ const s=document.createElement('script'); s.src=src+THEME_VER; s.defer=true; document.body.appendChild(s); }
+  function loadJS(src){ const s=document.createElement('script'); s.src=src+THEME_VER+'&r='+(Math.random().toString(36).slice(2)); s.defer=true; document.body.appendChild(s); }
 
   // effects meta
   const EFFECTS = {
-    lantern:  { file: '/js/effects/lantern.min.js',  keywords: ['lantern','diy-lantern','lantern-left','lantern-right','lantern-text','lantern-tips'] },
+    lantern:  { file: '/js/effects/lantern.min.js',  keywords: ['lantern'] },
     sakura:   { file: '/js/effects/sakura.min.js',   keywords: ['sakura','cherry','petal'] },
-    snow:     { file: '/js/effects/snowflake.min.js',keywords: ['snow','snowflake','snowfall'] },
-    universe: { file: '/js/effects/universe.min.js', keywords: ['universe','star','galaxy','constellation'] },
-    circle:   { file: '/js/effects/circleMagic.min.js', keywords: ['circle','circlemagic','circle-magic'] },
-    quantum:  { file: '/js/effects/quantum.min.js',  keywords: ['quantum','wordline'] },
+    snow:     { file: '/js/effects/snowflake.min.js',keywords: ['snow','snowflake'] },
+    universe: { file: '/js/effects/universe.min.js', keywords: ['universe','star','galaxy'] },
+    circle:   { file: '/js/effects/circleMagic.min.js', keywords: ['circle','circlemagic'] },
+    quantum:  { file: '/js/effects/quantum.min.js',  keywords: ['quantum'] },
   };
   const MODES = {
     lantern:  normMode(CFG.effects_lantern_mode),
@@ -828,23 +825,18 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     circle:   normMode(CFG.effects_circle_magic_mode),
     quantum:  normMode(CFG.effects_quantum_silk_thread_mode),
   };
-  const LOADED = {}; // 每个脚本只加载一次
-  const TRACK  = {}; // key -> {until}
 
-  // ---- 鼠标白名单（永不干预） ----
-  const MOUSE_EXCLUDE = ['mouse','cursor','trail','click','firework','fireworks','ribbon','ribbons','spark','sparkle','particle','particles','cursor-effects','canvascursor','cursor_canvas'];
-
-  function nameHit(el, words){
-    const id=(el.id||'').toLowerCase(), cls=(el.className||'').toString().toLowerCase();
-    return words.some(k=> id.includes(k) || cls.includes(k) );
-  }
-
-  // ---- 动态标记新增节点 + 持续补标（不会扫 canvas） ----
-  function startTrack(key,ms){ TRACK[key]={until:Date.now()+(ms||6000)}; }
+  // ---- 动态标记新增节点（方便显隐/清理） ----
+  const TRACK={};
+  function startTrack(key,ms){ TRACK[key]={until:Date.now()+(ms||8000)}; }
   function tagIfMatch(el, key){
     if(!el || el.dataset.diyEffect) return;
-    if (nameHit(el, MOUSE_EXCLUDE)) return; // 鼠标排除
-    if (nameHit(el, EFFECTS[key].keywords)) {
+    const id=(el.id||'').toLowerCase(), cls=(el.className||'').toString().toLowerCase();
+    const kw=EFFECTS[key].keywords;
+    const isCanvas = el.tagName==='CANVAS';
+    const rect = isCanvas ? el.getBoundingClientRect() : {width:0,height:0};
+    const full = isCanvas && rect.width>=window.innerWidth*0.6 && rect.height>=window.innerHeight*0.4;
+    if (kw.some(k=>id.includes(k)||cls.includes(k)) || full){
       el.dataset.diyEffect = key;
       try{ el.style.pointerEvents='none'; }catch(e){}
     }
@@ -865,74 +857,73 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   function observeBody(){ if(document.body) bodyObserver.observe(document.body,{childList:true,subtree:true}); else document.addEventListener('DOMContentLoaded',observeBody); }
   observeBody();
 
-  // 持续补标：每次更新都全局扫一遍（轻量匹配 id/class），避免 6s 窗口外创建的漏标节点
-  function globalRetag(){
-    const all = document.querySelectorAll('body *');
-    all.forEach(el=>{
-      if(el.dataset && el.dataset.diyEffect) return;
-      if (nameHit(el, MOUSE_EXCLUDE)) return;
-      for(const key of Object.keys(EFFECTS)){
-        if (nameHit(el, EFFECTS[key].keywords)) {
-          el.dataset.diyEffect = key;
-          try{ el.style.pointerEvents='none'; }catch(e){}
-          break;
-        }
+  // ---- 获取 / 清理 ----
+  function getNodes(key){
+    const kw = EFFECTS[key].keywords.join('|');
+    const sel = '[data-diy-effect="'+key+'"], body > [id*="'+kw+'"], body > [class*="'+kw+'"]';
+    return Array.from(document.querySelectorAll(sel));
+  }
+  function purgeEffect(key){
+    // 1) 标签/关键字节点
+    getNodes(key).forEach(el=>{ try{ el.remove(); }catch(e){} });
+
+    // 2) 兜底：超大 Canvas（常见于这些特效），防止漏网
+    document.querySelectorAll('body canvas').forEach(cv=>{
+      const r = cv.getBoundingClientRect();
+      const huge = r.width>=window.innerWidth*0.6 && r.height>=window.innerHeight*0.4;
+      if (huge && !cv.closest('[data-keep-canvas]')) {
+        try{ cv.remove(); }catch(e){}
       }
     });
+
+    // 3) 清理可能的 script 标签（强制后续可重建）
+    document.querySelectorAll('script[data-diy-effect-script="'+key+'"]').forEach(s=>{ try{s.remove();}catch(e){} });
+  }
+  function createEffect(key){
+    startTrack(key, 8000);
+    const s = document.createElement('script');
+    s.src = ASSETS + EFFECTS[key].file + THEME_VER + '&r=' + Math.random().toString(36).slice(2);
+    s.defer = true;
+    s.setAttribute('data-diy-effect-script', key);
+    document.body.appendChild(s);
   }
 
-  function getNodes(key){ return Array.from(document.querySelectorAll('[data-diy-effect="'+key+'"]')); }
-  function shouldShow(mode, scheme){ return mode==='all' || (mode==='light'&&scheme==='light') || (mode==='dark'&&scheme==='dark'); }
+  // ---- 构建（每次切换都“强制清理 + 需要则重建”） ----
+  let rebuildLock = false;
+  function applyVisibilityAndRebuild(){
+    if (rebuildLock) return;
+    rebuildLock = true;
+    try {
+      syncScheme();
+      const scheme = getCurrentScheme();
+      const shouldShow = (mode) => mode==='all' || (mode==='light'&&scheme==='light') || (mode==='dark'&&scheme==='dark');
 
-  // 灯笼“undefined”文本修正
-  function fixLanternText(){
-    document.querySelectorAll('[data-diy-effect="lantern"]').forEach(box=>{
-      box.querySelectorAll('*').forEach(n=>{
-        if(n.childNodes && n.childNodes.length===1 && n.childNodes[0].nodeType===3){
-          const t=n.textContent.trim().toLowerCase();
-          if(t==='undefined'){ n.textContent=''; }
+      Object.keys(EFFECTS).forEach(key=>{
+        const mode = MODES[key];
+        if (mode==='none') {
+          purgeEffect(key);
+          return;
+        }
+        if (shouldShow(mode)) {
+          // 目标需要显示：先清理旧的，再重建，避免“第三次第四次不动”
+          purgeEffect(key);
+          createEffect(key);
+        } else {
+          // 不需要：彻底清理
+          purgeEffect(key);
         }
       });
-    });
-  }
-
-  function updateVisibilityAndLoadIfNeeded(){
-    syncScheme();
-    const scheme = getCurrentScheme();
-    globalRetag(); // 每次切换/更新都补标一次，杜绝漏网
-
-    Object.keys(EFFECTS).forEach(key=>{
-      const mode = MODES[key];
-      const show = shouldShow(mode, scheme);
-      const nodes = getNodes(key);
-
-      if (mode==='none') {
-        nodes.forEach(el=>{ el.style.display='none'; });
-        return;
-      }
-      if (show) {
-        if (nodes.length===0 && !LOADED[key]) {
-          startTrack(key, 6000);
-          loadJS(ASSETS + EFFECTS[key].file);
-          LOADED[key] = true;
-        } else {
-          nodes.forEach(el=>{ el.style.display=''; });
-        }
-      } else {
-        nodes.forEach(el=>{ el.style.display='none'; });
-      }
-    });
-
-    // 灯笼文字兜底：避免“undefined”展示
-    setTimeout(fixLanternText, 100);
-    setTimeout(fixLanternText, 600);
+    } finally {
+      // 多次切换时节流一下，避免重复加载
+      setTimeout(()=>{ rebuildLock=false; }, 100);
+    }
   }
 
   // ---------- 主入口 ----------
-  if (!window.__DIY_ALL_EFFECTS_V16__) {
-    window.__DIY_ALL_EFFECTS_V16__ = true;
+  if (!window.__DIY_ALL_EFFECTS_V12__) {
+    window.__DIY_ALL_EFFECTS_V12__ = true;
     whenReady(function(){
-      // DreamConfig（供脚本内部读取）
+      // DreamConfig 供脚本内部读取（day/night/all/none）
       window.DreamConfig = window.DreamConfig || {};
       DreamConfig.effects_lantern_mode       = toDayNight(MODES.lantern);
       DreamConfig.effects_sakura_mode        = toDayNight(MODES.sakura);
@@ -941,7 +932,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
       DreamConfig.effects_circle_magic_mode  = toDayNight(MODES.circle);
       DreamConfig.effects_quantum_silk_thread_mode = toDayNight(MODES.quantum);
 
-      // 鼠标（与明暗无关；只初始化一次）
+      // 鼠标（与明暗无关）
       if (CFG.cursor_style && CFG.cursor_style !== 'none') {
         var pack=CFG.cursor_style, base=ASSETS+'/cursor/'+pack+'/';
         function urlq(n){ try{return 'url(\"'+encodeURI(base+n)+'\")'}catch(e){return 'url('+base+n+')'} }
@@ -956,18 +947,19 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
       if (CFG.cursor_move  && CFG.cursor_move  !== 'none') loadJS(ASSETS + '/js/cursor/move/'  + CFG.cursor_move  + '.min.js');
       if (CFG.cursor_click && CFG.cursor_click !== 'none') loadJS(ASSETS + '/js/cursor/click/' + CFG.cursor_click + '.min.js');
 
-      // 初始化与监听（加兜底轮询）
-      updateVisibilityAndLoadIfNeeded();
-      const fire = () => { requestAnimationFrame(updateVisibilityAndLoadIfNeeded); };
+      // 初次构建
+      applyVisibilityAndRebuild();
+
+      // 监听主题切换：每次都“强制清理 + 重建匹配”的效果
+      let rafToken = 0;
+      const fire = ()=>{ cancelAnimationFrame(rafToken); rafToken = requestAnimationFrame(applyVisibilityAndRebuild); };
       const mo = new MutationObserver(fire);
       mo.observe(document.documentElement, {attributes:true, attributeFilter:['class','data-theme','theme']});
       window.addEventListener('storage', fire);
-      let last = getCurrentScheme();
-      setInterval(()=>{ const now=getCurrentScheme(); if(now!==last){ last=now; fire(); } }, 600);
     });
   }
 </script>
-<!-- ===== /DIY: Plus 全部接线 v16 ===== -->
+<!-- ===== /DIY: Plus 全部接线 v12 ===== -->
 
 
 
