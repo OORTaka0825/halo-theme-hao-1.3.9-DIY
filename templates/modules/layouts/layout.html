@@ -654,7 +654,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 </script>
 
 
-    <!-- DIY × PLUS 一体化 Loader · v12-merge + DreamConfig + SnowRebuildSafe（仅修雪花加速） -->
+    <!-- DIY × PLUS 一体化 Loader · v12-merge + DreamConfig + SnowRebuildByIdRange -->
 <script th:inline="javascript">
 (function(){
   /* ========= 基础 ========= */
@@ -680,7 +680,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   const ASSET_BASES  = detectAssetBases();
   const FIRST_ASSETS = ASSET_BASES[0].replace(/\/+$/,'');
 
-  /* ========= 配置（enhance 优先，style 兜底） ========= */
+  /* ========= 读取配置（enhance 优先，style 兜底） ========= */
   const _e = {
     cursor_style: /*[[${theme.config.enhance.cursor_style}]]*/ null,
     cursor_move:  /*[[${theme.config.enhance.cursor_move}]]*/ null,
@@ -724,7 +724,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     effects_lantern_right: pick(_e.effects_lantern_right,_s.effects_lantern_right,'')
   };
 
-  /* ========= DreamConfig ========= */
+  /* ========= DreamConfig（给 PLUS 脚本读取） ========= */
   const DreamConfig = window.DreamConfig || (window.DreamConfig = {});
   DreamConfig.theme_version = THEME_VER || '';
   DreamConfig.assets_base   = FIRST_ASSETS + '/js';
@@ -757,7 +757,8 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 
   /* ========= 工具 ========= */
   function loadFromBases(id, relList){
-    if (document.getElementById(id)) return;
+    const exists = document.getElementById(id);
+    if (exists) return;
     const cand = [];
     ASSET_BASES.forEach(base=>{
       relList.forEach(rp=>{
@@ -769,7 +770,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     let i=0, s=document.createElement('script'); s.defer=true; s.id=id;
     function tryNext(){
       if(i>=cand.length) return;
-      s.src = cand[i++] + '?v=' + encodeURIComponent(DreamConfig.theme_version);
+      s.src = cand[i++] + '?v=' + encodeURIComponent(DreamConfig.theme_version) + '&r=' + Date.now();
       document.body.appendChild(s);
     }
     s.onerror=function(){ s.remove(); s=document.createElement('script'); s.defer=true; s.id=id; tryNext(); };
@@ -812,118 +813,61 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     st.textContent = css;
   }
 
-  /* ========= 雪花：重建但不加速（只拦截“来自 snowflake 脚本”的句柄） ========= */
-  const SnowRebuilder = (function(){
-    const Orig = {
-      setInterval: window.setInterval,
-      clearInterval: window.clearInterval,
-      setTimeout: window.setTimeout,
-      clearTimeout: window.clearTimeout,
-      requestAnimationFrame: window.requestAnimationFrame,
-      cancelAnimationFrame: window.cancelAnimationFrame,
-      addEventListener: window.addEventListener,
-      removeEventListener: window.removeEventListener,
-      docAdd: document.addEventListener,
-      docRemove: document.removeEventListener
-    };
-    let records = { timers:[], timeouts:[], rafs:[], listeners:[] };
-    let capturing = false;
+  /* ========= 只修“雪花加速” —— 计时器 ID 区间法 ========= */
+  const SnowRange = (function(){
+    let last = null; // {intStart,intEnd, toutStart, toutEnd}
 
-    function isFromSnow(){
-      try{
-        const st = (new Error()).stack || '';
-        return /snowflake/i.test(st);
-      }catch(e){ return false; }
+    function getMaxIntervalId(){
+      const id = setInterval(function(){},  0);
+      clearInterval(id);
+      return id;
     }
-
-    function hookStart(){
-      if (capturing) return;
-      capturing = true;
-
-      window.setInterval = function(fn,ms){ const id=Orig.setInterval(fn,ms); if (isFromSnow()) records.timers.push(id); return id; };
-      window.setTimeout  = function(fn,ms){ const id=Orig.setTimeout(fn,ms);  if (isFromSnow()) records.timeouts.push(id); return id; };
-      window.requestAnimationFrame = function(cb){ const id=Orig.requestAnimationFrame(cb); if (isFromSnow()) records.rafs.push(id); return id; };
-
-      window.addEventListener = function(type,handler,opts){ Orig.addEventListener.call(window,type,handler,opts); if (isFromSnow()) records.listeners.push({t:window,type,handler,opts}); };
-      document.addEventListener = function(type,handler,opts){ Orig.docAdd.call(document,type,handler,opts); if (isFromSnow()) records.listeners.push({t:document,type,handler,opts}); };
+    function getMaxTimeoutId(){
+      const id = setTimeout (function(){},  0);
+      clearTimeout(id);
+      return id;
     }
-
-    function hookStop(){
-      if (!capturing) return;
-      capturing = false;
-      window.setInterval = Orig.setInterval;
-      window.clearInterval = Orig.clearInterval;
-      window.setTimeout = Orig.setTimeout;
-      window.clearTimeout = Orig.clearTimeout;
-      window.requestAnimationFrame = Orig.requestAnimationFrame;
-      window.cancelAnimationFrame  = Orig.cancelAnimationFrame;
-      window.addEventListener = Orig.addEventListener;
-      window.removeEventListener = Orig.removeEventListener;
-      document.addEventListener = Orig.docAdd;
-      document.removeEventListener = Orig.docRemove;
-    }
-
-    function killPrev(){
-      try{
-        records.timers.forEach(id=>Orig.clearInterval(id));
-        records.timeouts.forEach(id=>Orig.clearTimeout(id));
-        records.rafs.forEach(id=>Orig.cancelAnimationFrame(id));
-        records.listeners.forEach(it=>{ try{ it.t.removeEventListener(it.type, it.handler, it.opts); }catch(e){} });
-      }catch(e){}
-      records = { timers:[], timeouts:[], rafs:[], listeners:[] };
-      // 移除 DOM & 旧脚本
+    function clearRange(r){
+      if (!r) return;
+      for (let i = r.intStart + 1; i <= r.intEnd; i++) { try{ clearInterval(i); }catch(e){} }
+      for (let i = r.toutStart + 1; i <= r.toutEnd; i++) { try{ clearTimeout(i); }catch(e){} }
+      // 清 DOM 与旧脚本
       document.querySelectorAll('#Snow,[id*="snow"],[class*="snow"]').forEach(el=>{ try{ el.remove(); }catch(e){} });
-      const old = document.getElementById('fx-snow'); if (old) try{ old.remove(); }catch(e){}
-      // 同时把任何 src 含 snowflake 的脚本都清一遍（保险）
+      const tag = document.getElementById('fx-snow'); if (tag) try{ tag.remove(); }catch(e){}
+      // 保险：删除任何 src 含 snowflake 的脚本标签
       document.querySelectorAll('script[src*="snowflake"]').forEach(s=>{ try{s.remove();}catch(e){} });
     }
 
-    function buildCandidates(){
-      const list = [];
-      ASSET_BASES.forEach(base=>{
-        ['js/effects/snowflake','effects/snowflake'].forEach(rp=>{
-          const p = (base.replace(/\/+$/,'') + '/' + rp).replace(/\/{2,}/g,'/');
-          list.push(p + '.min.js'); list.push(p + '.js');
-        });
-      });
-      return list;
-    }
-
-    function shouldLoadNow(){
-      const m = DreamConfig.effects_snowflake_mode || '';
-      if (!m) return false;
-      const dark = document.documentElement.classList.contains('night');
-      if (m==='all')  return true;
-      if (m==='day')  return !dark;
-      if (m==='night')return dark;
-      return false;
-    }
-
     function start(){
-      if (!shouldLoadNow()){ killPrev(); return; }
+      // 1) 不需要 → 清掉上一个并返回
+      if (!shouldLoad(DreamConfig.effects_snowflake_mode)) { clearRange(last); return; }
 
-      // 先干净清掉上一次
-      killPrev();
+      // 2) 清上一次
+      clearRange(last);
 
-      // 非常短的捕获窗口（只记录“来自 snowflake 脚本”的句柄）
-      hookStart();
+      // 3) 标记“本次构建前”的最大 ID
+      const intStart  = getMaxIntervalId();
+      const toutStart = getMaxTimeoutId();
 
-      const cand = buildCandidates();
-      let i=0, s=document.createElement('script'); s.defer=true; s.id='fx-snow';
-      function tryNext(){
-        if (i>=cand.length){ hookStop(); return; }
-        s = document.createElement('script'); s.defer=true; s.id='fx-snow';
-        s.src = cand[i++] + '?v=' + encodeURIComponent(DreamConfig.theme_version) + '&r=' + Date.now();
-        s.onload = function(){
-          // 给脚本一点时间创建 DOM/计时器，然后停止捕获
-          setTimeout(hookStop, 120);
-          // 再补一次兜底（避免某些情况下 onload 早于内部初始化）
-          setTimeout(hookStop, 300);
-        };
-        s.onerror = function(){ s.remove(); tryNext(); };
-        document.body.appendChild(s);
+      // 4) 重新加载雪花脚本
+      loadFromBases('fx-snow', ['js/effects/snowflake','effects/snowflake']);
+
+      // 5) 在脚本完成初始化后记录“本次构建后的最大 ID”
+      //    用两段延时取最大值，保证慢网速也能覆盖到
+      function snapshot(){
+        const intEnd  = getMaxIntervalId();
+        const toutEnd = getMaxTimeoutId();
+        if (!last) last = { intStart, intEnd, toutStart, toutEnd };
+        else {
+          // 记录一个“并集”区间（向上取最大），清理更稳
+          last.intStart  = Math.min(last.intStart,  intStart);
+          last.intEnd    = Math.max(last.intEnd,    intEnd);
+          last.toutStart = Math.min(last.toutStart, toutStart);
+          last.toutEnd   = Math.max(last.toutEnd,   toutEnd);
+        }
       }
-      tryNext();
+      setTimeout(snapshot, 350);   // 大多数脚本 100~300ms 完成
+      setTimeout(snapshot, 1200);  // 兜底再取一次
     }
 
     return { start };
@@ -931,7 +875,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 
   /* ========= 其它公共 ========= */
   function cleanEffectLayers(){
-    // 不动雪花；其它按原逻辑清理
+    // 不动雪花（交给 SnowRange 管），其它清理
     document.querySelectorAll('.canvas_effects,#universe_canvas,#quantum_c_n,.j-china-lantern,[id^=sakura]')
       .forEach(el=>{ try{ el.remove(); }catch(e){} });
     ['fx-sakura','fx-universe','fx-circle','fx-quantum','fx-lantern'].forEach(id=>{
@@ -948,7 +892,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     if (isMobile()) return;
     if (shouldLoad(DreamConfig.effects_lantern_mode))             loadFromBases('fx-lantern',['js/effects/lantern','effects/lantern']);
     if (shouldLoad(DreamConfig.effects_sakura_mode))              loadFromBases('fx-sakura', ['js/effects/sakura','effects/sakura']);
-    SnowRebuilder.start();                                       // ★ 雪花：重建但不叠速
+    SnowRange.start();                                           // ★ 雪花：重建但不叠速
     if (shouldLoad(DreamConfig.effects_universe_mode))            loadFromBases('fx-universe',['js/effects/universe','effects/universe']);
     if (shouldLoad(DreamConfig.effects_circle_magic_mode))        loadFromBases('fx-circle',  ['js/effects/circleMagic','effects/circleMagic']);
     if (shouldLoad(DreamConfig.effects_quantum_silk_thread_mode)) loadFromBases('fx-quantum', ['js/effects/quantum','effects/quantum']);
@@ -964,7 +908,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   window.addEventListener('pjax:complete', ()=>{ syncNightClass(); initAll(); });
   window.addEventListener('hao:mode-change', ()=>{
     cleanEffectLayers();
-    initCanvasEffects();   // 每次切换都会重建雪花，但不会越切越快
+    initCanvasEffects();   // 每次切换：先清旧区间，再重建新雪花 → 速度恒定
   });
 
   try{
