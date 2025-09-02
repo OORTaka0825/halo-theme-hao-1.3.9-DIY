@@ -752,55 +752,69 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     })();
     </script>
 
-    <!-- 统一特效桥 v2.6（自动探测 /themes/<id>/assets 基础路径） -->
+    <!-- DIY × PLUS 特效与光标一体化 Loader · v12-merge -->
 <script th:inline="javascript">
 (function () {
-  var version = '[[${theme.spec.version}]]';
-  var rawAssets = '[[${assets_link}]]' || '';
+  /* ================= 基础变量 ================= */
+  const THEME_VER  = /*[[${theme.spec.version}]]*/ '';
+  const RAW_ASSETS = /*[[${assets_link}]]*/ '';
 
-  /* ========= 自动探测真实 assets 基础路径 ========= */
-  function detectAssetsBases(){
-    var set = new Set();
-
-    // 1) 模板变量兜底（可能不对，但先收集）
-    if (rawAssets) {
-      var a = rawAssets.replace(/\/+$/,'');
+  /* ============ 自动探测 /themes/<id>/assets ============ */
+  function detectAssetBases() {
+    const set = new Set();
+    if (RAW_ASSETS) {
+      const a = String(RAW_ASSETS).replace(/\/+$/,'');
       set.add(a);
       set.add(a + '/assets');
     }
-
-    // 2) 从 head 里已存在的主题资源推断 /themes/<id>/assets
-    var nodes = document.querySelectorAll('link[href*="/themes/"],script[src*="/themes/"]');
-    nodes.forEach(function(n){
-      var url = n.getAttribute('href') || n.getAttribute('src') || '';
-      // 先找已经带 /assets/ 的
-      var m1 = url.match(/(\/themes\/[^\/]+)\/assets\//);
+    // 从已加载的主题 CSS/JS 推断
+    document.querySelectorAll('link[href*="/themes/"],script[src*="/themes/"]').forEach(n=>{
+      const url = n.getAttribute('href') || n.getAttribute('src') || '';
+      const m1 = url.match(/(\/themes\/[^/]+)\/assets\//);
       if (m1 && m1[1]) set.add(m1[1] + '/assets');
-      // 再找只到 /themes/<id>/ 的
-      var m2 = url.match(/(\/themes\/[^\/]+)\//);
+      const m2 = url.match(/(\/themes\/[^/]+)\//);
       if (m2 && m2[1]) set.add(m2[1] + '/assets');
     });
-
-    // 3) 兜底：把页面上任何出现的 /themes/<id>/assets 作为候选
-    var html = document.documentElement.outerHTML;
-    var re = /\/themes\/([^\/"']+)\/assets\//g, m;
-    while ((m = re.exec(html)) !== null) {
-      set.add('/themes/' + m[1] + '/assets');
-    }
-
-    // 4) 去重并输出数组，优先含 /assets 的项
-    return Array.from(set).filter(Boolean);
+    const arr = Array.from(set).filter(Boolean);
+    return arr.length ? arr : ['/themes/halo-theme-hao/assets']; // 兜底
   }
+  const ASSET_BASES = detectAssetBases();
 
-  var ASSET_BASES = detectAssetsBases();
-  // 如果还是什么都没探到，最后再硬塞两个常见候选，避免卡死
-  if (!ASSET_BASES.length) ASSET_BASES = ['/themes/theme-hao/assets','/themes/halo-theme-hao-1.3.9-DIY/assets'];
+  /* ============ 读取配置（enhance 优先，style 兜底） ============ */
+  // 先取一份 enhance 值
+  const _e = {
+    cursor_style: /*[[${theme.config.enhance.cursor_style}]]*/ null,
+    cursor_move:  /*[[${theme.config.enhance.cursor_move}]]*/ null,
+    cursor_click: /*[[${theme.config.enhance.cursor_click}]]*/ null,
 
-  /* ========= 读取配置（enhance 优先，style 兜底） ========= */
-  function gv(pathEnhance, pathStyle){
-    var a = '[[${' + pathEnhance + '}]]', b = '[[${' + pathStyle + '}]]';
-    return a || b || '';
-  }
+    effects_lantern_mode:             /*[[${theme.config.enhance.effects_lantern_mode}]]*/ null,
+    effects_sakura_mode:              /*[[${theme.config.enhance.effects_sakura_mode}]]*/ null,
+    effects_snowflake_mode:           /*[[${theme.config.enhance.effects_snowflake_mode}]]*/ null,
+    effects_universe_mode:            /*[[${theme.config.enhance.effects_universe_mode}]]*/ null,
+    effects_circle_magic_mode:        /*[[${theme.config.enhance.effects_circle_magic_mode}]]*/ null,
+    effects_quantum_silk_thread_mode: /*[[${theme.config.enhance.effects_quantum_silk_thread_mode}]]*/ null,
+
+    effects_lantern_left:  /*[[${theme.config.enhance.effects_lantern.effects_lantern_left}]]*/ null,
+    effects_lantern_right: /*[[${theme.config.enhance.effects_lantern.effects_lantern_right}]]*/ null
+  };
+  // 再取一份 style 值
+  const _s = {
+    cursor_style: /*[[${theme.config.style.cursor_style}]]*/ null,
+    cursor_move:  /*[[${theme.config.style.cursor_move}]]*/ null,
+    cursor_click: /*[[${theme.config.style.cursor_click}]]*/ null,
+
+    effects_lantern_mode:             /*[[${theme.config.style.effects_lantern_mode}]]*/ null,
+    effects_sakura_mode:              /*[[${theme.config.style.effects_sakura_mode}]]*/ null,
+    effects_snowflake_mode:           /*[[${theme.config.style.effects_snowflake_mode}]]*/ null,
+    effects_universe_mode:            /*[[${theme.config.style.effects_universe_mode}]]*/ null,
+    effects_circle_magic_mode:        /*[[${theme.config.style.effects_circle_magic_mode}]]*/ null,
+    effects_quantum_silk_thread_mode: /*[[${theme.config.style.effects_quantum_silk_thread_mode}]]*/ null,
+
+    effects_lantern_left:  /*[[${theme.config.style.effects_lantern.effects_lantern_left}]]*/ null,
+    effects_lantern_right: /*[[${theme.config.style.effects_lantern.effects_lantern_right}]]*/ null
+  };
+  // 选取：优先 enhance -> 回退 style -> 默认
+  function pick(a, b, defVal) { return (a || b || defVal); }
   function normalizeMode(m){
     if (!m || m==='none') return '';
     if (m==='light') return 'day';
@@ -808,143 +822,124 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     return m; // 已是 day/night/all
   }
 
-  var cfg = {
-    cursor_style: gv('theme.config.enhance.cursor_style','theme.config.style.cursor_style'),
-    cursor_move:  gv('theme.config.enhance.cursor_move','theme.config.style.cursor_move'),
-    cursor_click: gv('theme.config.enhance.cursor_click','theme.config.style.cursor_click'),
+  const CFG = {
+    cursor_style: pick(_e.cursor_style, _s.cursor_style, 'none'),
+    cursor_move:  pick(_e.cursor_move,  _s.cursor_move,  'none'),
+    cursor_click: pick(_e.cursor_click, _s.cursor_click, 'none'),
 
-    effects_lantern_mode:             gv('theme.config.enhance.effects_lantern_mode','theme.config.style.effects_lantern_mode'),
-    effects_sakura_mode:              gv('theme.config.enhance.effects_sakura_mode','theme.config.style.effects_sakura_mode'),
-    effects_snowflake_mode:           gv('theme.config.enhance.effects_snowflake_mode','theme.config.style.effects_snowflake_mode'),
-    effects_universe_mode:            gv('theme.config.enhance.effects_universe_mode','theme.config.style.effects_universe_mode'),
-    effects_circle_magic_mode:        gv('theme.config.enhance.effects_circle_magic_mode','theme.config.style.effects_circle_magic_mode'),
-    effects_quantum_silk_thread_mode: gv('theme.config.enhance.effects_quantum_silk_thread_mode','theme.config.style.effects_quantum_silk_thread_mode'),
+    effects_lantern_mode:             normalizeMode(pick(_e.effects_lantern_mode,             _s.effects_lantern_mode,             'none')),
+    effects_sakura_mode:              normalizeMode(pick(_e.effects_sakura_mode,              _s.effects_sakura_mode,              'none')),
+    effects_snowflake_mode:           normalizeMode(pick(_e.effects_snowflake_mode,           _s.effects_snowflake_mode,           'none')),
+    effects_universe_mode:            normalizeMode(pick(_e.effects_universe_mode,            _s.effects_universe_mode,            'none')),
+    effects_circle_magic_mode:        normalizeMode(pick(_e.effects_circle_magic_mode,        _s.effects_circle_magic_mode,        'none')),
+    effects_quantum_silk_thread_mode: normalizeMode(pick(_e.effects_quantum_silk_thread_mode, _s.effects_quantum_silk_thread_mode, 'none')),
 
-    effects_lantern_left:  gv('theme.config.enhance.effects_lantern.effects_lantern_left','theme.config.style.effects_lantern.effects_lantern_left'),
-    effects_lantern_right: gv('theme.config.enhance.effects_lantern.effects_lantern_right','theme.config.style.effects_lantern.effects_lantern_right')
+    effects_lantern_left:  pick(_e.effects_lantern_left,  _s.effects_lantern_left,  ''),
+    effects_lantern_right: pick(_e.effects_lantern_right, _s.effects_lantern_right, '')
   };
 
-  var DreamConfig = window.DreamConfig || (window.DreamConfig = {});
-  DreamConfig.theme_version = version;
-  DreamConfig.cursor_style = (cfg.cursor_style && cfg.cursor_style!=='none') ? cfg.cursor_style : '';
-  DreamConfig.cursor_move  = (cfg.cursor_move  && cfg.cursor_move  !=='none') ? cfg.cursor_move  : '';
-  DreamConfig.cursor_click = (cfg.cursor_click && cfg.cursor_click !=='none') ? cfg.cursor_click : '';
-
-  DreamConfig.effects_lantern_mode             = normalizeMode(cfg.effects_lantern_mode);
-  DreamConfig.effects_sakura_mode              = normalizeMode(cfg.effects_sakura_mode);
-  DreamConfig.effects_snowflake_mode           = normalizeMode(cfg.effects_snowflake_mode);
-  DreamConfig.effects_universe_mode            = normalizeMode(cfg.effects_universe_mode);
-  DreamConfig.effects_circle_magic_mode        = normalizeMode(cfg.effects_circle_magic_mode);
-  DreamConfig.effects_quantum_silk_thread_mode = normalizeMode(cfg.effects_quantum_silk_thread_mode);
-
-  DreamConfig.effects_lantern_left  = cfg.effects_lantern_left  || '';
-  DreamConfig.effects_lantern_right = cfg.effects_lantern_right || '';
-
-  /* ========= 夜间类兼容 ========= */
+  /* ============ 明暗模式兼容（DIY: data-theme=dark → .night） ============ */
   function syncNightClass(){
-    var html = document.documentElement;
-    var dark = html.getAttribute('data-theme')==='dark';
+    const html = document.documentElement;
+    const dark = html.getAttribute('data-theme') === 'dark';
     html.classList.toggle('night', dark);
-    window.specialEfficacyScheme = dark ? 'dark':'light';
+    window.specialEfficacyScheme = dark ? 'dark' : 'light';
   }
   syncNightClass();
   new MutationObserver(function(){
-    var o = document.documentElement.classList.contains('night');
+    const was = document.documentElement.classList.contains('night');
     syncNightClass();
-    var n = document.documentElement.classList.contains('night');
-    if (o!==n) window.dispatchEvent(new Event('hao:mode-change'));
-  }).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme','class']});
+    const now = document.documentElement.classList.contains('night');
+    if (was !== now) window.dispatchEvent(new Event('hao:mode-change'));
+  }).observe(document.documentElement, { attributes:true, attributeFilter:['data-theme','class'] });
 
-  /* ========= 脚本加载：遍历所有候选 base，直到成功 ========= */
-  function loadWithBases(id, relPathList){
+  /* ============ 脚本加载（遍历所有 base × 多路径） ============ */
+  function loadFromBases(id, relList){
     if (document.getElementById(id)) return;
-    var cand = [];
-    // 所有 base × 所有相对路径
-    ASSET_BASES.forEach(function(base){
-      relPathList.forEach(function(rp){
-        // 同时尝试 min 与非 min
-        cand.push(base + '/' + rp.replace(/\.js$/,'') + '.min.js');
-        cand.push(base + '/' + rp.replace(/\.js$/,'') + '.js');
+    const cand = [];
+    ASSET_BASES.forEach(base => {
+      relList.forEach(rp => {
+        const p = (base.replace(/\/+$/,'') + '/' + rp.replace(/^\/+/,'')).replace(/\/{2,}/g,'/');
+        cand.push(p.replace(/\.js$/,'') + '.min.js');
+        cand.push(p.replace(/\.js$/,'') + '.js');
       });
     });
-
-    var i=0, s=document.createElement('script'); s.defer=true; s.id=id;
+    let i = 0;
+    let s = document.createElement('script');
+    s.defer = true; s.id = id;
     function tryNext(){
-      if (i>=cand.length) return;
-      s.src = cand[i++] + '?mew=' + version;
+      if (i >= cand.length) return;
+      s.src = cand[i++] + '?v=' + encodeURIComponent(THEME_VER || '');
       document.body.appendChild(s);
     }
-    s.onerror=function(){ s.remove(); s=document.createElement('script'); s.defer=true; s.id=id; tryNext(); };
+    s.onerror = function(){ s.remove(); s = document.createElement('script'); s.defer = true; s.id = id; tryNext(); };
     tryNext();
   }
 
   function isMobile(){ return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent); }
 
-  /* ========= 光标风格（多命名/大小写/.cur/.ani 全兜底） ========= */
+  /* ============ 鼠标风格（精准文件表，减少 404） ============ */
   function applyCursorStyle(){
-    var cs = DreamConfig.cursor_style;
-    if (!cs) return;
+    const pack = CFG.cursor_style;
+    if (!pack || pack === 'none') return;
 
-    // 组装多个 base，以第一个能命中的为准
-    var bases = ASSET_BASES.map(function(b){ return b + '/cursor/' + cs; });
+    // 常用包的精确文件映射（可按需补充）
+    const MAP = {
+      breeze:     { default:['Arrow.cur'],        pointer:['Hand.cur'],         text:['IBeam.cur'] },
+      overwatch:  { default:['cross.cur'],        pointer:['link.cur'],         text:['handwriting.cur'] },
+      black_cat:  { default:['normal.cur'],       pointer:['Alternative.cur'],  text:['Escritura a Mano.cur'] }
+    };
+    const files = MAP[pack] || {
+      default:['Arrow.cur','Normal.cur'],
+      pointer:['Hand.cur','Link.cur'],
+      text:['IBeam.cur','Text.cur']
+    };
 
-    function build(names){
-      var list=[];
-      bases.forEach(function(base){
-        names.forEach(function(n){
-          ['cur','ani'].forEach(function(ext){
-            list.push("url('"+base+"/"+n+"."+ext+"')");
-            list.push("url('"+base+"/"+n.toLowerCase()+"."+ext+"')");
-            list.push("url('"+base+"/"+n.toUpperCase()+"."+ext+"')");
-          });
-        });
-      });
-      return list.join(', ') + ', auto';
-    }
+    // 组装所有 base 的候选 URL（有空格的文件名要 encodeURI）
+    const bases = ASSET_BASES.map(b => (b.replace(/\/+$/,'') + '/cursor/' + pack).replace(/\/{2,}/g,'/'));
+    const toUrls = list => {
+      const u = [];
+      bases.forEach(base => list.forEach(name => u.push("url('" + encodeURI(base + '/' + name) + "')")));
+      return u.join(',') + ', auto';
+    };
 
-    var vDefault = build(['Arrow','Normal','Cross','Default']);
-    var vPointer = build(['Hand','Link','Pointer','Alternative','Select']);
-    var vText    = build(['IBeam','Text','Handwriting','Escritura a Mano']); // black_cat 里这个名字
+    const css = [
+      'html, body { cursor: ' + toUrls(files.default) + ' !important; }',
+      'a, button, [role="button"], input[type=button], input[type=submit] { cursor: ' + toUrls(files.pointer) + ' !important; }',
+      'input[type=text], input[type=search], textarea, .text, .textbox, .input { cursor: ' + toUrls(files.text) + ' !important; }'
+    ].join('\n');
 
-    var root = document.documentElement;
-    root.style.setProperty('--cursor-default', vDefault);
-    root.style.setProperty('--cursor-pointer', vPointer);
-    root.style.setProperty('--cursor-text',    vText);
-
-    var css = document.getElementById('hao-cursor-style');
-    if (!css){
-      css = document.createElement('style');
-      css.id = 'hao-cursor-style';
-      css.textContent = 'html,body{cursor:var(--cursor-default)}a,button,[role="button"],input[type=submit]{cursor:var(--cursor-pointer)}pre,code,textarea,input[type=text],input[type=search]{cursor:var(--cursor-text)}';
-      document.head.appendChild(css);
-    }
+    let st = document.getElementById('hao-cursor-style');
+    if (!st) { st = document.createElement('style'); st.id = 'hao-cursor-style'; document.head.appendChild(st); }
+    st.textContent = css;
   }
 
-  /* ========= 清理 & 初始化 ========= */
+  /* ============ 清理与初始化 ============ */
   function cleanEffectLayers(){
     document.querySelectorAll('.canvas_effects,#universe_canvas,#quantum_c_n,.j-china-lantern,[id^=sakura],#Snow')
-      .forEach(function(el){ try{ el.remove(); }catch(e){} });
+      .forEach(el => { try{ el.remove(); }catch(e){} });
   }
 
   function initCursorEffects(){
     if (isMobile()) return;
-    if (DreamConfig.cursor_move){
-      loadWithBases('cursor-move', ['js/cursor/move/'  + DreamConfig.cursor_move]);
+    if (CFG.cursor_move && CFG.cursor_move !== 'none') {
+      loadFromBases('cursor-move',  ['js/cursor/move/'  + CFG.cursor_move]);
     }
-    if (DreamConfig.cursor_click){
-      loadWithBases('cursor-click',['js/cursor/click/' + DreamConfig.cursor_click]);
+    if (CFG.cursor_click && CFG.cursor_click !== 'none') {
+      loadFromBases('cursor-click', ['js/cursor/click/' + CFG.cursor_click]);
     }
   }
 
   function initCanvasEffects(){
     if (isMobile()) return;
     function on(m){ return !!m; }
-    if (on(DreamConfig.effects_lantern_mode))  loadWithBases('fx-lantern',['js/effects/lantern','effects/lantern']);
-    if (on(DreamConfig.effects_sakura_mode))   loadWithBases('fx-sakura', ['js/effects/sakura','effects/sakura']);
-    if (on(DreamConfig.effects_snowflake_mode))loadWithBases('fx-snow',   ['js/effects/snowflake','effects/snowflake']);
-    if (on(DreamConfig.effects_universe_mode)) loadWithBases('fx-universe',['js/effects/universe','effects/universe']);
-    if (on(DreamConfig.effects_circle_magic_mode)) loadWithBases('fx-circle',['js/effects/circleMagic','effects/circleMagic']);
-    if (on(DreamConfig.effects_quantum_silk_thread_mode)) loadWithBases('fx-quantum',['js/effects/quantum','effects/quantum']);
+
+    if (on(CFG.effects_lantern_mode))             loadFromBases('fx-lantern', ['js/effects/lantern','effects/lantern']);
+    if (on(CFG.effects_sakura_mode))              loadFromBases('fx-sakura',  ['js/effects/sakura','effects/sakura']);
+    if (on(CFG.effects_snowflake_mode))           loadFromBases('fx-snow',    ['js/effects/snowflake','effects/snowflake']);
+    if (on(CFG.effects_universe_mode))            loadFromBases('fx-universe',['js/effects/universe','effects/universe']);
+    if (on(CFG.effects_circle_magic_mode))        loadFromBases('fx-circle',  ['js/effects/circleMagic','effects/circleMagic']);
+    if (on(CFG.effects_quantum_silk_thread_mode)) loadFromBases('fx-quantum', ['js/effects/quantum','effects/quantum']);
   }
 
   function initAll(){
@@ -954,19 +949,19 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   }
 
   document.addEventListener('DOMContentLoaded', initAll);
-  window.addEventListener('pjax:complete', function(){ syncNightClass(); initAll(); });
-  window.addEventListener('hao:mode-change', function(){
+  window.addEventListener('pjax:complete', () => { syncNightClass(); initAll(); });
+  window.addEventListener('hao:mode-change', () => {
     cleanEffectLayers();
-    ['fx-sakura','fx-snow','fx-universe','fx-circle','fx-quantum','fx-lantern'].forEach(function(id){
-      var s = document.getElementById(id); if (s) s.remove();
+    ['fx-sakura','fx-snow','fx-universe','fx-circle','fx-quantum','fx-lantern'].forEach(id => {
+      const s = document.getElementById(id); if (s) s.remove();
     });
     initCanvasEffects();
   });
 
-  try{
+  try {
     console.log('[Hao Effects bases]', ASSET_BASES);
-    console.log('[Hao Effects cfg]', JSON.parse(JSON.stringify(DreamConfig)));
-  }catch(e){}
+    console.log('[Hao Effects cfg]', JSON.parse(JSON.stringify(CFG)));
+  } catch (e) {}
 })();
 </script>
 
