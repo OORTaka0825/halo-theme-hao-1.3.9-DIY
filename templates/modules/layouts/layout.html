@@ -752,7 +752,8 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     })();
     </script>
 
-    <!-- ===== DIY: Plus 全部接线（v14：不再误伤鼠标；仅按关键词标记；切换即时显隐） ===== -->
+    
+<!-- ===== DIY: Plus 全部接线（v15：严格鼠标白名单 + 轨迹窗口全屏捕获 + 残留画布清扫） ===== -->
 <script th:inline="javascript">
   const ASSETS = /*[[${assets_link}]]*/ '/assets';
   const THEME_VER = /*[[${theme_version}]]*/ '';
@@ -828,21 +829,38 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   const LOADED = {}; // 记录是否已加载过脚本（每个只加载一次）
   const TRACK  = {}; // key -> {until}
 
-  // ---- 动态标记新增节点（仅按关键词，不再用“全屏 canvas”启发式；避免误伤鼠标画布） ----
-  const MOUSE_EXCLUDE = ['mouse','cursor','trail','click','firework','ribbon','ribbons','spark','sparkle','particle','cursor-effects','canvascursor'];
+  // ---- 鼠标白名单（永不干预） ----
+  const MOUSE_EXCLUDE = ['mouse','cursor','trail','click','firework','fireworks','ribbon','ribbons','spark','sparkle','particle','particles','cursor-effects','canvascursor'];
+
   function nameHit(el, words){
     const id=(el.id||'').toLowerCase(), cls=(el.className||'').toString().toLowerCase();
     return words.some(k=> id.includes(k) || cls.includes(k) );
   }
+
+  // ---- 动态标记新增节点 ----
   function startTrack(key,ms){ TRACK[key]={until:Date.now()+(ms||6000)}; }
   function tagIfMatch(el, key){
     if(!el || el.dataset.diyEffect) return;
+    el.dataset.diyBorn = Date.now();
     // 鼠标相关排除
     if (nameHit(el, MOUSE_EXCLUDE)) return;
-    // 仅按该效果的关键词命中
+    // 关键词命中
     if (nameHit(el, EFFECTS[key].keywords)) {
       el.dataset.diyEffect = key;
       try{ el.style.pointerEvents='none'; }catch(e){}
+      return;
+    }
+    // 在轨迹窗口里，放开“大画布捕获”，但严格排除鼠标相关
+    const tk=TRACK[key];
+    if (tk && tk.until > Date.now()) {
+      if (el.tagName==='CANVAS') {
+        const r = el.getBoundingClientRect();
+        const big = r.width>=window.innerWidth*0.6 && r.height>=window.innerHeight*0.5;
+        if (big) {
+          el.dataset.diyEffect = key;
+          try{ el.style.pointerEvents='none'; }catch(e){}
+        }
+      }
     }
   }
   const bodyObserver=new MutationObserver((muts)=>{
@@ -850,6 +868,8 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     muts.forEach(m=>{
       m.addedNodes && m.addedNodes.forEach(node=>{
         if(!(node instanceof HTMLElement) && !(node instanceof HTMLCanvasElement)) return;
+        // 给所有新增的 canvas 记上时间戳（用于后续 sweep）
+        if (node.tagName==='CANVAS') node.dataset && (node.dataset.diyBorn = Date.now());
         Object.keys(TRACK).forEach(key=>{
           const tk=TRACK[key]; if(!tk || tk.until<now) return;
           tagIfMatch(node,key);
@@ -870,6 +890,23 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     return mode==='all' || (mode==='light'&&scheme==='light') || (mode==='dark'&&scheme==='dark');
   }
 
+  // ---- 针对老残留的大画布做一次清扫（不会影响鼠标） ----
+  function sweepOldUntaggedCanvases(){
+    const cutoff = Date.now() - 1200; // 只清 1.2s 之前的老画布
+    document.querySelectorAll('body > canvas').forEach(cv=>{
+      const born = Number(cv.dataset && cv.dataset.diyBorn || 0);
+      if (born && born > cutoff) return; // 新的先不动，等待打标签
+      if (nameHit(cv, MOUSE_EXCLUDE)) return; // 鼠标画布不动
+      if (cv.dataset && cv.dataset.diyEffect) return; // 已标记的不动
+      const r = cv.getBoundingClientRect();
+      const big = r.width>=window.innerWidth*0.6 && r.height>=window.innerHeight*0.5;
+      if (big) {
+        // 仅隐藏（不删除），避免脚本重复实例导致“加速”
+        cv.style.display = 'none';
+      }
+    });
+  }
+
   function updateVisibilityAndLoadIfNeeded(){
     syncScheme();
     const scheme = getCurrentScheme();
@@ -879,7 +916,6 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
       const nodes = getNodes(key);
 
       if (mode==='none') {
-        // 不显示：仅隐藏（不删除）
         nodes.forEach(el=>{ el.style.display='none'; });
         return;
       }
@@ -895,11 +931,16 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
         nodes.forEach(el=>{ el.style.display='none'; });
       }
     });
+
+    // 切换后延迟做一次“老残留”清扫，避免上一主题留下的未标记大画布卡住
+    setTimeout(sweepOldUntaggedCanvases, 50);
+    setTimeout(sweepOldUntaggedCanvases, 300);
+    setTimeout(sweepOldUntaggedCanvases, 800);
   }
 
   // ---------- 主入口 ----------
-  if (!window.__DIY_ALL_EFFECTS_V14__) {
-    window.__DIY_ALL_EFFECTS_V14__ = true;
+  if (!window.__DIY_ALL_EFFECTS_V15__) {
+    window.__DIY_ALL_EFFECTS_V15__ = true;
     whenReady(function(){
       // DreamConfig（供脚本内部读取）
       window.DreamConfig = window.DreamConfig || {};
@@ -910,7 +951,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
       DreamConfig.effects_circle_magic_mode  = toDayNight(MODES.circle);
       DreamConfig.effects_quantum_silk_thread_mode = toDayNight(MODES.quantum);
 
-      // 鼠标：与明暗无关，只初始化一次，也永不隐藏/清理
+      // 鼠标：与明暗无关，只初始化一次；我们从不隐藏/清理鼠标画布
       if (CFG.cursor_style && CFG.cursor_style !== 'none') {
         var pack=CFG.cursor_style, base=ASSETS+'/cursor/'+pack+'/';
         function urlq(n){ try{return 'url(\"'+encodeURI(base+n)+'\")'}catch(e){return 'url('+base+n+')'} }
@@ -925,22 +966,19 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
       if (CFG.cursor_move  && CFG.cursor_move  !== 'none') loadJS(ASSETS + '/js/cursor/move/'  + CFG.cursor_move  + '.min.js');
       if (CFG.cursor_click && CFG.cursor_click !== 'none') loadJS(ASSETS + '/js/cursor/click/' + CFG.cursor_click + '.min.js');
 
-      // 初始化与监听（加入轮询兜底，确保第三方切换也能捕捉到）
+      // 初始化与监听（加兜底轮询）
       updateVisibilityAndLoadIfNeeded();
       const fire = () => { requestAnimationFrame(updateVisibilityAndLoadIfNeeded); };
       const mo = new MutationObserver(fire);
       mo.observe(document.documentElement, {attributes:true, attributeFilter:['class','data-theme','theme']});
       window.addEventListener('storage', fire);
-      // 兜底 polling
       let last = getCurrentScheme();
-      setInterval(()=>{
-        const now = getCurrentScheme();
-        if (now !== last) { last = now; fire(); }
-      }, 500);
+      setInterval(()=>{ const now=getCurrentScheme(); if(now!==last){ last=now; fire(); } }, 500);
     });
   }
 </script>
-<!-- ===== /DIY: Plus 全部接线 v14 ===== -->
+<!-- ===== /DIY: Plus 全部接线 v15 ===== -->
+
 
 
 
