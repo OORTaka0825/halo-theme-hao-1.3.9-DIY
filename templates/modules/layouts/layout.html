@@ -752,7 +752,8 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     })();
     </script>
 
-    <!-- ===== DIY: Plus 全部接线（v12：强力清理 Canvas + 每次切换强制重建；鼠标不受明暗） ===== -->
+    
+<!-- ===== DIY: Plus 全部接线（v12-mousefix：仅修“鼠标移动/点击”两项，不改其它逻辑） ===== -->
 <script th:inline="javascript">
   const ASSETS = /*[[${assets_link}]]*/ '/assets';
   const THEME_VER = /*[[${theme_version}]]*/ '';
@@ -808,7 +809,39 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   }
   function loadJS(src){ const s=document.createElement('script'); s.src=src+THEME_VER+'&r='+(Math.random().toString(36).slice(2)); s.defer=true; document.body.appendChild(s); }
 
-  // effects meta
+  // ====== 仅为“鼠标移动/点击”增加的标记与保护 ======
+  const MOUSE_HINTS = ['mouse','cursor','trail','move','ribbon','ribbons','cursor-effects','canvascursor'];
+  const CLICK_HINTS = ['click','firework','fireworks','spark','sparkle','particle','particles'];
+
+  // 跟踪窗口：加载脚本后的短时间 & 用户操作后的短时间
+  const mouseTrack = { moveUntil: 0, clickUntil: 0 };
+  function beginMoveTrack(ms){ mouseTrack.moveUntil = Date.now() + (ms||8000); }
+  function beginClickTrack(ms){ mouseTrack.clickUntil = Date.now() + (ms||600); }
+
+  // 用户操作触发“点击窗口”
+  document.addEventListener('mousedown', ()=>beginClickTrack(600), true);
+  document.addEventListener('touchstart', ()=>beginClickTrack(800), true);
+  document.addEventListener('mousemove', ()=>{ if (!mouseTrack.moveUntil) beginMoveTrack(1200); }, {once:true, capture:true});
+
+  // 观察新增节点：在追踪窗口内或命中关键词的全屏 canvas 标记为鼠标专用
+  const bodyObserver=new MutationObserver((muts)=>{
+    const now=Date.now();
+    muts.forEach(m=>{
+      m.addedNodes && m.addedNodes.forEach(node=>{
+        if(!(node instanceof HTMLCanvasElement)) return;
+        const id=(node.id||'').toLowerCase(), cls=(node.className||'').toString().toLowerCase();
+        const hitMove = MOUSE_HINTS.some(k=>id.includes(k)||cls.includes(k));
+        const hitClick= CLICK_HINTS.some(k=>id.includes(k)||cls.includes(k));
+        const r=node.getBoundingClientRect();
+        const big = r.width>=window.innerWidth*0.5 && r.height>=window.innerHeight*0.3;
+        if ((now < mouseTrack.moveUntil && big) || hitMove) node.dataset.diyMouse = 'move';
+        if ((now < mouseTrack.clickUntil && big) || hitClick) node.dataset.diyMouse = 'click';
+      });
+    });
+  });
+  (function observeBody(){ if(document.body) bodyObserver.observe(document.body,{childList:true,subtree:true}); else document.addEventListener('DOMContentLoaded',observeBody); })();
+
+  // ====== v12 的效果配置（保持原样） ======
   const EFFECTS = {
     lantern:  { file: '/js/effects/lantern.min.js',  keywords: ['lantern'] },
     sakura:   { file: '/js/effects/sakura.min.js',   keywords: ['sakura','cherry','petal'] },
@@ -826,7 +859,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     quantum:  normMode(CFG.effects_quantum_silk_thread_mode),
   };
 
-  // ---- 动态标记新增节点（方便显隐/清理） ----
+  // v12 的打标窗口（用于六个显示模式，不涉及鼠标）
   const TRACK={};
   function startTrack(key,ms){ TRACK[key]={until:Date.now()+(ms||8000)}; }
   function tagIfMatch(el, key){
@@ -841,7 +874,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
       try{ el.style.pointerEvents='none'; }catch(e){}
     }
   }
-  const bodyObserver=new MutationObserver((muts)=>{
+  const effectObserver=new MutationObserver((muts)=>{
     const now=Date.now();
     muts.forEach(m=>{
       m.addedNodes && m.addedNodes.forEach(node=>{
@@ -854,29 +887,22 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
       });
     });
   });
-  function observeBody(){ if(document.body) bodyObserver.observe(document.body,{childList:true,subtree:true}); else document.addEventListener('DOMContentLoaded',observeBody); }
-  observeBody();
+  (function observeEffect(){ if(document.body) effectObserver.observe(document.body,{childList:true,subtree:true}); else document.addEventListener('DOMContentLoaded',observeEffect); })();
 
-  // ---- 获取 / 清理 ----
   function getNodes(key){
     const kw = EFFECTS[key].keywords.join('|');
     const sel = '[data-diy-effect="'+key+'"], body > [id*="'+kw+'"], body > [class*="'+kw+'"]';
     return Array.from(document.querySelectorAll(sel));
   }
-  function purgeEffect(key){
-    // 1) 标签/关键字节点
-    getNodes(key).forEach(el=>{ try{ el.remove(); }catch(e){} });
 
-    // 2) 兜底：超大 Canvas（常见于这些特效），防止漏网
+  // v12 的清理 —— 但不会移除鼠标画布（带 data-diyMouse）
+  function purgeEffect(key){
+    getNodes(key).forEach(el=>{ try{ el.remove(); }catch(e){} });
     document.querySelectorAll('body canvas').forEach(cv=>{
       const r = cv.getBoundingClientRect();
       const huge = r.width>=window.innerWidth*0.6 && r.height>=window.innerHeight*0.4;
-      if (huge && !cv.closest('[data-keep-canvas]')) {
-        try{ cv.remove(); }catch(e){}
-      }
+      if (huge && !cv.dataset.diyMouse) { try{ cv.remove(); }catch(e){} }
     });
-
-    // 3) 清理可能的 script 标签（强制后续可重建）
     document.querySelectorAll('script[data-diy-effect-script="'+key+'"]').forEach(s=>{ try{s.remove();}catch(e){} });
   }
   function createEffect(key){
@@ -888,7 +914,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     document.body.appendChild(s);
   }
 
-  // ---- 构建（每次切换都“强制清理 + 需要则重建”） ----
+  // v12 的切换流程（保持原样）
   let rebuildLock = false;
   function applyVisibilityAndRebuild(){
     if (rebuildLock) return;
@@ -900,39 +926,20 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 
       Object.keys(EFFECTS).forEach(key=>{
         const mode = MODES[key];
-        if (mode==='none') {
-          purgeEffect(key);
-          return;
-        }
-        if (shouldShow(mode)) {
-          // 目标需要显示：先清理旧的，再重建，避免“第三次第四次不动”
-          purgeEffect(key);
-          createEffect(key);
-        } else {
-          // 不需要：彻底清理
-          purgeEffect(key);
-        }
+        if (mode==='none') { purgeEffect(key); return; }
+        if (shouldShow(mode)) { purgeEffect(key); createEffect(key); }
+        else { purgeEffect(key); }
       });
     } finally {
-      // 多次切换时节流一下，避免重复加载
       setTimeout(()=>{ rebuildLock=false; }, 100);
     }
   }
 
   // ---------- 主入口 ----------
-  if (!window.__DIY_ALL_EFFECTS_V12__) {
-    window.__DIY_ALL_EFFECTS_V12__ = true;
+  if (!window.__DIY_ALL_EFFECTS_V12_MOUSEFIX_BOTH__) {
+    window.__DIY_ALL_EFFECTS_V12_MOUSEFIX_BOTH__ = true;
     whenReady(function(){
-      // DreamConfig 供脚本内部读取（day/night/all/none）
-      window.DreamConfig = window.DreamConfig || {};
-      DreamConfig.effects_lantern_mode       = toDayNight(MODES.lantern);
-      DreamConfig.effects_sakura_mode        = toDayNight(MODES.sakura);
-      DreamConfig.effects_snowflake_mode     = toDayNight(MODES.snow);
-      DreamConfig.effects_universe_mode      = toDayNight(MODES.universe);
-      DreamConfig.effects_circle_magic_mode  = toDayNight(MODES.circle);
-      DreamConfig.effects_quantum_silk_thread_mode = toDayNight(MODES.quantum);
-
-      // 鼠标（与明暗无关）
+      // 鼠标（单独处理：加载后开启追踪窗口，便于给画布打上 data-diyMouse 标签）
       if (CFG.cursor_style && CFG.cursor_style !== 'none') {
         var pack=CFG.cursor_style, base=ASSETS+'/cursor/'+pack+'/';
         function urlq(n){ try{return 'url(\"'+encodeURI(base+n)+'\")'}catch(e){return 'url('+base+n+')'} }
@@ -940,17 +947,24 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
         var css=[
           'html, body { cursor: '+urls(['arrow.cur','Arrow.cur','Normal.cur','normal.cur','Arrow.ani','Normal.ani'])+', auto !important; }',
           'a, button, [role=\"button\"], input[type=button], input[type=submit] { cursor: '+urls(['hand.cur','Hand.cur','link.cur','Link.cur','hand.ani','Link.ani','Alternate Select.cur','alternate.cur'])+', pointer !important; }',
-          'input[type=text], input[type=search], textarea, .text, .textbox, .input { cursor: '+urls(['ibeam.cur','IBeam.cur','beam.cur','Beam.cur','text.cur','Text.cur','ibeam.ani','Escritura a Mano.cur','Handwriting.cur','texto.cur'])+', text !important; }'
+          'input[type=text], input[type=search], textarea, .text, .textbox, .input { cursor: '+urls(['ibeam.cur','IBeam.cur','beam.cur','Beam.cur','text.cur','Text.cur','ibeam.ani'])+', text !important; }'
         ].join('\\n');
         var st=document.createElement('style'); st.textContent=css; document.head.appendChild(st);
       }
-      if (CFG.cursor_move  && CFG.cursor_move  !== 'none') loadJS(ASSETS + '/js/cursor/move/'  + CFG.cursor_move  + '.min.js');
-      if (CFG.cursor_click && CFG.cursor_click !== 'none') loadJS(ASSETS + '/js/cursor/click/' + CFG.cursor_click + '.min.js');
+      if (CFG.cursor_move  && CFG.cursor_move  !== 'none') { beginMoveTrack(8000); loadJS(ASSETS + '/js/cursor/move/'  + CFG.cursor_move  + '.min.js'); }
+      if (CFG.cursor_click && CFG.cursor_click !== 'none') { beginClickTrack(1200); loadJS(ASSETS + '/js/cursor/click/' + CFG.cursor_click + '.min.js'); }
 
-      // 初次构建
+      // DreamConfig（供部分脚本读取）
+      window.DreamConfig = window.DreamConfig || {};
+      window.DreamConfig.effects_lantern_mode       = toDayNight(MODES.lantern);
+      window.DreamConfig.effects_sakura_mode        = toDayNight(MODES.sakura);
+      window.DreamConfig.effects_snowflake_mode     = toDayNight(MODES.snow);
+      window.DreamConfig.effects_universe_mode      = toDayNight(MODES.universe);
+      window.DreamConfig.effects_circle_magic_mode  = toDayNight(MODES.circle);
+      window.DreamConfig.effects_quantum_silk_thread_mode = toDayNight(MODES.quantum);
+
+      // 初次与监听（保持 v12 ）
       applyVisibilityAndRebuild();
-
-      // 监听主题切换：每次都“强制清理 + 重建匹配”的效果
       let rafToken = 0;
       const fire = ()=>{ cancelAnimationFrame(rafToken); rafToken = requestAnimationFrame(applyVisibilityAndRebuild); };
       const mo = new MutationObserver(fire);
@@ -959,7 +973,8 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     });
   }
 </script>
-<!-- ===== /DIY: Plus 全部接线 v12 ===== -->
+<!-- ===== /DIY: Plus 全部接线 v12-mousefix ===== -->
+
 
 
 
