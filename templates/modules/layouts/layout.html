@@ -790,90 +790,83 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     /* 只替换这个函数，其它代码一律不动 */
     /* 只替换这个函数，其它代码一律不动 */
     /* 只替换这个函数，其它代码一律不动（V5：恢复稳定 CSS 方案；使用 assets_link 基准 + 精确映射） */
-    /* 只替换这个函数，其它代码一律不动（Overwatch 专项加强 + .ani 兼容 + contenteditable 选择器） */
+  
+  /* 只替换这个函数，其它代码一律不动（V7：按 PLUS 同名文件精确映射） */
   function applyCursorStyle(){
     const pack = (window.DreamConfig && window.DreamConfig.cursor_style) || '';
     if (!pack || pack === 'none') return;
 
-    // —— 每个包的候选（尽量把最可能命中的放前面） ——
+    // 1) 基于 PLUS 主题实际文件名的精确映射（默认/指针/文本）
     const MAP = {
-      OwO:             { default:['arrow.cur'],                                  pointer:['hand.cur'],                               text:['arrow.cur','hand.cur'] },
-      UwU:             { default:['arrow.cur'],                                  pointer:['hand.cur'],                               text:['arrow.cur','hand.cur'] },
-      mellow:          { default:['arrow.cur'],                                  pointer:['hand.cur'],                               text:['arrow.cur'] },
-      debris:          { default:['arrow.cur'],                                  pointer:['hand.cur'],                               text:['arrow.cur'] },
-      music_cat_01:    { default:['arrow.cur'],                                  pointer:['hand.cur'],                               text:['arrow.cur','hand.cur'] },
-      music_cat_02:    { default:['arrow.cur'],                                  pointer:['hand.cur'],                               text:['arrow.cur','hand.cur'] },
-      water_01:        { default:['arrow.cur'],                                  pointer:['hand.cur'],                               text:['arrow.cur'] },
-      water_02:        { default:['arrow.cur'],                                  pointer:['hand.cur'],                               text:['arrow.cur'] },
+      // 简单类 —— 只有箭头/手
+      OwO:            { default:['arrow.cur'],                   pointer:['hand.cur'],                         text:['arrow.cur'] },
+      UwU:            { default:['arrow.cur'],                   pointer:['hand.cur'],                         text:['arrow.cur'] },
+      mellow:         { default:['arrow.cur'],                   pointer:['hand.cur'],                         text:['arrow.cur'] },
+      debris:         { default:['arrow.cur'],                   pointer:['hand.cur'],                         text:['arrow.cur'] },
+      music_cat_01:   { default:['arrow.cur'],                   pointer:['hand.cur'],                         text:['arrow.cur'] },
+      music_cat_02:   { default:['arrow.cur'],                   pointer:['hand.cur'],                         text:['arrow.cur'] },
+      water_01:       { default:['arrow.cur'],                   pointer:['hand.cur'],                         text:['arrow.cur'] },
+      water_02:       { default:['arrow.cur'],                   pointer:['hand.cur'],                         text:['arrow.cur'] },
 
-      horse:           { default:['arrow.cur'],                                  pointer:['hand.cur','move.cur'],                    text:['beam.cur','text.cur','IBeam.cur','arrow.cur'] },
-      marry:           { default:['arrow.cur'],                                  pointer:['move.cur','hand.cur'],                    text:['beam.cur','IBeam.cur','Text.cur','text.cur'] },
+      horse:          { default:['arrow.cur'],                   pointer:['hand.cur'],                         text:['arrow.cur'] },
+      marry:          { default:['arrow.cur'],                   pointer:['move.cur'],                         text:['beam.cur'] },
 
-      breeze:          { default:['Normal.cur','Default.cur','Arrow.cur','arrow.cur','Normal.ani','Arrow.ani'],
-                         pointer:['Hand.cur','Link.cur','hand.cur','link.cur','Hand.ani','Link.ani'],
-                         text:['IBeam.cur','Text.cur','Handwriting.cur','text.cur','IBeam.ani','Text.ani'] },
+      // breeze（文件名首字母大写）
+      breeze:         { default:['Arrow.cur'],                   pointer:['Hand.cur'],                         text:['IBeam.cur','Handwriting.cur'] },
 
-      // —— Overwatch（守望先锋）专项加强：收全大小写 + .ani + 常见别名 ——
-      overwatch:       { default:[
-                           'cross.cur','Cross.cur','normal.cur','Normal.cur','default.cur','Default.cur','arrow.cur','Arrow.cur',
-                           'cursor.cur','Cursor.cur','move.cur','Move.cur','cross.ani','Cross.ani','Normal.ani','Arrow.ani'
-                         ],
-                         pointer:[
-                           'pointer.cur','Pointer.cur','link.cur','Link.cur','hand.cur','Hand.cur','move.cur','Move.cur',
-                           'pointer.ani','Link.ani','Hand.ani'
-                         ],
-                         text:[
-                           'text.cur','Text.cur','ibeam.cur','IBeam.cur','beam.cur','Beam.cur','Text.ani','IBeam.ani'
-                         ] },
+      // overwatch（全部小写）
+      overwatch:      { default:['cross.cur'],                   pointer:['pointer.cur','link.cur'],           text:['text.cur'] },
 
-      black_cat:       { default:['normal.cur','Normal.cur','arrow.cur'],
-                         pointer:['Alternative.cur','ALTERNATIVE.cur','link.cur','Link.cur','Hand.cur','hand.cur'],
-                         text:['Escritura a Mano.cur','texto.cur','Text.cur','IBeam.cur'] },
+      // black_cat（西语）
+      black_cat:      { default:['normal.cur'],                  pointer:['Alternative.cur'],                  text:['texto.cur','Escritura a Mano.cur'] },
 
-      rainbow_rain:    { default:['Alternative2.cur','Alternative.cur','normal.cur','arrow.cur'],
-                         pointer:['Movee2.cur','Move.cur','Hand.cur','hand.cur'],
-                         text:['texto.cur','Escritura a Mano.cur','Text.cur','text.cur'] },
+      // rainbow_rain（2/2 命名）
+      rainbow_rain:   { default:['Alternative2.cur'],            pointer:['Movee2.cur'],                       text:['texto.cur'] },
     };
 
-    // 兜底（很少用到）：
+    // 2) 兜底（极少用到）：
     const GENERIC = {
-      default: ['Normal.cur','Default.cur','Arrow.cur','arrow.cur','cursor.cur'],
-      pointer: ['Hand.cur','Link.cur','hand.cur','link.cur','pointer.cur','Pointer.cur'],
-      text:    ['IBeam.cur','Text.cur','text.cur','Handwriting.cur','beam.cur','ibeam.cur']
+      default: ['arrow.cur','Normal.cur','Default.cur'],
+      pointer: ['hand.cur','Link.cur','pointer.cur'],
+      text:    ['IBeam.cur','Text.cur','text.cur','beam.cur']
     };
     const files = MAP[pack] || GENERIC;
 
-    // —— 只用 assets_link 作基准 ——
+    // 3) 只用 assets_link 基准，避免串到其他主题
     const raw = /*[[${assets_link}]]*/ '';
     let base = String(raw || '').replace(/\/+$/,'');
     if (base && !/\/assets$/.test(base)) base += '/assets';
-    const bases = [];
-    if (base) {
-      bases.push((base + '/cursor/' + pack).replace(/\/{2,}/g,'/'));
-      bases.push((base + '/cursor').replace(/\/{2,}/g,'/')); // 兜底
-    }
+    const bases = base ? [
+      (base + '/cursor/' + pack).replace(/\/{2,}/g,'/'),
+      (base + '/cursor').replace(/\/{2,}/g,'/')
+    ] : [];
 
-    const toUrls = (list)=>{
+    const toUrls = (list, fallback)=>{
       const urls=[];
       bases.forEach(b=>{
         (list||[]).forEach(name=>{
           urls.push("url('"+ encodeURI(b + '/' + name) +"')");
         });
       });
-      return (urls.length ? urls.join(', ') + ', ' : '') + 'auto';
+      return (urls.length ? urls.join(', ') + ', ' : '') + (fallback || 'auto');
     };
 
-    // —— 注入 CSS（增加 contenteditable 支持文本光标） ——
+    // 用更贴近 PLUS 的选择器集合：
     const css = [
-      'html, body { cursor: ' + toUrls(files.default && files.default.length ? files.default : GENERIC.default) + ' !important; }',
-      'a, button, [role=\"button\"], input[type=button], input[type=submit] { cursor: ' + toUrls(files.pointer && files.pointer.length ? files.pointer : GENERIC.pointer) + ' !important; }',
-      'input[type=text], input[type=search], textarea, [contenteditable=\"true\"], .text, .textbox, .input { cursor: ' + toUrls(files.text && files.text.length ? files.text : GENERIC.text) + ' !important; }'
+      'html, body { cursor: ' + toUrls(files.default && files.default.length ? files.default : GENERIC.default, 'auto') + ' !important; }',
+      'a, button, .expand-done, .navbar-above .navbar-nav .item, .navbar-main .navbar-right [data-title], .twikoo .el-button, .twikoo .tk-action, .main-content figure > figcaption div, .photos .picture-details { cursor: ' + toUrls(files.pointer && files.pointer.length ? files.pointer : GENERIC.pointer, 'pointer') + ' !important; }',
+      '.aplayer .aplayer-pic, .aplayer .aplayer-music, .aplayer .aplayer-bar-wrap, .aplayer .aplayer-icon { cursor: ' + toUrls(files.pointer && files.pointer.length ? files.pointer : GENERIC.pointer, 'pointer') + ' !important; }',
+      'input[type=text], input[type=search], textarea, [contenteditable=\"true\"], .text, .textbox, .input { cursor: ' + toUrls(files.text && files.text.length ? files.text : GENERIC.text, 'text') + ' !important; }',
+      '.wechat .flip-wrapper { cursor: ' + toUrls(files.default && files.default.length ? files.default : GENERIC.default, 'auto') + '; }',
+      '.wechat .flip-wrapper.pointer { cursor: ' + toUrls(files.pointer && files.pointer.length ? files.pointer : GENERIC.pointer, 'pointer') + '; }',
+      'label { cursor: ' + toUrls(files.default && files.default.length ? files.default : GENERIC.default, 'auto') + '; }'
     ].join('\\n');
 
     let st = document.getElementById('hao-cursor-style');
     if(!st){ st=document.createElement('style'); st.id='hao-cursor-style'; document.head.appendChild(st); }
     st.textContent = css;
   }
+
 
 
 
