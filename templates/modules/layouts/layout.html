@@ -654,7 +654,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 </script>
 
 
-    <!-- DIY × PLUS Effects Loader（最小改动：仅雪花适配明/暗，与樱花一致；其他逻辑保持不变） -->
+    <!-- DIY × PLUS 一体化 Loader · v12-merge + DreamConfig + SnowRebuildByIdRange -->
 <script th:inline="javascript">
 (function(){
   /* ========= 基础 ========= */
@@ -680,19 +680,17 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   const ASSET_BASES  = detectAssetBases();
   const FIRST_ASSETS = ASSET_BASES[0].replace(/\/+$/,'');
 
-  /* ========= 读取主题配置（enhance 优先，style 兜底） ========= */
+  /* ========= 读取配置（enhance 优先，style 兜底） ========= */
   const _e = {
     cursor_style: /*[[${theme.config.enhance.cursor_style}]]*/ null,
     cursor_move:  /*[[${theme.config.enhance.cursor_move}]]*/ null,
     cursor_click: /*[[${theme.config.enhance.cursor_click}]]*/ null,
-
     effects_lantern_mode:             /*[[${theme.config.enhance.effects_lantern_mode}]]*/ null,
     effects_sakura_mode:              /*[[${theme.config.enhance.effects_sakura_mode}]]*/ null,
     effects_snowflake_mode:           /*[[${theme.config.enhance.effects_snowflake_mode}]]*/ null,
     effects_universe_mode:            /*[[${theme.config.enhance.effects_universe_mode}]]*/ null,
     effects_circle_magic_mode:        /*[[${theme.config.enhance.effects_circle_magic_mode}]]*/ null,
     effects_quantum_silk_thread_mode: /*[[${theme.config.enhance.effects_quantum_silk_thread_mode}]]*/ null,
-
     effects_lantern_left:  /*[[${theme.config.enhance.effects_lantern.effects_lantern_left}]]*/ null,
     effects_lantern_right: /*[[${theme.config.enhance.effects_lantern.effects_lantern_right}]]*/ null
   };
@@ -700,62 +698,49 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     cursor_style: /*[[${theme.config.style.cursor_style}]]*/ null,
     cursor_move:  /*[[${theme.config.style.cursor_move}]]*/ null,
     cursor_click: /*[[${theme.config.style.cursor_click}]]*/ null,
-
     effects_lantern_mode:             /*[[${theme.config.style.effects_lantern_mode}]]*/ null,
     effects_sakura_mode:              /*[[${theme.config.style.effects_sakura_mode}]]*/ null,
     effects_snowflake_mode:           /*[[${theme.config.style.effects_snowflake_mode}]]*/ null,
     effects_universe_mode:            /*[[${theme.config.style.effects_universe_mode}]]*/ null,
     effects_circle_magic_mode:        /*[[${theme.config.style.effects_circle_magic_mode}]]*/ null,
     effects_quantum_silk_thread_mode: /*[[${theme.config.style.effects_quantum_silk_thread_mode}]]*/ null,
-
     effects_lantern_left:  /*[[${theme.config.style.effects_lantern.effects_lantern_left}]]*/ null,
     effects_lantern_right: /*[[${theme.config.style.effects_lantern.effects_lantern_right}]]*/ null
   };
-
   const pick = (a,b,d)=> (a||b||d);
-  const normMode = (m)=>{
-    if (!m || m==='none') return '';
-    if (m==='light') return 'day';
-    if (m==='dark')  return 'night';
-    return m; // 已是 day/night/all
-  };
+  const normalizeMode = m => (!m||m==='none') ? '' : (m==='light'?'day':(m==='dark'?'night':m));
 
   const CFG = {
     cursor_style: pick(_e.cursor_style,_s.cursor_style,'none'),
     cursor_move:  pick(_e.cursor_move,_s.cursor_move,'none'),
     cursor_click: pick(_e.cursor_click,_s.cursor_click,'none'),
-
-    effects_lantern_mode:             normMode(pick(_e.effects_lantern_mode,_s.effects_lantern_mode,'none')),
-    effects_sakura_mode:              normMode(pick(_e.effects_sakura_mode,_s.effects_sakura_mode,'none')),
-    effects_snowflake_mode:           normMode(pick(_e.effects_snowflake_mode,_s.effects_snowflake_mode,'none')),
-    effects_universe_mode:            normMode(pick(_e.effects_universe_mode,_s.effects_universe_mode,'none')),
-    effects_circle_magic_mode:        normMode(pick(_e.effects_circle_magic_mode,_s.effects_circle_magic_mode,'none')),
-    effects_quantum_silk_thread_mode: normMode(pick(_e.effects_quantum_silk_thread_mode,_s.effects_quantum_silk_thread_mode,'none')),
-
+    effects_lantern_mode:             normalizeMode(pick(_e.effects_lantern_mode,_s.effects_lantern_mode,'none')),
+    effects_sakura_mode:              normalizeMode(pick(_e.effects_sakura_mode,_s.effects_sakura_mode,'none')),
+    effects_snowflake_mode:           normalizeMode(pick(_e.effects_snowflake_mode,_s.effects_snowflake_mode,'none')),
+    effects_universe_mode:            normalizeMode(pick(_e.effects_universe_mode,_s.effects_universe_mode,'none')),
+    effects_circle_magic_mode:        normalizeMode(pick(_e.effects_circle_magic_mode,_s.effects_circle_magic_mode,'none')),
+    effects_quantum_silk_thread_mode: normalizeMode(pick(_e.effects_quantum_silk_thread_mode,_s.effects_quantum_silk_thread_mode,'none')),
     effects_lantern_left:  pick(_e.effects_lantern_left,_s.effects_lantern_left,''),
     effects_lantern_right: pick(_e.effects_lantern_right,_s.effects_lantern_right,'')
   };
 
-  /* ========= DreamConfig ========= */
+  /* ========= DreamConfig（给 PLUS 脚本读取） ========= */
   const DreamConfig = window.DreamConfig || (window.DreamConfig = {});
   DreamConfig.theme_version = THEME_VER || '';
   DreamConfig.assets_base   = FIRST_ASSETS + '/js';
-
   DreamConfig.cursor_style  = (CFG.cursor_style && CFG.cursor_style!=='none') ? CFG.cursor_style : '';
   DreamConfig.cursor_move   = (CFG.cursor_move  && CFG.cursor_move  !=='none') ? CFG.cursor_move  : '';
   DreamConfig.cursor_click  = (CFG.cursor_click && CFG.cursor_click !=='none') ? CFG.cursor_click : '';
-
   DreamConfig.effects_lantern_mode             = CFG.effects_lantern_mode;
   DreamConfig.effects_sakura_mode              = CFG.effects_sakura_mode;
-  DreamConfig.effects_snowflake_mode           = CFG.effects_snowflake_mode;   // ← 雪花与樱花同一套模式
+  DreamConfig.effects_snowflake_mode           = CFG.effects_snowflake_mode;
   DreamConfig.effects_universe_mode            = CFG.effects_universe_mode;
   DreamConfig.effects_circle_magic_mode        = CFG.effects_circle_magic_mode;
   DreamConfig.effects_quantum_silk_thread_mode = CFG.effects_quantum_silk_thread_mode;
-
   DreamConfig.effects_lantern_left             = CFG.effects_lantern_left;
   DreamConfig.effects_lantern_right            = CFG.effects_lantern_right;
 
-  /* ========= 明暗同步（把 data-theme: dark 同步为 .night；不改你其它逻辑） ========= */
+  /* ========= 明暗兼容 ========= */
   function syncNightClass(){
     const html = document.documentElement;
     const dark = html.getAttribute('data-theme')==='dark';
@@ -772,7 +757,8 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 
   /* ========= 工具 ========= */
   function loadFromBases(id, relList){
-    if (document.getElementById(id)) return; // 已加载过脚本则不再重复下载
+    const exists = document.getElementById(id);
+    if (exists) return;
     const cand = [];
     ASSET_BASES.forEach(base=>{
       relList.forEach(rp=>{
@@ -784,24 +770,23 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     let i=0, s=document.createElement('script'); s.defer=true; s.id=id;
     function tryNext(){
       if(i>=cand.length) return;
-      s.src = cand[i++] + '?v=' + encodeURIComponent(DreamConfig.theme_version);
+      s.src = cand[i++] + '?v=' + encodeURIComponent(DreamConfig.theme_version) + '&r=' + Date.now();
       document.body.appendChild(s);
     }
     s.onerror=function(){ s.remove(); s=document.createElement('script'); s.defer=true; s.id=id; tryNext(); };
     tryNext();
   }
-
   const isMobile = ()=> /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const shouldLoad = (mode)=>{
     if (!mode) return false;
     const dark = document.documentElement.classList.contains('night');
-    if (mode==='all')  return true;
-    if (mode==='day')  return !dark;
-    if (mode==='night')return dark;
+    if (mode==='all') return true;
+    if (mode==='day')   return !dark;
+    if (mode==='night') return dark;
     return true;
   };
 
-  /* ========= 鼠标风格（不改你现有逻辑） ========= */
+  /* ========= 鼠标风格（精准文件表） ========= */
   function applyCursorStyle(){
     const pack = DreamConfig.cursor_style;
     if(!pack) return;
@@ -828,48 +813,89 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     st.textContent = css;
   }
 
-  /* ========= 初始化各类特效（保持原有逻辑；仅雪花按你要求改） ========= */
+  /* ========= 只修“雪花加速” —— 计时器 ID 区间法 ========= */
+  const SnowRange = (function(){
+    let last = null; // {intStart,intEnd, toutStart, toutEnd}
+
+    function getMaxIntervalId(){
+      const id = setInterval(function(){},  0);
+      clearInterval(id);
+      return id;
+    }
+    function getMaxTimeoutId(){
+      const id = setTimeout (function(){},  0);
+      clearTimeout(id);
+      return id;
+    }
+    function clearRange(r){
+      if (!r) return;
+      for (let i = r.intStart + 1; i <= r.intEnd; i++) { try{ clearInterval(i); }catch(e){} }
+      for (let i = r.toutStart + 1; i <= r.toutEnd; i++) { try{ clearTimeout(i); }catch(e){} }
+      // 清 DOM 与旧脚本
+      document.querySelectorAll('#Snow,[id*="snow"],[class*="snow"]').forEach(el=>{ try{ el.remove(); }catch(e){} });
+      const tag = document.getElementById('fx-snow'); if (tag) try{ tag.remove(); }catch(e){}
+      // 保险：删除任何 src 含 snowflake 的脚本标签
+      document.querySelectorAll('script[src*="snowflake"]').forEach(s=>{ try{s.remove();}catch(e){} });
+    }
+
+    function start(){
+      // 1) 不需要 → 清掉上一个并返回
+      if (!shouldLoad(DreamConfig.effects_snowflake_mode)) { clearRange(last); return; }
+
+      // 2) 清上一次
+      clearRange(last);
+
+      // 3) 标记“本次构建前”的最大 ID
+      const intStart  = getMaxIntervalId();
+      const toutStart = getMaxTimeoutId();
+
+      // 4) 重新加载雪花脚本
+      loadFromBases('fx-snow', ['js/effects/snowflake','effects/snowflake']);
+
+      // 5) 在脚本完成初始化后记录“本次构建后的最大 ID”
+      //    用两段延时取最大值，保证慢网速也能覆盖到
+      function snapshot(){
+        const intEnd  = getMaxIntervalId();
+        const toutEnd = getMaxTimeoutId();
+        if (!last) last = { intStart, intEnd, toutStart, toutEnd };
+        else {
+          // 记录一个“并集”区间（向上取最大），清理更稳
+          last.intStart  = Math.min(last.intStart,  intStart);
+          last.intEnd    = Math.max(last.intEnd,    intEnd);
+          last.toutStart = Math.min(last.toutStart, toutStart);
+          last.toutEnd   = Math.max(last.toutEnd,   toutEnd);
+        }
+      }
+      setTimeout(snapshot, 350);   // 大多数脚本 100~300ms 完成
+      setTimeout(snapshot, 1200);  // 兜底再取一次
+    }
+
+    return { start };
+  })();
+
+  /* ========= 其它公共 ========= */
+  function cleanEffectLayers(){
+    // 不动雪花（交给 SnowRange 管），其它清理
+    document.querySelectorAll('.canvas_effects,#universe_canvas,#quantum_c_n,.j-china-lantern,[id^=sakura]')
+      .forEach(el=>{ try{ el.remove(); }catch(e){} });
+    ['fx-sakura','fx-universe','fx-circle','fx-quantum','fx-lantern'].forEach(id=>{
+      const s = document.getElementById(id); if (s) s.remove();
+    });
+  }
+
   function initCursorEffects(){
     if (isMobile()) return;
     if (DreamConfig.cursor_move)  loadFromBases('cursor-move',  ['js/cursor/move/'  + DreamConfig.cursor_move]);
     if (DreamConfig.cursor_click) loadFromBases('cursor-click', ['js/cursor/click/' + DreamConfig.cursor_click]);
   }
-
   function initCanvasEffects(){
     if (isMobile()) return;
-
-    // 灯笼
-    if (shouldLoad(DreamConfig.effects_lantern_mode))
-      loadFromBases('fx-lantern', ['js/effects/lantern','effects/lantern']);
-
-    // 樱花
-    if (shouldLoad(DreamConfig.effects_sakura_mode))
-      loadFromBases('fx-sakura', ['js/effects/sakura','effects/sakura']);
-
-    // —— 雪花（与樱花一致的明/暗判断；仅此处为最小改动）——
-    if (shouldLoad(DreamConfig.effects_snowflake_mode)) {
-      loadFromBases('fx-snow', ['js/effects/snowflake','effects/snowflake']);
-      // 你当前的 snowflake.min.js 为 RAF 单例版，这里同步一次状态即可
-      setTimeout(function(){
-        try { window.SnowflakeEffect && window.SnowflakeEffect.ensure && window.SnowflakeEffect.ensure(); } catch(e){}
-      }, 0);
-    } else {
-      // 不需显示：仅移除画布并请求停止（不影响其它特效）
-      try { document.getElementById('snowfall') && document.getElementById('snowfall').remove(); } catch(e){}
-      try { window.SnowflakeEffect && window.SnowflakeEffect.stop && window.SnowflakeEffect.stop(); } catch(e){}
-    }
-
-    // 宇宙星空
-    if (shouldLoad(DreamConfig.effects_universe_mode))
-      loadFromBases('fx-universe', ['js/effects/universe','effects/universe']);
-
-    // 上升圆点
-    if (shouldLoad(DreamConfig.effects_circle_magic_mode))
-      loadFromBases('fx-circle', ['js/effects/circleMagic','effects/circleMagic']);
-
-    // 量子丝线
-    if (shouldLoad(DreamConfig.effects_quantum_silk_thread_mode))
-      loadFromBases('fx-quantum', ['js/effects/quantum','effects/quantum']);
+    if (shouldLoad(DreamConfig.effects_lantern_mode))             loadFromBases('fx-lantern',['js/effects/lantern','effects/lantern']);
+    if (shouldLoad(DreamConfig.effects_sakura_mode))              loadFromBases('fx-sakura', ['js/effects/sakura','effects/sakura']);
+    SnowRange.start();                                           // ★ 雪花：重建但不叠速
+    if (shouldLoad(DreamConfig.effects_universe_mode))            loadFromBases('fx-universe',['js/effects/universe','effects/universe']);
+    if (shouldLoad(DreamConfig.effects_circle_magic_mode))        loadFromBases('fx-circle',  ['js/effects/circleMagic','effects/circleMagic']);
+    if (shouldLoad(DreamConfig.effects_quantum_silk_thread_mode)) loadFromBases('fx-quantum', ['js/effects/quantum','effects/quantum']);
   }
 
   function initAll(){
@@ -878,19 +904,11 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     initCanvasEffects();
   }
 
-  /* ========= 入口与事件（不改你其它逻辑） ========= */
   document.addEventListener('DOMContentLoaded', initAll);
   window.addEventListener('pjax:complete', ()=>{ syncNightClass(); initAll(); });
-
-  // 明/暗切换：保持你现有行为，仅额外同步一次雪花状态
   window.addEventListener('hao:mode-change', ()=>{
-    // 不改你其它清理/重建逻辑；仅保证雪花与当前模式同步
-    if (shouldLoad(DreamConfig.effects_snowflake_mode)) {
-      try { window.SnowflakeEffect && window.SnowflakeEffect.ensure && window.SnowflakeEffect.ensure(); } catch(e){}
-    } else {
-      try { document.getElementById('snowfall') && document.getElementById('snowfall').remove(); } catch(e){}
-      try { window.SnowflakeEffect && window.SnowflakeEffect.stop && window.SnowflakeEffect.stop(); } catch(e){}
-    }
+    cleanEffectLayers();
+    initCanvasEffects();   // 每次切换：先清旧区间，再重建新雪花 → 速度恒定
   });
 
   try{
@@ -899,7 +917,6 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   }catch(e){}
 })();
 </script>
-
 
 
 
