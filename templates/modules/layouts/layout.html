@@ -781,37 +781,99 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   })();
 </script>
 
-<!-- ===== 鼠标移动点击特效 -->
+<!-- 鼠标移动和点击特效 -->
 <script th:inline="javascript">
-  (function(){
-    const ASSETS = /*[[${assets_link}]]*/ '/assets';
-    const THEME_VER = /*[[${theme_version}]]*/ '';
-    const CFG = {
-      cursor_move:  /*[[${theme.config.style.cursor_move}]]*/  'none',
-      cursor_click: /*[[${theme.config.style.cursor_click}]]*/ 'none'
-    };
+(function(){
+  // 仅处理鼠标移动/点击两项（不要动显示模式）
+  const ASSETS = /*[[${assets_link}]]*/ '/assets';
+  const THEME_VER = /*[[${theme_version}]]*/ '';
+  const CFG = {
+    cursor_move:  /*[[${theme.config.style.cursor_move}]]*/  'none',
+    cursor_click: /*[[${theme.config.style.cursor_click}]]*/ 'none'
+  };
 
-    if (window.__DIY_CURSOR_EFFECTS_V12__) return;
-    window.__DIY_CURSOR_EFFECTS_V12__ = true;
+  // 避免重复初始化
+  if (window.__DIY_CURSOR_MOVE_CLICK__) return;
+  window.__DIY_CURSOR_MOVE_CLICK__ = true;
 
-    function loadJS(src){
-      const s = document.createElement('script');
-      s.src = src + THEME_VER + '&r=' + (Math.random().toString(36).slice(2));
-      s.defer = true;
-      document.body.appendChild(s);
+  // 加载脚本（只加载一次）
+  function 加载(路径){
+    const s = document.createElement('script');
+    s.src = 路径 + THEME_VER;
+    s.defer = true;
+    document.body.appendChild(s);
+  }
+
+  // 从配置 / 已加载 <script> 推断包名（和 Plus 一样按路径推断）
+  function 取包名(){
+    let 移动 = CFG.cursor_move || '', 点击 = CFG.cursor_click || '';
+    // 如果没配，尝试从已加载脚本里推断
+    if (!移动 || !点击){
+      Array.from(document.scripts).forEach(s=>{
+        const src = s.getAttribute('src')||'';
+        if (!移动){
+          const m = src.match(/\/js\/cursor\/move\/([^\/]+)\.min\.js/i);
+          if (m) 移动 = m[1];
+        }
+        if (!点击){
+          const c = src.match(/\/js\/cursor\/click\/([^\/]+)\.min\.js/i);
+          if (c) 点击 = c[1];
+        }
+      });
     }
+    return { 移动, 点击 };
+  }
 
-    function whenReady(cb){
-      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', cb);
-      else cb();
-    }
+  // 标记鼠标画布（给它加 data-keep-canvas="mouse"，让你的 v12 清理逻辑跳过）
+  function 标记鼠标画布(cv){
+    try{
+      const s = ((cv.id||'')+' '+(cv.className||'')).toLowerCase();
+      const 是移动  = /cursor|trail|ribbon/.test(s);
+      const 是点击  = /click|firework|particle|spark/.test(s);
+      if (是移动) cv.dataset.diyMouse = 'move';
+      if (是点击) cv.dataset.diyMouse = 'click';
+      if (是移动 || 是点击){
+        cv.setAttribute('data-keep-canvas','mouse'); // 关键：v12 的 purge 会跳过带这个属性的节点
+        cv.style.pointerEvents = 'none';
+      }
+    }catch(e){}
+  }
 
-    whenReady(function(){
-      if (CFG.cursor_move  && CFG.cursor_move  !== 'none') loadJS(ASSETS + '/js/cursor/move/'  + CFG.cursor_move  + '.min.js');
-      if (CFG.cursor_click && CFG.cursor_click !== 'none') loadJS(ASSETS + '/js/cursor/click/' + CFG.cursor_click + '.min.js');
+  // 启动时先把现有 canvas 过一遍
+  function 初始扫描(){
+    document.querySelectorAll('canvas').forEach(标记鼠标画布);
+  }
+
+  // 监听后续新增节点（脚本创建的画布能及时被标记）
+  const 观察 = new MutationObserver(muts=>{
+    muts.forEach(m=>{
+      (m.addedNodes||[]).forEach(n=>{
+        if (n instanceof HTMLCanvasElement) 标记鼠标画布(n);
+        else if (n instanceof HTMLElement && n.querySelectorAll){
+          n.querySelectorAll('canvas').forEach(标记鼠标画布);
+        }
+      });
     });
-  })();
+  });
+
+  // 初始化：只加载一次脚本，然后标记画布（不随明暗切换）
+  function 启动(){
+    const { 移动, 点击 } = 取包名();
+    if (移动 && 移动 !== 'none')  加载(ASSETS + '/js/cursor/move/'  + 移动  + '.min.js');
+    if (点击 && 点击 !== 'none')  加载(ASSETS + '/js/cursor/click/' + 点击 + '.min.js');
+
+    初始扫描();
+    try{ 观察.observe(document.body, {childList:true, subtree:true}); }catch(e){}
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', 启动);
+  } else {
+    启动();
+  }
+})();
 </script>
+
 
 <!-- 6个显示模式 -->
 <script th:inline="javascript">
