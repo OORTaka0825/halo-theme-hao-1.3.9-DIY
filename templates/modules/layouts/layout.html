@@ -792,9 +792,8 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     const pack = (window.DreamConfig && window.DreamConfig.cursor_style) || '';
     if (!pack || pack === 'none') return;
 
-    // 1) 按你的实际光标包做的精确映射（默认/指针/文本）
+    // 1) 精确映射（默认/指针/文本），基于你 DIY 包实际命名
     const MAP = {
-      // 基础/卡通类：普遍只有 arrow/hand
       OwO:             { default:['arrow.cur'],                          pointer:['hand.cur'],                             text:['arrow.cur','hand.cur'] },
       UwU:             { default:['arrow.cur'],                          pointer:['hand.cur'],                             text:['arrow.cur','hand.cur'] },
       mellow:          { default:['arrow.cur'],                          pointer:['hand.cur'],                             text:['arrow.cur'] },
@@ -803,27 +802,17 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
       music_cat_02:    { default:['arrow.cur'],                          pointer:['hand.cur'],                             text:['arrow.cur','hand.cur'] },
       water_01:        { default:['arrow.cur'],                          pointer:['hand.cur'],                             text:['arrow.cur'] },
       water_02:        { default:['arrow.cur'],                          pointer:['hand.cur'],                             text:['arrow.cur'] },
-
-      // 含更多指针/文本文件名的包
       horse:           { default:['arrow.cur'],                          pointer:['hand.cur','move.cur'],                  text:['beam.cur','text.cur','IBeam.cur','arrow.cur'] },
       marry:           { default:['arrow.cur'],                          pointer:['move.cur','hand.cur'],                  text:['beam.cur','IBeam.cur','Text.cur','text.cur'] },
-
-      // breeze：首字母大写常见
       breeze:          { default:['Arrow.cur','arrow.cur'],              pointer:['Hand.cur','hand.cur'],                  text:['Handwriting.cur','IBeam.cur','Text.cur','text.cur'] },
-
-      // overwatch：有 cross/pointer/text
       overwatch:       { default:['cross.cur','Cross.cur'],              pointer:['pointer.cur','link.cur','Hand.cur','hand.cur'], text:['text.cur','Text.cur'] },
-
-      // black_cat：西语命名
       black_cat:       { default:['normal.cur','Normal.cur','arrow.cur'], pointer:['Alternative.cur','ALTERNATIVE.cur','link.cur','Link.cur','Hand.cur','hand.cur'], text:['Escritura a Mano.cur','texto.cur','Text.cur','IBeam.cur'] },
-
-      // rainbow_rain：Alternative2/Movee2/文本为 texto
       rainbow_rain:    { default:['Alternative2.cur','Alternative.cur','normal.cur','arrow.cur'],
                          pointer:['Movee2.cur','Move.cur','Hand.cur','hand.cur'],
                          text:['texto.cur','Escritura a Mano.cur','Text.cur','text.cur'] },
     };
 
-    // 2) 兜底候选（大小写 & 少量别名），命不中就顺序尝试下个；最终回退到 auto
+    // 2) 兜底候选（大小写/别名），命不中就顺序尝试；成功后浏览器不会继续请求后面的 URL
     const GENERIC = {
       default: ['Arrow.cur','arrow.cur','Normal.cur','normal.cur','Default.cur','DEFAULT.cur'],
       pointer: ['Hand.cur','hand.cur','Link.cur','link.cur','pointer.cur','Pointer.cur','Alternative.cur','ALTERNATIVE.cur','Move.cur','move.cur'],
@@ -831,32 +820,28 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     };
     const files = MAP[pack] || GENERIC;
 
-    // 3) 生成可用的 URL 列表：优先 /assets/cursor/<pack>/X.cur；兜底 /assets/cursor/X.cur
+    // 3) 只用 assets_link 作为首选基准，避免误命中 /themes/theme-hao/
+    //    assets_link 在 th:inline="javascript" 下会被模板引擎替换为当前主题的正确路径
+    const raw = /*[[${assets_link}]]*/ '';
+    let base = String(raw || '').replace(/\/+$/,'');
+    if (base && !/\/assets$/.test(base)) base += '/assets';
+
+    // 只保留两种基准：/assets/cursor/<pack> 和 /assets/cursor（减少 404 噪音）
     const bases = [];
-    (window.ASSET_BASES || (function(){
-      const set = new Set();
-      const raw = /*[[${assets_link}]]*/ '';
-      if (raw) { const a = String(raw).replace(/\/+$/,''); set.add(a); set.add(a + '/assets'); }
-      document.querySelectorAll('link[href*="/themes/"],script[src*="/themes/"]').forEach(n=>{
-        const u = n.getAttribute('href') || n.getAttribute('src') || '';
-        const m1 = u.match(/(\/themes\/[^/]+)\/assets\//); if (m1 && m1[1]) set.add(m1[1] + '/assets');
-        const m2 = u.match(/(\/themes\/[^/]+)\//);         if (m2 && m2[1]) set.add(m2[1] + '/assets');
-      });
-      return Array.from(set).filter(Boolean);
-    })()).forEach(b=>{
-      const root = b.replace(/\/+$/,'');
-      bases.push((root + '/cursor/' + pack).replace(/\/{2,}/g,'/'));
-      bases.push((root + '/cursor').replace(/\/{2,}/g,'/')); // 兜底
-    });
+    if (base) {
+      bases.push((base + '/cursor/' + pack).replace(/\/{2,}/g,'/'));
+      bases.push((base + '/cursor').replace(/\/{2,}/g,'/'));
+    }
 
     const toUrls = (list)=>{
       const urls=[];
-      bases.forEach(base=>{
+      bases.forEach(b=>{
         list.forEach(name=>{
-          urls.push("url('"+ encodeURI(base + '/' + name) +"')");
+          urls.push("url('"+ encodeURI(b + '/' + name) +"')");
         });
       });
-      return urls.join(', ') + ', auto';
+      // 保底：若 base 不可用，仍让系统指针可用
+      return (urls.length ? urls.join(', ') + ', ' : '') + 'auto';
     };
 
     const css = [
