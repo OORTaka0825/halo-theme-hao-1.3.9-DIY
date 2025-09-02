@@ -792,78 +792,8 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     /* 只替换这个函数，其它代码一律不动（V5：恢复稳定 CSS 方案；使用 assets_link 基准 + 精确映射） */
     /* 只替换这个函数，其它代码一律不动（Overwatch 专项加强 + .ani 兼容 + contenteditable 选择器） */
     /* 只替换这个函数，其它代码一律不动（对标 PLUS：overwatch 三态统一用 pointer.cur） */
-  function applyCursorStyle(){
-    const pack = (window.DreamConfig && window.DreamConfig.cursor_style) || '';
-    if (!pack || pack === 'none') return;
+  function applyCursorStyle(){ /* removed by request: mouse-style disabled */ }
 
-    // 1) 每个包的候选（默认/指针/文本）。overwatch 按 PLUS 行为：三态统一 pointer.cur
-    const MAP = {
-      OwO:             { default:['arrow.cur'],                                  pointer:['hand.cur'],                               text:['arrow.cur','hand.cur'] },
-      UwU:             { default:['arrow.cur'],                                  pointer:['hand.cur'],                               text:['arrow.cur','hand.cur'] },
-      mellow:          { default:['arrow.cur'],                                  pointer:['hand.cur'],                               text:['arrow.cur'] },
-      debris:          { default:['arrow.cur'],                                  pointer:['hand.cur'],                               text:['arrow.cur'] },
-      music_cat_01:    { default:['arrow.cur'],                                  pointer:['hand.cur'],                               text:['arrow.cur','hand.cur'] },
-      music_cat_02:    { default:['arrow.cur'],                                  pointer:['hand.cur'],                               text:['arrow.cur','hand.cur'] },
-      water_01:        { default:['arrow.cur'],                                  pointer:['hand.cur'],                               text:['arrow.cur'] },
-      water_02:        { default:['arrow.cur'],                                  pointer:['hand.cur'],                               text:['arrow.cur'] },
-
-      horse:           { default:['arrow.cur'],                                  pointer:['hand.cur','move.cur'],                    text:['beam.cur','text.cur','IBeam.cur','arrow.cur'] },
-      marry:           { default:['arrow.cur'],                                  pointer:['move.cur','hand.cur'],                    text:['beam.cur','IBeam.cur','Text.cur','text.cur'] },
-
-      breeze:          { default:['Normal.cur','Default.cur','Arrow.cur','arrow.cur','Normal.ani','Arrow.ani'],
-                         pointer:['Hand.cur','Link.cur','hand.cur','link.cur','Hand.ani','Link.ani'],
-                         text:['IBeam.cur','Text.cur','Handwriting.cur','text.cur','IBeam.ani','Text.ani'] },
-
-      // ← 对标 PLUS：守望先锋三态都用 pointer.cur
-      overwatch:       { default:['pointer.cur'], pointer:['pointer.cur'], text:['pointer.cur'] },
-
-      black_cat:       { default:['normal.cur','Normal.cur','arrow.cur'],
-                         pointer:['Alternative.cur','ALTERNATIVE.cur','link.cur','Link.cur','Hand.cur','hand.cur'],
-                         text:['Escritura a Mano.cur','texto.cur','Text.cur','IBeam.cur'] },
-
-      rainbow_rain:    { default:['Alternative2.cur','Alternative.cur','normal.cur','arrow.cur'],
-                         pointer:['Movee2.cur','Move.cur','Hand.cur','hand.cur'],
-                         text:['texto.cur','Escritura a Mano.cur','Text.cur','text.cur'] },
-    };
-
-    // 2) 兜底（极少用到）：
-    const GENERIC = {
-      default: ['Arrow.cur','Normal.cur','Default.cur','arrow.cur'],
-      pointer: ['Hand.cur','Link.cur','hand.cur','link.cur','pointer.cur'],
-      text:    ['IBeam.cur','Text.cur','text.cur','Handwriting.cur','beam.cur','texto.cur']
-    };
-    const files = MAP[pack] || GENERIC;
-
-    // 3) 只用 assets_link 作为 URL 基准，避免串到其它主题
-    const raw = /*[[${assets_link}]]*/ '';
-    let base = String(raw || '').replace(/\/+$/,'');
-    if (base && !/\/assets$/.test(base)) base += '/assets';
-    const bases = [];
-    if (base) {
-      bases.push((base + '/cursor/' + pack).replace(/\/{2,}/g,'/'));
-      bases.push((base + '/cursor').replace(/\/{2,}/g,'/'));
-    }
-
-    const toUrls = (list)=>{
-      const urls=[];
-      bases.forEach(b=>{
-        (list||[]).forEach(name=>{
-          urls.push("url('"+ encodeURI(b + '/' + name) +"')");
-        });
-      });
-      return (urls.length ? urls.join(', ') + ', ' : '') + 'auto';
-    };
-
-    const css = [
-      'html, body { cursor: ' + toUrls(files.default && files.default.length ? files.default : GENERIC.default) + ' !important; }',
-      'a, button, [role=\"button\"], input[type=button], input[type=submit] { cursor: ' + toUrls(files.pointer && files.pointer.length ? files.pointer : GENERIC.pointer) + ' !important; }',
-      'input[type=text], input[type=search], textarea, [contenteditable=\"true\"], .text, .textbox, .input { cursor: ' + toUrls(files.text && files.text.length ? files.text : GENERIC.text) + ' !important; }'
-    ].join('\\n');
-
-    let st = document.getElementById('hao-cursor-style');
-    if(!st){ st=document.createElement('style'); st.id='hao-cursor-style'; document.head.appendChild(st); }
-    st.textContent = css;
-  }
 
 
 
@@ -956,7 +886,6 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   }
 
   function initAll(){
-    applyCursorStyle();
     initCursorEffects();
     initCanvasEffects();
   }
