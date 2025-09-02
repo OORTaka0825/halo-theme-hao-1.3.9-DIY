@@ -654,7 +654,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 </script>
 
 
-    <!-- DIY × PLUS 一体化 Loader · DreamConfig + Effects Loader（适配 light/dark；雪花=RAF单例） -->
+    <!-- DIY × PLUS 一体化 Loader（适配 light/dark；雪花与樱花等一致的明暗切换行为） -->
 <script th:inline="javascript">
 (function(){
   /* ========= 基础 ========= */
@@ -713,7 +713,12 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   };
 
   const pick = (a,b,d)=> (a||b||d);
-  const normMode = m => (!m||m==='none') ? '' : (m==='light'?'day':(m==='dark'?'night':m));
+  const normMode = (m)=>{
+    if (!m || m==='none') return '';
+    if (m==='light') return 'day';
+    if (m==='dark')  return 'night';
+    return m; // 已是 day/night/all
+  };
 
   const CFG = {
     cursor_style: pick(_e.cursor_style,_s.cursor_style,'none'),
@@ -731,7 +736,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     effects_lantern_right: pick(_e.effects_lantern_right,_s.effects_lantern_right,'')
   };
 
-  /* ========= DreamConfig（给 PLUS/DIY 脚本读取） ========= */
+  /* ========= DreamConfig（供各特效脚本读取） ========= */
   const DreamConfig = window.DreamConfig || (window.DreamConfig = {});
   DreamConfig.theme_version = THEME_VER || '';
   DreamConfig.assets_base   = FIRST_ASSETS + '/js';
@@ -742,7 +747,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 
   DreamConfig.effects_lantern_mode             = CFG.effects_lantern_mode;
   DreamConfig.effects_sakura_mode              = CFG.effects_sakura_mode;
-  DreamConfig.effects_snowflake_mode           = CFG.effects_snowflake_mode;  // ← 雪花模式（all/day/night/''）
+  DreamConfig.effects_snowflake_mode           = CFG.effects_snowflake_mode;   // ← 雪花与樱花一致使用 day/night/all
   DreamConfig.effects_universe_mode            = CFG.effects_universe_mode;
   DreamConfig.effects_circle_magic_mode        = CFG.effects_circle_magic_mode;
   DreamConfig.effects_quantum_silk_thread_mode = CFG.effects_quantum_silk_thread_mode;
@@ -750,12 +755,11 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   DreamConfig.effects_lantern_left             = CFG.effects_lantern_left;
   DreamConfig.effects_lantern_right            = CFG.effects_lantern_right;
 
-  /* ========= 明暗模式兼容（把 data-theme: dark 同步为 .night） ========= */
+  /* ========= 明暗同步（把 data-theme: dark 同步为 .night） ========= */
   function syncNightClass(){
     const html = document.documentElement;
     const dark = html.getAttribute('data-theme')==='dark';
     html.classList.toggle('night', dark);
-    // 兼容一些脚本读取
     window.specialEfficacyScheme = dark ? 'dark' : 'light';
   }
   syncNightClass();
@@ -791,17 +795,16 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   const shouldLoad = (mode)=>{
     if (!mode) return false;
     const dark = document.documentElement.classList.contains('night');
-    if (mode==='all') return true;
-    if (mode==='day')   return !dark;
-    if (mode==='night') return dark;
+    if (mode==='all')  return true;
+    if (mode==='day')  return !dark;
+    if (mode==='night')return dark;
     return true;
   };
 
-  /* ========= 鼠标风格（使用你复制来的 cursor 包） ========= */
+  /* ========= 鼠标风格 ========= */
   function applyCursorStyle(){
     const pack = DreamConfig.cursor_style;
     if(!pack) return;
-    // 这里给几个常见映射名；没匹配到就用通用文件名兜底
     const MAP = {
       breeze:     { default:['Arrow.cur'],       pointer:['Hand.cur'],         text:['IBeam.cur'] },
       overwatch:  { default:['cross.cur'],       pointer:['link.cur'],         text:['handwriting.cur'] },
@@ -825,44 +828,40 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     st.textContent = css;
   }
 
-  /* ========= 只清“其它特效”的层（雪花由脚本自身管理） ========= */
+  /* ========= 只清“画布层”，不反复卸载脚本标签 ========= */
   function cleanEffectLayers(){
-    document.querySelectorAll('.canvas_effects,#universe_canvas,#quantum_c_n,.j-china-lantern,[id^=sakura]')
+    // 移除各特效生成的画布/容器，让它们在新模式下按需重建
+    document.querySelectorAll('.canvas_effects,#snowfall,#universe_canvas,#quantum_c_n,.j-china-lantern,[id^=sakura]')
       .forEach(el=>{ try{ el.remove(); }catch(e){} });
-    ['fx-sakura','fx-universe','fx-circle','fx-quantum','fx-lantern']
-      .forEach(id=>{ const s=document.getElementById(id); if(s) s.remove(); });
+    // 不移除 fx-*.js 的 <script> 标签；避免反复下载脚本
   }
 
-  /* ========= 初始化各类特效 ========= */
+  /* ========= 初始化各类特效（雪花与樱花等一致按模式加载） ========= */
   function initCursorEffects(){
     if (isMobile()) return;
     if (DreamConfig.cursor_move)  loadFromBases('cursor-move',  ['js/cursor/move/'  + DreamConfig.cursor_move]);
     if (DreamConfig.cursor_click) loadFromBases('cursor-click', ['js/cursor/click/' + DreamConfig.cursor_click]);
   }
+
   function initCanvasEffects(){
     if (isMobile()) return;
 
-    // 灯笼
     if (shouldLoad(DreamConfig.effects_lantern_mode))
       loadFromBases('fx-lantern', ['js/effects/lantern','effects/lantern']);
 
-    // 樱花
     if (shouldLoad(DreamConfig.effects_sakura_mode))
       loadFromBases('fx-sakura', ['js/effects/sakura','effects/sakura']);
 
-    // 雪花（你已换成 RAF 单例版）：只需首次按需加载一次；切换显示/销毁由脚本内 ensure() 处理
-    if (DreamConfig.effects_snowflake_mode) // 有配置即可加载（不必判断 day/night）
+    // 雪花：与樱花一致，按当前模式决定是否加载
+    if (shouldLoad(DreamConfig.effects_snowflake_mode))
       loadFromBases('fx-snow', ['js/effects/snowflake','effects/snowflake']);
 
-    // 宇宙星空
     if (shouldLoad(DreamConfig.effects_universe_mode))
       loadFromBases('fx-universe', ['js/effects/universe','effects/universe']);
 
-    // 上升圆点
     if (shouldLoad(DreamConfig.effects_circle_magic_mode))
       loadFromBases('fx-circle', ['js/effects/circleMagic','effects/circleMagic']);
 
-    // 量子丝线
     if (shouldLoad(DreamConfig.effects_quantum_silk_thread_mode))
       loadFromBases('fx-quantum', ['js/effects/quantum','effects/quantum']);
   }
@@ -873,14 +872,16 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     initCanvasEffects();
   }
 
-  /* ========= 首次与路由完成 ========= */
+  /* ========= 入口与事件 ========= */
   document.addEventListener('DOMContentLoaded', initAll);
   window.addEventListener('pjax:complete', ()=>{ syncNightClass(); initAll(); });
 
-  /* ========= 明暗切换：其它特效重建；雪花交给其内部 ensure() ========= */
+  // 明/暗切换：清掉旧画布 → 按新模式只加载需要的效果
   window.addEventListener('hao:mode-change', ()=>{
     cleanEffectLayers();
     initCanvasEffects();
+    // 如果你雪花脚本是 RAF 单例版，这里再确保一次状态同步
+    try{ window.SnowflakeEffect && window.SnowflakeEffect.ensure && window.SnowflakeEffect.ensure(); }catch(e){}
   });
 
   try{
