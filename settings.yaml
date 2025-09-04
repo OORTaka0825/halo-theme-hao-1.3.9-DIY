@@ -3222,11 +3222,30 @@ spec:
                   value: true
                 - label: 关闭
                   value: false
-        - $formkit: textarea
-          name: fontFamily
+        - $formkit: radio
+          name: global_font
           label: 全局字体
-          placeholder: '"PingFang SC", "Hiragino Sans GB", "Microsoft YaHei"'
-
+          value: off
+          help: 选择站点的全局字体（选择“关闭”将使用系统字体）
+          options:
+            - label: 关闭（使用系统字体）
+              value: off
+            - label: 站酷快乐体
+              value: zhankukuaile
+            - label: 站酷高端黑
+              value: zhankugdh
+            - label: 站酷仓耳渔阳体
+              value: zhankuyuyang
+            - label: 站酷酷黑体
+              value: zhankuheiti
+            - label: 站酷文艺体
+              value: zhankuwenyi
+            - label: 站酷庆科黄油体
+              value: zhankuhuangyou
+            - label: 站酷小薇LOGO体
+              value: zhankuxiaowei
+            - label: 筑紫A丸
+              value: zhuziawan
         - $formkit: select
           name: cursor_style
           label: 鼠标风格
