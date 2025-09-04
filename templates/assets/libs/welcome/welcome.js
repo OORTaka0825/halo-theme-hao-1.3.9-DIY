@@ -175,72 +175,31 @@ function showWelcome() {
         });
 })();
 
-/* ==== PJAX fix patch (minimal, no change to original logic) ==== */
+/* === PJAX minimal compatibility (non-intrusive) === */
 (function(){
-  // Try rendering when the mount node (#welcome-info) is present
-  function tryRenderOnce(){
-    var el = document.getElementById('welcome-info');
-    if(!el) return false;
-    try {
-      if (typeof showWelcome === 'function') {
-        showWelcome();
-        return true;
-      }
-    } catch(e){}
-    return false;
-  }
-
-  // Retry a few times after PJAX/content swap
-  function scheduleRender(retries, delay){
-    var n = 0;
-    function tick(){
-      if (tryRenderOnce()) return;
-      if (++n >= retries) return;
-      setTimeout(tick, delay);
-    }
-    tick();
-  }
-
-  // Observe DOM add/remove, when #welcome-info appears, render一次
-  var mo;
-  function ensureObserver(){
-    if (mo) return;
-    mo = new MutationObserver(function(muts){
-      for (var i=0;i<muts.length;i++){
-        if (document.getElementById('welcome-info')){
-          tryRenderOnce();
-          break;
-        }
-      }
-    });
+  function safeRender(){
     try{
-      mo.observe(document.documentElement || document.body, { childList:true, subtree:true });
-    }catch(e){}
+      var el = document.getElementById('welcome-info');
+      if (!el) return;
+      if (typeof window.showWelcome === 'function') window.showWelcome();
+    }catch(e){ /* swallow */ }
   }
-
-  // Initial attach
-  if (document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', function(){
-      scheduleRender(20, 100);
-      ensureObserver();
-    });
-  } else {
-    scheduleRender(20, 100);
-    ensureObserver();
+  function afterSwap(){
+    // run a couple times to cover late DOM insertion
+    setTimeout(safeRender, 0);
+    setTimeout(safeRender, 150);
+    setTimeout(safeRender, 400);
   }
+  // initial call (non-blocking)
+  if (document.readyState !== 'loading') { safeRender(); }
+  else { document.addEventListener('DOMContentLoaded', safeRender, {once:true}); }
 
-  // Hook common PJAX/router events
-  ['pjax:complete','pjax:end','pjax:success','swup:contentReplaced','barba:after','page:loaded']
-    .forEach(function(evt){
-      document.addEventListener(evt, function(){ scheduleRender(20, 100); }, false);
-    });
-
+  // common pjax/router events
+  ['pjax:complete','pjax:success','pjax:end','page:loaded'].forEach(function(evt){
+    document.addEventListener(evt, afterSwap, false);
+  });
   // bfcache restore
-  window.addEventListener('pageshow', function(e){ if(e.persisted) scheduleRender(20, 100); });
-
-  // Fallback timers
-  setTimeout(function(){ scheduleRender(20, 100); }, 200);
-  setTimeout(function(){ scheduleRender(20, 100); }, 800);
+  window.addEventListener('pageshow', function(e){ if (e.persisted) afterSwap(); }, false);
 })();
-/* ==== end PJAX fix patch ==== */
+/* === end PJAX minimal compatibility === */
 
