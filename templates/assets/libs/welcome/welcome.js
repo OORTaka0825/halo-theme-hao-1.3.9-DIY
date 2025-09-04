@@ -1,12 +1,31 @@
 // 访客欢迎信息模块（NSMAO）
 let ipLocation;
-const HAO_WELCOME_LNG = Number(GLOBAL_CONFIG?.source?.welcome?.locationLng) || 116.703781;
-const HAO_WELCOME_LAT = Number(GLOBAL_CONFIG?.source?.welcome?.locationLat) || 39.927334;
+function __getWelcomeLng(){
+  var v = Number(window.GLOBAL_CONFIG?.source?.welcome?.locationLng);
+  return Number.isFinite(v) ? v : 116.703781;
+}
+function __getWelcomeLat(){
+  var v = Number(window.GLOBAL_CONFIG?.source?.welcome?.locationLat);
+  return Number.isFinite(v) ? v : 39.927334;
+}
+
 
 // 计算两点间距离
 function getDistance(e1, n1, e2, n2) {
     const R = 6371;
-    const { sin, cos, asin, PI, hypot } = Math;
+    const { sin, cos, asin, PI, hypot }
+
+// 等待挂载点后再渲染，最多重试3秒
+function __renderWelcomeSafe(retries){
+    retries = typeof retries === 'number' ? retries : 30;
+    if (document.getElementById('welcome-info') && ipLocation){
+        try { __renderWelcomeSafe(); return true; } catch(e) {}
+    }
+    if (retries > 0) setTimeout(function(){ __renderWelcomeSafe(retries-1); }, 100);
+    return false;
+}
+
+ = Math;
     let getPoint = (e, n) => {
         e *= PI / 180;
         n *= PI / 180;
@@ -44,7 +63,7 @@ function fetchIpLocation() {
                     district: res.data.district
                 }
             };
-            showWelcome();
+            __renderWelcomeSafe();
         }
     });
 }
@@ -52,8 +71,8 @@ function fetchIpLocation() {
 // 展示欢迎语
 function showWelcome() {
     if (!ipLocation) return;
-    const myLng = HAO_WELCOME_LNG;
-    const myLat = HAO_WELCOME_LAT;
+    const myLng = __getWelcomeLng();
+    const myLat = __getWelcomeLat();
     let dist = getDistance(myLng, myLat, ipLocation.location.lng, ipLocation.location.lat);
     let pos = ipLocation.ad_info.nation;
     let ip = ipLocation.ip;
