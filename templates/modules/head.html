@@ -170,14 +170,26 @@
     <!-- 关于统计-->
     <script th:if="${#strings.contains(theme.config.about.widgets,'statistics-map')}" th:src="${assets_link + '/libs/countup/countup.js'}"></script>
 
-    <!-- 小板报 -->
-    <th:block th:if="${not #strings.isEmpty(theme.config.sidebar.welcome.key)}">
-        <script defer th:if="${#strings.contains(theme.config.sidebar.widgetss.indexWidgets,'welcome') ||
-            #strings.contains(theme.config.sidebar.widgetss.postWidgets,'welcome') ||
-            #strings.contains(theme.config.sidebar.widgetss.tagWidgets,'welcome') ||
-            #strings.contains(theme.config.sidebar.widgetss.categoryWidgets,'welcome')}"
-                th:src="${assets_link + '/libs/welcome/welcome.js'}"></script>
-    </th:block>
+    <!-- 小板报（始终加载 + PJAX 兼容）-->
+<th:block th:if="${not #strings.isEmpty(theme.config.sidebar.welcome.key)}">
+  <!-- PJAX：同一段里先注入配置再拉取，避免顺序竞态；th:inline 必须有 -->
+  <script th:inline="javascript" data-pjax>
+    (function () {
+      window.GLOBAL_CONFIG = window.GLOBAL_CONFIG || {};
+      GLOBAL_CONFIG.source = GLOBAL_CONFIG.source || {};
+      GLOBAL_CONFIG.source.welcome = {
+        key: '[[${theme.config.sidebar.welcome.key}]]',
+        locationLng: [[${theme.config.sidebar.welcome.locationLng}]],
+        locationLat: [[${theme.config.sidebar.welcome.locationLat}]]
+      };
+      try { window.fetchIpLocation && window.fetchIpLocation(); } catch(e){}
+    })();
+  </script>
+
+  <!-- 首屏：脚本加载完成后拉取一次 -->
+  <script defer th:src="${assets_link + '/libs/welcome/welcome.js'}"
+          onload="try{ window.fetchIpLocation && window.fetchIpLocation(); }catch(e){}"></script>
+</th:block>
 
 
     <!-- icon图标 -->
