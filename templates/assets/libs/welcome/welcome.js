@@ -1,10 +1,7 @@
 // 访客欢迎信息模块（NSMAO）
 let ipLocation;
-
-// 固定住后台设置的经纬度（首屏读取一次，PJAX 切页不丢）
 const HAO_WELCOME_LNG = Number(GLOBAL_CONFIG?.source?.welcome?.locationLng) || 116.703781;
 const HAO_WELCOME_LAT = Number(GLOBAL_CONFIG?.source?.welcome?.locationLat) || 39.927334;
-
 
 // 计算两点间距离
 function getDistance(e1, n1, e2, n2) {
@@ -28,7 +25,7 @@ function fetchIpLocation() {
         type: 'get',
         url: 'https://api.nsmao.net/api/ip/query',
         data: {
-            // 安全读取 key，避免未定义时报错
+            // 修改①：安全读取 key，避免未定义时报错
             key: (GLOBAL_CONFIG?.source?.welcome?.key || "")
         },
         dataType: 'json',
@@ -152,6 +149,28 @@ function showWelcome() {
     }
 }
 
-// 页面加载与 PJAX 兼容
-window.onload = fetchIpLocation;
-document.addEventListener("pjax:complete", fetchIpLocation);
+// === 页面加载与 PJAX 兼容（最小改动强化版） ===
+// 说明：用一个稳妥的初始化函数；首次加载跑一次；每次 PJAX/Swup/Barba 完成后再跑一次。
+// 如果已经拿到 ipLocation，则直接渲染；否则再请求接口。
+(function () {
+    function initWelcome() {
+        if (ipLocation) {
+            showWelcome();
+        } else {
+            fetchIpLocation();
+        }
+    }
+
+    // 首次加载
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initWelcome, { once: true });
+    } else {
+        initWelcome();
+    }
+
+    // 兼容多种 PJAX/路由库的完成事件
+    ['pjax:complete', 'pjax:end', 'pjax:success', 'swup:contentReplaced', 'barba:after']
+        .forEach(evt => {
+            document.addEventListener(evt, () => setTimeout(initWelcome, 0));
+        });
+})();
