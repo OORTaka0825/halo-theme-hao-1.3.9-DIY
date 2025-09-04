@@ -149,41 +149,6 @@ function showWelcome() {
     }
 }
 
-/* === PJAX minimal compatibility (non-intrusive) === */
-(function(){
-  function safeRender(){
-    try{
-      var el = document.getElementById('welcome-info');
-      if (!el) return;
-      if (typeof window.showWelcome === 'function') window.showWelcome();
-    }catch(e){ /* swallow */ }
-  }
-  function afterSwap(){
-    // run a couple times to cover late DOM insertion
-    setTimeout(safeRender, 0);
-    setTimeout(safeRender, 150);
-    setTimeout(safeRender, 400);
-  }
-  // initial call (non-blocking)
-  if (document.readyState !== 'loading') { safeRender(); }
-  else { document.addEventListener('DOMContentLoaded', safeRender, {once:true}); }
-
-  // common pjax/router events
-  ['pjax:complete','pjax:success','pjax:end','page:loaded'].forEach(function(evt){
-    document.addEventListener(evt, afterSwap, false);
-  });
-  // bfcache restore
-  window.addEventListener('pageshow', function(e){ if (e.persisted) afterSwap(); }, false);
-})();
-/* === end PJAX minimal compatibility === */
-
-// 提供全局可调用的初始化函数（供 head.html 的 <script data-pjax> 调用）
-window.initWelcome = window.initWelcome || function(){
-  try{
-    if (typeof showWelcome === 'function' && window.ipLocation) {
-      showWelcome();
-    } else if (typeof fetchIpLocation === 'function') {
-      fetchIpLocation();
-    }
-  }catch(e){}
-};
+// 页面加载与 PJAX 兼容（参考版）
+window.addEventListener('load', function(){ try{ fetchIpLocation && fetchIpLocation(); }catch(e){}; });
+document.addEventListener('pjax:complete', function(){ try{ fetchIpLocation && fetchIpLocation(); }catch(e){}; });
