@@ -170,11 +170,17 @@
     <!-- 关于统计-->
     <script th:if="${#strings.contains(theme.config.about.widgets,'statistics-map')}" th:src="${assets_link + '/libs/countup/countup.js'}"></script>
 
-    <!-- 小板报（全局加载 + PJAX 兼容 + 等待挂载点）-->
+    <!-- 小板报（始终加载脚本，兼容 PJAX）-->
 <th:block th:if="${not #strings.isEmpty(theme.config.sidebar.welcome.key)}">
-  <!-- 1) 把 key / 经纬度注入到全局（th:inline 确保 [[...]] 渲染为真实数值） -->
+
+  <!-- ① 首屏：先加载 welcome.js；加载完成后触发一次 -->
+  <script defer th:src="${assets_link + '/libs/welcome/welcome.js'}"
+          onload="try{ window.fetchIpLocation && window.fetchIpLocation(); }catch(e){}"></script>
+
+  <!-- ② PJAX：在同一段 data-pjax 里“写配置 + 立刻拉取”，避免顺序竞态 -->
   <script th:inline="javascript" data-pjax>
     (function () {
+      // 注入真实值（th:inline=javascript 让 [[...]] 变成数值/字符串）
       window.GLOBAL_CONFIG = window.GLOBAL_CONFIG || {};
       GLOBAL_CONFIG.source = GLOBAL_CONFIG.source || {};
       GLOBAL_CONFIG.source.welcome = {
@@ -182,31 +188,11 @@
         locationLng: [[${theme.config.sidebar.welcome.locationLng}]],
         locationLat: [[${theme.config.sidebar.welcome.locationLat}]]
       };
-      window.__welcomeConfigReady = true;
+      // 立刻拉取（此时配置已就绪，不会回落到默认值）
+      try { window.fetchIpLocation && window.fetchIpLocation(); } catch(e){}
     })();
   </script>
 
-  <!-- 2) 触发器：等待 #welcome-info 出现后再调用 -->
-  <script>
-    window.__welcomeRun = function(){
-      var tries = 0;
-      (function waitMount(){
-        var el = document.getElementById('welcome-info');
-        if (!el && tries < 30){ tries++; return setTimeout(waitMount, 100); }
-        try {
-          if (window.fetchIpLocation) { window.fetchIpLocation(); }
-          else if (window.initWelcome) { window.initWelcome(); }
-        } catch(e){}
-      })();
-    };
-  </script>
-
-  <!-- 3) 加载 welcome.js；加载完成后触发一次 -->
-  <script defer th:src="${assets_link + '/libs/welcome/welcome.js'}"
-          onload="__welcomeRun()"></script>
-
-  <!-- 4) PJAX 完成后再触发一次（data-pjax 会在 pjax:complete 后重跑） -->
-  <script data-pjax>__welcomeRun()</script>
 </th:block>
 
 
