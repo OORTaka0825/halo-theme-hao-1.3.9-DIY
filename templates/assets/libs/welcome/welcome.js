@@ -1,19 +1,7 @@
 // 访客欢迎信息模块（NSMAO）
 let ipLocation;
-function __getWelcomeLng(){
-  try{
-    var v = window.GLOBAL_CONFIG && GLOBAL_CONFIG.source && GLOBAL_CONFIG.source.welcome && GLOBAL_CONFIG.source.welcome.locationLng;
-    v = Number(v);
-    return isFinite(v) ? v : 116.703781;
-  }catch(e){ return 116.703781; }
-}
-function __getWelcomeLat(){
-  try{
-    var v = window.GLOBAL_CONFIG && GLOBAL_CONFIG.source && GLOBAL_CONFIG.source.welcome && GLOBAL_CONFIG.source.welcome.locationLat;
-    v = Number(v);
-    return isFinite(v) ? v : 39.927334;
-  }catch(e){ return 39.927334; }
-}
+const HAO_WELCOME_LNG = Number(GLOBAL_CONFIG?.source?.welcome?.locationLng) || 116.703781;
+const HAO_WELCOME_LAT = Number(GLOBAL_CONFIG?.source?.welcome?.locationLat) || 39.927334;
 
 // 计算两点间距离
 function getDistance(e1, n1, e2, n2) {
@@ -56,7 +44,7 @@ function fetchIpLocation() {
                     district: res.data.district
                 }
             };
-            __renderWelcomeWhenReady();
+            showWelcome();
         }
     });
 }
@@ -64,8 +52,8 @@ function fetchIpLocation() {
 // 展示欢迎语
 function showWelcome() {
     if (!ipLocation) return;
-    const myLng = __getWelcomeLng();
-    const myLat = __getWelcomeLat();
+    const myLng = HAO_WELCOME_LNG;
+    const myLat = HAO_WELCOME_LAT;
     let dist = getDistance(myLng, myLat, ipLocation.location.lng, ipLocation.location.lat);
     let pos = ipLocation.ad_info.nation;
     let ip = ipLocation.ip;
@@ -162,16 +150,5 @@ function showWelcome() {
 }
 
 // 页面加载与 PJAX 兼容（参考版）
-
-// 在欢迎容器出现后再渲染，最多重试3秒
-function __renderWelcomeWhenReady(left){
-  left = typeof left === 'number' ? left : 30;
-  var box = document.getElementById('welcome-info');
-  if (box && ipLocation){
-    try { __renderWelcomeWhenReady(); return true; } catch(e){}
-  }
-  if (left > 0) setTimeout(function(){ __renderWelcomeWhenReady(left-1); }, 100);
-  return false;
-}
 window.addEventListener('load', function(){ try{ fetchIpLocation && fetchIpLocation(); }catch(e){}; });
 document.addEventListener('pjax:complete', function(){ try{ fetchIpLocation && fetchIpLocation(); }catch(e){}; });
