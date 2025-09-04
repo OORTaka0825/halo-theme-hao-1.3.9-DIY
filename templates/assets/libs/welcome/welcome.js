@@ -149,29 +149,41 @@ function showWelcome() {
     }
 }
 
-// === 页面加载与 PJAX 兼容（最小改动强化版） ===
-// 说明：用一个稳妥的初始化函数；首次加载跑一次；每次 PJAX/Swup/Barba 完成后再跑一次。
-// 如果已经拿到 ipLocation，则直接渲染；否则再请求接口。
-(function () {
-    function initWelcome() {
-        if (ipLocation) {
-            showWelcome();
-        } else {
-            fetchIpLocation();
-        }
-    }
+/* === PJAX minimal compatibility (non-intrusive) === */
+(function(){
+  function safeRender(){
+    try{
+      var el = document.getElementById('welcome-info');
+      if (!el) return;
+      if (typeof window.showWelcome === 'function') window.showWelcome();
+    }catch(e){ /* swallow */ }
+  }
+  function afterSwap(){
+    // run a couple times to cover late DOM insertion
+    setTimeout(safeRender, 0);
+    setTimeout(safeRender, 150);
+    setTimeout(safeRender, 400);
+  }
+  // initial call (non-blocking)
+  if (document.readyState !== 'loading') { safeRender(); }
+  else { document.addEventListener('DOMContentLoaded', safeRender, {once:true}); }
 
-    // 首次加载
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initWelcome, { once: true });
-    } else {
-        initWelcome();
-    }
-
-    // 兼容多种 PJAX/路由库的完成事件
-    ['pjax:complete', 'pjax:end', 'pjax:success', 'swup:contentReplaced', 'barba:after']
-        .forEach(evt => {
-            document.addEventListener(evt, () => setTimeout(initWelcome, 0));
-        });
+  // common pjax/router events
+  ['pjax:complete','pjax:success','pjax:end','page:loaded'].forEach(function(evt){
+    document.addEventListener(evt, afterSwap, false);
+  });
+  // bfcache restore
+  window.addEventListener('pageshow', function(e){ if (e.persisted) afterSwap(); }, false);
 })();
+/* === end PJAX minimal compatibility === */
 
+// 提供全局可调用的初始化函数（供 head.html 的 <script data-pjax> 调用）
+window.initWelcome = window.initWelcome || function(){
+  try{
+    if (typeof showWelcome === 'function' && window.ipLocation) {
+      showWelcome();
+    } else if (typeof fetchIpLocation === 'function') {
+      fetchIpLocation();
+    }
+  }catch(e){}
+};
