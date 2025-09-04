@@ -173,6 +173,7 @@
     <!-- 小板报（始终加载脚本，兼容 PJAX）-->
 <th:block th:if="${not #strings.isEmpty(theme.config.sidebar.welcome.key)}">
   <script defer th:src="${assets_link + '/libs/welcome/welcome.js'}"></script>
+  <script data-pjax>try{ window.initWelcome && window.initWelcome(); }catch(e){}</script>
 </th:block>
 
     <!-- icon图标 -->
