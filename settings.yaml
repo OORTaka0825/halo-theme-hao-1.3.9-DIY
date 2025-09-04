@@ -3222,7 +3222,7 @@ spec:
                   value: true
                 - label: 关闭
                   value: false
-        - $formkit: radio
+        - $formkit: select
           name: global_font
           label: 全局字体
           value: off
