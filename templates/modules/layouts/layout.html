@@ -904,6 +904,46 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 })();
 </script>
 
+<link rel="preconnect" href="https://oortaka.top" crossorigin>
+
+<style>
+  /* 8 款字体的 @font-face —— 用你的外链直连 */
+  @font-face{font-family:'zhankukuaile';  src:url('https://oortaka.top/ziti/zhankukuaile.woff2')  format('woff2'); font-weight:400; font-style:normal; font-display:swap;}
+  @font-face{font-family:'zhankugdh';      src:url('https://oortaka.top/ziti/zhankugdh.woff2')      format('woff2'); font-weight:400; font-style:normal; font-display:swap;}
+  @font-face{font-family:'zhankuyuyang';   src:url('https://oortaka.top/ziti/zhankuyuyang.woff2')   format('woff2'); font-weight:400; font-style:normal; font-display:swap;}
+  @font-face{font-family:'zhankuheiti';    src:url('https://oortaka.top/ziti/zhankuheiti.woff2')    format('woff2'); font-weight:400; font-style:normal; font-display:swap;}
+  @font-face{font-family:'zhankuwenyi';    src:url('https://oortaka.top/ziti/zhankuwenyi.woff2')    format('woff2'); font-weight:400; font-style:normal; font-display:swap;}
+  @font-face{font-family:'zhankuhuangyou'; src:url('https://oortaka.top/ziti/zhankuhuangyou.woff2') format('woff2'); font-weight:400; font-style:normal; font-display:swap;}
+  @font-face{font-family:'zhankuxiaowei';  src:url('https://oortaka.top/ziti/zhankuxiaowei.woff2')  format('woff2'); font-weight:400; font-style:normal; font-display:swap;}
+  @font-face{font-family:'zhuziawan';      src:url('https://oortaka.top/ziti/zhuziawan.woff2')      format('woff2'); font-weight:400; font-style:normal; font-display:swap;}
+
+  /* 用 CSS 变量承载“全局字体” */
+  :root { --site-font: -apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei','Helvetica Neue',Arial,sans-serif; }
+  body  { font-family: var(--site-font); }
+
+  /* 后台选择 -> body 上加 class -> 切换变量 */
+  .font-zhankukuaile   { --site-font: 'zhankukuaile','PingFang SC','Microsoft YaHei',sans-serif; }
+  .font-zhankugdh      { --site-font: 'zhankugdh','PingFang SC','Microsoft YaHei',sans-serif; }
+  .font-zhankuyuyang   { --site-font: 'zhankuyuyang','PingFang SC','Microsoft YaHei',sans-serif; }
+  .font-zhankuheiti    { --site-font: 'zhankuheiti','PingFang SC','Microsoft YaHei',sans-serif; }
+  .font-zhankuwenyi    { --site-font: 'zhankuwenyi','PingFang SC','Microsoft YaHei',sans-serif; }
+  .font-zhankuhuangyou { --site-font: 'zhankuhuangyou','PingFang SC','Microsoft YaHei',sans-serif; }
+  .font-zhankuxiaowei  { --site-font: 'zhankuxiaowei','PingFang SC','Microsoft YaHei',sans-serif; }
+  .font-zhuziawan      { --site-font: 'zhuziawan','PingFang SC','Microsoft YaHei',sans-serif; }
+</style>
+
+<!-- 可选：按选择的字体做预加载，加快首屏 -->
+<th:block th:switch="${theme.config.style.global_font}">
+  <link th:case="'zhankukuaile'"   rel="preload" href="https://oortaka.top/ziti/zhankukuaile.woff2"  as="font" type="font/woff2" crossorigin>
+  <link th:case="'zhankugdh'"      rel="preload" href="https://oortaka.top/ziti/zhankugdh.woff2"      as="font" type="font/woff2" crossorigin>
+  <link th:case="'zhankuyuyang'"   rel="preload" href="https://oortaka.top/ziti/zhankuyuyang.woff2"   as="font" type="font/woff2" crossorigin>
+  <link th:case="'zhankuheiti'"    rel="preload" href="https://oortaka.top/ziti/zhankuheiti.woff2"    as="font" type="font/woff2" crossorigin>
+  <link th:case="'zhankuwenyi'"    rel="preload" href="https://oortaka.top/ziti/zhankuwenyi.woff2"    as="font" type="font/woff2" crossorigin>
+  <link th:case="'zhankuhuangyou'" rel="preload" href="https://oortaka.top/ziti/zhankuhuangyou.woff2" as="font" type="font/woff2" crossorigin>
+  <link th:case="'zhankuxiaowei'"  rel="preload" href="https://oortaka.top/ziti/zhankuxiaowei.woff2"  as="font" type="font/woff2" crossorigin>
+  <link th:case="'zhuziawan'"      rel="preload" href="https://oortaka.top/ziti/zhuziawan.woff2"      as="font" type="font/woff2" crossorigin>
+</th:block>
+<body th:classappend="${theme.config.style.global_font} != null and theme.config.style.global_font != 'off' ? ' font-' + theme.config.style.global_font : ''">
 
 
 </body>
