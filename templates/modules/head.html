@@ -288,7 +288,31 @@
 </th:block>
 
 <style id="webfonts-force-all">
-/* 全量强制：所有元素统一使用 --site-font */
-* { font-family: var(--site-font) !important; }
+/* 强制所有元素（含伪元素）使用 --site-font；再覆盖常见表单/ SVG 文本 */
+*, *::before, *::after { font-family: var(--site-font) !important; }
+svg, svg *, svg text, svg tspan { font-family: var(--site-font) !important; }
 </style>
+<script>
+// 保证样式总是位于 <head> 最后，PJAX/局部刷新后也继续生效
+(function(){ 
+  var css = '\n/* 强制所有元素（含伪元素）使用 --site-font；再覆盖常见表单/ SVG 文本 */\n*, *::before, *::after { font-family: var(--site-font) !important; }\nsvg, svg *, svg text, svg tspan { font-family: var(--site-font) !important; }\n';
+  function apply(){ 
+    var el = document.getElementById('webfonts-force-all');
+    if(!el){ el = document.createElement('style'); el.id='webfonts-force-all'; document.head.appendChild(el); }
+    el.textContent = css;
+    document.head.appendChild(el); // 追加到最后，提升优先级
+  }
+  apply();
+  document.addEventListener('DOMContentLoaded', apply);
+  window.addEventListener('load', apply);
+  // 常见 PJAX 事件
+  document.addEventListener('pjax:complete', apply);
+  document.addEventListener('pjax:success', apply);
+  document.addEventListener('page:loaded', apply);
+  // 有些主题晚注入 CSS，这里再补几次
+  setTimeout(apply, 0);
+  setTimeout(apply, 300);
+  setTimeout(apply, 800);
+})();
+</script>
 
