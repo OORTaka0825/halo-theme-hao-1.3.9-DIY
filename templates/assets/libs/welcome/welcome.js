@@ -175,31 +175,3 @@ function showWelcome() {
         });
 })();
 
-/* === PJAX minimal compatibility (non-intrusive) === */
-(function(){
-  function safeRender(){
-    try{
-      var el = document.getElementById('welcome-info');
-      if (!el) return;
-      if (typeof window.showWelcome === 'function') window.showWelcome();
-    }catch(e){ /* swallow */ }
-  }
-  function afterSwap(){
-    // run a couple times to cover late DOM insertion
-    setTimeout(safeRender, 0);
-    setTimeout(safeRender, 150);
-    setTimeout(safeRender, 400);
-  }
-  // initial call (non-blocking)
-  if (document.readyState !== 'loading') { safeRender(); }
-  else { document.addEventListener('DOMContentLoaded', safeRender, {once:true}); }
-
-  // common pjax/router events
-  ['pjax:complete','pjax:success','pjax:end','page:loaded'].forEach(function(evt){
-    document.addEventListener(evt, afterSwap, false);
-  });
-  // bfcache restore
-  window.addEventListener('pageshow', function(e){ if (e.persisted) afterSwap(); }, false);
-})();
-/* === end PJAX minimal compatibility === */
-
