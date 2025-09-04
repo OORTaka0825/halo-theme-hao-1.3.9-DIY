@@ -1,31 +1,24 @@
 // 访客欢迎信息模块（NSMAO）
 let ipLocation;
 function __getWelcomeLng(){
-  var v = Number(window.GLOBAL_CONFIG?.source?.welcome?.locationLng);
-  return Number.isFinite(v) ? v : 116.703781;
+  try{
+    var v = window.GLOBAL_CONFIG && GLOBAL_CONFIG.source && GLOBAL_CONFIG.source.welcome && GLOBAL_CONFIG.source.welcome.locationLng;
+    v = Number(v);
+    return isFinite(v) ? v : 116.703781;
+  }catch(e){ return 116.703781; }
 }
 function __getWelcomeLat(){
-  var v = Number(window.GLOBAL_CONFIG?.source?.welcome?.locationLat);
-  return Number.isFinite(v) ? v : 39.927334;
+  try{
+    var v = window.GLOBAL_CONFIG && GLOBAL_CONFIG.source && GLOBAL_CONFIG.source.welcome && GLOBAL_CONFIG.source.welcome.locationLat;
+    v = Number(v);
+    return isFinite(v) ? v : 39.927334;
+  }catch(e){ return 39.927334; }
 }
-
 
 // 计算两点间距离
 function getDistance(e1, n1, e2, n2) {
     const R = 6371;
-    const { sin, cos, asin, PI, hypot }
-
-// 等待挂载点后再渲染，最多重试3秒
-function __renderWelcomeSafe(retries){
-    retries = typeof retries === 'number' ? retries : 30;
-    if (document.getElementById('welcome-info') && ipLocation){
-        try { __renderWelcomeSafe(); return true; } catch(e) {}
-    }
-    if (retries > 0) setTimeout(function(){ __renderWelcomeSafe(retries-1); }, 100);
-    return false;
-}
-
- = Math;
+    const { sin, cos, asin, PI, hypot } = Math;
     let getPoint = (e, n) => {
         e *= PI / 180;
         n *= PI / 180;
@@ -63,7 +56,7 @@ function fetchIpLocation() {
                     district: res.data.district
                 }
             };
-            __renderWelcomeSafe();
+            __renderWelcomeWhenReady();
         }
     });
 }
@@ -169,5 +162,16 @@ function showWelcome() {
 }
 
 // 页面加载与 PJAX 兼容（参考版）
+
+// 在欢迎容器出现后再渲染，最多重试3秒
+function __renderWelcomeWhenReady(left){
+  left = typeof left === 'number' ? left : 30;
+  var box = document.getElementById('welcome-info');
+  if (box && ipLocation){
+    try { __renderWelcomeWhenReady(); return true; } catch(e){}
+  }
+  if (left > 0) setTimeout(function(){ __renderWelcomeWhenReady(left-1); }, 100);
+  return false;
+}
 window.addEventListener('load', function(){ try{ fetchIpLocation && fetchIpLocation(); }catch(e){}; });
 document.addEventListener('pjax:complete', function(){ try{ fetchIpLocation && fetchIpLocation(); }catch(e){}; });
