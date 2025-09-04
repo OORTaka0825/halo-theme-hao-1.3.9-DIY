@@ -172,29 +172,26 @@
 
     <!-- 小板报（始终加载脚本，兼容 PJAX）-->
 <th:block th:if="${not #strings.isEmpty(theme.config.sidebar.welcome.key)}">
-  <!-- 先把 key / 经纬度注入全局；必须 th:inline="javascript" 才会把 [[...]] 渲染成真实值 -->
-  <script th:inline="javascript" data-pjax>
-    (function () {
+  <!-- 配置注入到全局，且支持 PJAX 复执行 -->
+  <script data-pjax>
+    (function(){
       window.GLOBAL_CONFIG = window.GLOBAL_CONFIG || {};
       GLOBAL_CONFIG.source = GLOBAL_CONFIG.source || {};
       GLOBAL_CONFIG.source.welcome = {
-        key: '[[${theme.config.sidebar.welcome.key}]]',
+        key: "[(${theme.config.sidebar.welcome.key})]",
         locationLng: [[${theme.config.sidebar.welcome.locationLng}]],
         locationLat: [[${theme.config.sidebar.welcome.locationLat}]]
       };
     })();
   </script>
-
-  <!-- 加载 welcome.js；加载完成后首次拉取一次 -->
+  <!-- 加载 welcome.js（与参考版一致，不做页面判断） -->
   <script defer th:src="${assets_link + '/libs/welcome/welcome.js'}"
           onload="try{ window.fetchIpLocation && window.fetchIpLocation(); }catch(e){}"></script>
-
-  <!-- PJAX 完成后再拉取一次 -->
+  <!-- PJAX 完成后再次触发 -->
   <script data-pjax>
     try{ window.fetchIpLocation && window.fetchIpLocation(); }catch(e){};
   </script>
 </th:block>
-
 
 
     <!-- icon图标 -->
