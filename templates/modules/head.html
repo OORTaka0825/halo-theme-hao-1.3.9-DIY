@@ -287,12 +287,8 @@
 
 </th:block>
 
-<style id="webfonts-override-strong">
-/* 强力全局覆盖（参考你的写法，但排除图标与代码类） */
-*:not(.iconfont):not([class^="icon-"]):not([class*=" icon-"])
-  :not(.fa):not(.fas):not(.far):not(.fab)
-  :not(pre):not(code):not(kbd):not(samp) {
-  font-family: var(--site-font) !important;
-}
+<style id="webfonts-force-all">
+/* 全量强制：所有元素统一使用 --site-font */
+* { font-family: var(--site-font) !important; }
 </style>
 
