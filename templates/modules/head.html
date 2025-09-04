@@ -172,13 +172,25 @@
 
     <!-- 小板报（始终加载脚本，兼容 PJAX）-->
 <th:block th:if="${not #strings.isEmpty(theme.config.sidebar.welcome.key)}">
-  <!-- 1) 首次加载：脚本加载完成后再调用 initWelcome，避免顺序问题 -->
-  <script defer th:src="${assets_link + '/libs/welcome/welcome.js'}"
-          onload="try{ window.initWelcome && window.initWelcome(); }catch(e){}"></script>
-  <!-- 2) PJAX 完成：再次调用 initWelcome（data-pjax 会在 pjax:complete 后重新执行） -->
-  <script data-pjax>
-    try{ window.initWelcome && window.initWelcome(); }catch(e){};
+  <!-- 等待 #welcome-info 出现后再调用 initWelcome（最多重试约3秒） -->
+  <script>
+    window.__welcomeInitWhenReady = function(){
+      var tries = 0;
+      (function run(){
+        var el = document.getElementById('welcome-info');
+        if(!el && tries < 30){ tries++; return setTimeout(run, 100); }
+        try{ window.initWelcome && window.initWelcome(); }catch(e){}
+      })();
+    };
   </script>
+
+  <!-- 首次加载：脚本加载完成后触发 -->
+  <script defer th:src="${assets_link + '/libs/welcome/welcome.js'}"
+          onload="__welcomeInitWhenReady()"></script>
+
+  <!-- PJAX 完成：再次触发（data-pjax 会在 pjax:complete 后重新执行） -->
+  <script data-pjax>__welcomeInitWhenReady()</script>
+</th:block>
 </th:block>
 
     <!-- icon图标 -->
