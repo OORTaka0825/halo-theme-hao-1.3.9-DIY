@@ -238,81 +238,75 @@
 
 
 
-    <!-- === Webfonts: 8 Chinese display fonts + system fallback (linked to global_font) === -->
-    <link rel="preconnect" href="https://oortaka.top" crossorigin>
-    <style id="webfonts-base">
-      /* register 8 fonts (served from your domain) */
-      @font-face{font-family:'zhankukuaile';  src:url('https://oortaka.top/ziti/zhankukuaile.woff2')  format('woff2'); font-weight:400; font-style:normal; font-display:swap;}
-      @font-face{font-family:'zhankugdh';      src:url('https://oortaka.top/ziti/zhankugdh.woff2')      format('woff2'); font-weight:400; font-style:normal; font-display:swap;}
-      @font-face{font-family:'zhankuyuyang';   src:url('https://oortaka.top/ziti/zhankuyuyang.woff2')   format('woff2'); font-weight:400; font-style:normal; font-display:swap;}
-      @font-face{font-family:'zhankuheiti';    src:url('https://oortaka.top/ziti/zhankuheiti.woff2')    format('woff2'); font-weight:400; font-style:normal; font-display:swap;}
-      @font-face{font-family:'zhankuwenyi';    src:url('https://oortaka.top/ziti/zhankuwenyi.woff2')    format('woff2'); font-weight:400; font-style:normal; font-display:swap;}
-      @font-face{font-family:'zhankuhuangyou'; src:url('https://oortaka.top/ziti/zhankuhuangyou.woff2') format('woff2'); font-weight:400; font-style:normal; font-display:swap;}
-      @font-face{font-family:'zhankuxiaowei';  src:url('https://oortaka.top/ziti/zhankuxiaowei.woff2')  format('woff2'); font-weight:400; font-style:normal; font-display:swap;}
-      @font-face{font-family:'zhuziawan';      src:url('https://oortaka.top/ziti/zhuziawan.woff2')      format('woff2'); font-weight:400; font-style:normal; font-display:swap;}
+<!-- === Force font like your old snippet (single font applied globally with !important) === -->
+<link rel="preconnect" href="https://oortaka.top" crossorigin>
 
-      /* default when "关闭(off)" or unset: system font stack */
-      :root{
-        --site-font: -apple-system, BlinkMacSystemFont, "Segoe UI",
-                     "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC",
-                     "Helvetica Neue", Arial, sans-serif;
-      }
-      body{ font-family: var(--site-font); }
-    </style>
-
-    <!-- preload ONLY the selected font for faster paint -->
-    <th:block th:switch="${theme.config.style.global_font}">
-      <link th:case="'zhankukuaile'"   rel="preload" href="https://oortaka.top/ziti/zhankukuaile.woff2"  as="font" type="font/woff2" crossorigin>
-      <link th:case="'zhankugdh'"      rel="preload" href="https://oortaka.top/ziti/zhankugdh.woff2"      as="font" type="font/woff2" crossorigin>
-      <link th:case="'zhankuyuyang'"   rel="preload" href="https://oortaka.top/ziti/zhankuyuyang.woff2"   as="font" type="font/woff2" crossorigin>
-      <link th:case="'zhankuheiti'"    rel="preload" href="https://oortaka.top/ziti/zhankuheiti.woff2"    as="font" type="font/woff2" crossorigin>
-      <link th:case="'zhankuwenyi'"    rel="preload" href="https://oortaka.top/ziti/zhankuwenyi.woff2"    as="font" type="font/woff2" crossorigin>
-      <link th:case="'zhankuhuangyou'" rel="preload" href="https://oortaka.top/ziti/zhankuhuangyou.woff2" as="font" type="font/woff2" crossorigin>
-      <link th:case="'zhankuxiaowei'"  rel="preload" href="https://oortaka.top/ziti/zhankuxiaowei.woff2"  as="font" type="font/woff2" crossorigin>
-      <link th:case="'zhuziawan'"      rel="preload" href="https://oortaka.top/ziti/zhuziawan.woff2"      as="font" type="font/woff2" crossorigin>
-    </th:block>
-
-    <!-- switch CSS variable to selected font (no need to touch <body>) -->
-    <th:block th:switch="${theme.config.style.global_font}">
-      <style th:case="'zhankukuaile'">  :root{ --site-font: 'zhankukuaile', 'PingFang SC','Microsoft YaHei',sans-serif; } </style>
-      <style th:case="'zhankugdh'">     :root{ --site-font: 'zhankugdh',    'PingFang SC','Microsoft YaHei',sans-serif; } </style>
-      <style th:case="'zhankuyuyang'">  :root{ --site-font: 'zhankuyuyang', 'PingFang SC','Microsoft YaHei',sans-serif; } </style>
-      <style th:case="'zhankuheiti'">   :root{ --site-font: 'zhankuheiti',  'PingFang SC','Microsoft YaHei',sans-serif; } </style>
-      <style th:case="'zhankuwenyi'">   :root{ --site-font: 'zhankuwenyi',  'PingFang SC','Microsoft YaHei',sans-serif; } </style>
-      <style th:case="'zhankuhuangyou'">:root{ --site-font: 'zhankuhuangyou','PingFang SC','Microsoft YaHei',sans-serif; } </style>
-      <style th:case="'zhankuxiaowei'"> :root{ --site-font: 'zhankuxiaowei','PingFang SC','Microsoft YaHei',sans-serif; } </style>
-      <style th:case="'zhuziawan'">     :root{ --site-font: 'zhuziawan',    'PingFang SC','Microsoft YaHei',sans-serif; } </style>
-      <!-- off/unset: keep system stack -->
-    </th:block>
-
+<!-- preload selected font only -->
+<th:block th:switch="${theme.config.style.global_font}">
+  <link th:case="'zhankukuaile'"   rel="preload" href="https://oortaka.top/ziti/zhankukuaile.woff2"  as="font" type="font/woff2" crossorigin>
+  <link th:case="'zhankugdh'"      rel="preload" href="https://oortaka.top/ziti/zhankugdh.woff2"      as="font" type="font/woff2" crossorigin>
+  <link th:case="'zhankuyuyang'"   rel="preload" href="https://oortaka.top/ziti/zhankuyuyang.woff2"   as="font" type="font/woff2" crossorigin>
+  <link th:case="'zhankuheiti'"    rel="preload" href="https://oortaka.top/ziti/zhankuheiti.woff2"    as="font" type="font/woff2" crossorigin>
+  <link th:case="'zhankuwenyi'"    rel="preload" href="https://oortaka.top/ziti/zhankuwenyi.woff2"    as="font" type="font/woff2" crossorigin>
+  <link th:case="'zhankuhuangyou'" rel="preload" href="https://oortaka.top/ziti/zhankuhuangyou.woff2" as="font" type="font/woff2" crossorigin>
+  <link th:case="'zhankuxiaowei'"  rel="preload" href="https://oortaka.top/ziti/zhankuxiaowei.woff2"  as="font" type="font/woff2" crossorigin>
+  <link th:case="'zhuziawan'"      rel="preload" href="https://oortaka.top/ziti/zhuziawan.woff2"      as="font" type="font/woff2" crossorigin>
 </th:block>
 
-<style id="webfonts-force-all">
-/* 强制所有元素（含伪元素）使用 --site-font；再覆盖常见表单/ SVG 文本 */
-*, *::before, *::after { font-family: var(--site-font) !important; }
-svg, svg *, svg text, svg tspan { font-family: var(--site-font) !important; }
-</style>
+<!-- build the same effect as: * { font-family: "xxx" !important } -->
+<th:block th:if="${theme.config.style.global_font} != null and theme.config.style.global_font != 'off'">
+  <th:block th:switch="${theme.config.style.global_font}">
+    <style th:case="'zhankukuaile'" id="webfonts-force-all-single">
+      @font-face{font-family:'siteFontForce';src:url('https://oortaka.top/ziti/zhankukuaile.woff2') format('woff2');font-display:swap;}
+      * { font-family:'siteFontForce' !important; }
+    </style>
+    <style th:case="'zhankugdh'" id="webfonts-force-all-single">
+      @font-face{font-family:'siteFontForce';src:url('https://oortaka.top/ziti/zhankugdh.woff2') format('woff2');font-display:swap;}
+      * { font-family:'siteFontForce' !important; }
+    </style>
+    <style th:case="'zhankuyuyang'" id="webfonts-force-all-single">
+      @font-face{font-family:'siteFontForce';src:url('https://oortaka.top/ziti/zhankuyuyang.woff2') format('woff2');font-display:swap;}
+      * { font-family:'siteFontForce' !important; }
+    </style>
+    <style th:case="'zhankuheiti'" id="webfonts-force-all-single">
+      @font-face{font-family:'siteFontForce';src:url('https://oortaka.top/ziti/zhankuheiti.woff2') format('woff2');font-display:swap;}
+      * { font-family:'siteFontForce' !important; }
+    </style>
+    <style th:case="'zhankuwenyi'" id="webfonts-force-all-single">
+      @font-face{font-family:'siteFontForce';src:url('https://oortaka.top/ziti/zhankuwenyi.woff2') format('woff2');font-display:swap;}
+      * { font-family:'siteFontForce' !important; }
+    </style>
+    <style th:case="'zhankuhuangyou'" id="webfonts-force-all-single">
+      @font-face{font-family:'siteFontForce';src:url('https://oortaka.top/ziti/zhankuhuangyou.woff2') format('woff2');font-display:swap;}
+      * { font-family:'siteFontForce' !important; }
+    </style>
+    <style th:case="'zhankuxiaowei'" id="webfonts-force-all-single">
+      @font-face{font-family:'siteFontForce';src:url('https://oortaka.top/ziti/zhankuxiaowei.woff2') format('woff2');font-display:swap;}
+      * { font-family:'siteFontForce' !important; }
+    </style>
+    <style th:case="'zhuziawan'" id="webfonts-force-all-single">
+      @font-face{font-family:'siteFontForce';src:url('https://oortaka.top/ziti/zhuziawan.woff2') format('woff2');font-display:swap;}
+      * { font-family:'siteFontForce' !important; }
+    </style>
+  </th:block>
+</th:block>
+
+<!-- keep the force style at the very end to win cascade (also after PJAX) -->
 <script>
-// 保证样式总是位于 <head> 最后，PJAX/局部刷新后也继续生效
-(function(){ 
-  var css = '\n/* 强制所有元素（含伪元素）使用 --site-font；再覆盖常见表单/ SVG 文本 */\n*, *::before, *::after { font-family: var(--site-font) !important; }\nsvg, svg *, svg text, svg tspan { font-family: var(--site-font) !important; }\n';
-  function apply(){ 
-    var el = document.getElementById('webfonts-force-all');
-    if(!el){ el = document.createElement('style'); el.id='webfonts-force-all'; document.head.appendChild(el); }
-    el.textContent = css;
-    document.head.appendChild(el); // 追加到最后，提升优先级
+(function(){
+  function keepLast(){
+    var el = document.getElementById('webfonts-force-all-single');
+    if(!el) return;
+    document.head.appendChild(el); // move to the end
   }
-  apply();
-  document.addEventListener('DOMContentLoaded', apply);
-  window.addEventListener('load', apply);
-  // 常见 PJAX 事件
-  document.addEventListener('pjax:complete', apply);
-  document.addEventListener('pjax:success', apply);
-  document.addEventListener('page:loaded', apply);
-  // 有些主题晚注入 CSS，这里再补几次
-  setTimeout(apply, 0);
-  setTimeout(apply, 300);
-  setTimeout(apply, 800);
+  keepLast();
+  document.addEventListener('DOMContentLoaded', keepLast);
+  window.addEventListener('load', keepLast);
+  document.addEventListener('pjax:complete', keepLast);
+  document.addEventListener('pjax:success', keepLast);
+  document.addEventListener('page:loaded', keepLast);
+  setTimeout(keepLast, 0); setTimeout(keepLast, 300); setTimeout(keepLast, 800);
 })();
 </script>
 
+</th:block>
