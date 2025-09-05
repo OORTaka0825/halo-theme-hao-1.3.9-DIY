@@ -454,43 +454,12 @@ let halo = {
             var adElement = document.getElementById("footer-banner");
             var notMusic = document.body.getAttribute("data-type") != "music"; // 检测是否为音乐页面
             if ((adElement.offsetWidth <= 0 || adElement.offsetHeight <= 0) && notMusic) {
+                // 元素不可见，可能被拦截
                 console.log("Element may be blocked by AdBlocker Ultimate");
                 alert("页脚信息可能被AdBlocker Ultimate拦截，请检查广告拦截插件！")
             }
         }
-    },
-
-    /* === 复制本文链接（针对 .share-link 容器里的链条图标，支持 PJAX）=== */
-(function () {
-  function mount() {
-    if (typeof ClipboardJS === 'undefined') return;
-
-    // 清理旧实例，避免 PJAX 叠加
-    if (window.__shareLinkCopy__) {
-      window.__shareLinkCopy__.destroy();
-      window.__shareLinkCopy__ = null;
     }
 
-    window.__shareLinkCopy__ = new ClipboardJS('.share-link .haofont.hao-icon-link', {
-      text: () => location.href.split('#')[0]
-    });
 
-    const ok = () => (window.btf && btf.snackbarShow) ? btf.snackbarShow('链接已复制') : console.log('copied');
-    window.__shareLinkCopy__.on('success', () => ok());
-    window.__shareLinkCopy__.on('error', () => {
-      try {
-        const t = document.createElement('textarea');
-        t.value = location.href.split('#')[0];
-        t.style.cssText = 'position:fixed;left:-9999px;top:-9999px';
-        document.body.appendChild(t); t.select();
-        document.execCommand('copy'); document.body.removeChild(t);
-        ok();
-      } catch (_) {}
-    });
-  }
-
-  // 首次与 PJAX 完成后都挂载
-  window.addEventListener('load', mount);
-  document.addEventListener('pjax:complete', mount);
-  document.addEventListener('page:loaded', mount);
-})();
+}
