@@ -448,61 +448,56 @@ let halo = {
         document.getElementById("power-star") && init()
     },
 
-    checkAd() {
+        checkAd() {
         var default_enable = GLOBAL_CONFIG.source.footer.default_enable
         if (default_enable) {
             var adElement = document.getElementById("footer-banner");
             var notMusic = document.body.getAttribute("data-type") != "music"; // 检测是否为音乐页面
             if ((adElement.offsetWidth <= 0 || adElement.offsetHeight <= 0) && notMusic) {
-                // 元素不可见，可能被拦截
                 console.log("Element may be blocked by AdBlocker Ultimate");
                 alert("页脚信息可能被AdBlocker Ultimate拦截，请检查广告拦截插件！")
             }
         }
+    },
+
+    /* ===== 文章底部【复制链接】（支持 PJAX）===== */
+    initShareCopy() {
+        try {
+            if (typeof ClipboardJS === 'undefined') return;
+
+            // 先销毁旧实例，避免 PJAX 重复绑定
+            if (window.__shareCopy) {
+                window.__shareCopy.destroy();
+                window.__shareCopy = null;
+            }
+
+            // 给按钮写入要复制的文本（优先 data-url，其次当前页）
+            document.querySelectorAll('.copy-link').forEach(btn => {
+                const url = btn.getAttribute('data-url') || window.location.href;
+                btn.setAttribute('data-clipboard-text', url);
+            });
+
+            const clip = new ClipboardJS('.copy-link');
+            clip.on('success', e => {
+                try { window.btf && btf.snackbarShow && btf.snackbarShow('链接已复制'); } catch (_) {}
+                e.clearSelection();
+            });
+            clip.on('error', () => {
+                // 极少数环境降级到 Clipboard API
+                try {
+                    navigator.clipboard.writeText(window.location.href).then(() => {
+                        window.btf && btf.snackbarShow && btf.snackbarShow('链接已复制');
+                    });
+                } catch (_) {}
+            });
+
+            window.__shareCopy = clip;
+        } catch (_) {}
     }
-// ===== 文章底部【复制链接】 =====
-// 要求：页面上复制按钮带有 .copy-link 类名；若主题未渲染该按钮，这段代码不会报错，也不会做任何事
-halo.initShareCopy = function () {
-  try {
-    if (typeof ClipboardJS === 'undefined') return;
+};  // ←← 这里收尾：结束 let halo = { ... }
 
-    // 每次初始化前先销毁旧实例，避免 PJAX 累加
-    if (window.__shareCopy) {
-      window.__shareCopy.destroy();
-      window.__shareCopy = null;
-    }
-
-    // 给按钮写入要复制的文本（默认当前页 URL；也可在按钮上自定义 data-url）
-    document.querySelectorAll('.copy-link').forEach(btn => {
-      const url = btn.getAttribute('data-url') || window.location.href;
-      btn.setAttribute('data-clipboard-text', url);
-    });
-
-    // 绑定复制
-    const clip = new ClipboardJS('.copy-link');
-    clip.on('success', e => {
-      try { window.btf && btf.snackbarShow && btf.snackbarShow('链接已复制'); }
-      catch (_) {}
-      e.clearSelection();
-    });
-    clip.on('error', () => {
-      // 极少数环境 ClipboardJS 失败时降级
-      try {
-        navigator.clipboard.writeText(window.location.href).then(() => {
-          window.btf && btf.snackbarShow && btf.snackbarShow('链接已复制');
-        });
-      } catch (_) {}
-    });
-
-    window.__shareCopy = clip;
-  } catch (_) {}
-};
-
-// 首次进入与 PJAX 切换后都重新挂载
-window.addEventListener('load', halo.initShareCopy);
-document.addEventListener('pjax:complete', halo.initShareCopy);
-document.addEventListener('page:loaded', halo.initShareCopy);
-
-
-}
+/* 首次进入与 PJAX 切换后都初始化一次复制按钮 */
+window.addEventListener('load', () => halo.initShareCopy());
+document.addEventListener('pjax:complete', () => halo.initShareCopy());
+document.addEventListener('page:loaded', () => halo.initShareCopy());
 
