@@ -3247,41 +3247,6 @@ spec:
             - label: 站酷快乐体
               value: zhankukuaile
         - $formkit: select
-          name: cursor_style
-          label: 鼠标风格
-          value: none
-          options:
-            - value: none
-              label: 关闭
-            - value: OwO
-              label: OwO
-            - value: UwU
-              label: UwU
-            - value: breeze
-              label: 清风（深色）
-            - value: mellow
-              label: 卡通圆润
-            - value: water_01
-              label: 彩虹水滴（一）
-            - value: water_02
-              label: 彩虹水滴（二）
-            - value: horse
-              label: 彩虹小马
-            - value: debris
-              label: 彩色碎片
-            - value: overwatch
-              label: 守望先锋
-            - value: rainbow_rain
-              label: 彩虹云雨
-            - value: marry
-              label: 小樱茉莉
-            - value: black_cat
-              label: 黑色小猫
-            - value: music_cat_01
-              label: 音乐小猫（一）
-            - value: music_cat_02
-              label: 音乐小猫（二）
-        - $formkit: select
           name: cursor_move
           label: 鼠标移动特效
           value: none
