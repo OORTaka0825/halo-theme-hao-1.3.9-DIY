@@ -149,18 +149,23 @@ document.addEventListener('pjax:complete', pjaxRecalc);
 document.addEventListener('pjax:success',  pjaxRecalc);
 document.addEventListener('page:loaded',    pjaxRecalc);
 
-// ---- welcome.js 末尾添加：统一触发器（首屏 + PJAX） ----
+// ---- welcome.js 末尾：统一触发器（首屏 + PJAX）----
 (function () {
+  if (window.__WELCOME_BIND_ONCE__) return;      // ★ 防重复
+  window.__WELCOME_BIND_ONCE__ = true;
+
   function pjaxRecalc() {
     try { window.showWelcome && window.showWelcome(); } catch (e) {}
     try { window.fetchIpLocation && window.fetchIpLocation(); } catch (e) {}
   }
+
   // 首次加载
   window.addEventListener('load', function () {
     try { window.fetchIpLocation && window.fetchIpLocation(); } catch (e) {}
   });
+
   // PJAX 回来时
   document.addEventListener('pjax:complete', pjaxRecalc);
   document.addEventListener('pjax:success',  pjaxRecalc);
-  document.addEventListener('page:loaded',    pjaxRecalc);
+  document.addEventListener('page:loaded',   pjaxRecalc);
 })();
