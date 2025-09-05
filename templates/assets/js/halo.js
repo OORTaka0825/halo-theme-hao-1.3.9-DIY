@@ -181,34 +181,23 @@ let halo = {
             };
 
             // 折叠图标（右上角）：默认“向左”
-            var expander
             if (isEnableExpander) {
-                expander = document.createElement("i");
+                var expander = document.createElement("i");
                 expander.className = 'fa-sharp fa-solid haofont hao-icon-angle-left code-expander cursor-pointer'
                 customItem.appendChild(expander)
 
                 expander.addEventListener('click', prismToolsFn)
             }
 
-            // —— 新增：底部“向上收回”按钮（展开时出现在代码块**下方**） & 原有“向下展开”按钮
-            let btnDown = null  // 向下展开（覆盖在底部）
-            let btnUp = null    // 向上收回（插在代码块外、下方）
-
-            // 底部“向下展开”
+            // 底部“展开”按钮：点击后进入全量，并把右上角图标切为“向下”
             const expandCode = function () {
-                // 记录展开前的滚动位置
-                const originTop = r.getBoundingClientRect().top + window.scrollY;
-                r.setAttribute('data-origin-top', originTop);
-
                 this.classList.add("expand-done");
                 this.style.display = "none";
                 r.classList.add("expand-done");
-                // 展开后显示“向上收回”
-                if (btnUp) btnUp.style.display = 'block';
-                // 右上角图标切为“向下”（先移除再添加，避免错乱）
+
                 try {
                     if (expander) {
-                        expander.classList.remove('hao-icon-angle-left', 'hao-icon-angle-down');
+                        expander.classList.remove('hao-icon-angle-left');
                         expander.classList.add('hao-icon-angle-down');
                     }
                 } catch (e) {}
@@ -216,91 +205,45 @@ let halo = {
 
             if (isEnableHeightLimit && r.offsetHeight > prismLimit) {
                 r.classList.add("close")
-                // 向下展开按钮（保持原样，覆盖在代码底部）
-                btnDown = document.createElement("div");
-                btnDown.className = "code-expand-btn";
-                btnDown.innerHTML = '<i class="haofont hao-icon-angle-double-down"></i>';
-                btnDown.addEventListener("click", expandCode);
-                r.offsetParent.appendChild(btnDown);
-
-                // 向上收回按钮（新增，默认隐藏；插在代码块**外部**，不会挡住最后一行）
-                btnUp = document.createElement("div");
-                btnUp.className = "code-expand-btn";
-                btnUp.style.display = 'none';
-                // 使用 double-down + 旋转，保证图标一定存在
-                btnUp.innerHTML = '<i class="haofont hao-icon-angle-double-down" style="transform: rotate(180deg);"></i>';
-                btnUp.addEventListener("click", function () {
-                    r.classList.remove("expand-done");
-                    // 收回后显示“向下展开”，隐藏“向上收回”
-                    if (btnDown) {
-                        btnDown.style.display = "block";
-                        btnDown.classList.remove("expand-done");
-                    }
-                    btnUp.style.display = "none";
-                    // 右上角图标恢复“向左”（先移除再添加，避免错乱）
-                    try {
-                        if (expander) {
-                            expander.classList.remove('hao-icon-angle-left', 'hao-icon-angle-down');
-                            expander.classList.add('hao-icon-angle-left');
-                        }
-                    } catch (e) {}
-
-                    // 回到展开前的位置
-                    const backTop = parseFloat(r.getAttribute('data-origin-top'));
-                    if (!Number.isNaN(backTop)) {
-                        window.scrollTo({ top: backTop, behavior: 'smooth' });
-                    }
-                });
-                // 把“向上收回”按钮插到代码块容器**下面**
-                r.offsetParent.parentNode.insertBefore(btnUp, r.offsetParent.nextSibling);
+                const ele = document.createElement("div");
+                ele.className = "code-expand-btn";
+                ele.innerHTML = '<i class="haofont hao-icon-angle-double-down"></i>';
+                ele.addEventListener("click", expandCode);
+                r.offsetParent.appendChild(ele);
             }
 
-            // 右上角箭头：仅在「限制高度 ↔ 全量」之间切换；不进入“仅标题”折叠
+            // 右上角箭头：仅在「限制高度 ↔ 全量」之间切换；不再进入“仅标题”折叠
             const prismShrinkFn = () => {
-                const isExpanded = r.classList.contains('expand-done');
+                const $btnWrap = r.offsetParent.lastElementChild;
+                const hasBottomBtn = $btnWrap && $btnWrap.classList && $btnWrap.classList.contains('code-expand-btn');
 
-                if (isExpanded) {
-                    // 全量 → 限制高度
+                // A：当前是“全量展开”→ 点击右上角 = 回到“限制高度”
+                if (r.classList.contains('expand-done')) {
                     r.classList.remove('expand-done');
-                    if (btnDown) {
-                        btnDown.style.display = 'block';
-                        btnDown.classList.remove('expand-done');
+                    if (hasBottomBtn) {
+                        $btnWrap.style.display = 'block';
+                        $btnWrap.classList.remove('expand-done'); // 底部箭头恢复“向下”
                     }
-                    if (btnUp) btnUp.style.display = 'none';
                     try {
                         if (expander) {
-                            expander.classList.remove('hao-icon-angle-left', 'hao-icon-angle-down');
-                            expander.classList.add('hao-icon-angle-left');
+                            expander.classList.remove('hao-icon-angle-down');
+                            expander.classList.add('hao-icon-angle-left'); // 右上角恢复“向左”
                         }
                     } catch (e) {}
-
-                    // 回到展开前的位置
-                    const backTop = parseFloat(r.getAttribute('data-origin-top'));
-                    if (!Number.isNaN(backTop)) {
-                        window.scrollTo({ top: backTop, behavior: 'smooth' });
-                    }
                     return;
                 }
 
-                // 限制高度 → 全量
-                const originTop = r.getBoundingClientRect().top + window.scrollY;
-                r.setAttribute('data-origin-top', originTop);
-
+                // B：当前是“限制高度”→ 点击右上角 = 全量展开
                 r.classList.add('expand-done');
-                if (btnDown) btnDown.style.display = 'none';
-                if (btnUp)   btnUp.style.display   = 'block';
+                if (hasBottomBtn) {
+                    $btnWrap.classList.add('expand-done'); // 与底部逻辑保持一致（随后隐藏）
+                    $btnWrap.style.display = 'none';
+                }
                 try {
                     if (expander) {
-                        expander.classList.remove('hao-icon-angle-left', 'hao-icon-angle-down');
-                        expander.classList.add('hao-icon-angle-down');
+                        expander.classList.remove('hao-icon-angle-left');
+                        expander.classList.add('hao-icon-angle-down'); // 右上角切为“向下”
                     }
-                } catch (e) {}
-
-                // 强制取消“仅标题折叠”相关的样式与状态
-                try {
-                    toolbar.classList.remove('c-expander');
-                    r.classList.remove('expand-done-expander');
-                    r.firstElementChild.style.display = 'block';
                 } catch (e) {}
             };
 
