@@ -460,61 +460,37 @@ let halo = {
         }
     },
 
-    /* === 复制本文链接（支持 PJAX，零改模板）=== */
+    /* === 复制本文链接（针对 .share-link 容器里的链条图标，支持 PJAX）=== */
 (function () {
-  // 成功/失败提示
-  function toast(msg) {
-    if (window.btf && btf.snackbarShow) btf.snackbarShow(msg);
-    else console.log(msg);
-  }
+  function mount() {
+    if (typeof ClipboardJS === 'undefined') return;
 
-  // 真正复制
-  function copyText(text) {
-    // 先用 Clipboard API
-    if (navigator.clipboard && window.isSecureContext !== false) {
-      return navigator.clipboard.writeText(text).then(
-        () => toast('链接已复制'),
-        () => fallback(text)
-      );
+    // 清理旧实例，避免 PJAX 叠加
+    if (window.__shareLinkCopy__) {
+      window.__shareLinkCopy__.destroy();
+      window.__shareLinkCopy__ = null;
     }
-    // 兜底
-    return fallback(text);
 
-    function fallback(t) {
+    window.__shareLinkCopy__ = new ClipboardJS('.share-link .haofont.hao-icon-link', {
+      text: () => location.href.split('#')[0]
+    });
+
+    const ok = () => (window.btf && btf.snackbarShow) ? btf.snackbarShow('链接已复制') : console.log('copied');
+    window.__shareLinkCopy__.on('success', () => ok());
+    window.__shareLinkCopy__.on('error', () => {
       try {
-        const ta = document.createElement('textarea');
-        ta.value = t;
-        ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px';
-        document.body.appendChild(ta);
-        ta.select();
-        const ok = document.execCommand('copy');
-        document.body.removeChild(ta);
-        ok ? toast('链接已复制') : toast('复制失败，请手动复制');
-      } catch (e) {
-        toast('复制失败，请手动复制');
-      }
-    }
+        const t = document.createElement('textarea');
+        t.value = location.href.split('#')[0];
+        t.style.cssText = 'position:fixed;left:-9999px;top:-9999px';
+        document.body.appendChild(t); t.select();
+        document.execCommand('copy'); document.body.removeChild(t);
+        ok();
+      } catch (_) {}
+    });
   }
 
-  // 事件委托（Capture 阶段，避免被别的 stopPropagation 抢先阻断）
-  function clickHandler(e) {
-    const btn = e.target && e.target.closest(
-      // 覆盖常见写法：有其中任意一个就会触发
-      '[data-action="copy-link"], [data-copy-link], .copy-link, .share-link, .haofont.hao-icon-link'
-    );
-    if (!btn) return;
-
-    e.preventDefault();
-    // 优先 data-url / href，其次当前页
-    const url = btn.getAttribute('data-url')
-             || btn.getAttribute('href')
-             || location.href.replace(location.hash, '');
-    copyText(url);
-  }
-
-  // 常驻绑定一次即可，PJAX 不会丢
-  if (!window.__COPY_LINK_BOUND__) {
-    document.addEventListener('click', clickHandler, true); // capture
-    window.__COPY_LINK_BOUND__ = true;
-  }
+  // 首次与 PJAX 完成后都挂载
+  window.addEventListener('load', mount);
+  document.addEventListener('pjax:complete', mount);
+  document.addEventListener('page:loaded', mount);
 })();
