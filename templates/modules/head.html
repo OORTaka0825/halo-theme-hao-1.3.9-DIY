@@ -189,8 +189,9 @@
           onload="try{ window.fetchIpLocation && window.fetchIpLocation(); }catch(e){}"></script>
   <!-- PJAX 完成后再次触发 -->
   <script data-pjax>
-    try{ window.fetchIpLocation && window.fetchIpLocation(); }catch(e){};
-  </script>
+  try{ window.showWelcome && window.showWelcome(); }catch(e){}
+  try{ window.fetchIpLocation && window.fetchIpLocation(); }catch(e){}
+</script>
 </th:block>
 
 
