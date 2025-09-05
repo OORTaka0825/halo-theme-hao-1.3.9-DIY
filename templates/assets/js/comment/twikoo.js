@@ -19,46 +19,7 @@
                 $("input").focusout(function () {
                     heo_intype = false;
                 });
-                
-
-                // === Fix region display: prefer City -> Province -> Country; hide '0' ===
-                try {
-                    const pickRegion = (s) => {
-                        const parts = String(s || '').split('|'); // [country, area, province, city, isp]
-                        const country = parts[0] || '';
-                        const province = parts[2] || '';
-                        const city = parts[3] || '';
-                        return (city && city !== '0') ? city
-                             : (province && province !== '0') ? province
-                             : (country && country !== '0') ? country
-                             : '';
-                    };
-
-                    const fixTwikooRegion = (root) => {
-                        root = root || document;
-                        // 1) explicit region elements often used by themes
-                        const nodes = root.querySelectorAll('#twikoo .tk-region, #twikoo .comment-region, #twikoo .region-badge, #twikoo .twikoo-region, #twikoo .badge-region');
-                        nodes.forEach((el) => {
-                            const raw = el.getAttribute('data-ipRegion') || el.dataset.ipRegion || el.dataset.region || el.getAttribute('title') || el.getAttribute('aria-label') || el.textContent.trim();
-                            const nice = pickRegion(raw);
-                            if (nice) el.textContent = nice;
-                            else if (el.textContent.trim() === '0') el.remove();
-                        });
-
-                        // 2) as a fallback, remove plain '0' badges within meta area
-                        root.querySelectorAll('#twikoo .tk-meta .badge, #twikoo .tk-meta .tag, #twikoo .tk-meta .tk-tag').forEach((el) => {
-                            if (el.textContent.trim() === '0') el.remove();
-                        });
-                    };
-
-                    // run immediately for current render
-                    fixTwikooRegion(document);
-                    // also schedule once more after layout just in case
-                    setTimeout(() => fixTwikooRegion(document), 0);
-                } catch (e) {
-                    console && console.debug && console.debug('[twikoo] region fix failed:', e);
-                }
-$("textarea").focusout(function () {
+                $("textarea").focusout(function () {
                     heo_intype = false;
                 });
             }
