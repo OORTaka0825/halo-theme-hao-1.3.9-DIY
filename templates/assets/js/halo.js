@@ -7,13 +7,16 @@ let halo = {
             else
                 commentDOMclass.replace('dark', 'light')
         }
+
     },
 
     dataCodeTheme: () => {
+
         var t = document.documentElement.getAttribute('data-theme')
         var e = document.querySelector("link[data-code-theme=light]"),
             o = document.querySelector("link[data-code-theme=dark]");
         (o || e) && ("light" === t ? (o.disabled = !0, e.disabled = !1) : (e.disabled = !0, o.disabled = !1))
+
     },
 
     /**
@@ -21,9 +24,13 @@ let halo = {
      * 只适用于halo的代码渲染
      */
     addPrismTool: () => {
-        if (typeof Prism === 'undefined' || typeof document === 'undefined') return;
+        if (typeof Prism === 'undefined' || typeof document === 'undefined') {
+            return;
+        }
+
         if (!Prism.plugins.toolbar) {
             console.warn('Copy to Clipboard plugin loaded before Toolbar plugin.');
+
             return;
         }
 
@@ -37,25 +44,37 @@ let halo = {
         const prismLimit = GLOBAL_CONFIG.prism.prism_limit;
         const isEnableHeightLimit = GLOBAL_CONFIG.prism.enable_height_limit;
 
+        // https://stackoverflow.com/a/30810322/7595472
+
         /** @param {CopyInfo} copyInfo */
         function fallbackCopyTextToClipboard(copyInfo) {
             var textArea = document.createElement('textarea');
             textArea.value = copyInfo.getText();
+
+            // Avoid scrolling to bottom
             textArea.style.top = '0';
             textArea.style.left = '0';
             textArea.style.position = 'fixed';
+
             document.body.appendChild(textArea);
             textArea.focus();
             textArea.select();
+
             try {
                 var successful = document.execCommand('copy');
                 setTimeout(function () {
-                    if (successful) copyInfo.success();
-                    else copyInfo.error();
+                    if (successful) {
+                        copyInfo.success();
+                    } else {
+                        copyInfo.error();
+                    }
                 }, 1);
             } catch (err) {
-                setTimeout(function () { copyInfo.error(err); }, 1);
+                setTimeout(function () {
+                    copyInfo.error(err);
+                }, 1);
             }
+
             document.body.removeChild(textArea);
         }
 
@@ -63,48 +82,97 @@ let halo = {
         function copyTextToClipboard(copyInfo) {
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(copyInfo.getText()).then(copyInfo.success, function () {
+                    // try the fallback in case `writeText` didn't work
                     fallbackCopyTextToClipboard(copyInfo);
                 });
-            } else fallbackCopyTextToClipboard(copyInfo);
+            } else {
+                fallbackCopyTextToClipboard(copyInfo);
+            }
         }
 
-        function selectElementText(element) { window.getSelection().selectAllChildren(element); }
+        /**
+         * Selects the text content of the given element.
+         *
+         * @param {Element} element
+         */
+        function selectElementText(element) {
+            // https://stackoverflow.com/a/20079910/7595472
+            window.getSelection().selectAllChildren(element);
+        }
 
+        /**
+         * Traverses up the DOM tree to find data attributes that override the default plugin settings.
+         *
+         * @param {Element} startElement An element to start from.
+         * @returns {Settings} The plugin settings.
+         * @typedef {Record<"copy" | "copy-error" | "copy-success" | "copy-timeout", string | number>} Settings
+         */
         function getSettings(startElement) {
-            var settings = { 'copy': 'Copy', 'copy-error': 'Press Ctrl+C to copy', 'copy-success': 'Copied!', 'copy-timeout': 5000 };
+            /** @type {Settings} */
+            var settings = {
+                'copy': 'Copy',
+                'copy-error': 'Press Ctrl+C to copy',
+                'copy-success': 'Copied!',
+                'copy-timeout': 5000
+            };
+
             var prefix = 'data-prismjs-';
             for (var key in settings) {
                 var attr = prefix + key;
                 var element = startElement;
-                while (element && !element.hasAttribute(attr)) element = element.parentElement;
-                if (element) settings[key] = element.getAttribute(attr);
+                while (element && !element.hasAttribute(attr)) {
+                    element = element.parentElement;
+                }
+                if (element) {
+                    settings[key] = element.getAttribute(attr);
+                }
             }
             return settings;
         }
 
         var r = Prism.plugins.toolbar.hook = function (a) {
+
+
             var r = a.element.parentNode;
             var toolbar = r.nextElementSibling;
 
-            // 标题 & 分隔
-            isEnableTitle && toolbar.classList.add("c-title");
-            isEnableHr && toolbar.classList.add("c-hr");
-
+            //标题
+            isEnableTitle && toolbar.classList.add("c-title")
+            //标题分割线
+            isEnableHr && toolbar.classList.add("c-hr")
             var customItem = document.createElement("div");
-            customItem.className = 'custom-item absolute top-0';
+            customItem.className = 'custom-item absolute top-0'
 
-            // 复制
+            //复制
             if (isEnableCopy) {
                 var copy = document.createElement("i");
-                copy.className = 'haofont hao-icon-paste copy-button code-copy cursor-pointer';
-                customItem.appendChild(copy);
+
+                copy.className = 'haofont hao-icon-paste copy-button code-copy cursor-pointer'
+                customItem.appendChild(copy)
+
                 copy.addEventListener('click', function () {
                     copyTextToClipboard({
-                        getText: function () { return a.element.textContent; },
-                        success: function () { btf.snackbarShow('复制成功'); setState('copy-success'); resetText(); },
-                        error: function () { setState('copy-error'); setTimeout(function () { selectElementText(a.element); }, 1); resetText(); }
+                        getText: function () {
+                            return a.element.textContent;
+                        },
+                        success: function () {
+                            btf.snackbarShow('复制成功')
+                            setState('copy-success');
+                            resetText();
+                        },
+                        error: function () {
+                            setState('copy-error');
+
+                            setTimeout(function () {
+                                selectElementText(a.element);
+                            }, 1);
+
+                            resetText();
+                        }
                     });
+
                 });
+
             }
 
             const prismToolsFn = function (e) {
@@ -112,105 +180,114 @@ let halo = {
                 if ($target.contains("code-expander")) prismShrinkFn(this);
             };
 
-            // 右上角折叠图标：默认“向左”
-            let expander = null;
+            // 折叠图标（右上角）：默认“向左”
             if (isEnableExpander) {
-                expander = document.createElement("i");
-                expander.className = 'fa-sharp fa-solid haofont hao-icon-angle-left code-expander cursor-pointer';
-                customItem.appendChild(expander);
-                expander.addEventListener('click', prismToolsFn);
+                var expander = document.createElement("i");
+                expander.className = 'fa-sharp fa-solid haofont hao-icon-angle-left code-expander cursor-pointer'
+                customItem.appendChild(expander)
+
+                expander.addEventListener('click', prismToolsFn)
             }
 
-            // —— 底部按钮（下展开 / 上收回）——
-            let btnDown = null;   // 向下（展开到全量）
-            let btnUp   = null;   // 向上（从全量收回到限制高度）
-
-            // 点击“下展开”
+            // 底部“展开”按钮：点击后进入全量，并把右上角图标切为“向下”
             const expandCode = function () {
                 this.classList.add("expand-done");
                 this.style.display = "none";
                 r.classList.add("expand-done");
-                // 显示“上收回”
-                if (btnUp) btnUp.style.display = 'block';
-                // 右上角图标切为“向下”
-                try { if (expander) { expander.classList.remove('hao-icon-angle-left'); expander.classList.add('hao-icon-angle-down'); } } catch (e) {}
-            };
 
-            // 点击“上收回”
-            const collapseCode = function () {
-                r.classList.remove("expand-done");
-                // 显示“下展开”
-                if (btnDown) { btnDown.style.display = 'block'; btnDown.classList.remove('expand-done'); }
-                // 隐藏“上收回”
-                if (btnUp) btnUp.style.display = 'none';
-                // 右上角图标改回“向左”
-                try { if (expander) { expander.classList.remove('hao-icon-angle-down'); expander.classList.add('hao-icon-angle-left'); } } catch (e) {}
-            };
-
-            // 超过阈值才渲染底部按钮
-            if (isEnableHeightLimit && r.offsetHeight > prismLimit) {
-                // 向下（展开）
-                btnDown = document.createElement("div");
-                btnDown.className = "code-expand-btn";
-                btnDown.innerHTML = '<i class="haofont hao-icon-angle-double-down"></i>';
-                btnDown.addEventListener("click", expandCode);
-                r.offsetParent.appendChild(btnDown);
-
-                // 向上（收回）——默认隐藏；展开时显示
-                btnUp = document.createElement("div");
-                btnUp.className = "code-expand-btn";
-                btnUp.style.display = 'none';
-                btnUp.innerHTML = '<i class="haofont hao-icon-angle-double-up"></i>';
-                btnUp.addEventListener("click", collapseCode);
-                r.offsetParent.appendChild(btnUp);
-            }
-
-            // 右上角箭头：只在「限制高度 ↔ 全量」之间切换；不进入“仅标题”折叠
-            const prismShrinkFn = () => {
-                const isExpanded = r.classList.contains('expand-done');
-
-                if (isExpanded) {
-                    // 全量 → 限制高度
-                    r.classList.remove('expand-done');
-                    if (btnDown) { btnDown.style.display = 'block'; btnDown.classList.remove('expand-done'); }
-                    if (btnUp)   btnUp.style.display = 'none';
-                    try { if (expander) { expander.classList.remove('hao-icon-angle-down'); expander.classList.add('hao-icon-angle-left'); } } catch (e) {}
-                } else {
-                    // 限制高度 → 全量
-                    r.classList.add('expand-done');
-                    if (btnDown) btnDown.style.display = 'none';
-                    if (btnUp)   btnUp.style.display   = 'block';
-                    try { if (expander) { expander.classList.remove('hao-icon-angle-left'); expander.classList.add('hao-icon-angle-down'); } } catch (e) {}
-                }
-
-                // 强制取消“仅标题折叠”相关状态
                 try {
-                    toolbar.classList.remove('c-expander');
-                    r.classList.remove('expand-done-expander');
-                    r.firstElementChild.style.display = 'block';
+                    if (expander) {
+                        expander.classList.remove('hao-icon-angle-left');
+                        expander.classList.add('hao-icon-angle-down');
+                    }
                 } catch (e) {}
             };
 
-            toolbar.appendChild(customItem);
+            if (isEnableHeightLimit && r.offsetHeight > prismLimit) {
+                r.classList.add("close")
+                const ele = document.createElement("div");
+                ele.className = "code-expand-btn";
+                ele.innerHTML = '<i class="haofont hao-icon-angle-double-down"></i>';
+                ele.addEventListener("click", expandCode);
+                r.offsetParent.appendChild(ele);
+            }
+
+            // 右上角箭头：仅在「限制高度 ↔ 全量」之间切换；不再进入“仅标题”折叠
+            const prismShrinkFn = () => {
+                const $btnWrap = r.offsetParent.lastElementChild;
+                const hasBottomBtn = $btnWrap && $btnWrap.classList && $btnWrap.classList.contains('code-expand-btn');
+
+                // A：当前是“全量展开”→ 点击右上角 = 回到“限制高度”
+                if (r.classList.contains('expand-done')) {
+                    r.classList.remove('expand-done');
+                    if (hasBottomBtn) {
+                        $btnWrap.style.display = 'block';
+                        $btnWrap.classList.remove('expand-done'); // 底部箭头恢复“向下”
+                    }
+                    try {
+                        if (expander) {
+                            expander.classList.remove('hao-icon-angle-down');
+                            expander.classList.add('hao-icon-angle-left'); // 右上角恢复“向左”
+                        }
+                    } catch (e) {}
+                    return;
+                }
+
+                // B：当前是“限制高度”→ 点击右上角 = 全量展开
+                r.classList.add('expand-done');
+                if (hasBottomBtn) {
+                    $btnWrap.classList.add('expand-done'); // 与底部逻辑保持一致（随后隐藏）
+                    $btnWrap.style.display = 'none';
+                }
+                try {
+                    if (expander) {
+                        expander.classList.remove('hao-icon-angle-left');
+                        expander.classList.add('hao-icon-angle-down'); // 右上角切为“向下”
+                    }
+                } catch (e) {}
+            };
+
+            toolbar.appendChild(customItem)
 
             var settings = getSettings(a.element);
-            function resetText() { setTimeout(function () { setState('copy'); }, settings['copy-timeout']); }
-            function setState(state) { if (isEnableCopy) copy.setAttribute('data-copy-state', state); }
-        };
 
-        Prism.hooks.add("complete", r);
+
+            function resetText() {
+                setTimeout(function () {
+                    setState('copy');
+                }, settings['copy-timeout']);
+            }
+
+            /** @param {"copy" | "copy-error" | "copy-success"} state */
+            function setState(state) {
+                copy.setAttribute('data-copy-state', state);
+            }
+
+        };
+        Prism.hooks.add("complete", r)
     },
 
     addScript: (e, t, n) => {
-        if (document.getElementById(e)) return n ? n() : void 0;
+        if (document.getElementById(e))
+            return n ? n() : void 0;
         let a = document.createElement("script");
-        a.src = t, a.id = e, n && (a.onload = n), document.head.appendChild(a)
+        a.src = t,
+            a.id = e,
+        n && (a.onload = n),
+            document.head.appendChild(a)
     },
 
     danmu: () => {
-        const e = new EasyDanmakuMin({ el: "#danmu", line: 10, speed: 20, hover: !0, loop: !0 });
+        const e = new EasyDanmakuMin({
+            el: "#danmu",
+            line: 10,
+            speed: 20,
+            hover: !0,
+            loop: !0
+        });
         let t = saveToLocal.get("danmu");
-        if (t) e.batchSend(t, !0);
+        if (t)
+            e.batchSend(t, !0);
         else {
             let n = [];
             if (GLOBAL_CONFIG.source.comments.use == 'Twikoo') {
@@ -222,59 +299,81 @@ let halo = {
                         includeReply: !1,
                         pageSize: 5
                     }),
-                    headers: { "Content-Type": "application/json" }
-                }).then((e => e.json())).then((({ data: t }) => {
-                    t.forEach((e => {
-                        null == e.avatar && (e.avatar = "https://cravatar.cn/avatar/d615d5793929e8c7d70eab5f00f7f5f1?d=mp"),
-                            n.push({ avatar: e.avatar, content: e.nick + "：" + btf.changeContent(e.comment), href: e.url + '#' + e.id })
-                    })),
-                        e.batchSend(n, !0),
-                        saveToLocal.set("danmu", n, .02)
-                }))
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                }).then((e => e.json())).then((({data: t}) => {
+                        t.forEach((e => {
+                                null == e.avatar && (e.avatar = "https://cravatar.cn/avatar/d615d5793929e8c7d70eab5f00f7f5f1?d=mp"),
+                                    n.push({
+                                        avatar: e.avatar,
+                                        content: e.nick + "：" + btf.changeContent(e.comment),
+                                        href: e.url + '#' + e.id
+
+                                    })
+                            }
+                        )),
+                            e.batchSend(n, !0),
+                            saveToLocal.set("danmu", n, .02)
+                    }
+                ))
             }
             if (GLOBAL_CONFIG.source.comments.use == 'Artalk') {
                 const statheaderList = {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Origin': window.location.origin },
-                    body: new URLSearchParams({ 'site_name': GLOBAL_CONFIG.source.artalk.siteName, 'limit': '100', 'type': 'latest_comments' })
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Origin': window.location.origin
+                    },
+                    body: new URLSearchParams({
+                        'site_name': GLOBAL_CONFIG.source.artalk.siteName,
+                        'limit': '100',
+                        'type': 'latest_comments'
+                    })
                 }
                 fetch(GLOBAL_CONFIG.source.artalk.artalkUrl + 'api/stat', statheaderList)
-                    .then((e => e.json())).then((({ data: t }) => {
+                    .then((e => e.json())).then((({data: t}) => {
                         t.forEach((e => {
-                            n.push({
-                                avatar: 'https://cravatar.cn/avatar/' + e.email_encrypted + '?d=mp&s=240',
-                                content: e.nick + "：" + btf.changeContent(e.content_marked),
-                                href: e.page_url + '#atk-comment-' + e.id
-                            })
-                        })),
+                                n.push({
+                                    avatar: 'https://cravatar.cn/avatar/' + e.email_encrypted + '?d=mp&s=240',
+                                    content: e.nick + "：" + btf.changeContent(e.content_marked),
+                                    href: e.page_url + '#atk-comment-' + e.id
+
+                                })
+                            }
+                        )),
                             e.batchSend(n, !0),
                             saveToLocal.set("danmu", n, .02)
-                    }))
+                    }
+                ))
             }
             if (GLOBAL_CONFIG.source.comments.use == 'Waline') {
                 const loadWaline = () => {
-                    Waline.RecentComments({ serverURL: GLOBAL_CONFIG.source.waline.serverURL, count: 50 })
-                        .then(({ comments }) => {
-                            const walineArray = comments.map(e => {
-                                return {
-                                    'content': e.nick + "：" + btf.changeContent(e.comment),
-                                    'avatar': e.avatar,
-                                    'href': e.url + '#' + e.objectId,
-                                }
-                            })
-                            e.batchSend(walineArray, !0),
-                                saveToLocal.set("danmu", walineArray, .02)
+                    Waline.RecentComments({
+                        serverURL: GLOBAL_CONFIG.source.waline.serverURL,
+                        count: 50
+                    }).then(({comments}) => {
+                        const walineArray = comments.map(e => {
+                            return {
+                                'content': e.nick + "：" + btf.changeContent(e.comment),
+                                'avatar': e.avatar,
+                                'href': e.url + '#' + e.objectId,
+                            }
                         })
+                        e.batchSend(walineArray, !0),
+                            saveToLocal.set("danmu", walineArray, .02)
+                    })
                 }
                 if (typeof Waline === 'object') loadWaline()
                 else getScript(GLOBAL_CONFIG.source.waline.js).then(loadWaline)
             }
+
         }
         document.getElementById("danmuBtn").innerHTML = "<button class=\"hideBtn\" onclick=\"document.getElementById('danmu').classList.remove('hidedanmu')\">显示弹幕</button> <button class=\"hideBtn\" onclick=\"document.getElementById('danmu').classList.add('hidedanmu')\">隐藏弹幕</button>"
     },
 
     changeMarginLeft(element) {
-        var randomMargin = Math.floor(Math.random() * 901) + 100;
+        var randomMargin = Math.floor(Math.random() * 901) + 100; // 生成100-1000之间的随机数
         element.style.marginLeft = randomMargin + 'px';
     },
 
@@ -292,6 +391,7 @@ let halo = {
                         saveToLocal.set('power-data', JSON.stringify(values), 10 / (60 * 24))
                         renderer(values);
                     }
+
                 })
         }
 
@@ -323,7 +423,9 @@ let halo = {
                     var i = 0;
                     var htmlText = '';
                     for (let value of values) {
-                        if (i > parseInt(show_num)) break;
+                        if (i > parseInt(show_num)) {
+                            break;
+                        }
                         htmlText += ` <a href="${"https://afdian.net/u/" + value["user_id"]}" rel="external nofollow" target="_blank" th:title="${value["name"]}">${value["name"]}</a>`;
                         i = i + 1;
                     }
@@ -336,8 +438,11 @@ let halo = {
 
         function init() {
             const data = saveToLocal.get('power-data')
-            if (data) renderer(JSON.parse(data))
-            else getPower()
+            if (data) {
+                renderer(JSON.parse(data))
+            } else {
+                getPower()
+            }
         }
 
         document.getElementById("power-star") && init()
@@ -347,11 +452,14 @@ let halo = {
         var default_enable = GLOBAL_CONFIG.source.footer.default_enable
         if (default_enable) {
             var adElement = document.getElementById("footer-banner");
-            var notMusic = document.body.getAttribute("data-type") != "music";
+            var notMusic = document.body.getAttribute("data-type") != "music"; // 检测是否为音乐页面
             if ((adElement.offsetWidth <= 0 || adElement.offsetHeight <= 0) && notMusic) {
+                // 元素不可见，可能被拦截
                 console.log("Element may be blocked by AdBlocker Ultimate");
                 alert("页脚信息可能被AdBlocker Ultimate拦截，请检查广告拦截插件！")
             }
         }
     }
+
+
 }
