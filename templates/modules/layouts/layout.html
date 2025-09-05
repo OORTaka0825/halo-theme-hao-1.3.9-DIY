@@ -252,7 +252,8 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 
     <!-- https://davidshimjs.github.io/qrcodejs/ 生成二维码 -->
     <!-- 应该是文章页分享使用 -->
-    <script data-pjax defer src="https://cdn.jsdelivr.net/npm/qrcodejs2@1.0.0/qrcode.min.js"></script>
+    <script data-pjax defer src="https://cdn.bootcdn.net/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
 
     <!-- 评论 -->
     <th:block th:if="${theme.config.comments.use!='commentWidget' && theme.config.comments.commentsEnable }"
