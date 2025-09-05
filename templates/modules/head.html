@@ -172,7 +172,7 @@
 
     <!-- 小板报（始终加载脚本，兼容 PJAX）-->
 <th:block th:if="${not #strings.isEmpty(theme.config.sidebar.welcome.key)}">
-  <!-- 配置注入到全局，且支持 PJAX 复执行 -->
+  <!-- 只保留：把后台配置注入到全局（模板渲染必须在 HTML 中做） -->
   <script data-pjax>
     (function(){
       window.GLOBAL_CONFIG = window.GLOBAL_CONFIG || {};
@@ -184,14 +184,9 @@
       };
     })();
   </script>
-  <!-- 加载 welcome.js（与参考版一致，不做页面判断） -->
-  <script defer th:src="${assets_link + '/libs/welcome/welcome.js'}"
-          onload="try{ window.fetchIpLocation && window.fetchIpLocation(); }catch(e){}"></script>
-  <!-- PJAX 完成后再次触发 -->
-  <script data-pjax>
-  try{ window.showWelcome && window.showWelcome(); }catch(e){}
-  try{ window.fetchIpLocation && window.fetchIpLocation(); }catch(e){}
-</script>
+
+  <!-- 仅引入脚本；去掉 onload -->
+  <script defer th:src="${assets_link + '/libs/welcome/welcome.js'}"></script>
 </th:block>
 
 

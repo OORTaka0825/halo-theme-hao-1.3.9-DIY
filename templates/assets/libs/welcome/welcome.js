@@ -148,3 +148,19 @@ function pjaxRecalc() {
 document.addEventListener('pjax:complete', pjaxRecalc);
 document.addEventListener('pjax:success',  pjaxRecalc);
 document.addEventListener('page:loaded',    pjaxRecalc);
+
+// ---- welcome.js 末尾添加：统一触发器（首屏 + PJAX） ----
+(function () {
+  function pjaxRecalc() {
+    try { window.showWelcome && window.showWelcome(); } catch (e) {}
+    try { window.fetchIpLocation && window.fetchIpLocation(); } catch (e) {}
+  }
+  // 首次加载
+  window.addEventListener('load', function () {
+    try { window.fetchIpLocation && window.fetchIpLocation(); } catch (e) {}
+  });
+  // PJAX 回来时
+  document.addEventListener('pjax:complete', pjaxRecalc);
+  document.addEventListener('pjax:success',  pjaxRecalc);
+  document.addEventListener('page:loaded',    pjaxRecalc);
+})();
