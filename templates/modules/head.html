@@ -172,7 +172,6 @@
 
     <!-- 小板报（始终加载脚本，兼容 PJAX）-->
 <th:block th:if="${not #strings.isEmpty(theme.config.sidebar.welcome.key)}">
-  <!-- 只保留：把后台配置注入到全局（模板渲染必须在 HTML 中做） -->
   <script data-pjax>
     (function(){
       window.GLOBAL_CONFIG = window.GLOBAL_CONFIG || {};
@@ -184,8 +183,7 @@
       };
     })();
   </script>
-
-  <!-- 仅引入脚本；去掉 onload -->
+  <!-- 小板报-仅引入脚本；-->
   <script defer th:src="${assets_link + '/libs/welcome/welcome.js'}"></script>
 </th:block>
 
