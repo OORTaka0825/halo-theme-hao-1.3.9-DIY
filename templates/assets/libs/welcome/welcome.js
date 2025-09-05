@@ -1,15 +1,26 @@
 // 访客欢迎信息模块（NSMAO） —— PJAX安全版
 let ipLocation;
 
+// ★ 后台为空时的默认中心点
+const WELCOME_DEFAULT_CENTER = { lng: 111.64, lat: 21.54 };
+
 // 统一：实时读取后台配置（避免被“常量缓存”）
 function getWelcomeCenter() {
-  const cfg = (window.GLOBAL_CONFIG && GLOBAL_CONFIG.source && GLOBAL_CONFIG.source.welcome) ? GLOBAL_CONFIG.source.welcome : {};
-  const lng = Number(cfg.locationLng);
-  const lat = Number(cfg.locationLat);
+  const cfg = (window.GLOBAL_CONFIG && GLOBAL_CONFIG.source && GLOBAL_CONFIG.source.welcome)
+    ? GLOBAL_CONFIG.source.welcome
+    : {};
+
+  // 把后台值当字符串读，再转数值；空串视为无效
+  const rawLng = (cfg.locationLng ?? '').toString().trim();
+  const rawLat = (cfg.locationLat ?? '').toString().trim();
+
+  const lng = rawLng === '' ? NaN : Number(rawLng);
+  const lat = rawLat === '' ? NaN : Number(rawLat);
+
   return {
-    // 只在不是数字的情况下才回落到默认值，避免 0 被当成“假值”
-    lng: Number.isFinite(lng) ? lng : 116.703781,
-    lat: Number.isFinite(lat) ? lat : 39.927334
+    // 仅当是“有限数字”才采用后台值，否则落回默认 111.64 / 21.54
+    lng: Number.isFinite(lng) ? lng : WELCOME_DEFAULT_CENTER.lng,
+    lat: Number.isFinite(lat) ? lat : WELCOME_DEFAULT_CENTER.lat
   };
 }
 

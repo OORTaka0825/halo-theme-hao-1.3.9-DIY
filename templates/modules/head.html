@@ -178,12 +178,14 @@
       GLOBAL_CONFIG.source = GLOBAL_CONFIG.source || {};
       GLOBAL_CONFIG.source.welcome = {
         key: "[(${theme.config.sidebar.welcome.key})]",
-        locationLng: [[${theme.config.sidebar.welcome.locationLng}]],
-        locationLat: [[${theme.config.sidebar.welcome.locationLat}]]
+        /* ▼ 仅这两行改为“字符串注入” ▼ */
+        locationLng: "[[${theme.config.sidebar.welcome.locationLng}]]",
+        locationLat: "[[${theme.config.sidebar.welcome.locationLat}]]"
+        /* ▲ 仅此两行修改 ▲ */
       };
     })();
   </script>
-  <!-- 小板报-仅引入脚本；-->
+  <!-- 小板报-仅引入脚本 -->
   <script defer th:src="${assets_link + '/libs/welcome/welcome.js'}"></script>
 </th:block>
 
