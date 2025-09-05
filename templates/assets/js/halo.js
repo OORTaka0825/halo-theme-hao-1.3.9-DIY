@@ -183,7 +183,7 @@ let halo = {
             //折叠
             if (isEnableExpander) {
                 var expander = document.createElement("i");
-                expander.className = 'fa-sharp fa-solid haofont hao-icon-angle-down code-expander cursor-pointer'
+                expander.className = 'fa-sharp fa-solid haofont hao-icon-angle-left code-expander cursor-pointer'
                 customItem.appendChild(expander)
 
                 expander.addEventListener('click', prismToolsFn)
@@ -207,40 +207,26 @@ let halo = {
                 r.offsetParent.appendChild(ele);
             }
 
-            // 改造：若此前点过“全部显示”（有 expand-done），
-// 再点右上角箭头则“收回到限定高度”，而不是折叠成只留标题
+            // 右上角箭头：仅在「限定高度 ↔ 全量」之间切换；不再进入“仅标题”折叠
 const prismShrinkFn = () => {
-  const $nextEle = r.offsetParent.lastElementChild.classList;
+  const $btnWrap = r.offsetParent.lastElementChild;
+  const hasBottomBtn = $btnWrap && $btnWrap.classList && $btnWrap.classList.contains('code-expand-btn');
 
-  // 情况1：当前是“全量展开”状态（来自底部“全部显示”）
+  // 情况A：当前是“全量展开”→ 点击右上角 = 回到限定高度
   if (r.classList.contains('expand-done')) {
-    // 去掉全量展开
-    r.classList.remove('expand-done');
-
-    // 重新显示底部“展开”按钮
-    if ($nextEle.contains('code-expand-btn')) {
-      r.offsetParent.lastElementChild.style.display = 'block';
+    r.classList.remove('expand-done');             // 取消全量
+    if (hasBottomBtn) {
+      $btnWrap.style.display = 'block';            // 重新显示底部按钮
+      $btnWrap.classList.remove('expand-done');    // ★ 关键：让底部箭头朝下
     }
-    // 不做标题级折叠，直接回到“限定高度”即可
     return;
   }
 
-  // 情况2：普通切换——在“标题折叠 / 还原标题折叠”之间切换（原有逻辑）
-  toolbar.classList.toggle('c-expander');
-  r.classList.toggle('expand-done-expander');
-
-  if (toolbar.classList.contains('c-expander')) {
-    // 标题折叠：隐藏代码内容、隐藏底部展开按钮
-    r.firstElementChild.style.display = 'none';
-    if ($nextEle.contains('code-expand-btn')) {
-      r.offsetParent.lastElementChild.style.display = 'none';
-    }
-  } else {
-    // 还原标题折叠：显示代码内容；若未全量展开，则可见底部展开按钮
-    r.firstElementChild.style.display = 'block';
-    if ($nextEle.contains('code-expand-btn') && !r.classList.contains('expand-done')) {
-      r.offsetParent.lastElementChild.style.display = 'block';
-    }
+  // 情况B：当前是“限定高度”→ 点击右上角 = 全量展开
+  r.classList.add('expand-done');
+  if (hasBottomBtn) {
+    $btnWrap.classList.add('expand-done');         // 与点“全部显示”一致（虽然此时被隐藏）
+    $btnWrap.style.display = 'none';               // 隐藏底部按钮
   }
 };
 
