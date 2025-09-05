@@ -454,12 +454,67 @@ let halo = {
             var adElement = document.getElementById("footer-banner");
             var notMusic = document.body.getAttribute("data-type") != "music"; // 检测是否为音乐页面
             if ((adElement.offsetWidth <= 0 || adElement.offsetHeight <= 0) && notMusic) {
-                // 元素不可见，可能被拦截
                 console.log("Element may be blocked by AdBlocker Ultimate");
                 alert("页脚信息可能被AdBlocker Ultimate拦截，请检查广告拦截插件！")
             }
         }
+    },
+
+    /* === 复制本文链接（支持 PJAX，零改模板）=== */
+(function () {
+  // 成功/失败提示
+  function toast(msg) {
+    if (window.btf && btf.snackbarShow) btf.snackbarShow(msg);
+    else console.log(msg);
+  }
+
+  // 真正复制
+  function copyText(text) {
+    // 先用 Clipboard API
+    if (navigator.clipboard && window.isSecureContext !== false) {
+      return navigator.clipboard.writeText(text).then(
+        () => toast('链接已复制'),
+        () => fallback(text)
+      );
     }
+    // 兜底
+    return fallback(text);
 
+    function fallback(t) {
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = t;
+        ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        const ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        ok ? toast('链接已复制') : toast('复制失败，请手动复制');
+      } catch (e) {
+        toast('复制失败，请手动复制');
+      }
+    }
+  }
 
-}
+  // 事件委托（Capture 阶段，避免被别的 stopPropagation 抢先阻断）
+  function clickHandler(e) {
+    const btn = e.target && e.target.closest(
+      // 覆盖常见写法：有其中任意一个就会触发
+      '[data-action="copy-link"], [data-copy-link], .copy-link, .share-link, .haofont.hao-icon-link'
+    );
+    if (!btn) return;
+
+    e.preventDefault();
+    // 优先 data-url / href，其次当前页
+    const url = btn.getAttribute('data-url')
+             || btn.getAttribute('href')
+             || location.href.replace(location.hash, '');
+    copyText(url);
+  }
+
+  // 常驻绑定一次即可，PJAX 不会丢
+  if (!window.__COPY_LINK_BOUND__) {
+    document.addEventListener('click', clickHandler, true); // capture
+    window.__COPY_LINK_BOUND__ = true;
+  }
+})();
