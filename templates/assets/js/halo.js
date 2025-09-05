@@ -463,3 +463,57 @@ let halo = {
 
 
 }
+
+<script>
+/* === 文章底部「复制链接」按钮（支持 PJAX）=== */
+(function () {
+  // 复制工具：优先 Clipboard API，失败则回退
+  function copyText(text, onOk, onFail) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(onOk, function(){ fallback(); });
+    } else {
+      fallback();
+    }
+    function fallback() {
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.cssText = 'position:fixed;top:-1000px;left:-1000px;';
+        document.body.appendChild(ta);
+        ta.focus(); ta.select();
+        var ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        ok ? onOk() : onFail && onFail();
+      } catch(e){ onFail && onFail(e); }
+    }
+  }
+
+  // 常驻事件委托（兼容 PJAX）
+  document.addEventListener('click', function (e) {
+    // 兼容多种可能的选择器：你主题的链条图标是 hao-icon-link
+    var btn = e.target.closest('[data-copy-link], .copy-link, .copyLink, .haofont.hao-icon-link');
+    if (!btn) return;
+
+    // 阻止 a 标签跳转
+    e.preventDefault();
+
+    // 优先取 data-url / data-copy-link，其次用当前地址
+    var url = btn.getAttribute('data-url')
+            || btn.getAttribute('data-copy-link')
+            || window.location.href;
+
+    copyText(
+      url,
+      function () {
+        // 主题里常用的提示，如果没有 btf.snackbarShow 就回退 alert
+        if (window.btf && btf.snackbarShow) btf.snackbarShow('链接已复制');
+        else alert('链接已复制：' + url);
+      },
+      function () {
+        if (window.btf && btf.snackbarShow) btf.snackbarShow('复制失败，请手动复制', false, 3000);
+        else alert('复制失败，请手动复制：' + url);
+      }
+    );
+  });
+})();
+</script>
