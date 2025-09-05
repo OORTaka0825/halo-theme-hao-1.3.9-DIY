@@ -135,20 +135,6 @@ function showWelcome() {
   catch (err) { console.log("欢迎模块插入失败:", err); }
 }
 
-// 页面加载与 PJAX 兼容
-window.addEventListener('load', function () {
-  try { fetchIpLocation && fetchIpLocation(); } catch (e) {}
-});
-
-// PJAX：优先用现成的 ipLocation 立刻重算一次，再拉取最新数据
-function pjaxRecalc() {
-  try { if (ipLocation) showWelcome(); } catch (e) {}
-  try { fetchIpLocation && fetchIpLocation(); } catch (e) {}
-}
-document.addEventListener('pjax:complete', pjaxRecalc);
-document.addEventListener('pjax:success',  pjaxRecalc);
-document.addEventListener('page:loaded',    pjaxRecalc);
-
 // ---- welcome.js 末尾：统一触发器（首屏 + PJAX）----
 (function () {
   if (window.__WELCOME_BIND_ONCE__) return;      // ★ 防重复
