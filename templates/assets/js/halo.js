@@ -180,25 +180,30 @@ let halo = {
                 if ($target.contains("code-expander")) prismShrinkFn(this);
             };
 
-            //折叠
+            // 折叠图标（右上角）：默认“向左”
             if (isEnableExpander) {
                 var expander = document.createElement("i");
                 expander.className = 'fa-sharp fa-solid haofont hao-icon-angle-left code-expander cursor-pointer'
                 customItem.appendChild(expander)
 
                 expander.addEventListener('click', prismToolsFn)
-
-
             }
 
+            // 底部“展开”按钮：点击后进入全量，并把右上角图标切为“向下”
             const expandCode = function () {
-                this.classList.toggle("expand-done");
+                this.classList.add("expand-done");
                 this.style.display = "none";
-                r.classList.toggle("expand-done");
+                r.classList.add("expand-done");
+
+                try {
+                    if (expander) {
+                        expander.classList.remove('hao-icon-angle-left');
+                        expander.classList.add('hao-icon-angle-down');
+                    }
+                } catch (e) {}
             };
 
             if (isEnableHeightLimit && r.offsetHeight > prismLimit) {
-
                 r.classList.add("close")
                 const ele = document.createElement("div");
                 ele.className = "code-expand-btn";
@@ -207,30 +212,40 @@ let halo = {
                 r.offsetParent.appendChild(ele);
             }
 
-            // 右上角箭头：仅在「限定高度 ↔ 全量」之间切换；不再进入“仅标题”折叠
-const prismShrinkFn = () => {
-  const $btnWrap = r.offsetParent.lastElementChild;
-  const hasBottomBtn = $btnWrap && $btnWrap.classList && $btnWrap.classList.contains('code-expand-btn');
+            // 右上角箭头：仅在「限制高度 ↔ 全量」之间切换；不再进入“仅标题”折叠
+            const prismShrinkFn = () => {
+                const $btnWrap = r.offsetParent.lastElementChild;
+                const hasBottomBtn = $btnWrap && $btnWrap.classList && $btnWrap.classList.contains('code-expand-btn');
 
-  // 情况A：当前是“全量展开”→ 点击右上角 = 回到限定高度
-  if (r.classList.contains('expand-done')) {
-    r.classList.remove('expand-done');             // 取消全量
-    if (hasBottomBtn) {
-      $btnWrap.style.display = 'block';            // 重新显示底部按钮
-      $btnWrap.classList.remove('expand-done');    // ★ 关键：让底部箭头朝下
-    }
-    return;
-  }
+                // A：当前是“全量展开”→ 点击右上角 = 回到“限制高度”
+                if (r.classList.contains('expand-done')) {
+                    r.classList.remove('expand-done');
+                    if (hasBottomBtn) {
+                        $btnWrap.style.display = 'block';
+                        $btnWrap.classList.remove('expand-done'); // 底部箭头恢复“向下”
+                    }
+                    try {
+                        if (expander) {
+                            expander.classList.remove('hao-icon-angle-down');
+                            expander.classList.add('hao-icon-angle-left'); // 右上角恢复“向左”
+                        }
+                    } catch (e) {}
+                    return;
+                }
 
-  // 情况B：当前是“限定高度”→ 点击右上角 = 全量展开
-  r.classList.add('expand-done');
-  if (hasBottomBtn) {
-    $btnWrap.classList.add('expand-done');         // 与点“全部显示”一致（虽然此时被隐藏）
-    $btnWrap.style.display = 'none';               // 隐藏底部按钮
-  }
-};
-
-
+                // B：当前是“限制高度”→ 点击右上角 = 全量展开
+                r.classList.add('expand-done');
+                if (hasBottomBtn) {
+                    $btnWrap.classList.add('expand-done'); // 与底部逻辑保持一致（随后隐藏）
+                    $btnWrap.style.display = 'none';
+                }
+                try {
+                    if (expander) {
+                        expander.classList.remove('hao-icon-angle-left');
+                        expander.classList.add('hao-icon-angle-down'); // 右上角切为“向下”
+                    }
+                } catch (e) {}
+            };
 
             toolbar.appendChild(customItem)
 
