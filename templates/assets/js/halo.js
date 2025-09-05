@@ -207,23 +207,43 @@ let halo = {
                 r.offsetParent.appendChild(ele);
             }
 
-            const prismShrinkFn = ele => {
-                const $nextEle = r.offsetParent.lastElementChild.classList
-                toolbar.classList.toggle('c-expander')
-                r.classList.toggle("expand-done-expander");
-                if (toolbar.classList.contains('c-expander')) {
-                    r.firstElementChild.style.display = "none";
-                    if ($nextEle.contains('code-expand-btn')) {
-                        r.offsetParent.lastElementChild.style.display = "none";
-                    }
-                } else {
-                    r.firstElementChild.style.display = "block";
-                    if ($nextEle.contains('code-expand-btn') && !r.classList.contains('expand-done')) {
-                        r.offsetParent.lastElementChild.style.display = "block";
-                    }
-                }
+            // 改造：若此前点过“全部显示”（有 expand-done），
+// 再点右上角箭头则“收回到限定高度”，而不是折叠成只留标题
+const prismShrinkFn = () => {
+  const $nextEle = r.offsetParent.lastElementChild.classList;
 
-            };
+  // 情况1：当前是“全量展开”状态（来自底部“全部显示”）
+  if (r.classList.contains('expand-done')) {
+    // 去掉全量展开
+    r.classList.remove('expand-done');
+
+    // 重新显示底部“展开”按钮
+    if ($nextEle.contains('code-expand-btn')) {
+      r.offsetParent.lastElementChild.style.display = 'block';
+    }
+    // 不做标题级折叠，直接回到“限定高度”即可
+    return;
+  }
+
+  // 情况2：普通切换——在“标题折叠 / 还原标题折叠”之间切换（原有逻辑）
+  toolbar.classList.toggle('c-expander');
+  r.classList.toggle('expand-done-expander');
+
+  if (toolbar.classList.contains('c-expander')) {
+    // 标题折叠：隐藏代码内容、隐藏底部展开按钮
+    r.firstElementChild.style.display = 'none';
+    if ($nextEle.contains('code-expand-btn')) {
+      r.offsetParent.lastElementChild.style.display = 'none';
+    }
+  } else {
+    // 还原标题折叠：显示代码内容；若未全量展开，则可见底部展开按钮
+    r.firstElementChild.style.display = 'block';
+    if ($nextEle.contains('code-expand-btn') && !r.classList.contains('expand-done')) {
+      r.offsetParent.lastElementChild.style.display = 'block';
+    }
+  }
+};
+
 
 
             toolbar.appendChild(customItem)
