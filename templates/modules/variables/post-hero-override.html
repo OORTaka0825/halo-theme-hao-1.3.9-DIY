@@ -1,9 +1,28 @@
 <!-- 文章标题背景（独立色）覆盖：仅在文章页且开关开启时注入 -->
 <th:block th:if="${htmlType == 'post' and theme.config.post.postHeroColor.enable}">
   <style type="text/css" th:inline="css">
-    :root{ --hao-post-hero-bg: [(${theme.config.post.postHeroColor.light})]; }
-    [data-theme="dark"]{ --hao-post-hero-bg: [(${theme.config.post.postHeroColor.dark})]; }
+    /* 按模式把独立颜色“局部作用”到 #page-header.post-bg */
+    #page-header.post-bg{ --hao-post-hero-bg: [(${theme.config.post.postHeroColor.light})]; }
+    [data-theme="dark"] #page-header.post-bg{ --hao-post-hero-bg: [(${theme.config.post.postHeroColor.dark})]; }
+
+    /* 标题区内，局部重写主题变量（很多渐变依赖它们生成） */
     #page-header.post-bg{
+      --heo-theme: var(--hao-post-hero-bg) !important;
+      --heo-main:  var(--hao-post-hero-bg) !important;
+      /* 透明度版本，防止需要半透明的地方取不到色 */
+      /* 如果你的浏览器不支持 color-mix，可删除两行也没问题 */
+      --heo-theme-op: color-mix(in srgb, var(--hao-post-hero-bg) 85%, transparent) !important;
+      --heo-theme-op-deep: color-mix(in srgb, var(--hao-post-hero-bg) 93%, transparent) !important;
+    }
+
+    /* 直接把背景改成纯色，并关闭任何背景图/渐变 */
+    /* 覆盖本体 + 常见伪元素/子层，尽量全面 */
+    body #page-header.post-bg,
+    body #page-header.post-bg::before,
+    body #page-header .post-bg,
+    body #page-header .post-bg::before,
+    body #post-top-cover,
+    body #post-top-cover::before{
       background-color: var(--hao-post-hero-bg) !important;
       background-image: none !important;
     }
