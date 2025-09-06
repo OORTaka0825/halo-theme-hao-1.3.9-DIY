@@ -1,14 +1,24 @@
-<!-- 无 PJAX 进度条“单段模式”事件桥：不新增进度条，只让主题自带的那一条在新页面统一起跑 -->
+<!-- 无 PJAX：进度条事件桥（顺滑两段衔接版）
+  目标：点击立刻有反馈（旧页起跑），新页继续起跑，但通过“最短首段时长 + 轻延时收尾”
+  让两段在视觉上更顺滑。不会新增进度条，仅触发主题已有的进度条事件。
+-->
 <th:block>
   <script>
   (function () {
     if (window.__hao_pjax_event_bridge__) return;
     window.__hao_pjax_event_bridge__ = true;
 
+    // 开启 PJAX 时完全让路
     var USE_PJAX = !!(window.pjax && typeof window.pjax.loadUrl === 'function');
-    if (USE_PJAX) return; // 开启 PJAX 时完全让路
+    if (USE_PJAX) return;
 
-    var KEY = 'hao:pjax-bridge';
+    var KEY = 'hao:pjax-bridge-ts';
+    var MIN_FIRST_MS = 320;   // 最短首段可见时长（可按手感 260~380 调）
+    var FINISH_LAG  = 120;    // 新页完成的轻延时，避免“瞬间收尾”突兀
+
+    function fire(name){
+      try { document.dispatchEvent(new Event(name)); } catch(e) {}
+    }
 
     function isSelfNav(e){
       if (e.defaultPrevented || e.button!==0) return false;
@@ -22,45 +32,47 @@
       return true;
     }
 
-    // 离开旧页时：只记录标记，不触发任何进度事件（避免第一段）
+    // 旧页：立即起跑，并记录时间戳
     document.addEventListener('click', function(e){
       if (!isSelfNav(e)) return;
-      try { sessionStorage.setItem(KEY, '1'); } catch(e) {}
-    }, true);
-    document.addEventListener('submit', function(){
-      try { sessionStorage.setItem(KEY, '1'); } catch(e) {}
+      try { sessionStorage.setItem(KEY, String(Date.now())); } catch(e) {}
+      fire('pjax:send');    // 触发主题原有进度条开始（第一段）
     }, true);
 
-    // 新页面：统一在这里起跑 & 收尾 —— 只显示“一段”
-    if (sessionStorage.getItem(KEY)) {
+    document.addEventListener('submit', function(){
+      try { sessionStorage.setItem(KEY, String(Date.now())); } catch(e) {}
+      fire('pjax:send');
+    }, true);
+
+    // 新页：尽早继续起跑，但保证首段至少展示 MIN_FIRST_MS
+    var ts = 0;
+    try { ts = parseInt(sessionStorage.getItem(KEY) || '0', 10) || 0; } catch(e){ ts = 0; }
+    if (ts) {
       try { sessionStorage.removeItem(KEY); } catch(e) {}
 
-      function fire(name){ try { document.dispatchEvent(new Event(name)); } catch(e) {} }
+      var elapsed = Date.now() - ts;
+      var startDelay = Math.max(0, MIN_FIRST_MS - elapsed);
 
-      // 尽早启动：等待最短时间与 DOM 可用（防止监听还未挂载）
       var started = false;
-      var startOnce = function(){ if (started) return; started = true; fire('pjax:send'); };
+      var start2 = function(){ if (started) return; started = true; fire('pjax:send'); };
 
+      // DOM 越早可用越好：下一个 tick 安排一次，再在 DOMContentLoaded 兜底
+      setTimeout(function(){ setTimeout(start2, startDelay); }, 0);
       if (document.readyState === 'loading') {
-        // DOM 还在解析，安排一个宏任务 + DOMContentLoaded 双保险
-        setTimeout(startOnce, 0);
-        document.addEventListener('DOMContentLoaded', startOnce, { once: true });
-      } else {
-        // DOM 已可用，立即/下一个tick 开始
-        setTimeout(startOnce, 0);
+        document.addEventListener('DOMContentLoaded', function(){ setTimeout(start2, startDelay); }, { once:true });
       }
 
-      // 完成：在 load / pageshow 时结束，与 PJAX 行为对齐
       var finish = function(){
-        fire('pjax:success');
-        fire('pjax:complete');
-        fire('page:loaded');
+        setTimeout(function(){
+          fire('pjax:success');
+          fire('pjax:complete');
+          fire('page:loaded');
+        }, FINISH_LAG);
       };
-      if (document.readyState === 'complete') {
-        setTimeout(finish, 0);
-      } else {
-        window.addEventListener('load', finish, { once: true });
-        window.addEventListener('pageshow', finish, { once: true });
+      if (document.readyState === 'complete') finish();
+      else {
+        window.addEventListener('load', finish, { once:true });
+        window.addEventListener('pageshow', finish, { once:true });
       }
     }
   })();
