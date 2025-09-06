@@ -1,41 +1,42 @@
-<!-- 关闭 PJAX 时的跨页顺滑进度条：点击立刻出现，新页继续跑，load 后收尾 -->
+<!-- 关闭 PJAX 时的跨页顺滑进度条（安全版）：取消遮罩层，保留顶部细条 -->
 <th:block>
   <script>
   (function () {
     var KEY = 'hao:progress:carry';
+    var RUN = window.__hao_no_pjax_progress__;
+    if (RUN) return; window.__hao_no_pjax_progress__ = true;
 
-    // 是否正在使用 PJAX（有 pjax 实例就交给原逻辑处理，不重复）
     var USE_PJAX = !!(window.pjax && typeof window.pjax.loadUrl === 'function');
 
-    // 取主题色（优先文章页局部变量，否则回退全局）
     function pickColor() {
-      var cs = getComputedStyle(document.documentElement);
-      return (cs.getPropertyValue('--hao-post-hero-bg') ||
-              cs.getPropertyValue('--heo-theme') ||
-              cs.getPropertyValue('--heo-main') || '#7c5cff').trim();
+      try {
+        var cs = getComputedStyle(document.documentElement);
+        var c = (cs.getPropertyValue('--hao-post-hero-bg') ||
+                 cs.getPropertyValue('--heo-theme') ||
+                 cs.getPropertyValue('--heo-main') || '#7c5cff').trim();
+        return c || '#7c5cff';
+      } catch(e){ return '#7c5cff'; }
     }
 
     function ensureBar() {
       var bar = document.getElementById('hao-top-progress');
       if (bar) return bar;
 
-      // 样式尽早注入一次
+      // 样式（无遮罩，只保留 2px 顶部条）
       var style = document.getElementById('hao-top-progress-style');
       if (!style) {
         style = document.createElement('style');
         style.id = 'hao-top-progress-style';
         style.textContent =
-          '#hao-top-progress{position:fixed;top:0;left:0;width:100%;height:3px;z-index:2147483647;pointer-events:none;opacity:0;transition:opacity .15s linear;}'
-        + '#hao-top-progress .htrack{position:absolute;inset:0;background:rgba(0,0,0,.35)}'
-        + '#hao-top-progress .hbar{position:absolute;left:0;top:0;height:3px;width:0;background:'+ pickColor() +';box-shadow:0 0 6px currentColor;transition:width .35s ease;}'
+          '#hao-top-progress{position:fixed;top:0;left:0;right:0;height:2px;z-index:2147483647;pointer-events:none;opacity:0;transition:opacity .12s linear}'
+        + '#hao-top-progress .hbar{position:absolute;left:0;top:0;height:2px;width:0;background:var(--hao-progress-color,#7c5cff);box-shadow:0 0 6px var(--hao-progress-color,#7c5cff);transition:width .28s ease}'
         + 'html.hao-loading #hao-top-progress{opacity:1}';
         document.head.appendChild(style);
       }
-
-      // 容器
       bar = document.createElement('div');
       bar.id = 'hao-top-progress';
-      bar.innerHTML = '<div class="htrack"></div><div class="hbar"></div>';
+      bar.innerHTML = '<div class="hbar"></div>';
+      bar.style.setProperty('--hao-progress-color', pickColor());
       document.body.appendChild(bar);
       return bar;
     }
@@ -43,8 +44,7 @@
     function start() {
       var el = ensureBar();
       document.documentElement.classList.add('hao-loading');
-      // 先冲到 80%
-      requestAnimationFrame(function(){ el.querySelector('.hbar').style.width = '80%'; });
+      requestAnimationFrame(function(){ el.querySelector('.hbar').style.width = '75%'; });
     }
 
     function done() {
@@ -53,48 +53,43 @@
       el.querySelector('.hbar').style.width = '100%';
       setTimeout(function(){
         document.documentElement.classList.remove('hao-loading');
-        // 复位宽度，便于下次使用
         el.querySelector('.hbar').style.width = '0';
-      }, 180);
+      }, 150);
     }
 
-    // 新页面：如果来自上页点击，继续跑进度，直到 load
+    // 新页面接力
     if (sessionStorage.getItem(KEY) && !USE_PJAX) {
       start();
-      window.addEventListener('load', done, { once: true });
-      window.addEventListener('pageshow', function(){ setTimeout(done, 0); }, { once: true });
-      setTimeout(done, 7000); // 兜底
-      try { sessionStorage.removeItem(KEY); } catch(e){}
+      var finished = false;
+      var finish = function(){ if(finished) return; finished=true; done(); try{sessionStorage.removeItem(KEY);}catch(e){} };
+      window.addEventListener('load', finish, { once:true });
+      window.addEventListener('pageshow', finish, { once:true });
+      document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='visible') finish(); }, { once:true });
+      setTimeout(finish, 7000);
     }
 
-    function shouldHandleClick(e){
-      if (USE_PJAX) return false;               // 开 PJAX 让原逻辑处理
-      if (e.defaultPrevented) return false;
-      if (e.button !== 0) return false;         // 只管左键
-      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return false; // 新开标签页等不处理
-      var a = e.target.closest('a');
+    function isSelfNav(e){
+      if (USE_PJAX) return false;
+      if (e.defaultPrevented || e.button!==0) return false;
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return false;
+      var a = e.target.closest && e.target.closest('a');
       if (!a) return false;
-      var href = a.getAttribute('href') || '';
+      var href = a.getAttribute('href')||'';
       if (!href || href.startsWith('#')) return false;
       if (a.target && a.target !== '_self') return false;
-      try {
-        var u = new URL(a.href, location.href);
-        if (u.origin !== location.origin) return false; // 仅内部链接
-      } catch(e){ return false; }
+      try{ var u = new URL(a.href, location.href); if(u.origin!==location.origin) return false; }catch(e){ return false; }
       return true;
     }
 
-    // 上一页点击时：立刻显示条，并把“要继续跑”的标记写进 sessionStorage
     document.addEventListener('click', function(e){
-      if (!shouldHandleClick(e)) return;
-      try { sessionStorage.setItem(KEY, '1'); } catch(e){}
+      if (!isSelfNav(e)) return;
+      try { sessionStorage.setItem(KEY,'1'); } catch(e){}
       start();
     }, true);
 
-    // 表单提交也处理一下
     document.addEventListener('submit', function(){
       if (USE_PJAX) return;
-      try { sessionStorage.setItem(KEY, '1'); } catch(e){}
+      try { sessionStorage.setItem(KEY,'1'); } catch(e){}
       start();
     }, true);
   })();
