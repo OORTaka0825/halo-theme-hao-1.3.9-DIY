@@ -1,0 +1,11 @@
+<!-- 文章标题背景（独立色）覆盖：仅在文章页且开关开启时注入 -->
+<th:block th:if="${htmlType == 'post' and theme.config.post.postHeroColor.enable}">
+  <style type="text/css" th:inline="css">
+    :root{ --hao-post-hero-bg: [(${theme.config.post.postHeroColor.light})]; }
+    [data-theme="dark"]{ --hao-post-hero-bg: [(${theme.config.post.postHeroColor.dark})]; }
+    #page-header.post-bg{
+      background-color: var(--hao-post-hero-bg) !important;
+      background-image: none !important;
+    }
+  </style>
+</th:block>
