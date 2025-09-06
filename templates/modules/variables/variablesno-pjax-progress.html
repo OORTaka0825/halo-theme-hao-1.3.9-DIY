@@ -1,0 +1,102 @@
+<!-- 关闭 PJAX 时的跨页顺滑进度条：点击立刻出现，新页继续跑，load 后收尾 -->
+<th:block>
+  <script>
+  (function () {
+    var KEY = 'hao:progress:carry';
+
+    // 是否正在使用 PJAX（有 pjax 实例就交给原逻辑处理，不重复）
+    var USE_PJAX = !!(window.pjax && typeof window.pjax.loadUrl === 'function');
+
+    // 取主题色（优先文章页局部变量，否则回退全局）
+    function pickColor() {
+      var cs = getComputedStyle(document.documentElement);
+      return (cs.getPropertyValue('--hao-post-hero-bg') ||
+              cs.getPropertyValue('--heo-theme') ||
+              cs.getPropertyValue('--heo-main') || '#7c5cff').trim();
+    }
+
+    function ensureBar() {
+      var bar = document.getElementById('hao-top-progress');
+      if (bar) return bar;
+
+      // 样式尽早注入一次
+      var style = document.getElementById('hao-top-progress-style');
+      if (!style) {
+        style = document.createElement('style');
+        style.id = 'hao-top-progress-style';
+        style.textContent =
+          '#hao-top-progress{position:fixed;top:0;left:0;width:100%;height:3px;z-index:2147483647;pointer-events:none;opacity:0;transition:opacity .15s linear;}'
+        + '#hao-top-progress .htrack{position:absolute;inset:0;background:rgba(0,0,0,.35)}'
+        + '#hao-top-progress .hbar{position:absolute;left:0;top:0;height:3px;width:0;background:'+ pickColor() +';box-shadow:0 0 6px currentColor;transition:width .35s ease;}'
+        + 'html.hao-loading #hao-top-progress{opacity:1}';
+        document.head.appendChild(style);
+      }
+
+      // 容器
+      bar = document.createElement('div');
+      bar.id = 'hao-top-progress';
+      bar.innerHTML = '<div class="htrack"></div><div class="hbar"></div>';
+      document.body.appendChild(bar);
+      return bar;
+    }
+
+    function start() {
+      var el = ensureBar();
+      document.documentElement.classList.add('hao-loading');
+      // 先冲到 80%
+      requestAnimationFrame(function(){ el.querySelector('.hbar').style.width = '80%'; });
+    }
+
+    function done() {
+      var el = document.getElementById('hao-top-progress');
+      if (!el) return;
+      el.querySelector('.hbar').style.width = '100%';
+      setTimeout(function(){
+        document.documentElement.classList.remove('hao-loading');
+        // 复位宽度，便于下次使用
+        el.querySelector('.hbar').style.width = '0';
+      }, 180);
+    }
+
+    // 新页面：如果来自上页点击，继续跑进度，直到 load
+    if (sessionStorage.getItem(KEY) && !USE_PJAX) {
+      start();
+      window.addEventListener('load', done, { once: true });
+      window.addEventListener('pageshow', function(){ setTimeout(done, 0); }, { once: true });
+      setTimeout(done, 7000); // 兜底
+      try { sessionStorage.removeItem(KEY); } catch(e){}
+    }
+
+    function shouldHandleClick(e){
+      if (USE_PJAX) return false;               // 开 PJAX 让原逻辑处理
+      if (e.defaultPrevented) return false;
+      if (e.button !== 0) return false;         // 只管左键
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return false; // 新开标签页等不处理
+      var a = e.target.closest('a');
+      if (!a) return false;
+      var href = a.getAttribute('href') || '';
+      if (!href || href.startsWith('#')) return false;
+      if (a.target && a.target !== '_self') return false;
+      try {
+        var u = new URL(a.href, location.href);
+        if (u.origin !== location.origin) return false; // 仅内部链接
+      } catch(e){ return false; }
+      return true;
+    }
+
+    // 上一页点击时：立刻显示条，并把“要继续跑”的标记写进 sessionStorage
+    document.addEventListener('click', function(e){
+      if (!shouldHandleClick(e)) return;
+      try { sessionStorage.setItem(KEY, '1'); } catch(e){}
+      start();
+    }, true);
+
+    // 表单提交也处理一下
+    document.addEventListener('submit', function(){
+      if (USE_PJAX) return;
+      try { sessionStorage.setItem(KEY, '1'); } catch(e){}
+      start();
+    }, true);
+  })();
+  </script>
+</th:block>
