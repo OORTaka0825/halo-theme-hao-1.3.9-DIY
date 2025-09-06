@@ -66,6 +66,10 @@ function fetchIpLocation() {
 function showWelcome() {
   if (!ipLocation) return;
 
+  // ★ 改动 1：没有容器直接跳过，避免 innerHTML null 报错
+  var box = document.getElementById('welcome-info');
+  if (!box) return;
+
   const { lng: myLng, lat: myLat } = getWelcomeCenter();
   const dist = getDistance(myLng, myLat, ipLocation.location.lng, ipLocation.location.lat);
 
@@ -142,8 +146,9 @@ function showWelcome() {
   if (ip.includes(":")) ip = "好复杂，咱看不懂~(ipv6)";
 
   const html = ` <b><span style="color: var(--kouseki-ip-color);font-size: var(--kouseki-gl-size)">${pos}</span></b> 的小友💖<br>${desc}🍂<br>当前位置距博主约 <b><span style="color: var(--kouseki-ip-color)">${dist}</span></b> 公里！<br>您的IP地址为：<b><span>${ip}</span></b><br>${greet} <br>`;
-  try { document.getElementById("welcome-info").innerHTML = html; }
-  catch (err) { console.log("欢迎模块插入失败:", err); }
+
+  // ★ 改动 1 的配套：安全赋值，不再抛错/打日志
+  box.innerHTML = html;
 }
 
 // ---- welcome.js 末尾：统一触发器（首屏 + PJAX）----
@@ -152,6 +157,10 @@ function showWelcome() {
   window.__WELCOME_BIND_ONCE__ = true;
 
   function pjaxRecalc() {
+    // ★ 改动 2：没有容器时直接跳过，避免不必要的渲染/报错
+    var box = document.getElementById('welcome-info');
+    if (!box) return;
+
     try { window.showWelcome && window.showWelcome(); } catch (e) {}
     try { window.fetchIpLocation && window.fetchIpLocation(); } catch (e) {}
   }
