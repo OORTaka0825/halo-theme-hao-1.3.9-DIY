@@ -1865,32 +1865,6 @@ spec:
               value: false
           help: 文章主色匹配图片颜色
         - $formkit: group
-          name: postHeroColor
-          label: 文章标题背景（独立）
-          value:
-            enable: false
-            light: '#4a73d9'   # 浅色模式颜色（自行改）
-            dark:  '#e3a23a'   # 深色模式颜色（自行改）
-          children:
-            - $formkit: radio
-              name: enable
-              label: 启用文章标题背景自定义
-              options:
-                - label: 开启
-                  value: true
-                - label: 关闭
-                  value: false
-            - $formkit: color
-              if: $get(enable).value
-              name: light
-              label: 浅色模式颜色
-              format: hex
-            - $formkit: color
-              if: $get(enable).value
-              name: dark
-              label: 深色模式颜色
-              format: hex
-        - $formkit: group
           name: aiDescription
           label: 文章 AI 摘要
           value:
