@@ -1874,6 +1874,8 @@ spec:
           children:
             - $formkit: radio
               name: enable
+              id: postHeroColor_enable
+              key: postHeroColor_enable
               label: 启用文章标题背景自定义
               options:
                 - label: 开启
@@ -1881,12 +1883,12 @@ spec:
                 - label: 关闭
                   value: false
             - $formkit: color
-              if: $get(enable).value
+              if: $get(postHeroColor_enable).value
               name: light
               label: 浅色模式颜色
               format: hex
             - $formkit: color
-              if: $get(enable).value
+              if: $get(postHeroColor_enable).value
               name: dark
               label: 深色模式颜色
               format: hex
