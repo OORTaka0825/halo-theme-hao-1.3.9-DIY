@@ -2,23 +2,29 @@
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{modules/layouts/layout :: layout(content = ~{::content}, htmlType = 'fcircle',title = ${singlePage.spec.title + ' | ' + site.title}, head = ~{::head} )}">
 <th:block th:fragment="head">
-    <!-- OG：优先主题配置，再回落到页面字段 -->
-    <th:block th:replace="~{modules/common/open-graph :: open-graph(
-      _title    = ${ !#strings.isEmpty(theme.config.fcircle.bigTitle) ? theme.config.fcircle.bigTitle
-                    : (!#strings.isEmpty(theme.config.fcircle.title) ? theme.config.fcircle.title : singlePage.spec.title) },
-      _permalink= ${ singlePage.status.permalink },
-      _cover    = ${ !#strings.isEmpty(theme.config.fcircle.background) ? theme.config.fcircle.background
-                    : (!#strings.isEmpty(theme.config.fcircle.bg) ? theme.config.fcircle.bg : singlePage.spec.cover) },
-      _excerpt  = ${ !#strings.isEmpty(theme.config.fcircle.description) ? theme.config.fcircle.description
-                    : (!#strings.isEmpty(theme.config.fcircle.desc) ? theme.config.fcircle.desc : singlePage.status.excerpt) },
-      _type     = 'website'
-    )}"></th:block>
+  <!-- OG：优先主题设置，再回落页面字段 -->
+  <th:block th:replace="~{modules/common/open-graph :: open-graph(
+    _title    = ${ !#strings.isEmpty(theme.config.fcircle.bigTitle) ? theme.config.fcircle.bigTitle
+                  : (!#strings.isEmpty(theme.config.fcircle.title) ? theme.config.fcircle.title : singlePage.spec.title) },
+    _permalink= ${ singlePage.status.permalink },
+    _cover    = ${
+                    !#strings.isEmpty(theme.config.fcircle.backgroundImg) ? theme.config.fcircle.backgroundImg
+                    : (!#strings.isEmpty(theme.config.fcircle.background) ? theme.config.fcircle.background
+                    : (!#strings.isEmpty(theme.config.fcircle.bg) ? theme.config.fcircle.bg : singlePage.spec.cover))
+                 },
+    _excerpt  = ${
+                    !#strings.isEmpty(theme.config.fcircle.detail) ? theme.config.fcircle.detail
+                    : (!#strings.isEmpty(theme.config.fcircle.description) ? theme.config.fcircle.description
+                    : (!#strings.isEmpty(theme.config.fcircle.desc) ? theme.config.fcircle.desc : singlePage.status.excerpt))
+                 },
+    _type     = 'website'
+  )}"></th:block>
 </th:block>
 
 <th:block th:fragment="content">
   <div class="page" id="body-wrap">
 
-    <!-- 顶部导航标题也走相同逻辑 -->
+    <!-- 顶部导航标题 -->
     <header class="not-top-img" id="page-header">
       <nav th:replace="~{modules/nav :: nav(
         title = ${ !#strings.isEmpty(theme.config.fcircle.bigTitle) ? theme.config.fcircle.bigTitle
@@ -29,17 +35,23 @@
     <main class="layout hide-aside" id="content-inner">
       <div id="page">
 
-        <!-- 头图组件：背景/小标题/大标题/描述优先主题设置，其次页面字段 -->
+        <!-- 头图组件：背景/小标题/大标题/描述 -->
         <div th:replace="~{macro/author-content :: author-content(
-          background = ${ !#strings.isEmpty(theme.config.fcircle.background) ? theme.config.fcircle.background
-                        : (!#strings.isEmpty(theme.config.fcircle.bg) ? theme.config.fcircle.bg : singlePage.spec.cover) },
+          background = ${
+                          !#strings.isEmpty(theme.config.fcircle.backgroundImg) ? theme.config.fcircle.backgroundImg
+                          : (!#strings.isEmpty(theme.config.fcircle.background) ? theme.config.fcircle.background
+                          : (!#strings.isEmpty(theme.config.fcircle.bg) ? theme.config.fcircle.bg : singlePage.spec.cover))
+                        },
           smallTitle = ${ !#strings.isEmpty(theme.config.fcircle.smallTitle) ? theme.config.fcircle.smallTitle
                         : (!#strings.isEmpty(theme.config.fcircle.subTitle) ? theme.config.fcircle.subTitle
                         : (!#strings.isEmpty(theme.config.fcircle.subtitle) ? theme.config.fcircle.subtitle : '友链')) },
           bigTitle   = ${ !#strings.isEmpty(theme.config.fcircle.bigTitle) ? theme.config.fcircle.bigTitle
                         : (!#strings.isEmpty(theme.config.fcircle.title) ? theme.config.fcircle.title : singlePage.spec.title) },
-          detail     = ${ !#strings.isEmpty(theme.config.fcircle.description) ? theme.config.fcircle.description
-                        : (!#strings.isEmpty(theme.config.fcircle.desc) ? theme.config.fcircle.desc : singlePage.spec.excerpt.raw) },
+          detail     = ${
+                          !#strings.isEmpty(theme.config.fcircle.detail) ? theme.config.fcircle.detail
+                          : (!#strings.isEmpty(theme.config.fcircle.description) ? theme.config.fcircle.description
+                          : (!#strings.isEmpty(theme.config.fcircle.desc) ? theme.config.fcircle.desc : singlePage.spec.excerpt.raw))
+                        },
           buttonUrl  = ${ !#strings.isEmpty(theme.config.fcircle.buttonUrl) ? theme.config.fcircle.buttonUrl : site.url },
           buttonTitle= ${ !#strings.isEmpty(theme.config.fcircle.buttonTitle) ? theme.config.fcircle.buttonTitle : '部署项目' }
         )}"></div>
@@ -79,7 +91,7 @@
         <div id="hexo-circle-of-friends-root"></div>
         <script>
           var UserConfig = {
-            private_api_url: "[(${theme.config.fcircle.apiurl})]", // 这里填纯基址，如 https://hao-yutang.vercel.app 或 /api
+            private_api_url: "[(${theme.config.fcircle.apiurl})]",  // 这里填纯基址，如 https://hao-yutang.vercel.app 或 /api
             page_turning_number: 12,
             error_img: "https://sdn.geekzu.org/avatar/57d8260dfb55501c37dde588e7c3852c",
             sort_rule: "created"
