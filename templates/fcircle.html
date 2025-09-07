@@ -2,35 +2,46 @@
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{modules/layouts/layout :: layout(content = ~{::content}, htmlType = 'fcircle',title = ${singlePage.spec.title + ' | ' + site.title}, head = ~{::head} )}">
 <th:block th:fragment="head">
-    <th:block th:replace="~{modules/common/open-graph :: open-graph(_title = ${singlePage.spec.title},
-                _permalink = ${singlePage.status.permalink},
-                _cover = ${singlePage.spec.cover},
-                _excerpt = ${singlePage.status.excerpt},
-                _type = 'website')}"></th:block>
+    <!-- 优先主题设置，其次页面字段 -->
+    <th:block th:replace="~{modules/common/open-graph :: open-graph(
+                _title    = ${#strings.isEmpty(theme.config.fcircle.bigTitle) ? singlePage.spec.title : theme.config.fcircle.bigTitle},
+                _permalink= ${singlePage.status.permalink},
+                _cover    = ${#strings.isEmpty(theme.config.fcircle.background) ? singlePage.spec.cover : theme.config.fcircle.background},
+                _excerpt  = ${#strings.isEmpty(theme.config.fcircle.description) ? singlePage.status.excerpt : theme.config.fcircle.description},
+                _type     = 'website')}"></th:block>
 </th:block>
 <th:block th:fragment="content">
 
     <div class="page" id="body-wrap">
 
-        <!-- 头部导航栏 -->
+        <!-- 头部导航栏：标题同样优先读主题配置 -->
         <header class="not-top-img" id="page-header">
-            <nav th:replace="~{modules/nav :: nav(title = ${singlePage.spec.title})}"></nav>
+            <nav th:replace="~{modules/nav :: nav(
+                    title = ${#strings.isEmpty(theme.config.fcircle.bigTitle) ? singlePage.spec.title : theme.config.fcircle.bigTitle}
+            )}"></nav>
         </header>
+
         <main class="layout hide-aside" id="content-inner">
             <div id="page">
-                <div  th:replace="~{macro/author-content :: author-content(background = ${singlePage.spec.cover},
-                smallTitle = '友链',
-                bigTitle = ${singlePage.spec.title},
-                detail = ${singlePage.spec.excerpt.raw},
-                buttonUrl = ${theme.config.fcircle.buttonUrl},
-                buttonTitle = ${theme.config.fcircle.buttonTitle})}" ></div>
+
+                <!-- 头图组件：背景图/小标题/大标题/描述 优先主题设置 -->
+                <div th:replace="~{macro/author-content :: author-content(
+                    background = ${#strings.isEmpty(theme.config.fcircle.background) ? singlePage.spec.cover : theme.config.fcircle.background},
+                    smallTitle = ${#strings.isEmpty(theme.config.fcircle.smallTitle) ? '友链' : theme.config.fcircle.smallTitle},
+                    bigTitle   = ${#strings.isEmpty(theme.config.fcircle.bigTitle) ? singlePage.spec.title : theme.config.fcircle.bigTitle},
+                    detail     = ${#strings.isEmpty(theme.config.fcircle.description) ? singlePage.spec.excerpt.raw : theme.config.fcircle.description},
+                    buttonUrl  = ${#strings.isEmpty(theme.config.fcircle.buttonUrl) ? site.url : theme.config.fcircle.buttonUrl},
+                    buttonTitle= ${#strings.isEmpty(theme.config.fcircle.buttonTitle) ? '部署项目' : theme.config.fcircle.buttonTitle}
+                )}"></div>
+
                 <!--钓鱼-->
                 <th:block th:if="${theme.config.fcircle.fcircleRandomFriendsEnable}" >
-                    <div  class="title-h2-a">
+                    <div class="title-h2-a">
                         <div class="title-h2-a-left">
-                            <h2 style="padding-top:0;margin:.6rem 0 .6rem">🎣 钓鱼</h2><a class="random-post-start"
-                                                                                         href="javascript:fetchRandomPost();"><i
-                                class="haofont hao-icon-arrow-rotate-right"></i></a>
+                            <h2 style="padding-top:0;margin:.6rem 0 .6rem">🎣 钓鱼</h2>
+                            <a class="random-post-start" href="javascript:fetchRandomPost();">
+                                <i class="haofont hao-icon-arrow-rotate-right"></i>
+                            </a>
                         </div>
                         <div th:if="${not #strings.isEmpty(theme.config.link.linksUrl)}" class="title-h2-a-right">
                             <a class="random-post-all" th:href="${theme.config.link.linksUrl}">全部友链</a>
@@ -45,21 +56,21 @@
                         }
                     </script>
                     <script th:src="${assets_link + '/libs/moments/random-friends-post.js'}"></script>
-
                 </th:block>
+
                 <!--鱼塘-->
-                <!-- <div id="hexo-circle-of-friends-root"></div>
-                <script defer data-pjax src="https://cdn.yzczi.com/anzhiyu-blog-static%401.0.0/friends_vue/index2.js"></script> -->
                 <div class="title-h2-a">
-                    <div class="title-h2-a-left"><h2 style="padding-top: 0;margin:0.6rem 0 0.6rem;">🐟 鱼塘</h2></div>
+                    <div class="title-h2-a-left">
+                        <h2 style="padding-top: 0;margin:0.6rem 0 0.6rem;">🐟 鱼塘</h2>
+                    </div>
                     <div class="title-h2-a-right"><span>以下内容自动生成，未经过审核</span></div>
                 </div>
                 <div id="hexo-circle-of-friends-root"></div>
                 <script type="text/javascript">
                     var UserConfig = {
-                        // 填写你的api地址
+                        // 填写你的api地址（主题设置里填纯基址，例如 https://hao-yutang.vercel.app 或 /api）
                         private_api_url: "[(${theme.config.fcircle.apiurl})]",
-                        // 点击加载更多时，一次最多加载几篇文章，默认10
+                        // 点击加载更多时，一次最多加载几篇文章
                         page_turning_number: 12,
                         // 头像加载失败时，默认头像地址
                         error_img: 'https://sdn.geekzu.org/avatar/57d8260dfb55501c37dde588e7c3852c',
@@ -87,11 +98,11 @@
                 </style>
 
             </div>
-
-
         </main>
+
         <!-- 底部 -->
         <footer th:replace="~{modules/footer}"/>
+
         <!-- 卡片顶部气泡效果 -->
         <script th:if="${theme.config.other.bubbleEnable}" async data-pjax th:src="${assets_link + '/libs/canvas/bubble.js'}"></script>
     </div>
@@ -99,4 +110,3 @@
 </th:block>
 
 </html>
-
