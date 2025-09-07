@@ -2,111 +2,104 @@
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{modules/layouts/layout :: layout(content = ~{::content}, htmlType = 'fcircle',title = ${singlePage.spec.title + ' | ' + site.title}, head = ~{::head} )}">
 <th:block th:fragment="head">
-    <!-- 优先主题设置，其次页面字段 -->
+    <!-- OG：优先主题配置，再回落到页面字段 -->
     <th:block th:replace="~{modules/common/open-graph :: open-graph(
-                _title    = ${#strings.isEmpty(theme.config.fcircle.bigTitle) ? singlePage.spec.title : theme.config.fcircle.bigTitle},
-                _permalink= ${singlePage.status.permalink},
-                _cover    = ${#strings.isEmpty(theme.config.fcircle.background) ? singlePage.spec.cover : theme.config.fcircle.background},
-                _excerpt  = ${#strings.isEmpty(theme.config.fcircle.description) ? singlePage.status.excerpt : theme.config.fcircle.description},
-                _type     = 'website')}"></th:block>
+      _title    = ${ !#strings.isEmpty(theme.config.fcircle.bigTitle) ? theme.config.fcircle.bigTitle
+                    : (!#strings.isEmpty(theme.config.fcircle.title) ? theme.config.fcircle.title : singlePage.spec.title) },
+      _permalink= ${ singlePage.status.permalink },
+      _cover    = ${ !#strings.isEmpty(theme.config.fcircle.background) ? theme.config.fcircle.background
+                    : (!#strings.isEmpty(theme.config.fcircle.bg) ? theme.config.fcircle.bg : singlePage.spec.cover) },
+      _excerpt  = ${ !#strings.isEmpty(theme.config.fcircle.description) ? theme.config.fcircle.description
+                    : (!#strings.isEmpty(theme.config.fcircle.desc) ? theme.config.fcircle.desc : singlePage.status.excerpt) },
+      _type     = 'website'
+    )}"></th:block>
 </th:block>
+
 <th:block th:fragment="content">
+  <div class="page" id="body-wrap">
 
-    <div class="page" id="body-wrap">
+    <!-- 顶部导航标题也走相同逻辑 -->
+    <header class="not-top-img" id="page-header">
+      <nav th:replace="~{modules/nav :: nav(
+        title = ${ !#strings.isEmpty(theme.config.fcircle.bigTitle) ? theme.config.fcircle.bigTitle
+                  : (!#strings.isEmpty(theme.config.fcircle.title) ? theme.config.fcircle.title : singlePage.spec.title) }
+      )}"></nav>
+    </header>
 
-        <!-- 头部导航栏：标题同样优先读主题配置 -->
-        <header class="not-top-img" id="page-header">
-            <nav th:replace="~{modules/nav :: nav(
-                    title = ${#strings.isEmpty(theme.config.fcircle.bigTitle) ? singlePage.spec.title : theme.config.fcircle.bigTitle}
-            )}"></nav>
-        </header>
+    <main class="layout hide-aside" id="content-inner">
+      <div id="page">
 
-        <main class="layout hide-aside" id="content-inner">
-            <div id="page">
+        <!-- 头图组件：背景/小标题/大标题/描述优先主题设置，其次页面字段 -->
+        <div th:replace="~{macro/author-content :: author-content(
+          background = ${ !#strings.isEmpty(theme.config.fcircle.background) ? theme.config.fcircle.background
+                        : (!#strings.isEmpty(theme.config.fcircle.bg) ? theme.config.fcircle.bg : singlePage.spec.cover) },
+          smallTitle = ${ !#strings.isEmpty(theme.config.fcircle.smallTitle) ? theme.config.fcircle.smallTitle
+                        : (!#strings.isEmpty(theme.config.fcircle.subTitle) ? theme.config.fcircle.subTitle
+                        : (!#strings.isEmpty(theme.config.fcircle.subtitle) ? theme.config.fcircle.subtitle : '友链')) },
+          bigTitle   = ${ !#strings.isEmpty(theme.config.fcircle.bigTitle) ? theme.config.fcircle.bigTitle
+                        : (!#strings.isEmpty(theme.config.fcircle.title) ? theme.config.fcircle.title : singlePage.spec.title) },
+          detail     = ${ !#strings.isEmpty(theme.config.fcircle.description) ? theme.config.fcircle.description
+                        : (!#strings.isEmpty(theme.config.fcircle.desc) ? theme.config.fcircle.desc : singlePage.spec.excerpt.raw) },
+          buttonUrl  = ${ !#strings.isEmpty(theme.config.fcircle.buttonUrl) ? theme.config.fcircle.buttonUrl : site.url },
+          buttonTitle= ${ !#strings.isEmpty(theme.config.fcircle.buttonTitle) ? theme.config.fcircle.buttonTitle : '部署项目' }
+        )}"></div>
 
-                <!-- 头图组件：背景图/小标题/大标题/描述 优先主题设置 -->
-                <div th:replace="~{macro/author-content :: author-content(
-                    background = ${#strings.isEmpty(theme.config.fcircle.background) ? singlePage.spec.cover : theme.config.fcircle.background},
-                    smallTitle = ${#strings.isEmpty(theme.config.fcircle.smallTitle) ? '友链' : theme.config.fcircle.smallTitle},
-                    bigTitle   = ${#strings.isEmpty(theme.config.fcircle.bigTitle) ? singlePage.spec.title : theme.config.fcircle.bigTitle},
-                    detail     = ${#strings.isEmpty(theme.config.fcircle.description) ? singlePage.spec.excerpt.raw : theme.config.fcircle.description},
-                    buttonUrl  = ${#strings.isEmpty(theme.config.fcircle.buttonUrl) ? site.url : theme.config.fcircle.buttonUrl},
-                    buttonTitle= ${#strings.isEmpty(theme.config.fcircle.buttonTitle) ? '部署项目' : theme.config.fcircle.buttonTitle}
-                )}"></div>
-
-                <!--钓鱼-->
-                <th:block th:if="${theme.config.fcircle.fcircleRandomFriendsEnable}" >
-                    <div class="title-h2-a">
-                        <div class="title-h2-a-left">
-                            <h2 style="padding-top:0;margin:.6rem 0 .6rem">🎣 钓鱼</h2>
-                            <a class="random-post-start" href="javascript:fetchRandomPost();">
-                                <i class="haofont hao-icon-arrow-rotate-right"></i>
-                            </a>
-                        </div>
-                        <div th:if="${not #strings.isEmpty(theme.config.link.linksUrl)}" class="title-h2-a-right">
-                            <a class="random-post-all" th:href="${theme.config.link.linksUrl}">全部友链</a>
-                        </div>
-                    </div>
-                    <div id="random-post"></div>
-                    <script type="text/javascript">
-                        var fdataUser = {
-                            apiurl: "[(${theme.config.fcircle.apiurl})]",
-                            defaultFish: 500,
-                            hungryFish: 500,
-                        }
-                    </script>
-                    <script th:src="${assets_link + '/libs/moments/random-friends-post.js'}"></script>
-                </th:block>
-
-                <!--鱼塘-->
-                <div class="title-h2-a">
-                    <div class="title-h2-a-left">
-                        <h2 style="padding-top: 0;margin:0.6rem 0 0.6rem;">🐟 鱼塘</h2>
-                    </div>
-                    <div class="title-h2-a-right"><span>以下内容自动生成，未经过审核</span></div>
-                </div>
-                <div id="hexo-circle-of-friends-root"></div>
-                <script type="text/javascript">
-                    var UserConfig = {
-                        // 填写你的api地址（主题设置里填纯基址，例如 https://hao-yutang.vercel.app 或 /api）
-                        private_api_url: "[(${theme.config.fcircle.apiurl})]",
-                        // 点击加载更多时，一次最多加载几篇文章
-                        page_turning_number: 12,
-                        // 头像加载失败时，默认头像地址
-                        error_img: 'https://sdn.geekzu.org/avatar/57d8260dfb55501c37dde588e7c3852c',
-                        // 进入页面时第一次的排序规则
-                        sort_rule: 'created'
-                    }
-                </script>
-                <link rel="stylesheet" th:href="${assets_link + '/libs/moments/heoMainColor.css'}">
-                <script type="text/javascript" th:src="${assets_link + '/libs/moments/app.min.js'}"></script>
-                <script type="text/javascript" th:src="${assets_link + '/libs/moments/bundle.js'}"></script>
-
-                <style>
-                    /*修复友链朋友圈管理面板显示太大导致无法关闭的bug*/
-                    .cf-manage-pannel[data-v-34921c7c] {
-                        width: 80% !important;
-                        height: 80% !important;
-                    }
-                    .cf-article-author:hover {
-                        color: var(--heo-card-bg)!important
-                    }
-                    #cf-more:hover{
-                        background: var(--heo-lighttext)!important;
-                        color: var(--heo-card-bg)!important
-                    }
-                </style>
-
+        <!-- 🎣 钓鱼 -->
+        <th:block th:if="${theme.config.fcircle.fcircleRandomFriendsEnable}">
+          <div class="title-h2-a">
+            <div class="title-h2-a-left">
+              <h2 style="padding-top:0;margin:.6rem 0 .6rem">🎣 钓鱼</h2>
+              <a class="random-post-start" href="javascript:fetchRandomPost();">
+                <i class="haofont hao-icon-arrow-rotate-right"></i>
+              </a>
             </div>
-        </main>
+            <div th:if="${not #strings.isEmpty(theme.config.link.linksUrl)}" class="title-h2-a-right">
+              <a class="random-post-all" th:href="${theme.config.link.linksUrl}">全部友链</a>
+            </div>
+          </div>
+          <div id="random-post"></div>
+          <script>
+            var fdataUser = {
+              apiurl: "[(${theme.config.fcircle.apiurl})]",
+              defaultFish: 500,
+              hungryFish: 500,
+            };
+          </script>
+          <script th:src="${assets_link + '/libs/moments/random-friends-post.js'}"></script>
+        </th:block>
 
-        <!-- 底部 -->
-        <footer th:replace="~{modules/footer}"/>
+        <!-- 🐟 鱼塘 -->
+        <div class="title-h2-a">
+          <div class="title-h2-a-left">
+            <h2 style="padding-top:0;margin:.6rem 0 .6rem">🐟 鱼塘</h2>
+          </div>
+          <div class="title-h2-a-right"><span>以下内容自动生成，未经审核</span></div>
+        </div>
 
-        <!-- 卡片顶部气泡效果 -->
-        <script th:if="${theme.config.other.bubbleEnable}" async data-pjax th:src="${assets_link + '/libs/canvas/bubble.js'}"></script>
-    </div>
+        <div id="hexo-circle-of-friends-root"></div>
+        <script>
+          var UserConfig = {
+            private_api_url: "[(${theme.config.fcircle.apiurl})]", // 这里填纯基址，如 https://hao-yutang.vercel.app 或 /api
+            page_turning_number: 12,
+            error_img: "https://sdn.geekzu.org/avatar/57d8260dfb55501c37dde588e7c3852c",
+            sort_rule: "created"
+          };
+        </script>
+        <link rel="stylesheet" th:href="${assets_link + '/libs/moments/heoMainColor.css'}">
+        <script th:src="${assets_link + '/libs/moments/app.min.js'}"></script>
+        <script th:src="${assets_link + '/libs/moments/bundle.js'}"></script>
 
+        <style>
+          .cf-manage-pannel[data-v-34921c7c]{width:80%!important;height:80%!important}
+          .cf-article-author:hover{color:var(--heo-card-bg)!important}
+          #cf-more:hover{background:var(--heo-lighttext)!important;color:var(--heo-card-bg)!important}
+        </style>
+
+      </div>
+    </main>
+
+    <footer th:replace="~{modules/footer}"/>
+    <script th:if="${theme.config.other.bubbleEnable}" async data-pjax th:src="${assets_link + '/libs/canvas/bubble.js'}"></script>
+  </div>
 </th:block>
-
 </html>
