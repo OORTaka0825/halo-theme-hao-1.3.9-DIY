@@ -31,25 +31,8 @@
                   : (!#strings.isEmpty(theme.config.fcircle.title) ? theme.config.fcircle.title : singlePage.spec.title) }
       )}"></nav>
   <!-- 引入 heo-fcircle3.css 但放入独立 CSS Layer，避免全局通用规则覆盖鱼塘样式 -->
-  <link rel="stylesheet" th:href="${assets_link + '/libs/fcircle/heo-fcircle3.css'}" layer="heo" type="text/css">
-
-  <!-- 最小化修复：若 heo 在部分浏览器仍影响到鱼塘图片/混合模式，这里精准复原 -->
-  <style id="fcircle-min-fix">
-    #hexo-circle-of-friends-root, #hexo-circle-of-friends-root *{
-      mix-blend-mode: normal;
-    }
-    #hexo-circle-of-friends-root img{
-      filter: none;
-      transform: none;
-      object-fit: cover;
-      background: none;
-      max-width: 100%;
-      height: auto;
-      display: block;
-    }
-  </style>
-
-    </header>
+<!-- 最小化修复：若 heo 在部分浏览器仍影响到鱼塘图片/混合模式，这里精准复原 -->
+</header>
 
     <main class="layout hide-aside" id="content-inner">
       <div id="page">
