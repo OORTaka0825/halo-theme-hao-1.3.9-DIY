@@ -19,29 +19,46 @@
         <main class="layout hide-aside" id="content-inner">
             <div id="page">
                 <th:block th:replace="~{macro/content-links :: content-links(${htmlType})}" />
-                <!-- 推荐博客分页 v3（不改变原布局；每页 21 个；无滚动跳动；分页条居中） -->
-                <style id="flink-pager-style-v3">
+                <!-- 推荐博客分页 v4（主题色交互；无跳动；分页条居中） -->
+                <style id="flink-pager-style-v4">
                   .flink-pager-bar{
                     display:flex; align-items:center; justify-content:center; gap:.5rem;
                     margin: 1rem auto 0; width: max-content;
                   }
                   .flink-pager-bar button{
-                    padding:.4rem .8rem; border-radius:.6rem; border: var(--style-border);
-                    background: var(--heo-card-bg); color: var(--heo-fontcolor);
+                    padding:.42rem .9rem; border-radius:.8rem; 
+                    border: var(--style-border);
+                    background: var(--heo-card-bg);
+                    color: var(--heo-fontcolor);
                     cursor: pointer;
+                    transition: background .2s ease, color .2s ease, border-color .2s ease, transform .1s ease;
                   }
-                  .flink-pager-bar button[disabled]{ opacity:.5; cursor:not-allowed; }
-                  .flink-pager-bar .num{ min-width:2.8rem; text-align:center; }
+                  .flink-pager-bar button:hover{
+                    background: var(--heo-theme);
+                    border-color: var(--heo-theme);
+                    color: var(--heo-white);
+                    transform: translateY(-1px);
+                  }
+                  .flink-pager-bar button:active{
+                    transform: translateY(0);
+                  }
+                  .flink-pager-bar button[disabled]{
+                    opacity:.5; cursor:not-allowed;
+                    transform: none;
+                  }
+                  .flink-pager-bar .num{
+                    min-width:3.2rem; text-align:center; 
+                    color: var(--heo-secondtext);
+                  }
                 </style>
                 <script data-pjax>
                 (()=>{
-                  function initFlinkPagerV3(){
-                    // 1) 找“推荐博客”标题
+                  function initFlinkPagerV4(){
                     const titles = Array.from(document.querySelectorAll('#page h1, #page h2, #page h3, #page .tag-title, #page .section-title'));
                     const title = titles.find(el => /推荐博客/.test(el.textContent.trim()));
                     if(!title) return;
 
-                    // 2) 找后面的第一个“卡片集合容器”（子元素较多的块）
+                    // 找到卡片容器
                     let container = title.nextElementSibling;
                     let guard = 0;
                     while(container && guard < 10){
@@ -50,16 +67,14 @@
                       container = container.nextElementSibling;
                       guard++;
                     }
-                    if(!container) return;
-                    if(container.dataset.flinkPager === 'on') return;
+                    if(!container || container.dataset.flinkPager === 'on') return;
                     container.dataset.flinkPager = 'on';
 
-                    // 3) 条目和分页
                     const items = Array.from(container.children).filter(el => el.nodeType === 1);
-                    const pageSize = 21; // 3×7
+                    const pageSize = 21;
                     if(items.length <= pageSize) return;
 
-                    // 创建分页条
+                    // 分页条
                     const bar = document.createElement('div');
                     bar.className = 'flink-pager-bar';
                     const prev = document.createElement('button'); prev.textContent = '上一页';
@@ -74,7 +89,7 @@
                     function render(){
                       const start = (pageIndex-1) * pageSize;
                       const end = start + pageSize;
-                      for(let i=0; i<items.length; i++){
+                      for(let i=0;i<items.length;i++){
                         items[i].style.display = (i>=start && i<end) ? '' : 'none';
                       }
                       info.textContent = pageIndex + ' / ' + pageCount;
@@ -82,19 +97,20 @@
                       next.disabled = pageIndex>=pageCount;
                     }
 
-                    // 初次渲染并锁定容器高度，避免翻页布局抖动
                     render();
+
+                    // 锁容器高度避免翻页抖动
                     const baseH = container.getBoundingClientRect().height;
                     container.style.minHeight = baseH + 'px';
 
-                    // 翻页：不再滚动到标题，保持视口不动
-                    prev.addEventListener('click', (e)=>{ e.preventDefault(); if(pageIndex>1){ pageIndex--; render(); } });
-                    next.addEventListener('click', (e)=>{ e.preventDefault(); if(pageIndex<pageCount){ pageIndex++; render(); } });
+                    // 交互：保持视口不动
+                    prev.addEventListener('click', (e)=>{ e.preventDefault(); if(pageIndex>1){ pageIndex--; render(); }});
+                    next.addEventListener('click', (e)=>{ e.preventDefault(); if(pageIndex<pageCount){ pageIndex++; render(); }});
                   }
 
-                  if(document.readyState !== 'loading') initFlinkPagerV3();
-                  else document.addEventListener('DOMContentLoaded', initFlinkPagerV3);
-                  document.addEventListener('pjax:complete', initFlinkPagerV3);
+                  if(document.readyState !== 'loading') initFlinkPagerV4();
+                  else document.addEventListener('DOMContentLoaded', initFlinkPagerV4);
+                  document.addEventListener('pjax:complete', initFlinkPagerV4);
                 })();
                 </script>
 
