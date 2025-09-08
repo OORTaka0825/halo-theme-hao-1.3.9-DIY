@@ -19,6 +19,112 @@
         <main class="layout hide-aside" id="content-inner">
             <div id="page">
                 <th:block th:replace="~{macro/content-links :: content-links(${htmlType})}" />
+                <!-- 推荐博客分页（3行×7列=21条/页） -->
+                <style id="flink-pager-style">
+                  /* 仅作用于“推荐博客”区块的列表容器 */
+                  .flink-pager-grid{
+                    display: grid;
+                    grid-template-columns: repeat(7, minmax(0, 1fr));
+                    gap: .8rem;
+                  }
+                  /* 只在足够宽的桌面端固定 7 列；较窄设备按原主题自适应 */
+                  @media (max-width: 1280px){
+                    .flink-pager-grid{
+                      grid-template-columns: repeat(4, minmax(0, 1fr));
+                    }
+                  }
+                  @media (max-width: 960px){
+                    .flink-pager-grid{
+                      grid-template-columns: repeat(2, minmax(0, 1fr));
+                    }
+                  }
+                  .flink-pager-bar{
+                    display:flex; align-items:center; justify-content:center; gap:.5rem;
+                    margin-top: 1rem;
+                  }
+                  .flink-pager-bar button{
+                    padding:.4rem .8rem; border-radius:.6rem; border: var(--style-border);
+                    background: var(--heo-card-bg); color: var(--heo-fontcolor);
+                    cursor: pointer;
+                  }
+                  .flink-pager-bar button[disabled]{
+                    opacity:.5; cursor:not-allowed;
+                  }
+                  .flink-pager-bar .num{ min-width:2rem; text-align:center; }
+                </style>
+                <script data-pjax>
+                (()=>{
+                  function initFlinkPager(){
+                    // 1) 找到“推荐博客”标题
+                    const titleCandidates = Array.from(document.querySelectorAll('#page h1, #page h2, #page h3, #page .tag-title, #page .section-title'));
+                    const title = titleCandidates.find(el => /推荐博客/.test(el.textContent.trim()));
+                    if(!title) return;
+
+                    // 2) 找到紧随其后的卡片容器（向后找第一个包含 >=6 个子元素的块）
+                    let container = title.nextElementSibling;
+                    let step = 0;
+                    while(container && step < 10){
+                      const count = (container.children || []).length;
+                      if(count >= 6) break;
+                      container = container.nextElementSibling;
+                      step++;
+                    }
+                    if(!container) return;
+
+                    // 避免重复初始化
+                    if(container.dataset.flinkPager === 'on') return;
+                    container.dataset.flinkPager = 'on';
+
+                    // 3) 准备分页
+                    const items = Array.from(container.children);
+                    if(items.length <= 21){
+                      // 项很少，保持原样
+                      return;
+                    }
+
+                    // 包一层，方便套用网格
+                    const grid = document.createElement('div');
+                    grid.className = 'flink-pager-grid';
+                    // 将原有子元素转移到 grid
+                    items.forEach(el => grid.appendChild(el));
+                    container.appendChild(grid);
+
+                    const pageSize = 21; // 3行×7列
+                    let pageIndex = 1;
+                    const pageCount = Math.max(1, Math.ceil(items.length / pageSize));
+
+                    // 创建分页条
+                    const bar = document.createElement('div');
+                    bar.className = 'flink-pager-bar';
+                    const prev = document.createElement('button'); prev.textContent = '上一页';
+                    const info = document.createElement('span'); info.className='num';
+                    const next = document.createElement('button'); next.textContent = '下一页';
+                    bar.append(prev, info, next);
+                    container.appendChild(bar);
+
+                    function render(){
+                      const start = (pageIndex-1) * pageSize;
+                      const end = start + pageSize;
+                      items.forEach((el, i)=>{
+                        el.style.display = (i>=start && i<end) ? '' : 'none';
+                      });
+                      info.textContent = pageIndex + ' / ' + pageCount;
+                      prev.disabled = pageIndex<=1;
+                      next.disabled = pageIndex>=pageCount;
+                    }
+                    prev.addEventListener('click', ()=>{ if(pageIndex>1){ pageIndex--; render(); container.scrollIntoView({behavior:"smooth", block:"start"});} });
+                    next.addEventListener('click', ()=>{ if(pageIndex<pageCount){ pageIndex++; render(); container.scrollIntoView({behavior:"smooth", block:"start"});} });
+
+                    render();
+                  }
+
+                  // 首次与 PJAX 场景
+                  if(document.readyState !== 'loading') initFlinkPager();
+                  else document.addEventListener('DOMContentLoaded', initFlinkPager);
+                  document.addEventListener('pjax:complete', initFlinkPager);
+                })();
+                </script>
+
 
                 <hr/>
                 <!--/* 评论组件 */-->
