@@ -7204,7 +7204,7 @@ li.tree-list-item {
 
 .title-h2-a a {
     margin-left: 0.5rem;
-    color: var(--heo-secondtext);
+    color: var(--text-highlight-color);
     font-weight: bold;
 }
 
