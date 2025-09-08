@@ -30,30 +30,57 @@
         title = ${ !#strings.isEmpty(theme.config.fcircle.bigTitle) ? theme.config.fcircle.bigTitle
                   : (!#strings.isEmpty(theme.config.fcircle.title) ? theme.config.fcircle.title : singlePage.spec.title) }
       )}"></nav>
-  <!-- 仅给顶部加遮罩/毛玻璃，不影响卡片 -->
-  <style id="fcircle-header-mask-only-v2">
-    #page-header{ position:relative; }
-    /* 遮罩本体：放在 header 顶部区域 */
-    #page-header .fcircle-header-mask{
-      position:absolute; left:0; right:0; top:0; height:72px;
-      background: linear-gradient(rgba(0,0,0,.46), rgba(0,0,0,.18) 40%, rgba(0,0,0,0));
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      pointer-events:none;
-      z-index: 1;
+  <!-- 与 links 页保持一致：引入 heo-fcircle3.css -->
+  <link rel="stylesheet" type="text/css" th:href="${assets_link + '/libs/fcircle/heo-fcircle3.css'}">
+
+  <!-- 仅在鱼塘列表作用域内复原 heo-fcircle3.css 对 cf-* 的覆盖，避免卡片/图片发生变化 -->
+  <style id="fcircle-undo-heo-conflicts">
+    /* 作用域限定到鱼塘根容器，避免影响其它页面 */
+    #hexo-circle-of-friends-root, 
+    #hexo-circle-of-friends-root * {
+      mix-blend-mode: normal !important;
+      filter: none !important;
     }
-    /* 保证导航在遮罩之上显示清晰 */
-    #page-header nav, #page-header .menus, #page-header .menus_items, #page-header .top-social{
-      position: relative; z-index: 2;
+
+    /* 常见被覆盖的容器/卡片 */
+    #hexo-circle-of-friends-root .cf-article,
+    #hexo-circle-of-friends-root .cf-article-card,
+    #hexo-circle-of-friends-root .cf-article-floor,
+    #hexo-circle-of-friends-root .cf-overshow,
+    #hexo-circle-of-friends-root .cf-overshow-head,
+    #hexo-circle-of-friends-root .cf-overshow-content {
+      background: transparent !important;
+      box-shadow: none !important;
+      border: none !important;
+      transform: none !important;
+      transition: none !important;
     }
-    /* 在浅色模式下稍弱一点；如主题有 data-theme 可自行替换判断 */
-    @media (prefers-color-scheme: light){
-      #page-header .fcircle-header-mask{
-        background: linear-gradient(rgba(0,0,0,.30), rgba(0,0,0,.12) 40%, rgba(0,0,0,0));
-      }
+
+    /* 图片统一按主题原样显示 */
+    #hexo-circle-of-friends-root img,
+    #hexo-circle-of-friends-root .cf-article img,
+    #hexo-circle-of-friends-root .cf-img-avatar {
+      border-radius: .75rem !important;   /* 按你主题卡片统一圆角，可按需调 */
+      object-fit: cover !important;
+      background: none !important;
+      box-shadow: none !important;
+      transform: none !important;
+      transition: none !important;
+    }
+
+    /* 标题两行省略有时会被强加，恢复为正常块级显示 */
+    #hexo-circle-of-friends-root .cf-article-title{
+      display: block !important;
+      -webkit-line-clamp: unset !important;
+      -webkit-box-orient: unset !important;
+    }
+
+    /* 时间/作者颜色按主题继承，不要 heo 的深浅覆写 */
+    #hexo-circle-of-friends-root .cf-article-time,
+    #hexo-circle-of-friends-root .cf-article-author{
+      color: inherit !important;
     }
   </style>
-  <div class="fcircle-header-mask" aria-hidden="true"></div>
 
     </header>
 
