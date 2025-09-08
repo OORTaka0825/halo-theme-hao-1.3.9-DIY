@@ -19,6 +19,85 @@
         <main class="layout hide-aside" id="content-inner">
             <div id="page">
                 <th:block th:replace="~{macro/content-links :: content-links(${htmlType})}" />
+                <!-- 推荐博客分页 v3（不改变原布局；每页 21 个；无滚动跳动；分页条居中） -->
+                <style id="flink-pager-style-v3">
+                  .flink-pager-bar{
+                    display:flex; align-items:center; justify-content:center; gap:.5rem;
+                    margin: 1rem auto 0; width: max-content;
+                  }
+                  .flink-pager-bar button{
+                    padding:.4rem .8rem; border-radius:.6rem; border: var(--style-border);
+                    background: var(--heo-card-bg); color: var(--heo-fontcolor);
+                    cursor: pointer;
+                  }
+                  .flink-pager-bar button[disabled]{ opacity:.5; cursor:not-allowed; }
+                  .flink-pager-bar .num{ min-width:2.8rem; text-align:center; }
+                </style>
+                <script data-pjax>
+                (()=>{
+                  function initFlinkPagerV3(){
+                    // 1) 找“推荐博客”标题
+                    const titles = Array.from(document.querySelectorAll('#page h1, #page h2, #page h3, #page .tag-title, #page .section-title'));
+                    const title = titles.find(el => /推荐博客/.test(el.textContent.trim()));
+                    if(!title) return;
+
+                    // 2) 找后面的第一个“卡片集合容器”（子元素较多的块）
+                    let container = title.nextElementSibling;
+                    let guard = 0;
+                    while(container && guard < 10){
+                      const count = (container.children || []).length;
+                      if(count >= 10) break;
+                      container = container.nextElementSibling;
+                      guard++;
+                    }
+                    if(!container) return;
+                    if(container.dataset.flinkPager === 'on') return;
+                    container.dataset.flinkPager = 'on';
+
+                    // 3) 条目和分页
+                    const items = Array.from(container.children).filter(el => el.nodeType === 1);
+                    const pageSize = 21; // 3×7
+                    if(items.length <= pageSize) return;
+
+                    // 创建分页条
+                    const bar = document.createElement('div');
+                    bar.className = 'flink-pager-bar';
+                    const prev = document.createElement('button'); prev.textContent = '上一页';
+                    const info = document.createElement('span'); info.className='num';
+                    const next = document.createElement('button'); next.textContent = '下一页';
+                    bar.append(prev, info, next);
+                    container.appendChild(bar);
+
+                    let pageIndex = 1;
+                    const pageCount = Math.max(1, Math.ceil(items.length / pageSize));
+
+                    function render(){
+                      const start = (pageIndex-1) * pageSize;
+                      const end = start + pageSize;
+                      for(let i=0; i<items.length; i++){
+                        items[i].style.display = (i>=start && i<end) ? '' : 'none';
+                      }
+                      info.textContent = pageIndex + ' / ' + pageCount;
+                      prev.disabled = pageIndex<=1;
+                      next.disabled = pageIndex>=pageCount;
+                    }
+
+                    // 初次渲染并锁定容器高度，避免翻页布局抖动
+                    render();
+                    const baseH = container.getBoundingClientRect().height;
+                    container.style.minHeight = baseH + 'px';
+
+                    // 翻页：不再滚动到标题，保持视口不动
+                    prev.addEventListener('click', (e)=>{ e.preventDefault(); if(pageIndex>1){ pageIndex--; render(); } });
+                    next.addEventListener('click', (e)=>{ e.preventDefault(); if(pageIndex<pageCount){ pageIndex++; render(); } });
+                  }
+
+                  if(document.readyState !== 'loading') initFlinkPagerV3();
+                  else document.addEventListener('DOMContentLoaded', initFlinkPagerV3);
+                  document.addEventListener('pjax:complete', initFlinkPagerV3);
+                })();
+                </script>
+
 
                 <hr/>
                 <!--/* 评论组件 */-->
