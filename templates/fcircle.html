@@ -30,7 +30,22 @@
         title = ${ !#strings.isEmpty(theme.config.fcircle.bigTitle) ? theme.config.fcircle.bigTitle
                   : (!#strings.isEmpty(theme.config.fcircle.title) ? theme.config.fcircle.title : singlePage.spec.title) }
       )}"></nav>
-      <link rel="stylesheet" type="text/css" th:href="${assets_link + '/libs/fcircle/heo-fcircle3.css'}">
+  <!-- A方案：仅顶部遮罩/毛玻璃，不引入 heo-fcircle3.css -->
+  <style id="fcircle-header-mask-only">
+    #page-header{ position: relative; overflow: hidden; }
+    #page-header::after{
+      content:"";
+      position:absolute;
+      left:0; right:0; top:0;
+      height:72px; /* 导航高度，可按需 64~80px */
+      background: linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.18) 40%, rgba(0,0,0,0));
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      pointer-events:none;
+      z-index: 0;
+    }
+  </style>
+
     </header>
 
     <main class="layout hide-aside" id="content-inner">
