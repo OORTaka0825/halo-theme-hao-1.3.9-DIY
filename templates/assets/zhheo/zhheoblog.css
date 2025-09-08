@@ -18746,3 +18746,38 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
     color: #fff
 }
 
+/* ====== [fcircle unified nav + scope fixes | appended by ChatGPT] ====== */
+
+/* 统一非头图页（.not-top-img）导航在滚动时的蒙层外观，使用主题变量 */
+#page-header.not-top-img #nav {
+  background: var(--heo-maskbg);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: var(--heo-shadow-nav);
+  border-bottom: var(--style-border-always);
+  z-index: 1000;
+}
+
+/* 当主题脚本给 header 加上 .nav-fixed 时，保持与其他页面一致的半透明/实色切换 */
+#page-header.not-top-img.nav-fixed #nav,
+#page-header.nav-fixed #nav {
+  background: var(--heo-card-bg);
+  backdrop-filter: saturate(180%) blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* 导航内文字颜色与主题保持一致 */
+#page-header.not-top-img #nav a {
+  color: var(--heo-fontcolor);
+}
+
+/* ——鱼塘内容区保护：避免页面全局动画/过渡影响到卡片图片，修复“变变”的问题 —— */
+#hexo-circle-of-friends-root img {
+  transition: none !important;
+}
+
+/* 新建层叠上下文，防止导航蒙层样式穿透到鱼塘内部组件（极端场景下有帮助） */
+#hexo-circle-of-friends-root {
+  isolation: isolate;
+}
+/* ====== [end patch] ====== */
