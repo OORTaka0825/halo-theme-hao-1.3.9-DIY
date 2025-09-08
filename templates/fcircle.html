@@ -30,55 +30,28 @@
         title = ${ !#strings.isEmpty(theme.config.fcircle.bigTitle) ? theme.config.fcircle.bigTitle
                   : (!#strings.isEmpty(theme.config.fcircle.title) ? theme.config.fcircle.title : singlePage.spec.title) }
       )}"></nav>
-  <!-- 与 links 页保持一致：引入 heo-fcircle3.css -->
-  <link rel="stylesheet" type="text/css" th:href="${assets_link + '/libs/fcircle/heo-fcircle3.css'}">
-
-  <!-- 仅在鱼塘列表作用域内复原 heo-fcircle3.css 对 cf-* 的覆盖，避免卡片/图片发生变化 -->
-  <style id="fcircle-undo-heo-conflicts">
-    /* 作用域限定到鱼塘根容器，避免影响其它页面 */
-    #hexo-circle-of-friends-root, 
-    #hexo-circle-of-friends-root * {
-      mix-blend-mode: normal !important;
-      filter: none !important;
+  <!-- 与其它页面一致的导航遮罩：不引入 heo-fcircle3.css，仅修正导航自身样式 -->
+  <style id="fcircle-nav-mask-compat">
+    /* 顶部为非大图页时（not-top-img），导航半透明并开启毛玻璃 */
+    #page-header.not-top-img #nav{
+      background: var(--heo-maskbg);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+    #page-header.not-top-img #nav a{
+      color: var(--heo-fontcolor);
+      text-shadow: none;
     }
 
-    /* 常见被覆盖的容器/卡片 */
-    #hexo-circle-of-friends-root .cf-article,
-    #hexo-circle-of-friends-root .cf-article-card,
-    #hexo-circle-of-friends-root .cf-article-floor,
-    #hexo-circle-of-friends-root .cf-overshow,
-    #hexo-circle-of-friends-root .cf-overshow-head,
-    #hexo-circle-of-friends-root .cf-overshow-content {
-      background: transparent !important;
-      box-shadow: none !important;
-      border: none !important;
-      transform: none !important;
-      transition: none !important;
+    /* 滚动吸顶后的导航（nav-fixed）与其它页面保持一致 */
+    #page-header.nav-fixed #nav{
+      background: var(--heo-card-bg);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: none;
     }
-
-    /* 图片统一按主题原样显示 */
-    #hexo-circle-of-friends-root img,
-    #hexo-circle-of-friends-root .cf-article img,
-    #hexo-circle-of-friends-root .cf-img-avatar {
-      border-radius: .75rem !important;   /* 按你主题卡片统一圆角，可按需调 */
-      object-fit: cover !important;
-      background: none !important;
-      box-shadow: none !important;
-      transform: none !important;
-      transition: none !important;
-    }
-
-    /* 标题两行省略有时会被强加，恢复为正常块级显示 */
-    #hexo-circle-of-friends-root .cf-article-title{
-      display: block !important;
-      -webkit-line-clamp: unset !important;
-      -webkit-box-orient: unset !important;
-    }
-
-    /* 时间/作者颜色按主题继承，不要 heo 的深浅覆写 */
-    #hexo-circle-of-friends-root .cf-article-time,
-    #hexo-circle-of-friends-root .cf-article-author{
-      color: inherit !important;
+    #page-header.nav-fixed #nav a{
+      text-shadow: none;
     }
   </style>
 
