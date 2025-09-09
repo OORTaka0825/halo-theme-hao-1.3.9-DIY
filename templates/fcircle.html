@@ -30,8 +30,8 @@
         title = ${ !#strings.isEmpty(theme.config.fcircle.bigTitle) ? theme.config.fcircle.bigTitle
                   : (!#strings.isEmpty(theme.config.fcircle.title) ? theme.config.fcircle.title : singlePage.spec.title) }
       )}"></nav>
-<!-- 修复(v4)：优先取外链域名作为头像，避免一直停留在 404s.gif -->
-<script data-pjax id="fcircle-avatar-fallback-v4">
+<!-- 修复(v5 通用)：鱼塘卡片一直是懒加载占位图时，尽量从任何可见位置提取网址并替换为对应站点图标 -->
+<script data-pjax id="fcircle-avatar-fallback-v5">
   (function () {
     var root = document.querySelector('#hexo-circle-of-friends-root') || document;
     if (!root) return;
@@ -39,7 +39,6 @@
     function isPlaceholder(url) {
       return /(?:^|\/)404s?\.(?:gif|png|jpe?g|webp)(?:$|\?)/i.test(url || '');
     }
-
     function wakeLazy() {
       try {
         if (window.lazyLoadInstance && typeof window.lazyLoadInstance.update === 'function') {
@@ -48,50 +47,47 @@
         }
       } catch (e) {}
     }
-
-    function getExternalHref(card){
-      var links = card ? card.querySelectorAll('a[href]') : [];
-      var host = location.hostname;
-      for (var i=0;i<links.length;i++){
-        try{
-          var href = links[i].getAttribute('href');
-          var u = new URL(href, location.href);
-          if (u.hostname && u.hostname !== host) return u.href; // 选外链
-        }catch(e){}
-      }
-      // 再试 dataset
-      if (card){
-        var c = card.closest('[data-url],[data-link],[data-href],[data-site]');
-        if (c) return c.dataset.url || c.dataset.link || c.dataset.href || c.dataset.site || null;
+    function toFavicon(href) {
+      try { var u = new URL(href, location.href); return 'https://icons.duckduckgo.com/ip3/' + u.hostname + '.ico'; }
+      catch (e) { return null; }
+    }
+    // 在节点及其祖先里，尽可能找一个包含 http(s) 的 URL
+    function findAnyUrl(node) {
+      var maxDepth = 6, depth = 0, el = node;
+      while (el && depth++ < maxDepth) {
+        // 1) data-* / 任何属性里出现 http
+        if (el.attributes) {
+          for (var i = 0; i < el.attributes.length; i++) {
+            var v = el.attributes[i].value;
+            if (typeof v === 'string' && /^https?:\/\//i.test(v)) return v;
+          }
+        }
+        // 2) 子元素里的链接
+        var a = el.querySelector && el.querySelector('a[href^="http"]');
+        if (a) return a.getAttribute('href');
+        el = el.parentElement;
       }
       return null;
     }
-
-    function toFavicon(href) {
-      try {
-        var u = new URL(href, location.href);
-        return 'https://icons.duckduckgo.com/ip3/' + u.hostname + '.ico';
-      } catch (e) { return null; }
-    }
-
     function fixImages(scope) {
       var box = scope || root;
       wakeLazy();
-
       var imgs = box.querySelectorAll('img');
       var fixed = 0;
-      imgs.forEach(function (img) {
-        if (img.dataset.fcircleFixed === '1') return;
+      for (var i = 0; i < imgs.length; i++) {
+        var img = imgs[i];
+        if (img.dataset.fcircleFixed === '1') continue;
         var cur = img.getAttribute('src') || '';
-        if (!isPlaceholder(cur)) return;
+        if (!isPlaceholder(cur)) continue;
 
         var real = img.getAttribute('data-lazy-src') || img.getAttribute('data-src') || img.getAttribute('data-original');
-
         if (!real) {
           var card = img.closest('.cf-card, .cf-item, article, li, div');
-          var href = getExternalHref(card);
-          if (href) real = toFavicon(href);
+          var any = findAnyUrl(card || img);
+          if (any) real = toFavicon(any);
         }
+        // 最后兜底：至少用本站 favicon 让它发生变化，便于确认脚本在工作
+        if (!real) real = location.origin + '/favicon.ico';
 
         if (real) {
           img.referrerPolicy = 'no-referrer';
@@ -101,16 +97,16 @@
           img.dataset.fcircleFixed = '1';
           fixed++;
         }
-      });
-      // console.log('[fcircle-avatar-fallback-v4] fixed:', fixed);
+      }
+      // console.log('[v5] fixed', fixed);
     }
-
     if (document.readyState !== 'loading') fixImages();
     else document.addEventListener('DOMContentLoaded', function () { fixImages(); }, { once: true });
 
     var mo = new MutationObserver(function (muts) {
-      var changed = muts.some(function (m) { return m.addedNodes && m.addedNodes.length; });
-      if (changed) fixImages();
+      for (var i = 0; i < muts.length; i++) {
+        if (muts[i].addedNodes && muts[i].addedNodes.length) { fixImages(); break; }
+      }
     });
     mo.observe(root, { childList: true, subtree: true });
 
@@ -119,8 +115,25 @@
 </script>
 
   <!-- 引入 heo-fcircle3.css 但放入独立 CSS Layer，避免全局通用规则覆盖鱼塘样式 -->
-<!-- 最小化修复：若 heo 在部分浏览器仍影响到鱼塘图片/混合模式，这里精准复原 -->
-</header>
+  <link rel="stylesheet" th:href="${assets_link + '/libs/fcircle/heo-fcircle3.css'}" layer="heo" type="text/css">
+
+  <!-- 最小化修复：若 heo 在部分浏览器仍影响到鱼塘图片/混合模式，这里精准复原 -->
+  <style id="fcircle-min-fix">
+    #hexo-circle-of-friends-root, #hexo-circle-of-friends-root *{
+      mix-blend-mode: normal;
+    }
+    #hexo-circle-of-friends-root img{
+      filter: none;
+      transform: none;
+      object-fit: cover;
+      background: none;
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+  </style>
+
+    </header>
 
     <main class="layout hide-aside" id="content-inner">
       <div id="page">
