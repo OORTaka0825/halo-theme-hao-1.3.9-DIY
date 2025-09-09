@@ -30,57 +30,74 @@
         title = ${ !#strings.isEmpty(theme.config.fcircle.bigTitle) ? theme.config.fcircle.bigTitle
                   : (!#strings.isEmpty(theme.config.fcircle.title) ? theme.config.fcircle.title : singlePage.spec.title) }
       )}"></nav>
-<!-- 精准修复：鱼塘懒加载（主题使用 vanilla-lazyload -> window.lazyLoadInstance，属性 data-lazy-src） -->
-<script data-pjax id="fcircle-lazyfix-precise">
+<!-- 修复：鱼塘卡片图片仅有占位图时，以站点 favicon 兜底；并兼容懒加载二次唤醒 -->
+<script data-pjax id="fcircle-avatar-fallback">
   (function () {
-    var root = document.getElementById('hexo-circle-of-friends-root');
+    var root = document.getElementById('hexo-circle-of-friends-root') || document;
     if (!root) return;
 
-    function wakeThemeLazy() {
+    function isPlaceholder(url) {
+      return /(?:^|\/)404s\.gif(?:$|\?)/i.test(url || '');
+    }
+
+    function wakeLazy() {
       try {
         if (window.lazyLoadInstance && typeof window.lazyLoadInstance.update === 'function') {
           window.lazyLoadInstance.update();
+          window.lazyLoadInstance.loadAll && window.lazyLoadInstance.loadAll();
         }
-      } catch(e){}
+      } catch (e) {}
     }
 
-    function eagerFill(box){
-      var scope = box || root;
-      var imgs = scope.querySelectorAll('img');
-      imgs.forEach(function(img){
-        if (img.dataset._eagerDone === '1') return;
-        // 仅当当前没有正常 src 时，才把 data-lazy-src 写回 src
+    function fixImages(scope) {
+      var box = scope || root;
+      // 先尝试懒加载刷新
+      wakeLazy();
+
+      // 再兜底：把 404s.gif 替换为站点 favicon 或 data-lazy-src
+      var imgs = box.querySelectorAll('img');
+      var fixed = 0;
+      imgs.forEach(function (img) {
         var cur = img.getAttribute('src') || '';
-        var real = img.getAttribute('data-lazy-src'); // 主题配置：data_src = 'lazy-src'
-        if ((!cur || /^data:image\//.test(cur)) && real) {
-          img.setAttribute('src', real);
-        }
-        img.setAttribute('loading', 'eager');
-        img.setAttribute('decoding', 'async');
-        img.dataset._eagerDone = '1';
-      });
-    }
+        if (!isPlaceholder(cur)) return;
 
-    function run(scope){
-      wakeThemeLazy();
-      // 等一帧后再兜底一次（确保 update() 没把图加载出来时也能显示）
-      setTimeout(function(){
-        eagerFill(scope);
-      }, 0);
+        // 优先读 data-lazy-src / data-src / data-original
+        var real = img.getAttribute('data-lazy-src') || img.getAttribute('data-src') || img.getAttribute('data-original');
+        if (!real) {
+          // 再尝试卡片上的链接，取其域名的 favicon
+          var card = img.closest('.cf-card, .cf-item, article, li, div');
+          var a = card ? card.querySelector('a[href]') : null;
+          if (a) {
+            try {
+              var u = new URL(a.href, location.href);
+              real = u.origin + '/favicon.ico';
+            } catch (e) {}
+          }
+        }
+        if (real) {
+          img.referrerPolicy = 'no-referrer';
+          img.setAttribute('loading', 'eager');
+          img.setAttribute('decoding', 'async');
+          img.src = real + (real.indexOf('?') > -1 ? '&' : '?') + 't=' + Date.now();
+          fixed++;
+        }
+      });
+      // console.log('[fcircle-avatar-fallback] fixed:', fixed);
     }
 
     // 首次
-    if (document.readyState !== 'loading') run();
-    else document.addEventListener('DOMContentLoaded', function(){ run(); }, { once:true });
+    if (document.readyState !== 'loading') fixImages();
+    else document.addEventListener('DOMContentLoaded', function () { fixImages(); }, { once: true });
 
-    // 监听 DOM 动态插入（鱼塘渲染完成/翻页）
-    var mo = new MutationObserver(function(muts){
-      if (muts.some(function(m){ return m.addedNodes && m.addedNodes.length; })) run();
+    // 监听 DOM 变化（鱼塘异步渲染/翻页）
+    var mo = new MutationObserver(function (muts) {
+      var changed = muts.some(function (m) { return m.addedNodes && m.addedNodes.length; });
+      if (changed) fixImages();
     });
-    mo.observe(root, { childList:true, subtree:true });
+    mo.observe(root, { childList: true, subtree: true });
 
-    // PJAX 返回该页
-    document.addEventListener('pjax:complete', function(){ run(); });
+    // PJAX 回来后再执行一次
+    document.addEventListener('pjax:complete', function () { setTimeout(fixImages, 0); });
   })();
 </script>
 
