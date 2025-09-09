@@ -30,6 +30,27 @@
         title = ${ !#strings.isEmpty(theme.config.fcircle.bigTitle) ? theme.config.fcircle.bigTitle
                   : (!#strings.isEmpty(theme.config.fcircle.title) ? theme.config.fcircle.title : singlePage.spec.title) }
       )}"></nav>
+      <!-- 修复：首次通过 PJAX 进入页面时，滚动不触发导航吸顶与蒙层 -->
+      <script data-pjax id="fcircle-navfix">
+        (function () {
+          var header = document.getElementById('page-header');
+          if (!header) return;
+          function updateNav() {
+            var top = window.pageYOffset || document.documentElement.scrollTop || 0;
+            if (top > 10) {
+              header.classList.add('nav-fixed');
+            } else {
+              header.classList.remove('nav-fixed');
+            }
+          }
+          if (document.readyState !== 'loading') updateNav();
+          else document.addEventListener('DOMContentLoaded', updateNav, { once: true });
+          window.addEventListener('scroll', updateNav, { passive: true });
+          document.addEventListener('pjax:complete', function () { setTimeout(updateNav, 0); });
+          setTimeout(updateNav, 60);
+        })();
+      </script>
+
   
 
 </header>
