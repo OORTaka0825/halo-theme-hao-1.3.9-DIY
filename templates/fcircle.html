@@ -315,17 +315,26 @@
 })();
 </script>
 
-<script data-pjax id="fcircle-infinite-scroll-auto-hide-drain">
+<script data-pjax id="fcircle-infinite-scroll-robust">
 (function(){
   const ROOT = document.querySelector('#hexo-circle-of-friends-root') || document;
-  const BTN_SEL = '#cf-more';
-  let io = null;
-  let rootMO = null;
-  let pageMO = null;
-  let lastClick = 0;
-  let draining = false;
+  let io=null, rootMO=null, pageMO=null, lastClick=0, draining=false;
 
-  function getBtn(){ return document.querySelector(BTN_SEL); }
+  // 更鲁棒：多种选择器 + 文本匹配 + 容器内 fallback
+  function findBtn(){
+    let btn = document.querySelector('#cf-more, .cf-more, button.cf-more, a#cf-more, a.cf-more');
+    if (btn) return btn;
+    // 在容器内找“∞”按钮
+    const scope = ROOT.querySelector('.cf-container, .cf-body, .cf-list, body') || ROOT;
+    const candidates = scope.querySelectorAll('button, a, div');
+    for (const el of candidates){
+      const t = (el.textContent||'').trim();
+      if (t === '∞' || /加载更多|载入更多|更多/i.test(t)){
+        btn = el; break;
+      }
+    }
+    return btn;
+  }
 
   function finished(btn){
     if(!btn) return true;
@@ -334,19 +343,20 @@
     return btn.hasAttribute('disabled') ||
            btn.getAttribute('aria-disabled')==='true' ||
            /没有|无更多|到底|完|暂无|已全部/i.test(t) ||
-           /(no-more|nomore|end|disabled)/i.test(cls);
+           /(no-more|nomore|end|disabled)/i.test(cls) ||
+           btn.style.visibility==='hidden';
   }
 
   function ensureSentinel(btn){
     let s = btn.nextElementSibling;
-    if(!s || s.id !== 'cf-more-sentinel'){
+    if(!s || s.id!=='cf-more-sentinel'){
       s = document.createElement('div');
       s.id = 'cf-more-sentinel';
       s.setAttribute('aria-hidden','true');
-      s.style.cssText = 'height:1px;width:1px;opacity:0;margin:0;padding:0;';
+      s.style.cssText='height:1px;width:1px;opacity:0;margin:0;padding:0;';
       btn.parentNode.insertBefore(s, btn.nextSibling);
     }
-    // 隐藏按钮本体（只是不显示，仍在 DOM 里可点击）
+    // 仅隐藏按钮以免视觉打断（保持可点击）
     btn.style.display = 'none';
     return s;
   }
@@ -358,86 +368,76 @@
     return r.top < H && r.bottom > 0;
   }
 
-  function atBottom(thres=80){
+  function atBottom(thres=100){
     return (window.innerHeight + window.scrollY) >= (document.documentElement.scrollHeight - thres);
   }
 
   function safeClick(btn){
     const now = Date.now();
-    if(now - lastClick < 650) return false; // 节流
+    if(now - lastClick < 650) return false;
     lastClick = now;
-    try { btn.click(); } catch(e){
+    try{ btn.click(); }catch(e){
       btn.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true}));
     }
     return true;
   }
 
-  function waitNextMutation(timeout=1400){
+  function waitMutation(timeout=1600){
     return new Promise(resolve=>{
-      let settled = false;
-      const done = ()=>{ if(!settled){ settled = true; resolve(); } };
-      const timer = setTimeout(done, timeout);
-      const cb = (muts)=>{
-        if(muts.some(m=>m.addedNodes && m.addedNodes.length)){
+      let settled=false;
+      const done=()=>{ if(!settled){ settled=true; resolve(); } };
+      const timer=setTimeout(done, timeout);
+      pageMO && pageMO.disconnect();
+      pageMO = new MutationObserver((muts)=>{
+        if (muts.some(m=>m.addedNodes && m.addedNodes.length)){
           clearTimeout(timer);
-          pageMO && pageMO.disconnect();
+          pageMO.disconnect();
           done();
         }
-      };
-      pageMO = new MutationObserver(cb);
+      });
       pageMO.observe(ROOT, {childList:true, subtree:true});
     });
   }
 
-  async function drainLoop(){
-    if(draining) return;
+  async function drain(){
+    if (draining) return;
     draining = true;
     try{
       while(true){
-        const btn = getBtn();
-        if(finished(btn)) break;
-        const sentinel = ensureSentinel(btn);
-
-        // 只有在底部或哨兵可见时才继续抽水
-        if(!atBottom(200) && !inView(sentinel)) break;
-
-        const clicked = safeClick(btn);
-        await waitNextMutation(1600);
+        const btn = findBtn();
+        if (finished(btn)) break;
+        const s = ensureSentinel(btn);
+        if (!atBottom(200) && !inView(s)) break;
+        safeClick(btn);
+        await waitMutation(1800);
       }
     } finally {
       draining = false;
     }
   }
 
-  function observe(){
-    const btn = getBtn();
-    if(!btn) return;
-    const sentinel = ensureSentinel(btn);
-    if(io){ try{io.disconnect();}catch(e){} io=null; }
+  function hook(){
+    const btn = findBtn();
+    if (!btn) return;
+    const s = ensureSentinel(btn);
+    if (io){ try{io.disconnect();}catch(e){} io=null; }
     io = new IntersectionObserver((entries)=>{
-      entries.forEach(en=>{
-        if(en.isIntersecting) drainLoop();
-      });
+      entries.forEach(en=>{ if (en.isIntersecting) drain(); });
     }, {root:null, threshold:0.01, rootMargin:'300px 0px'});
-    io.observe(sentinel);
+    io.observe(s);
   }
 
-  function init(){
-    observe();
-  }
+  function init(){ hook(); }
 
-  if(document.readyState==='loading'){
+  if (document.readyState === 'loading'){
     document.addEventListener('DOMContentLoaded', init, {once:true});
-  } else {
-    init();
-  }
+  } else { init(); }
 
-  document.addEventListener('pjax:complete', ()=> setTimeout(init, 0));
+  document.addEventListener('pjax:complete', ()=> setTimeout(init,0));
 
-  // 分页按钮替换后自动重绑
-  if(rootMO) { try{rootMO.disconnect();}catch(e){} }
+  if (rootMO) { try{rootMO.disconnect();}catch(e){} }
   rootMO = new MutationObserver((muts)=>{
-    if(muts.some(m=>m.addedNodes && m.addedNodes.length)) observe();
+    if (muts.some(m=>m.addedNodes && m.addedNodes.length)) hook();
   });
   rootMO.observe(ROOT, {childList:true, subtree:true});
 })();
