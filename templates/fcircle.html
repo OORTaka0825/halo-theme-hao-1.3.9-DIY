@@ -314,3 +314,64 @@
   else document.addEventListener('DOMContentLoaded', init, { once: true });
 })();
 </script>
+
+<script data-pjax id="fcircle-infinite-scroll-min">
+(function () {
+  const ROOT = document.querySelector('#hexo-circle-of-friends-root') || document;
+  let io = null;
+  let lastClick = 0;
+  let btn = null;
+
+  function disabled(b) {
+    if (!b) return true;
+    const t = (b.textContent || '').trim();
+    return b.hasAttribute('disabled') || b.getAttribute('aria-disabled') === 'true' ||
+           /没有|无更多|到底|完|暂无|已全部/i.test(t) ||
+           b.style.display === 'none' || b.style.visibility === 'hidden';
+  }
+
+  function clickSafely(b){
+    const now = Date.now();
+    if (now - lastClick < 800) return;
+    lastClick = now;
+    if (!disabled(b)) {
+      try { b.click(); } catch(e) {
+        b.dispatchEvent(new MouseEvent('click', {bubbles:true,cancelable:true}));
+      }
+    }
+  }
+
+  function observe(b) {
+    if (!b) return;
+    btn = b;
+    // 不改样式，不禁用点击，保持原样
+    if (io) { try{io.disconnect();}catch(e){} io = null; }
+    io = new IntersectionObserver((entries)=>{
+      entries.forEach(en => {
+        if (en.isIntersecting) clickSafely(b);
+      });
+    }, {root:null, threshold:0.01, rootMargin:'300px 0px'});
+    io.observe(b);
+  }
+
+  function init(){
+    // 仅针对 #cf-more，避免影响其它元素
+    const b = document.querySelector('#cf-more');
+    if (b && b !== btn && !disabled(b)) observe(b);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init, {once:true});
+  } else {
+    init();
+  }
+
+  document.addEventListener('pjax:complete', () => setTimeout(init, 0));
+
+  // 分页加载后按钮会被替换，监听根节点变化以重新绑定
+  const mo = new MutationObserver((m)=>{
+    if (m.some(x => x.addedNodes && x.addedNodes.length)) init();
+  });
+  mo.observe(ROOT, {childList:true, subtree:true});
+})();
+</script>
