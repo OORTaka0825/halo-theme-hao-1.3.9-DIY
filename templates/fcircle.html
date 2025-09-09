@@ -30,7 +30,9 @@
         title = ${ !#strings.isEmpty(theme.config.fcircle.bigTitle) ? theme.config.fcircle.bigTitle
                   : (!#strings.isEmpty(theme.config.fcircle.title) ? theme.config.fcircle.title : singlePage.spec.title) }
       )}"></nav>
-    </header>
+  
+
+</header>
 
     <main class="layout hide-aside" id="content-inner">
       <div id="page">
@@ -116,14 +118,14 @@
 </th:block>
 </html>
 
-<!-- Friends avatar fix: pull avatar from API, fallback to Google Icons or inline SVG -->
-<script data-pjax id="fcircle-avatar-from-api">
+<!-- Friends avatar fix v8: prefer API avatar, smarter host detection (handles internal links), final inline SVG fallback -->
+<script data-pjax id="fcircle-avatar-from-api-v8">
 (function () {
-  const API = 'https://fcircle.oortaka.top/all';  // TODO: if CORS blocks, change to your same-origin proxy, e.g. '/friends-api/all'
+  const API = 'https://fcircle.oortaka.top/all';  // change to same-origin proxy if CORS blocks
   const ROOT = document.querySelector('#hexo-circle-of-friends-root') || document;
   const isPH = s => /(?:^|\/)404s?\.(?:gif|png|jpe?g|webp)(?:$|\?)/i.test((s||''));
+  const SELF = location.hostname;
 
-  // Inline SVG default avatar (guaranteed to load)
   const DEFAULT_SVG =
     'data:image/svg+xml;utf8,' +
     '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64">' +
@@ -136,26 +138,46 @@
     return 'https://www.google.com/s2/favicons?sz=64&domain=' + host;
   }
 
-  function getHostFromCard(card) {
+  // Extract first external host from a card, even if links are internal:
+  function detectHost(card) {
     if (!card) return null;
-    // Prefer card link
-    const a = card.querySelector('a[href]');
-    if (a) {
-      try { return new URL(a.href, location.href).hostname; } catch {}
+
+    // 1) any external <a href>
+    const links = card.querySelectorAll('a[href]');
+    for (const a of links) {
+      try {
+        const u = new URL(a.getAttribute('href'), location.href);
+        if (u.hostname && u.hostname !== SELF) return u.hostname;
+      } catch {}
     }
-    // Scan ancestors for http(s) values
-    let el = card, depth = 0;
-    while (el && depth++ < 5) {
-      if (el.attributes) {
-        for (const attr of el.attributes) {
-          const v = attr.value;
-          if (typeof v === 'string' && /^https?:\/\//i.test(v)) {
-            try { return new URL(v).hostname; } catch {}
+
+    // 2) scan descendant/own attributes that contain http(s)
+    const nodes = card.querySelectorAll('*');
+    const allNodes = [card, ...nodes];
+    for (const el of allNodes) {
+      if (!el.attributes) continue;
+      for (const attr of el.attributes) {
+        const val = String(attr.value || '');
+        const urls = val.match(/https?:\/\/[^\s"'<>)]+/ig);
+        if (urls) {
+          for (const raw of urls) {
+            try {
+              const u = new URL(raw, location.href);
+              if (u.hostname && u.hostname !== SELF) return u.hostname;
+            } catch {}
           }
         }
       }
-      el = el.parentElement;
     }
+
+    // 3) last resort: search outerHTML for http(s)
+    try {
+      const m = String(card.outerHTML||'').match(/https?:\/\/[^\s"'<>)]+/i);
+      if (m) {
+        const u = new URL(m[0], location.href);
+        if (u.hostname && u.hostname !== SELF) return u.hostname;
+      }
+    } catch {}
     return null;
   }
 
@@ -175,23 +197,26 @@
       : url + (url.includes('?') ? '&' : '?') + 't=' + Date.now();
   }
 
-  async function buildAvatarMap() {
+  let AVATAR_MAP = null; // Map host->avatar
+  async function ensureMap() {
+    if (AVATAR_MAP) return AVATAR_MAP;
     try {
-      const res  = await fetch(API, { cache: 'no-store', mode: 'cors' });
+      const res = await fetch(API, { cache: 'no-store', mode: 'cors' });
       const data = await res.json();
       const list = Array.isArray(data?.article_data) ? data.article_data : [];
-      const map  = new Map(); // host -> avatar
+      const map = new Map();
       for (const it of list) {
         try {
           const host = new URL(it.link).hostname;
-          if (!map.has(host) && it.avatar) map.set(host, it.avatar);
+          if (host && it.avatar && !map.has(host)) map.set(host, it.avatar);
         } catch {}
       }
-      return map;
+      AVATAR_MAP = map;
     } catch (e) {
-      console.warn('[friends-api] fetch failed:', e);
-      return new Map();
+      console.warn('[friends-api v8] fetch failed:', e);
+      AVATAR_MAP = new Map();
     }
+    return AVATAR_MAP;
   }
 
   async function fixOnce(scope) {
@@ -203,7 +228,7 @@
       }
     } catch {}
 
-    const map = await buildAvatarMap();
+    const map = await ensureMap();
     const imgs = box.querySelectorAll('img');
     let fixed = 0;
 
@@ -211,13 +236,15 @@
       const cur = img.getAttribute('src') || '';
       if (!isPH(cur)) return;
 
+      // prefer data-lazy real url
       let real =
         img.getAttribute('data-lazy-src') ||
         img.getAttribute('data-src') ||
         img.getAttribute('data-original');
 
       if (!real) {
-        const host = getHostFromCard(img.closest('.cf-card, .cf-item, article, li, div'));
+        const card = img.closest('.cf-card, .cf-item, article, li, div');
+        const host = detectHost(card);
         if (host) {
           real = map.get(host) || googleIcon(host);
         } else {
@@ -229,7 +256,7 @@
       fixed++;
     });
 
-    // console.log('[friends-avatar] replaced:', fixed);
+    // console.log('[friends-avatar v8] replaced:', fixed, 'map size:', (AVATAR_MAP&&AVATAR_MAP.size));
   }
 
   function init() {
