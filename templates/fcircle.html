@@ -314,3 +314,98 @@
   else document.addEventListener('DOMContentLoaded', init, { once: true });
 })();
 </script>
+
+
+<script data-pjax id="fcircle-auto-load-all">
+(function(){
+  // 自动连点“加载更多”（无需滚动到按钮）直到全部加载
+  var draining = false;
+
+  function findBtn(){
+    var btn = document.querySelector('#cf-more, .cf-more, .moments-more');
+    if (btn) return btn;
+    var scope = document.querySelector('#hexo-circle-of-friends-root') || document;
+    var cands = scope.querySelectorAll('button, a, div');
+    for (var i=0;i<cands.length;i++){
+      var el = cands[i];
+      var t = (el.textContent||'').trim();
+      if (t === '∞' || /加载更多|载入更多|更多|Load\s*more/i.test(t)) return el;
+    }
+    return null;
+  }
+
+  function isDone(btn){
+    if (!btn) return true;
+    var t = (btn.textContent||'').trim();
+    var cls = btn.className||'';
+    return btn.disabled ||
+           btn.getAttribute('aria-disabled') === 'true' ||
+           /没有|无更多|到底|完成|已全部|暂无|完毕/i.test(t) ||
+           /(no-more|nomore|end|disabled)/i.test(cls) ||
+           btn.style.visibility === 'hidden';
+  }
+
+  function safeClick(btn){
+    try { btn.click(); }
+    catch(e){
+      try{
+        btn.dispatchEvent(new MouseEvent('click', {bubbles:true, cancelable:true}));
+      }catch(_){}
+    }
+  }
+
+  function waitRender(timeout){
+    return new Promise(function(resolve){
+      var settled = false;
+      var root = document.querySelector('#hexo-circle-of-friends-root') || document.body;
+      var mo = new MutationObserver(function(muts){
+        if (muts.some(function(m){ return m.addedNodes && m.addedNodes.length; })){
+          if (!settled){ settled = true; mo.disconnect(); resolve(true); }
+        }
+      });
+      mo.observe(root, {childList:true, subtree:true});
+      setTimeout(function(){ if(!settled){ settled=true; mo.disconnect(); resolve(false);} }, timeout||900);
+    });
+  }
+
+  async function drain(){
+    if (draining) return;
+    draining = true;
+    try{
+      var tries = 0;
+      while(tries < 200){ // 上限保护
+        var btn = findBtn();
+        if (isDone(btn)) break;
+        // 不显示按钮，避免视觉抖动
+        btn.style.display = 'none';
+        safeClick(btn);
+        tries++;
+        await waitRender(1100);
+        if (isDone(findBtn())) break;
+      }
+    } finally {
+      draining = false;
+    }
+  }
+
+  function startWhenReady(){
+    var checks = 0;
+    var timer = setInterval(function(){
+      checks++;
+      var btn = findBtn();
+      if (btn){
+        clearInterval(timer);
+        drain();
+      }
+      if (checks > 80) clearInterval(timer);
+    }, 250);
+  }
+
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', startWhenReady, {once:true});
+  } else {
+    setTimeout(startWhenReady, 30);
+  }
+})();
+</script>
+
