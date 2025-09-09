@@ -30,30 +30,7 @@
         title = ${ !#strings.isEmpty(theme.config.fcircle.bigTitle) ? theme.config.fcircle.bigTitle
                   : (!#strings.isEmpty(theme.config.fcircle.title) ? theme.config.fcircle.title : singlePage.spec.title) }
       )}"></nav>
-      <!-- 修复：首次通过 PJAX 进入页面时，滚动不触发导航吸顶与蒙层 -->
-      <script data-pjax id="fcircle-navfix">
-        (function () {
-          var header = document.getElementById('page-header');
-          if (!header) return;
-          function updateNav() {
-            var top = window.pageYOffset || document.documentElement.scrollTop || 0;
-            if (top > 10) {
-              header.classList.add('nav-fixed');
-            } else {
-              header.classList.remove('nav-fixed');
-            }
-          }
-          if (document.readyState !== 'loading') updateNav();
-          else document.addEventListener('DOMContentLoaded', updateNav, { once: true });
-          window.addEventListener('scroll', updateNav, { passive: true });
-          document.addEventListener('pjax:complete', function () { setTimeout(updateNav, 0); });
-          setTimeout(updateNav, 60);
-        })();
-      </script>
-
-  
-
-</header>
+    </header>
 
     <main class="layout hide-aside" id="content-inner">
       <div id="page">
@@ -138,3 +115,133 @@
   </div>
 </th:block>
 </html>
+
+<!-- Friends avatar fix: pull avatar from API, fallback to Google Icons or inline SVG -->
+<script data-pjax id="fcircle-avatar-from-api">
+(function () {
+  const API = 'https://fcircle.oortaka.top/all';  // TODO: if CORS blocks, change to your same-origin proxy, e.g. '/friends-api/all'
+  const ROOT = document.querySelector('#hexo-circle-of-friends-root') || document;
+  const isPH = s => /(?:^|\/)404s?\.(?:gif|png|jpe?g|webp)(?:$|\?)/i.test((s||''));
+
+  // Inline SVG default avatar (guaranteed to load)
+  const DEFAULT_SVG =
+    'data:image/svg+xml;utf8,' +
+    '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64">' +
+    '<rect width="100%" height="100%" rx="12" ry="12" fill="#2b2b2b"/>' +
+    '<circle cx="32" cy="24" r="12" fill="#555"/>' +
+    '<rect x="14" y="40" width="36" height="14" rx="7" ry="7" fill="#555"/>' +
+    '</svg>';
+
+  function googleIcon(host) {
+    return 'https://www.google.com/s2/favicons?sz=64&domain=' + host;
+  }
+
+  function getHostFromCard(card) {
+    if (!card) return null;
+    // Prefer card link
+    const a = card.querySelector('a[href]');
+    if (a) {
+      try { return new URL(a.href, location.href).hostname; } catch {}
+    }
+    // Scan ancestors for http(s) values
+    let el = card, depth = 0;
+    while (el && depth++ < 5) {
+      if (el.attributes) {
+        for (const attr of el.attributes) {
+          const v = attr.value;
+          if (typeof v === 'string' && /^https?:\/\//i.test(v)) {
+            try { return new URL(v).hostname; } catch {}
+          }
+        }
+      }
+      el = el.parentElement;
+    }
+    return null;
+  }
+
+  function apply(img, url) {
+    img.style.objectFit = img.style.objectFit || 'cover';
+    img.referrerPolicy = 'no-referrer';
+    img.loading = 'eager';
+    img.decoding = 'async';
+    img.onerror = function () {
+      if (img.dataset.fcircleErr !== '1') {
+        img.dataset.fcircleErr = '1';
+        img.src = DEFAULT_SVG;
+      }
+    };
+    img.src = url.startsWith('data:')
+      ? url
+      : url + (url.includes('?') ? '&' : '?') + 't=' + Date.now();
+  }
+
+  async function buildAvatarMap() {
+    try {
+      const res  = await fetch(API, { cache: 'no-store', mode: 'cors' });
+      const data = await res.json();
+      const list = Array.isArray(data?.article_data) ? data.article_data : [];
+      const map  = new Map(); // host -> avatar
+      for (const it of list) {
+        try {
+          const host = new URL(it.link).hostname;
+          if (!map.has(host) && it.avatar) map.set(host, it.avatar);
+        } catch {}
+      }
+      return map;
+    } catch (e) {
+      console.warn('[friends-api] fetch failed:', e);
+      return new Map();
+    }
+  }
+
+  async function fixOnce(scope) {
+    const box = scope || ROOT;
+    try {
+      if (window.lazyLoadInstance?.update) {
+        window.lazyLoadInstance.update();
+        window.lazyLoadInstance.loadAll && window.lazyLoadInstance.loadAll();
+      }
+    } catch {}
+
+    const map = await buildAvatarMap();
+    const imgs = box.querySelectorAll('img');
+    let fixed = 0;
+
+    imgs.forEach(img => {
+      const cur = img.getAttribute('src') || '';
+      if (!isPH(cur)) return;
+
+      let real =
+        img.getAttribute('data-lazy-src') ||
+        img.getAttribute('data-src') ||
+        img.getAttribute('data-original');
+
+      if (!real) {
+        const host = getHostFromCard(img.closest('.cf-card, .cf-item, article, li, div'));
+        if (host) {
+          real = map.get(host) || googleIcon(host);
+        } else {
+          real = DEFAULT_SVG;
+        }
+      }
+
+      apply(img, real);
+      fixed++;
+    });
+
+    // console.log('[friends-avatar] replaced:', fixed);
+  }
+
+  function init() {
+    fixOnce();
+    document.addEventListener('pjax:complete', () => setTimeout(fixOnce, 0));
+    const mo = new MutationObserver(muts => {
+      if (muts.some(m => m.addedNodes && m.addedNodes.length)) fixOnce();
+    });
+    mo.observe(ROOT, { childList: true, subtree: true });
+  }
+
+  if (document.readyState !== 'loading') init();
+  else document.addEventListener('DOMContentLoaded', init, { once: true });
+})();
+</script>
