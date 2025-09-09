@@ -315,75 +315,115 @@
 })();
 </script>
 
-<script data-pjax id="fcircle-infinite-scroll-hide-btn">
-(function () {
+<script data-pjax id="fcircle-infinite-scroll-drain">
+(function(){
   const ROOT = document.querySelector('#hexo-circle-of-friends-root') || document;
+  const BTN_SEL = '#cf-more';
   let io = null;
+  let mo = null;
+  let draining = false;
   let lastClick = 0;
-  let btn = null;
-  let sentinel = null;
 
-  function isDisabled(b) {
-    if (!b) return true;
-    const t = (b.textContent || '').trim();
-    return b.hasAttribute('disabled') ||
-           b.getAttribute('aria-disabled') === 'true' ||
+  const now = () => Date.now();
+
+  function getBtn(){ return document.querySelector(BTN_SEL); }
+
+  function finished(btn){
+    if(!btn) return true;
+    const t = (btn.textContent||'').trim();
+    const cls = btn.className||'';
+    return btn.hasAttribute('disabled') ||
+           btn.getAttribute('aria-disabled')==='true' ||
            /没有|无更多|到底|完|暂无|已全部/i.test(t) ||
-           b.style.display === 'none' && !document.getElementById('cf-more-sentinel');
+           /(no-more|nomore|end|disabled)/i.test(cls) ||
+           btn.style.display==='none' || btn.style.visibility==='hidden';
   }
 
-  function safeClick(b){
-    const now = Date.now();
-    if (now - lastClick < 800) return;
-    lastClick = now;
-    try { b.click(); } catch(e) {
-      b.dispatchEvent(new MouseEvent('click', {bubbles:true, cancelable:true}));
+  function inView(el){
+    if(!el) return false;
+    const rect = el.getBoundingClientRect();
+    return rect.top < (window.innerHeight || document.documentElement.clientHeight) &&
+           rect.bottom > 0;
+  }
+
+  function atBottom(thres=60){
+    return (window.innerHeight + window.scrollY) >= (document.documentElement.scrollHeight - thres);
+  }
+
+  function safeClick(btn){
+    const t = now();
+    if(t - lastClick < 700) return false; // throttle
+    lastClick = t;
+    try { btn.click(); } catch(e){
+      btn.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true}));
     }
+    return true;
   }
 
-  function ensureSentinel(b) {
-    let s = b.nextElementSibling;
-    if (!s || s.id !== 'cf-more-sentinel') {
-      s = document.createElement('div');
-      s.id = 'cf-more-sentinel';
-      s.setAttribute('aria-hidden', 'true');
-      s.style.cssText = 'height:1px;width:1px;margin:0;padding:0;opacity:0;';
-      b.parentNode.insertBefore(s, b.nextSibling);
+  function waitNextMutation(timeout=1200){
+    return new Promise(resolve=>{
+      let settled = false;
+      const done = ()=>{ if(!settled){ settled = true; resolve(); } };
+      const timer = setTimeout(done, timeout);
+      const callback = (muts)=>{
+        if(muts.some(m=>m.addedNodes && m.addedNodes.length)){
+          clearTimeout(timer);
+          mo && mo.disconnect();
+          done();
+        }
+      };
+      mo = new MutationObserver(callback);
+      mo.observe(ROOT, {childList:true, subtree:true});
+    });
+  }
+
+  async function drainLoop(){
+    if(draining) return;
+    draining = true;
+    while(draining){
+      const btn = getBtn();
+      if(finished(btn)) break;
+
+      // 只有当按钮在视口或已经接近底部时才继续“抽水”
+      if(!inView(btn) && !atBottom(200)) { break; }
+
+      const clicked = safeClick(btn);
+      // 等待新内容进来或超时，然后再判断是否需要继续
+      await waitNextMutation(1400);
     }
-    // 隐藏按钮本体，但保留在文档中供点击
-    b.style.display = 'none';
-    return s;
+    draining = false;
   }
 
-  function observe(s, b) {
-    if (!s) return;
-    if (io) { try { io.disconnect(); } catch(e) {} io = null; }
+  function observeBtn(){
+    const btn = getBtn();
+    if(!btn) return;
+    if(io){ try{io.disconnect();}catch(e){} io=null; }
     io = new IntersectionObserver((entries)=>{
-      entries.forEach(en => { if (en.isIntersecting && !isDisabled(b)) safeClick(b); });
+      entries.forEach(en=>{
+        if(en.isIntersecting){
+          drainLoop();
+        }
+      });
     }, {root:null, threshold:0.01, rootMargin:'300px 0px'});
-    io.observe(s);
+    io.observe(btn);
   }
 
   function init(){
-    const b = document.querySelector('#cf-more');
-    if (!b) return;
-    if (isDisabled(b)) { return; }
-    btn = b;
-    sentinel = ensureSentinel(btn);
-    observe(sentinel, btn);
+    observeBtn();
   }
 
-  if (document.readyState === 'loading') {
+  if(document.readyState==='loading'){
     document.addEventListener('DOMContentLoaded', init, {once:true});
   } else {
     init();
   }
 
-  document.addEventListener('pjax:complete', () => setTimeout(init, 0));
+  document.addEventListener('pjax:complete', ()=> setTimeout(init, 0));
 
-  const mo = new MutationObserver((ml)=>{
-    if (ml.some(x => x.addedNodes && x.addedNodes.length)) init();
+  // 当分页后按钮被替换，重新绑定
+  const rootMO = new MutationObserver((muts)=>{
+    if(muts.some(m=>m.addedNodes && m.addedNodes.length)) observeBtn();
   });
-  mo.observe(ROOT, {childList:true, subtree:true});
+  rootMO.observe(ROOT, {childList:true, subtree:true});
 })();
 </script>
