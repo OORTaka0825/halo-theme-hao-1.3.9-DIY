@@ -30,55 +30,59 @@
         title = ${ !#strings.isEmpty(theme.config.fcircle.bigTitle) ? theme.config.fcircle.bigTitle
                   : (!#strings.isEmpty(theme.config.fcircle.title) ? theme.config.fcircle.title : singlePage.spec.title) }
       )}"></nav>
-      <!-- 修复：鱼塘列表懒加载图片不出现（动态注入后未二次初始化） -->
-      <script data-pjax id="fcircle-lazyfix">
-        (function () {
-          var root = document.getElementById('hexo-circle-of-friends-root');
-          if (!root) return;
+<!-- 精准修复：鱼塘懒加载（主题使用 vanilla-lazyload -> window.lazyLoadInstance，属性 data-lazy-src） -->
+<script data-pjax id="fcircle-lazyfix-precise">
+  (function () {
+    var root = document.getElementById('hexo-circle-of-friends-root');
+    if (!root) return;
 
-          function eagerLoadImgs(scope){
-            try{
-              var box = scope || root;
-              // 1) 尝试唤醒主题自带的懒加载实例
-              if (window.lazyLoadInstance && typeof window.lazyLoadInstance.update === 'function') {
-                window.lazyLoadInstance.update();
-              }
-              // 2) 兜底：把 data-* 源复制到 src，并禁用 lazy
-              var imgs = box.querySelectorAll('img');
-              imgs.forEach(function(img){
-                if (img.dataset._eagerDone === '1') return;
-                var src = img.getAttribute('src') || '';
-                var need = !src || /^data:image\/(gif|png|jpg)/.test(src);
-                var real = img.getAttribute('data-lazy-src') || img.getAttribute('data-src') || img.getAttribute('data-original');
-                if (need && real) img.setAttribute('src', real);
-                img.setAttribute('loading', 'eager');
-                img.setAttribute('decoding', 'async');
-                img.dataset._eagerDone = '1';
-              });
-            }catch(e){}
-          }
+    function wakeThemeLazy() {
+      try {
+        if (window.lazyLoadInstance && typeof window.lazyLoadInstance.update === 'function') {
+          window.lazyLoadInstance.update();
+        }
+      } catch(e){}
+    }
 
-          // 首次尝试
-          if (document.readyState !== 'loading') eagerLoadImgs();
-          else document.addEventListener('DOMContentLoaded', function(){ eagerLoadImgs(); }, {once:true});
+    function eagerFill(box){
+      var scope = box || root;
+      var imgs = scope.querySelectorAll('img');
+      imgs.forEach(function(img){
+        if (img.dataset._eagerDone === '1') return;
+        // 仅当当前没有正常 src 时，才把 data-lazy-src 写回 src
+        var cur = img.getAttribute('src') || '';
+        var real = img.getAttribute('data-lazy-src'); // 主题配置：data_src = 'lazy-src'
+        if ((!cur || /^data:image\//.test(cur)) && real) {
+          img.setAttribute('src', real);
+        }
+        img.setAttribute('loading', 'eager');
+        img.setAttribute('decoding', 'async');
+        img.dataset._eagerDone = '1';
+      });
+    }
 
-          // 监听 FriendCircle 动态渲染
-          var mo = new MutationObserver(function(muts){
-            var changed = false;
-            muts.forEach(function(m){
-              if (m.addedNodes && m.addedNodes.length) changed = true;
-            });
-            if (changed) eagerLoadImgs();
-          });
-          mo.observe(root, {childList:true, subtree:true});
+    function run(scope){
+      wakeThemeLazy();
+      // 等一帧后再兜底一次（确保 update() 没把图加载出来时也能显示）
+      setTimeout(function(){
+        eagerFill(scope);
+      }, 0);
+    }
 
-          // PJAX 场景
-          document.addEventListener('pjax:complete', function(){ setTimeout(function(){ eagerLoadImgs(); }, 0); });
+    // 首次
+    if (document.readyState !== 'loading') run();
+    else document.addEventListener('DOMContentLoaded', function(){ run(); }, { once:true });
 
-          // 保险：首屏延时再跑一次
-          setTimeout(eagerLoadImgs, 120);
-        })();
-      </script>
+    // 监听 DOM 动态插入（鱼塘渲染完成/翻页）
+    var mo = new MutationObserver(function(muts){
+      if (muts.some(function(m){ return m.addedNodes && m.addedNodes.length; })) run();
+    });
+    mo.observe(root, { childList:true, subtree:true });
+
+    // PJAX 返回该页
+    document.addEventListener('pjax:complete', function(){ run(); });
+  })();
+</script>
 
     </header>
 
