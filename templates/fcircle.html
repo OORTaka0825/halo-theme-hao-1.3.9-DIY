@@ -30,109 +30,6 @@
         title = ${ !#strings.isEmpty(theme.config.fcircle.bigTitle) ? theme.config.fcircle.bigTitle
                   : (!#strings.isEmpty(theme.config.fcircle.title) ? theme.config.fcircle.title : singlePage.spec.title) }
       )}"></nav>
-<!-- 修复(v5 通用)：鱼塘卡片一直是懒加载占位图时，尽量从任何可见位置提取网址并替换为对应站点图标 -->
-<script data-pjax id="fcircle-avatar-fallback-v5">
-  (function () {
-    var root = document.querySelector('#hexo-circle-of-friends-root') || document;
-    if (!root) return;
-
-    function isPlaceholder(url) {
-      return /(?:^|\/)404s?\.(?:gif|png|jpe?g|webp)(?:$|\?)/i.test(url || '');
-    }
-    function wakeLazy() {
-      try {
-        if (window.lazyLoadInstance && typeof window.lazyLoadInstance.update === 'function') {
-          window.lazyLoadInstance.update();
-          window.lazyLoadInstance.loadAll && window.lazyLoadInstance.loadAll();
-        }
-      } catch (e) {}
-    }
-    function toFavicon(href) {
-      try { var u = new URL(href, location.href); return 'https://icons.duckduckgo.com/ip3/' + u.hostname + '.ico'; }
-      catch (e) { return null; }
-    }
-    // 在节点及其祖先里，尽可能找一个包含 http(s) 的 URL
-    function findAnyUrl(node) {
-      var maxDepth = 6, depth = 0, el = node;
-      while (el && depth++ < maxDepth) {
-        // 1) data-* / 任何属性里出现 http
-        if (el.attributes) {
-          for (var i = 0; i < el.attributes.length; i++) {
-            var v = el.attributes[i].value;
-            if (typeof v === 'string' && /^https?:\/\//i.test(v)) return v;
-          }
-        }
-        // 2) 子元素里的链接
-        var a = el.querySelector && el.querySelector('a[href^="http"]');
-        if (a) return a.getAttribute('href');
-        el = el.parentElement;
-      }
-      return null;
-    }
-    function fixImages(scope) {
-      var box = scope || root;
-      wakeLazy();
-      var imgs = box.querySelectorAll('img');
-      var fixed = 0;
-      for (var i = 0; i < imgs.length; i++) {
-        var img = imgs[i];
-        if (img.dataset.fcircleFixed === '1') continue;
-        var cur = img.getAttribute('src') || '';
-        if (!isPlaceholder(cur)) continue;
-
-        var real = img.getAttribute('data-lazy-src') || img.getAttribute('data-src') || img.getAttribute('data-original');
-        if (!real) {
-          var card = img.closest('.cf-card, .cf-item, article, li, div');
-          var any = findAnyUrl(card || img);
-          if (any) real = toFavicon(any);
-        }
-        // 最后兜底：至少用本站 favicon 让它发生变化，便于确认脚本在工作
-        if (!real) real = location.origin + '/favicon.ico';
-
-        if (real) {
-          img.referrerPolicy = 'no-referrer';
-          img.setAttribute('loading', 'eager');
-          img.setAttribute('decoding', 'async');
-          img.src = real + (real.indexOf('?') > -1 ? '&' : '?') + 't=' + Date.now();
-          img.dataset.fcircleFixed = '1';
-          fixed++;
-        }
-      }
-      // console.log('[v5] fixed', fixed);
-    }
-    if (document.readyState !== 'loading') fixImages();
-    else document.addEventListener('DOMContentLoaded', function () { fixImages(); }, { once: true });
-
-    var mo = new MutationObserver(function (muts) {
-      for (var i = 0; i < muts.length; i++) {
-        if (muts[i].addedNodes && muts[i].addedNodes.length) { fixImages(); break; }
-      }
-    });
-    mo.observe(root, { childList: true, subtree: true });
-
-    document.addEventListener('pjax:complete', function () { setTimeout(fixImages, 0); });
-  })();
-</script>
-
-  <!-- 引入 heo-fcircle3.css 但放入独立 CSS Layer，避免全局通用规则覆盖鱼塘样式 -->
-  <link rel="stylesheet" th:href="${assets_link + '/libs/fcircle/heo-fcircle3.css'}" layer="heo" type="text/css">
-
-  <!-- 最小化修复：若 heo 在部分浏览器仍影响到鱼塘图片/混合模式，这里精准复原 -->
-  <style id="fcircle-min-fix">
-    #hexo-circle-of-friends-root, #hexo-circle-of-friends-root *{
-      mix-blend-mode: normal;
-    }
-    #hexo-circle-of-friends-root img{
-      filter: none;
-      transform: none;
-      object-fit: cover;
-      background: none;
-      max-width: 100%;
-      height: auto;
-      display: block;
-    }
-  </style>
-
     </header>
 
     <main class="layout hide-aside" id="content-inner">
@@ -218,3 +115,100 @@
   </div>
 </th:block>
 </html>
+
+<!-- 修复(v6)：只在占位图时替换，并使用更稳的 Google Favicons（保留布局，不改样式） -->
+<script data-pjax id="fcircle-avatar-fallback-v6">
+  (function () {
+    var root = document.querySelector('#hexo-circle-of-friends-root') || document;
+    if (!root) return;
+
+    function isPH(url) {
+      return /(?:^|\/)404s?\.(?:gif|png|jpe?g|webp)(?:$|\?)/i.test(url || '');
+    }
+    function wakeLazy() {
+      try {
+        if (window.lazyLoadInstance && typeof window.lazyLoadInstance.update === 'function') {
+          window.lazyLoadInstance.update();
+          window.lazyLoadInstance.loadAll && window.lazyLoadInstance.loadAll();
+        }
+      } catch (e) {}
+    }
+    function getHostFrom(card) {
+      if (!card) return null;
+      var links = card.querySelectorAll('a[href]');
+      for (var i = 0; i < links.length; i++) {
+        try {
+          var u = new URL(links[i].getAttribute('href'), location.href);
+          if (u.hostname && u.hostname !== location.hostname) return u.hostname;
+        } catch (e) {}
+      }
+      // 再从属性里找 http(s)
+      var el = card, depth = 0;
+      while (el && depth++ < 5) {
+        if (el.attributes) {
+          for (var j = 0; j < el.attributes.length; j++) {
+            var v = el.attributes[j].value;
+            if (typeof v === 'string' && /^https?:\/\//i.test(v)) {
+              try { return new URL(v).hostname; } catch (e) {}
+            }
+          }
+        }
+        el = el.parentElement;
+      }
+      return null;
+    }
+    function buildIcon(host) {
+      if (!host) return null;
+      // 优先 Google 的 s2（稳定、可指定尺寸）
+      return 'https://www.google.com/s2/favicons?sz=64&domain=' + host;
+    }
+    function fixImages(scope) {
+      var box = scope || root;
+      wakeLazy();
+      var imgs = box.querySelectorAll('img');
+      var fixed = 0;
+      for (var i = 0; i < imgs.length; i++) {
+        var img = imgs[i];
+        if (img.dataset.fcircleFixed === '1') continue;
+        var cur = img.getAttribute('src') || '';
+        if (!isPH(cur)) continue;
+
+        // 1) 有真实地址优先
+        var real = img.getAttribute('data-lazy-src') || img.getAttribute('data-src') || img.getAttribute('data-original');
+
+        // 2) 没有就用外链域名的 favicon
+        if (!real) {
+          var card = img.closest('.cf-card, .cf-item, article, li, div');
+          var host = getHostFrom(card);
+          if (host) real = buildIcon(host);
+        }
+        // 3) 仍然没有：用本站 favicon 兜底（只为让它不再是 404s）
+        if (!real) real = location.origin + '/favicon.ico';
+
+        // 应尽量不改变布局：仅替换 src，保留类名/尺寸；补一个 object-fit 防止拉伸
+        if (real) {
+          img.style.objectFit = img.style.objectFit || 'cover';
+          img.referrerPolicy = 'no-referrer';
+          img.loading = 'eager';
+          img.decoding = 'async';
+          img.src = real + (real.indexOf('?') > -1 ? '&' : '?') + 't=' + Date.now();
+          img.dataset.fcircleFixed = '1';
+          fixed++;
+        }
+      }
+      // console.log('[fcircle v6] fixed:', fixed);
+    }
+
+    if (document.readyState !== 'loading') fixImages();
+    else document.addEventListener('DOMContentLoaded', function () { fixImages(); }, { once: true });
+
+    var mo = new MutationObserver(function (muts) {
+      for (var i = 0; i < muts.length; i++) {
+        if (muts[i].addedNodes && muts[i].addedNodes.length) { fixImages(); break; }
+      }
+    });
+    mo.observe(root, { childList: true, subtree: true });
+
+    document.addEventListener('pjax:complete', function () { setTimeout(fixImages, 0); });
+  })();
+</script>
