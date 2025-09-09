@@ -30,8 +30,8 @@
         title = ${ !#strings.isEmpty(theme.config.fcircle.bigTitle) ? theme.config.fcircle.bigTitle
                   : (!#strings.isEmpty(theme.config.fcircle.title) ? theme.config.fcircle.title : singlePage.spec.title) }
       )}"></nav>
-<!-- 修复(v3)：鱼塘卡片一直显示懒加载占位图(404s.gif/404.gif) —— 强制用真实地址或 favicon 兜底 -->
-<script data-pjax id="fcircle-avatar-fallback-v3">
+<!-- 修复(v4)：优先取外链域名作为头像，避免一直停留在 404s.gif -->
+<script data-pjax id="fcircle-avatar-fallback-v4">
   (function () {
     var root = document.querySelector('#hexo-circle-of-friends-root') || document;
     if (!root) return;
@@ -49,21 +49,27 @@
       } catch (e) {}
     }
 
-    function findSiteUrl(card) {
-      if (!card) return null;
-      // 优先找卡片内的外链
-      var a = card.querySelector('a[href^="http"]') || card.closest('a[href^="http"]');
-      if (a) return a.getAttribute('href');
-      // 兜底：尝试常见 dataset 字段
-      var c = card.closest('[data-url],[data-link],[data-href],[data-site]');
-      if (c) return c.dataset.url || c.dataset.link || c.dataset.href || c.dataset.site || null;
+    function getExternalHref(card){
+      var links = card ? card.querySelectorAll('a[href]') : [];
+      var host = location.hostname;
+      for (var i=0;i<links.length;i++){
+        try{
+          var href = links[i].getAttribute('href');
+          var u = new URL(href, location.href);
+          if (u.hostname && u.hostname !== host) return u.href; // 选外链
+        }catch(e){}
+      }
+      // 再试 dataset
+      if (card){
+        var c = card.closest('[data-url],[data-link],[data-href],[data-site]');
+        if (c) return c.dataset.url || c.dataset.link || c.dataset.href || c.dataset.site || null;
+      }
       return null;
     }
 
     function toFavicon(href) {
       try {
         var u = new URL(href, location.href);
-        // 用 DuckDuckGo 的图标服务，稳定且避免防盗链
         return 'https://icons.duckduckgo.com/ip3/' + u.hostname + '.ico';
       } catch (e) { return null; }
     }
@@ -79,13 +85,11 @@
         var cur = img.getAttribute('src') || '';
         if (!isPlaceholder(cur)) return;
 
-        // 真实地址（若存在）
         var real = img.getAttribute('data-lazy-src') || img.getAttribute('data-src') || img.getAttribute('data-original');
 
-        // 兜底：卡片链接域名 -> favicon
         if (!real) {
           var card = img.closest('.cf-card, .cf-item, article, li, div');
-          var href = findSiteUrl(card);
+          var href = getExternalHref(card);
           if (href) real = toFavicon(href);
         }
 
@@ -98,7 +102,7 @@
           fixed++;
         }
       });
-      // console.log('[fcircle-avatar-fallback-v3] fixed:', fixed);
+      // console.log('[fcircle-avatar-fallback-v4] fixed:', fixed);
     }
 
     if (document.readyState !== 'loading') fixImages();
@@ -114,8 +118,8 @@
   })();
 </script>
 
-  
-
+  <!-- 引入 heo-fcircle3.css 但放入独立 CSS Layer，避免全局通用规则覆盖鱼塘样式 -->
+<!-- 最小化修复：若 heo 在部分浏览器仍影响到鱼塘图片/混合模式，这里精准复原 -->
 </header>
 
     <main class="layout hide-aside" id="content-inner">
