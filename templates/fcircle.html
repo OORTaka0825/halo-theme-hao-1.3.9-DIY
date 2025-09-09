@@ -30,14 +30,15 @@
         title = ${ !#strings.isEmpty(theme.config.fcircle.bigTitle) ? theme.config.fcircle.bigTitle
                   : (!#strings.isEmpty(theme.config.fcircle.title) ? theme.config.fcircle.title : singlePage.spec.title) }
       )}"></nav>
-<!-- 修复：鱼塘卡片图片仅有占位图时，以站点 favicon 兜底；并兼容懒加载二次唤醒 -->
-<script data-pjax id="fcircle-avatar-fallback">
+<!-- 修复(v2)：鱼塘卡片图片仅有占位图（404.gif/404s.gif）时，以站点 favicon 兜底；并兼容懒加载二次唤醒 -->
+<script data-pjax id="fcircle-avatar-fallback-v2">
   (function () {
     var root = document.getElementById('hexo-circle-of-friends-root') || document;
     if (!root) return;
 
     function isPlaceholder(url) {
-      return /(?:^|\/)404s\.gif(?:$|\?)/i.test(url || '');
+      // 兼容 404.gif / 404s.gif / 带查询参数
+      return /(?:^|\/)404s?\.(?:gif|png|jpe?g|webp)(?:$|\?)/i.test(url || '');
     }
 
     function wakeLazy() {
@@ -49,31 +50,41 @@
       } catch (e) {}
     }
 
+    function findLink(node){
+      if (!node) return null;
+      // 优先找卡片内的链接
+      var a = node.querySelector('a[href]');
+      if (a) return a;
+      // 再向上找一层
+      var up = node.closest('a[href]');
+      return up || null;
+    }
+
     function fixImages(scope) {
       var box = scope || root;
-      // 先尝试懒加载刷新
       wakeLazy();
 
-      // 再兜底：把 404s.gif 替换为站点 favicon 或 data-lazy-src
       var imgs = box.querySelectorAll('img');
       var fixed = 0;
       imgs.forEach(function (img) {
         var cur = img.getAttribute('src') || '';
         if (!isPlaceholder(cur)) return;
 
-        // 优先读 data-lazy-src / data-src / data-original
+        // 真实地址（若存在）
         var real = img.getAttribute('data-lazy-src') || img.getAttribute('data-src') || img.getAttribute('data-original');
+
+        // 兜底：取卡片里的第一个链接，拼接 favicon
         if (!real) {
-          // 再尝试卡片上的链接，取其域名的 favicon
           var card = img.closest('.cf-card, .cf-item, article, li, div');
-          var a = card ? card.querySelector('a[href]') : null;
+          var a = findLink(card);
           if (a) {
             try {
-              var u = new URL(a.href, location.href);
+              var u = new URL(a.getAttribute('href'), location.href);
               real = u.origin + '/favicon.ico';
             } catch (e) {}
           }
         }
+
         if (real) {
           img.referrerPolicy = 'no-referrer';
           img.setAttribute('loading', 'eager');
@@ -82,21 +93,18 @@
           fixed++;
         }
       });
-      // console.log('[fcircle-avatar-fallback] fixed:', fixed);
+      // console.log('[fcircle-avatar-fallback-v2] fixed:', fixed);
     }
 
-    // 首次
     if (document.readyState !== 'loading') fixImages();
     else document.addEventListener('DOMContentLoaded', function () { fixImages(); }, { once: true });
 
-    // 监听 DOM 变化（鱼塘异步渲染/翻页）
     var mo = new MutationObserver(function (muts) {
       var changed = muts.some(function (m) { return m.addedNodes && m.addedNodes.length; });
       if (changed) fixImages();
     });
     mo.observe(root, { childList: true, subtree: true });
 
-    // PJAX 回来后再执行一次
     document.addEventListener('pjax:complete', function () { setTimeout(fixImages, 0); });
   })();
 </script>
