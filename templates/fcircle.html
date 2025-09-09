@@ -30,7 +30,9 @@
         title = ${ !#strings.isEmpty(theme.config.fcircle.bigTitle) ? theme.config.fcircle.bigTitle
                   : (!#strings.isEmpty(theme.config.fcircle.title) ? theme.config.fcircle.title : singlePage.spec.title) }
       )}"></nav>
-    </header>
+  
+
+</header>
 
     <main class="layout hide-aside" id="content-inner">
       <div id="page">
@@ -115,210 +117,11 @@
   </div>
 </th:block>
 </html>
-<script data-pjax id="fcircle-avatar-fix-v10">
-(function () {
-  const API  = 'https://fcircle.oortaka.top/all';   // change to same-origin proxy if CORS blocks
-  const ROOT = document.querySelector('#hexo-circle-of-friends-root') || document;
-  const SELF = location.hostname;
-  const isPH = s => /(?:^|\/)404s?\.(?:gif|png|jpe?g|webp)(?:$|\?)/i.test((s||''));
-
-  // Never-fail inline SVG
-  const DEFAULT_SVG =
-    'data:image/svg+xml;utf8,' +
-    '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64">' +
-    '<rect width="100%" height="100%" rx="12" ry="12" fill="#2b2b2b"/>' +
-    '<circle cx="32" cy="24" r="12" fill="#555"/>' +
-    '<rect x="14" y="40" width="36" height="14" rx="7" ry="7" fill="#555"/>' +
-    '</svg>';
-
-  const googleIcon = host => 'https://www.google.com/s2/favicons?sz=64&domain=' + host;
-
-  function findCardFor(img) {
-    // Generic: walk up to a reasonable container
-    let el = img;
-    for (let i=0; i<6 && el; i++) {
-      if (el.matches && (el.matches('article, li, section') || (el.tagName === 'DIV' && el.children && el.children.length > 2))) {
-        return el;
-      }
-      el = el.parentElement;
-    }
-    return img.parentElement || img;
-  }
-
-  function extractExternalHostFromLink(a) {
-    try {
-      const u = new URL(a.getAttribute('href'), location.href);
-      if (u.hostname && u.hostname !== SELF) return u.hostname;
-      const KEYS = ['url','u','link','to','target','jump','redirect','dest','destination'];
-      for (const k of KEYS) {
-        const raw = u.searchParams.get(k);
-        if (!raw) continue;
-        try { const h = new URL(raw, location.href).hostname; if (h && h !== SELF) return h; } catch {}
-        try {
-          const dec = decodeURIComponent(raw);
-          try {
-            const b64 = atob(dec.replace(/_/g,'/').replace(/-/g,'+'));
-            const h = new URL(b64, location.href).hostname; if (h && h !== SELF) return h;
-          } catch {}
-          try {
-            const h2 = new URL(dec, location.href).hostname; if (h2 && h2 !== SELF) return h2;
-          } catch {}
-        } catch {}
-      }
-    } catch {}
-    return null;
-  }
-
-  function detectHost(card) {
-    if (!card) return null;
-    const as = card.querySelectorAll('a[href]');
-    for (const a of as) {
-      const host = extractExternalHostFromLink(a);
-      if (host) return host;
-    }
-    const nodes = [card, ...card.querySelectorAll('*')];
-    for (const el of nodes) {
-      if (!el.attributes) continue;
-      for (const attr of el.attributes) {
-        const val = String(attr.value || '');
-        const urls = val.match(/https?:\/\/[^\s"'<>)]+/ig);
-        if (urls) {
-          for (const raw of urls) {
-            try {
-              const h = new URL(raw, location.href).hostname;
-              if (h && h !== SELF) return h;
-            } catch {}
-          }
-        }
-      }
-    }
-    try {
-      const m = String(card.outerHTML||'').match(/https?:\/\/[^\s"'<>)]+/i);
-      if (m) {
-        const h = new URL(m[0], location.href).hostname;
-        if (h && h !== SELF) return h;
-      }
-    } catch {}
-    return null;
-  }
-
-  function apply(img, url) {
-    img.style.objectFit = img.style.objectFit || 'cover';
-    img.referrerPolicy = 'no-referrer';
-    img.loading = 'eager';
-    img.decoding = 'async';
-    img.onerror = function () {
-      if (img.dataset.fcircleErr !== '1') {
-        img.dataset.fcircleErr = '1';
-        img.src = DEFAULT_SVG;
-      }
-    };
-    img.src = url.startsWith('data:')
-      ? url
-      : url + (url.includes('?') ? '&' : '?') + 't=' + Date.now();
-  }
-
-  let MAP_BY_HOST   = null; // host -> avatar
-  let MAP_BY_AUTHOR = null; // author -> avatar
-  async function ensureMaps() {
-    if (MAP_BY_HOST && MAP_BY_AUTHOR) return;
-    try {
-      const res = await fetch(API, { cache: 'no-store', mode: 'cors' });
-      const data = await res.json();
-      const list = Array.isArray(data?.article_data) ? data.article_data : [];
-      MAP_BY_HOST = new Map();
-      MAP_BY_AUTHOR = new Map();
-      for (const it of list) {
-        try {
-          const host = new URL(it.link).hostname;
-          if (host && it.avatar && !MAP_BY_HOST.has(host)) MAP_BY_HOST.set(host, it.avatar);
-        } catch {}
-        const author = (it.author || '').trim();
-        if (author && it.avatar && !MAP_BY_AUTHOR.has(author)) MAP_BY_AUTHOR.set(author, it.avatar);
-      }
-    } catch (e) {
-      console.warn('[friends v10] fetch failed:', e);
-      MAP_BY_HOST = MAP_BY_HOST || new Map();
-      MAP_BY_AUTHOR = MAP_BY_AUTHOR || new Map();
-    }
-  }
-
-  function findAuthorText(card) {
-    // 优先常见类名
-    let el = card.querySelector?.('.cf-article-author, .cf-author, .post-author, [class*="author"]');
-    if (el && el.textContent) return el.textContent.trim();
-    // 兜底：尝试在卡片中找到与 API 中 author 名称匹配的文本
-    if (MAP_BY_AUTHOR && MAP_BY_AUTHOR.size) {
-      const txt = (card.innerText || '').trim();
-      for (const name of MAP_BY_AUTHOR.keys()) {
-        if (name && txt.includes(name)) return name;
-      }
-    }
-    return null;
-  }
-
-  async function fixOnce(scope) {
-    await ensureMaps();
-
-    const box  = scope || ROOT;
-    try {
-      if (window.lazyLoadInstance?.update) {
-        window.lazyLoadInstance.update();
-        window.lazyLoadInstance.loadAll && window.lazyLoadInstance.loadAll();
-      }
-    } catch {}
-
-    const imgs = box.querySelectorAll('img');
-    imgs.forEach(img => {
-      const cur = img.getAttribute('src') || '';
-      if (!isPH(cur)) return;
-
-      // 1) 后端已经写了真实地址
-      let real =
-        img.getAttribute('data-lazy-src') ||
-        img.getAttribute('data-src') ||
-        img.getAttribute('data-original');
-
-      // 2) 用作者名映射
-      if (!real) {
-        const card   = findCardFor(img);
-        const author = findAuthorText(card);
-        if (author && MAP_BY_AUTHOR.has(author)) {
-          real = MAP_BY_AUTHOR.get(author);
-        }
-
-        // 3) 再用 host 映射
-        if (!real) {
-          const host = detectHost(card);
-          if (host) real = MAP_BY_HOST.get(host) || googleIcon(host);
-        }
-
-        // 4) 最后兜底
-        if (!real) real = DEFAULT_SVG;
-      }
-
-      apply(img, real);
-    });
-  }
-
-  function init() {
-    fixOnce();
-    document.addEventListener('pjax:complete', () => setTimeout(fixOnce, 0));
-    const mo = new MutationObserver(muts => {
-      if (muts.some(m => m.addedNodes && m.addedNodes.length)) fixOnce();
-    });
-    mo.observe(ROOT, { childList: true, subtree: true });
-  }
-
-  if (document.readyState !== 'loading') init();
-  else document.addEventListener('DOMContentLoaded', init, { once: true });
-})();
-</script>
 
 
-<script data-pjax id="fcircle-auto-load-all">
+
+<script data-pjax id="fcircle-autoload-all-with-endtip">
 (function(){
-  // 自动连点“加载更多”（无需滚动到按钮）直到全部加载
   var draining = false;
 
   function findBtn(){
@@ -368,20 +171,44 @@
     });
   }
 
+  function showEndTip(btn){
+    // 如果原主题就是用按钮显示“∞ / 一切皆有尽头”，复用它
+    if (btn){
+      btn.style.display = '';
+      btn.setAttribute('disabled','true');
+      btn.classList.add('no-more');
+      btn.style.pointerEvents = 'none';
+      btn.textContent = '一切皆有尽头';
+      return;
+    }
+    // 否则创建一个样式接近的提示
+    var tip = document.getElementById('cf-end-tip');
+    if (!tip){
+      tip = document.createElement('div');
+      tip.id = 'cf-end-tip';
+      tip.textContent = '一切皆有尽头';
+      tip.style.cssText = 'margin:16px auto 0; width:max-content; padding:8px 16px; border-radius:999px; opacity:.7; background:var(--heo-card-bg, rgba(255,255,255,.06)); color:var(--heo-font-color, #c9d1d9);';
+      var parent = (document.querySelector('#cf-more')||document.querySelector('.cf-more'))?.parentNode
+                 || document.querySelector('.cf-container,.cf-body,.friend-wrapper,main,body');
+      parent && parent.appendChild(tip);
+    }
+  }
+
   async function drain(){
     if (draining) return;
     draining = true;
     try{
       var tries = 0;
-      while(tries < 200){ // 上限保护
+      while(tries < 200){
         var btn = findBtn();
-        if (isDone(btn)) break;
-        // 不显示按钮，避免视觉抖动
-        btn.style.display = 'none';
+        if (isDone(btn)){ showEndTip(btn); break; }
+        // 点击期间先隐藏，避免闪烁
+        if (btn) btn.style.display = 'none';
         safeClick(btn);
         tries++;
         await waitRender(1100);
-        if (isDone(findBtn())) break;
+        var btn2 = findBtn();
+        if (isDone(btn2)){ showEndTip(btn2); break; }
       }
     } finally {
       draining = false;
