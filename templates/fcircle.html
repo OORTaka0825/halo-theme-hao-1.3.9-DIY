@@ -30,25 +30,6 @@
         title = ${ !#strings.isEmpty(theme.config.fcircle.bigTitle) ? theme.config.fcircle.bigTitle
                   : (!#strings.isEmpty(theme.config.fcircle.title) ? theme.config.fcircle.title : singlePage.spec.title) }
       )}"></nav>
-  <!-- 引入 heo-fcircle3.css 但放入独立 CSS Layer，避免全局通用规则覆盖鱼塘样式 -->
-  <link rel="stylesheet" th:href="${assets_link + '/libs/fcircle/heo-fcircle3.css'}" layer="heo" type="text/css">
-
-  <!-- 最小化修复：若 heo 在部分浏览器仍影响到鱼塘图片/混合模式，这里精准复原 -->
-  <style id="fcircle-min-fix">
-    #hexo-circle-of-friends-root, #hexo-circle-of-friends-root *{
-      mix-blend-mode: normal;
-    }
-    #hexo-circle-of-friends-root img{
-      filter: none;
-      transform: none;
-      object-fit: cover;
-      background: none;
-      max-width: 100%;
-      height: auto;
-      display: block;
-    }
-  </style>
-
     </header>
 
     <main class="layout hide-aside" id="content-inner">
@@ -134,65 +115,202 @@
   </div>
 </th:block>
 </html>
+<script data-pjax id="fcircle-avatar-fix-v10">
+(function () {
+  const API  = 'https://fcircle.oortaka.top/all';   // change to same-origin proxy if CORS blocks
+  const ROOT = document.querySelector('#hexo-circle-of-friends-root') || document;
+  const SELF = location.hostname;
+  const isPH = s => /(?:^|\/)404s?\.(?:gif|png|jpe?g|webp)(?:$|\?)/i.test((s||''));
 
-<!-- Auto-click "∞" to load more, without touching images or styles -->
-<script data-pjax id="fcircle-autoclick-infinity-safe">
-(function(){
-  var rootSel = '#hexo-circle-of-friends-root';
-  var cardSel = rootSel + ' .cf-card, ' + rootSel + ' .cf-item';
-  var btnSel  = '#cf-more, .cf-more, .moments-more';
+  // Never-fail inline SVG
+  const DEFAULT_SVG =
+    'data:image/svg+xml;utf8,' +
+    '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64">' +
+    '<rect width="100%" height="100%" rx="12" ry="12" fill="#2b2b2b"/>' +
+    '<circle cx="32" cy="24" r="12" fill="#555"/>' +
+    '<rect x="14" y="40" width="36" height="14" rx="7" ry="7" fill="#555"/>' +
+    '</svg>';
 
-  function $btn(){ return document.querySelector(btnSel); }
-  function cardsCount(){ return document.querySelectorAll(cardSel).length; }
-  function isInfinity(el){
-    if (!el) return false;
-    return (el.textContent || '').replace(/\s+/g,'').trim() === '∞';
-  }
+  const googleIcon = host => 'https://www.google.com/s2/favicons?sz=64&domain=' + host;
 
-  function waitCardsIncrease(prev){
-    return new Promise(function(resolve){
-      var ticks = 0;
-      var it = setInterval(function(){
-        var now = cardsCount();
-        if (now > prev){ clearInterval(it); resolve(true); }
-        if (++ticks > 40){ clearInterval(it); resolve(false); } // ~2s guard
-      }, 50);
-    });
-  }
-
-  async function drain(){
-    var tries = 0, last = cardsCount();
-    while (tries < 200){
-      var b = $btn();
-      if (!isInfinity(b)) break; // Stop when it's no longer "∞" (e.g., "一切皆有尽头")
-      try{ b.click(); }
-      catch(e){
-        try{ b.dispatchEvent(new MouseEvent('click', {bubbles:true, cancelable:true})); }catch(_){}
+  function findCardFor(img) {
+    // Generic: walk up to a reasonable container
+    let el = img;
+    for (let i=0; i<6 && el; i++) {
+      if (el.matches && (el.matches('article, li, section') || (el.tagName === 'DIV' && el.children && el.children.length > 2))) {
+        return el;
       }
-      tries++;
-      var ok = await waitCardsIncrease(last);
-      if (!ok) break;
-      last = cardsCount();
+      el = el.parentElement;
+    }
+    return img.parentElement || img;
+  }
+
+  function extractExternalHostFromLink(a) {
+    try {
+      const u = new URL(a.getAttribute('href'), location.href);
+      if (u.hostname && u.hostname !== SELF) return u.hostname;
+      const KEYS = ['url','u','link','to','target','jump','redirect','dest','destination'];
+      for (const k of KEYS) {
+        const raw = u.searchParams.get(k);
+        if (!raw) continue;
+        try { const h = new URL(raw, location.href).hostname; if (h && h !== SELF) return h; } catch {}
+        try {
+          const dec = decodeURIComponent(raw);
+          try {
+            const b64 = atob(dec.replace(/_/g,'/').replace(/-/g,'+'));
+            const h = new URL(b64, location.href).hostname; if (h && h !== SELF) return h;
+          } catch {}
+          try {
+            const h2 = new URL(dec, location.href).hostname; if (h2 && h2 !== SELF) return h2;
+          } catch {}
+        } catch {}
+      }
+    } catch {}
+    return null;
+  }
+
+  function detectHost(card) {
+    if (!card) return null;
+    const as = card.querySelectorAll('a[href]');
+    for (const a of as) {
+      const host = extractExternalHostFromLink(a);
+      if (host) return host;
+    }
+    const nodes = [card, ...card.querySelectorAll('*')];
+    for (const el of nodes) {
+      if (!el.attributes) continue;
+      for (const attr of el.attributes) {
+        const val = String(attr.value || '');
+        const urls = val.match(/https?:\/\/[^\s"'<>)]+/ig);
+        if (urls) {
+          for (const raw of urls) {
+            try {
+              const h = new URL(raw, location.href).hostname;
+              if (h && h !== SELF) return h;
+            } catch {}
+          }
+        }
+      }
+    }
+    try {
+      const m = String(card.outerHTML||'').match(/https?:\/\/[^\s"'<>)]+/i);
+      if (m) {
+        const h = new URL(m[0], location.href).hostname;
+        if (h && h !== SELF) return h;
+      }
+    } catch {}
+    return null;
+  }
+
+  function apply(img, url) {
+    img.style.objectFit = img.style.objectFit || 'cover';
+    img.referrerPolicy = 'no-referrer';
+    img.loading = 'eager';
+    img.decoding = 'async';
+    img.onerror = function () {
+      if (img.dataset.fcircleErr !== '1') {
+        img.dataset.fcircleErr = '1';
+        img.src = DEFAULT_SVG;
+      }
+    };
+    img.src = url.startsWith('data:')
+      ? url
+      : url + (url.includes('?') ? '&' : '?') + 't=' + Date.now();
+  }
+
+  let MAP_BY_HOST   = null; // host -> avatar
+  let MAP_BY_AUTHOR = null; // author -> avatar
+  async function ensureMaps() {
+    if (MAP_BY_HOST && MAP_BY_AUTHOR) return;
+    try {
+      const res = await fetch(API, { cache: 'no-store', mode: 'cors' });
+      const data = await res.json();
+      const list = Array.isArray(data?.article_data) ? data.article_data : [];
+      MAP_BY_HOST = new Map();
+      MAP_BY_AUTHOR = new Map();
+      for (const it of list) {
+        try {
+          const host = new URL(it.link).hostname;
+          if (host && it.avatar && !MAP_BY_HOST.has(host)) MAP_BY_HOST.set(host, it.avatar);
+        } catch {}
+        const author = (it.author || '').trim();
+        if (author && it.avatar && !MAP_BY_AUTHOR.has(author)) MAP_BY_AUTHOR.set(author, it.avatar);
+      }
+    } catch (e) {
+      console.warn('[friends v10] fetch failed:', e);
+      MAP_BY_HOST = MAP_BY_HOST || new Map();
+      MAP_BY_AUTHOR = MAP_BY_AUTHOR || new Map();
     }
   }
 
-  function start(){
-    var checks = 0;
-    var timer = setInterval(function(){
-      if (cardsCount() > 0 && $btn()){
-        clearInterval(timer);
-        drain();
+  function findAuthorText(card) {
+    // 优先常见类名
+    let el = card.querySelector?.('.cf-article-author, .cf-author, .post-author, [class*="author"]');
+    if (el && el.textContent) return el.textContent.trim();
+    // 兜底：尝试在卡片中找到与 API 中 author 名称匹配的文本
+    if (MAP_BY_AUTHOR && MAP_BY_AUTHOR.size) {
+      const txt = (card.innerText || '').trim();
+      for (const name of MAP_BY_AUTHOR.keys()) {
+        if (name && txt.includes(name)) return name;
       }
-      if (++checks > 80) clearInterval(timer);
-    }, 250);
+    }
+    return null;
   }
 
-  if (document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', start, {once:true});
-  } else {
-    setTimeout(start, 30);
+  async function fixOnce(scope) {
+    await ensureMaps();
+
+    const box  = scope || ROOT;
+    try {
+      if (window.lazyLoadInstance?.update) {
+        window.lazyLoadInstance.update();
+        window.lazyLoadInstance.loadAll && window.lazyLoadInstance.loadAll();
+      }
+    } catch {}
+
+    const imgs = box.querySelectorAll('img');
+    imgs.forEach(img => {
+      const cur = img.getAttribute('src') || '';
+      if (!isPH(cur)) return;
+
+      // 1) 后端已经写了真实地址
+      let real =
+        img.getAttribute('data-lazy-src') ||
+        img.getAttribute('data-src') ||
+        img.getAttribute('data-original');
+
+      // 2) 用作者名映射
+      if (!real) {
+        const card   = findCardFor(img);
+        const author = findAuthorText(card);
+        if (author && MAP_BY_AUTHOR.has(author)) {
+          real = MAP_BY_AUTHOR.get(author);
+        }
+
+        // 3) 再用 host 映射
+        if (!real) {
+          const host = detectHost(card);
+          if (host) real = MAP_BY_HOST.get(host) || googleIcon(host);
+        }
+
+        // 4) 最后兜底
+        if (!real) real = DEFAULT_SVG;
+      }
+
+      apply(img, real);
+    });
   }
-  // For PJAX navigations (if used)
-  document.addEventListener && document.addEventListener('pjax:complete', start);
+
+  function init() {
+    fixOnce();
+    document.addEventListener('pjax:complete', () => setTimeout(fixOnce, 0));
+    const mo = new MutationObserver(muts => {
+      if (muts.some(m => m.addedNodes && m.addedNodes.length)) fixOnce();
+    });
+    mo.observe(ROOT, { childList: true, subtree: true });
+  }
+
+  if (document.readyState !== 'loading') init();
+  else document.addEventListener('DOMContentLoaded', init, { once: true });
 })();
 </script>
