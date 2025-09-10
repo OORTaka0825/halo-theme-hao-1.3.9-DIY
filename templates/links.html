@@ -18,7 +18,9 @@
         </header>
         <main class="layout hide-aside" id="content-inner">
             <div id="page">
-                <th:block th:replace="~{macro/content-links :: content-links(${htmlType})}" />
+                <th:block th:with="isLazyload=${false}">
+  <th:block th:replace="~{macro/content-links :: content-links(${htmlType})}" />
+</th:block>
                 <!-- 推荐博客分页 v4（主题色交互；无跳动；分页条居中） -->
                 <style id="flink-pager-style-v4">
                   .flink-pager-bar{
@@ -173,58 +175,7 @@
                 </style>
 
             </div>
-        
-<!-- 仅 /links：彻底禁用懒加载（严格版） -->
-<script data-pjax id="links-nolazy-strict">
-(function(){
-  function isLinks(){ try{ return location.pathname.replace(/\/+$/,'').endsWith('/links'); }catch(e){ return true; } }
-
-  // 1) 阻止常见懒加载库在本页自动初始化（lazysizes）
-  if(isLinks()){
-    window.lazySizesConfig = window.lazySizesConfig || {};
-    window.lazySizesConfig.init = false;
-    // 拦截懒加载触发事件（即使库已注入）
-    document.addEventListener('lazybeforeunveil', function(e){ if(isLinks()) e.preventDefault(); }, true);
-  }
-
-  function swapAttrsOnce(){
-    if(!isLinks()) return;
-    const wrap = document.querySelector('#page') || document;
-
-    // A) <img>：只要存在 data-src / data-original / data-lazy-src，就无条件替换为 src；同理处理 srcset
-    wrap.querySelectorAll('img').forEach(function(img){
-      const ds  = img.getAttribute('data-src') || img.getAttribute('data-original') || img.getAttribute('data-lazy-src');
-      const dss = img.getAttribute('data-srcset') || img.getAttribute('data-lazy-srcset');
-      if(ds){ img.setAttribute('src', ds); }
-      if(dss){ img.setAttribute('srcset', dss); }
-      ['data-src','data-original','data-lazy-src','data-srcset','data-lazy-srcset'].forEach(a=>img.removeAttribute(a));
-      img.classList.remove('lazyload','lazy','lozad','lazyloaded','lazyloading');
-      img.setAttribute('loading','eager'); img.setAttribute('decoding','sync');
-    });
-
-    // B) <source>：同理
-    wrap.querySelectorAll('source[data-srcset]').forEach(function(s){
-      s.setAttribute('srcset', s.getAttribute('data-srcset'));
-      s.removeAttribute('data-srcset');
-    });
-
-    // C) 背景图懒加载（若有 data-bg / data-background-image）
-    wrap.querySelectorAll('[data-bg],[data-background-image]').forEach(function(el){
-      const url = el.getAttribute('data-bg') || el.getAttribute('data-background-image');
-      if(url){ el.style.backgroundImage = 'url(\"'+url+'\ ")'; }
-      el.removeAttribute('data-bg'); el.removeAttribute('data-background-image');
-      el.classList.remove('lazyload','lazy','lozad','lazyloaded','lazyloading');
-    });
-  }
-
-  function run(){ swapAttrsOnce(); }
-
-  if(document.readyState !== 'loading') run();
-  else document.addEventListener('DOMContentLoaded', run, { once:true });
-  document.addEventListener('pjax:complete', run);
-})();
-</script>
-</main>
+        </main>
         <!-- 底部 -->
         <footer th:replace="~{modules/footer}"/>
     </div>
