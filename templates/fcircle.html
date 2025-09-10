@@ -100,6 +100,65 @@
         <link rel="stylesheet" th:href="${assets_link + '/libs/moments/heoMainColor.css'}">
         <script th:src="${assets_link + '/libs/moments/app.min.js'}"></script>
         <script th:src="${assets_link + '/libs/moments/bundle.js'}"></script>
+<!-- 自动加载：隐藏按钮 -->
+<style id="fcircle-auto-load-css">
+  /* 隐藏 黄色“加载更多” 按钮（#cf-more） */
+  #cf-more{ display:none !important; }
+</style>
+
+<!-- 自动加载：下拉到尾部自动触发“加载更多” -->
+<script data-pjax id="fcircle-auto-load">
+(function(){
+  const ROOT = document.querySelector('#hexo-circle-of-friends-root');
+  if(!ROOT) return;
+
+  const END_TEXT_RE = /尽头|没有更多|已到底|END/i;  // 结束提示关键字
+  let io=null, busy=false;
+
+  const getBtn   = ()=> ROOT.querySelector('#cf-more');
+  const getState = ()=> ROOT.querySelector('#cf-state');
+  const isDone   = ()=> {
+    const st = getState();
+    return !getBtn() || (st && END_TEXT_RE.test(st.textContent||''));
+  };
+
+  function clickMore(){
+    const btn = getBtn();
+    if(!btn || busy) return;
+    busy = true;
+    btn.click();                 // 触发下一页加载
+    setTimeout(()=> busy=false, 800); // 简单节流
+  }
+
+  function ensureSentinel(){
+    let s = ROOT.querySelector('#cf-auto-sentinel');
+    if(!s){
+      s = document.createElement('div');
+      s.id = 'cf-auto-sentinel';
+      s.style.cssText = 'height:1px;margin-top:1px;';
+      // 放到状态区（“已到底”提示）附近，随列表增长而下移
+      (getState()?.parentNode || ROOT).appendChild(s);
+    }
+    if(io) io.disconnect();
+    io = new IntersectionObserver((entries)=>{
+      if(isDone()){ io.disconnect(); return; }
+      entries.forEach(e=>{ if(e.isIntersecting) clickMore(); });
+    }, { rootMargin: '1200px 0px 1200px 0px' }); // 提前触发，滚到近底部就加载
+    io.observe(s);
+  }
+
+  // 监听列表变化，保证新增内容后继续自动加载
+  const mo = new MutationObserver(()=>{
+    if(isDone()){ if(io) io.disconnect(); return; }
+    ensureSentinel();
+  });
+  mo.observe(ROOT, { childList:true, subtree:true });
+
+  // 首次启动
+  ensureSentinel();
+})();
+</script>
+
 
         <style>
           .cf-manage-pannel[data-v-34921c7c]{width:80%!important;height:80%!important}
