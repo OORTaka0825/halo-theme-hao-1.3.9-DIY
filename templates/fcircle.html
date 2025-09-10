@@ -106,56 +106,62 @@
   #cf-more{ display:none !important; }
 </style>
 
-<!-- 自动加载：下拉到尾部自动触发“加载更多” -->
+
+<!-- 自动加载：滚动到页面底部自动“点击加载更多”（更稳健版本） -->
 <script data-pjax id="fcircle-auto-load">
 (function(){
   const ROOT = document.querySelector('#hexo-circle-of-friends-root');
   if(!ROOT) return;
 
-  const END_TEXT_RE = /尽头|没有更多|已到底|END/i;  // 结束提示关键字
-  let io=null, busy=false;
+  const END_TEXT_RE = /尽头|没有更多|已到底|END/i;
+  let busy = false;
+  let seenBtnOnce = false;
 
-  const getBtn   = ()=> ROOT.querySelector('#cf-more');
-  const getState = ()=> ROOT.querySelector('#cf-state');
-  const isDone   = ()=> {
+  const getBtn   = ()=> document.getElementById('cf-more') || ROOT.querySelector('#cf-more');
+  const getState = ()=> document.getElementById('cf-state') || ROOT.querySelector('#cf-state');
+
+  function isDone(){
     const st = getState();
-    return !getBtn() || (st && END_TEXT_RE.test(st.textContent||''));
-  };
+    const btn = getBtn();
+    if(btn) seenBtnOnce = true;
+    // 只有见过按钮之后才允许因为“按钮消失”判断为结束，避免初始化阶段误判
+    return (seenBtnOnce && !btn) || (st && END_TEXT_RE.test((st.textContent||'').trim()));
+  }
 
   function clickMore(){
     const btn = getBtn();
     if(!btn || busy) return;
     busy = true;
-    btn.click();                 // 触发下一页加载
-    setTimeout(()=> busy=false, 800); // 简单节流
+    btn.click();                       // 触发下一页加载
+    setTimeout(()=> busy = false, 1000); // 简单节流，避免抖动
   }
 
-  function ensureSentinel(){
-    let s = ROOT.querySelector('#cf-auto-sentinel');
-    if(!s){
-      s = document.createElement('div');
-      s.id = 'cf-auto-sentinel';
-      s.style.cssText = 'height:1px;margin-top:1px;';
-      // 放到状态区（“已到底”提示）附近，随列表增长而下移
-      (getState()?.parentNode || ROOT).appendChild(s);
-    }
-    if(io) io.disconnect();
-    io = new IntersectionObserver((entries)=>{
-      if(isDone()){ io.disconnect(); return; }
-      entries.forEach(e=>{ if(e.isIntersecting) clickMore(); });
-    }, { rootMargin: '1200px 0px 1200px 0px' }); // 提前触发，滚到近底部就加载
-    io.observe(s);
+  function nearBottom(pad){
+    pad = pad ?? 800; // 距离底部多少像素开始加载
+    const doc = document.documentElement;
+    const scrolled = (window.pageYOffset || doc.scrollTop) + window.innerHeight;
+    const total = Math.max(doc.scrollHeight, doc.offsetHeight, doc.clientHeight);
+    return total - scrolled <= pad;
   }
 
-  // 监听列表变化，保证新增内容后继续自动加载
-  const mo = new MutationObserver(()=>{
-    if(isDone()){ if(io) io.disconnect(); return; }
-    ensureSentinel();
-  });
-  mo.observe(ROOT, { childList:true, subtree:true });
+  function maybeTrigger(){
+    if(isDone()) return;
+    if(nearBottom()) clickMore();
+  }
 
-  // 首次启动
-  ensureSentinel();
+  // 监听内容变化，新增卡片后继续判断
+  const mo = new MutationObserver(mutations => { maybeTrigger(); });
+  mo.observe(ROOT, {childList:true, subtree:true});
+
+  // 监听滚动/窗口变化
+  window.addEventListener('scroll', maybeTrigger, {passive:true});
+  window.addEventListener('resize', maybeTrigger);
+  document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) maybeTrigger(); });
+
+  // 多次尝试引导首轮加载（应对按钮创建较晚的情况）
+  setTimeout(maybeTrigger, 300);
+  setTimeout(maybeTrigger, 900);
+  setTimeout(maybeTrigger, 1800);
 })();
 </script>
 
