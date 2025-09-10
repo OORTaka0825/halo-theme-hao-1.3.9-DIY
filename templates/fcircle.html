@@ -100,62 +100,39 @@
         <link rel="stylesheet" th:href="${assets_link + '/libs/moments/heoMainColor.css'}">
         <script th:src="${assets_link + '/libs/moments/app.min.js'}"></script>
         <script th:src="${assets_link + '/libs/moments/bundle.js'}"></script>
-<!-- 仅鱼塘页生效的头部样式兜底（不改全局、避免 PJAX 残留） -->
-<style id="fcircle-header-hardfix-css">
-/* 当页面含有 #hexo-circle-of-friends-root（鱼塘容器）时，强制导航为非透明样式 */
-body:has(#hexo-circle-of-friends-root) #page-header,
-body:has(#hexo-circle-of-friends-root) #page-header nav{
-  background: var(--heo-card-bg, rgba(25,25,25,.86)) !important;
-  -webkit-backdrop-filter: saturate(180%) blur(10px);
-  backdrop-filter: saturate(180%) blur(10px);
-  box-shadow: 0 10px 40px rgba(0,0,0,.25);
-}
-/* 兼容某些主题的透明蒙层元素（如 nav-mask / header-transparent） */
-body:has(#hexo-circle-of-friends-root) #page-header .nav-mask,
-body:has(#hexo-circle-of-friends-root) #page-header.header-transparent{ display: none !important; }
-</style>
-
-<!-- 鱼塘页头部修复（增强版）：多帧巩固 + PJAX 复挂载，仅添加不删除 -->
-<script data-pjax id="fcircle-header-hardfix">
+<!-- fcircle 顶图样式恢复（只添加、不删、不覆盖全局） -->
+<script data-pjax id="fcircle-topimg-restore">
 (function(){
   function inFcircle(){ return !!document.getElementById('hexo-circle-of-friends-root'); }
-  function apply(){
+  function restoreTopImg(){
     if(!inFcircle()) return;
     var header = document.getElementById('page-header');
     if(!header) return;
     var nav = header.querySelector('nav');
 
-    // 目标：确保是“非顶图样式”
-    header.classList.add('not-top-img');
-    ['top-img','is-top-banner','header-transparent','is-top-img','page-banner'].forEach(function(c){
-      header.classList.remove(c);
-    });
+    // 鱼塘页应该是“顶图 + 透明下拉”样式：恢复相关类
+    header.classList.add('top-img');
+    header.classList.remove('not-top-img');
+
     if(nav){
-      ['nav-transparent','is-transparent','hide','header-transparent'].forEach(function(c){
-        nav.classList.remove(c);
-      });
+      nav.classList.add('nav-transparent');
+      nav.classList.remove('hide');
     }
-    document.body && document.body.classList.add('not-top-img-page');
-    document.body && document.body.classList.remove('top-img-page');
+
+    // 有些主题用 body 类控制
+    document.body && document.body.classList.add('top-img-page');
+    document.body && document.body.classList.remove('not-top-img-page');
   }
 
-  // 连续多帧加固，防止其它脚本晚一步又改回去
-  function reinforce(times){
-    times = times || 8;
-    function tick(n){
-      if(n<=0) return;
-      apply();
-      requestAnimationFrame(function(){ tick(n-1); });
-    }
-    tick(times);
-  }
+  // 首次进入
+  if(document.readyState !== 'loading') { setTimeout(restoreTopImg, 0); }
+  else { document.addEventListener('DOMContentLoaded', function(){ setTimeout(restoreTopImg, 0); }, { once:true }); }
 
-  if(document.readyState !== 'loading') reinforce();
-  else document.addEventListener('DOMContentLoaded', function(){ reinforce(); }, { once:true });
-
-  // PJAX 完成后再次执行
+  // PJAX 再次点击同页后
   document.addEventListener('pjax:complete', function(){
-    setTimeout(function(){ reinforce(); }, 0);
+    // 给主题脚本一个先执行的机会，再恢复样式
+    setTimeout(restoreTopImg, 0);
+    setTimeout(restoreTopImg, 80);   // 再补一刀，避免晚到
   });
 })();
 </script>
