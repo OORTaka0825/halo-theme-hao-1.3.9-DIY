@@ -18745,3 +18745,12 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
     background-color: #2196f3;
     color: #fff
 }
+
+/* Twikoo UA 徽章里的 <i> 强制使用 Remix Icon 字体 */
+#twikoo .tk-badge i,
+#twikoo .tk-ua i {
+  font-family: "remixicon" !important;
+  font-style: normal;
+  margin-right: .4em;
+  vertical-align: -.1em;
+}
