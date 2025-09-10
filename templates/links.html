@@ -6,7 +6,20 @@
                 _permalink = '/links',
                 _cover = ${theme.config.other.opengraph.image},
                 _excerpt = ${site.seo.description},
-                _type = 'website')}"></th:block>
+                _type = 'website')}">
+    <!-- 仅 /links：禁用全局懒加载的自动初始化（不影响其它页面） -->
+    <script>
+      (function(){
+        try{
+          if(location.pathname.replace(/\/+/g,'/').replace(/\/$/,'').endsWith('/links')){
+            window.__NO_LAZY_ON_LINKS__ = true;
+            window.lazySizesConfig = window.lazySizesConfig || {};
+            window.lazySizesConfig.init = false; // 若主题使用 lazysizes，阻止它在本页自动初始化
+          }
+        }catch(e){}
+      })();
+    </script>
+</th:block>
 </th:block>
 <th:block th:fragment="content">
 
@@ -173,7 +186,48 @@
                 </style>
 
             </div>
-        </main>
+        
+<!-- 仅 /links 页面：把懒加载属性转为正常加载；PJAX 兼容；不影响全局 -->
+<script data-pjax id="links-disable-global-lazy">
+(function(){
+  function isLinks(){ try{ return location.pathname.replace(/\/+$/,'').endsWith('/links'); }catch(e){ return true; } }
+  function disableLazyOnLinks(){
+    if(!isLinks()) return;
+    const wrap = document.querySelector('#page') || document;
+    // 处理 <img>
+    wrap.querySelectorAll('img').forEach(function(img){
+      const ds  = img.getAttribute('data-src') || img.getAttribute('data-original') || img.getAttribute('data-lazy-src');
+      const dss = img.getAttribute('data-srcset') || img.getAttribute('data-lazy-srcset');
+      if(ds && (!img.getAttribute('src') || /loading|placeholder|svg|base64/i.test(img.getAttribute('src')||''))){
+        img.setAttribute('src', ds);
+      }
+      if(dss && !img.getAttribute('srcset')){
+        img.setAttribute('srcset', dss);
+      }
+      img.removeAttribute('data-src'); img.removeAttribute('data-original');
+      img.removeAttribute('data-lazy-src'); img.removeAttribute('data-srcset'); img.removeAttribute('data-lazy-srcset');
+      img.classList.remove('lazyload','lazy','lozad','lazyloaded','lazyloading');
+      img.setAttribute('loading','eager'); img.setAttribute('decoding','sync');
+    });
+    // 处理 <source>
+    wrap.querySelectorAll('source[data-srcset]').forEach(function(s){
+      s.setAttribute('srcset', s.getAttribute('data-srcset')); s.removeAttribute('data-srcset');
+    });
+
+    // 如果全局已加载 lazysizes，在本页禁用其处理（通过阻止事件）
+    document.addEventListener('lazybeforeunveil', function(e){
+      if(isLinks()) e.preventDefault();
+    }, true);
+  }
+
+  if(document.readyState !== 'loading') disableLazyOnLinks();
+  else document.addEventListener('DOMContentLoaded', disableLazyOnLinks, { once:true });
+  document.addEventListener('pjax:complete', disableLazyOnLinks);
+  // 离开本页时，恢复全局（避免影响其它页面）
+  document.addEventListener('pjax:send', function(){ try{ delete window.lazySizesConfig.init; }catch(e){} });
+})();
+</script>
+</main>
         <!-- 底部 -->
         <footer th:replace="~{modules/footer}"/>
     </div>
