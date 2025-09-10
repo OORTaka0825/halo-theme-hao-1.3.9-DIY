@@ -92,7 +92,7 @@
         <script>
           var UserConfig = {
             private_api_url: "[(${theme.config.fcircle.apiurl})]",  // 这里填纯基址，如 https://hao-yutang.vercel.app 或 /api
-            page_turning_number: 24,
+            page_turning_number: 12,
             error_img: "https://sdn.geekzu.org/avatar/57d8260dfb55501c37dde588e7c3852c",
             sort_rule: "created"
           };
@@ -100,111 +100,65 @@
         <link rel="stylesheet" th:href="${assets_link + '/libs/moments/heoMainColor.css'}">
         <script th:src="${assets_link + '/libs/moments/app.min.js'}"></script>
         <script th:src="${assets_link + '/libs/moments/bundle.js'}"></script>
-<!-- 自动点击“加载更多”：按钮一进入可视区就自动点击（保留原按钮与到底提示） -->
-<script data-pjax id="fcircle-auto-click-more">
+<!-- 仅鱼塘页生效的头部样式兜底（不改全局、避免 PJAX 残留） -->
+<style id="fcircle-header-hardfix-css">
+/* 当页面含有 #hexo-circle-of-friends-root（鱼塘容器）时，强制导航为非透明样式 */
+body:has(#hexo-circle-of-friends-root) #page-header,
+body:has(#hexo-circle-of-friends-root) #page-header nav{
+  background: var(--heo-card-bg, rgba(25,25,25,.86)) !important;
+  -webkit-backdrop-filter: saturate(180%) blur(10px);
+  backdrop-filter: saturate(180%) blur(10px);
+  box-shadow: 0 10px 40px rgba(0,0,0,.25);
+}
+/* 兼容某些主题的透明蒙层元素（如 nav-mask / header-transparent） */
+body:has(#hexo-circle-of-friends-root) #page-header .nav-mask,
+body:has(#hexo-circle-of-friends-root) #page-header.header-transparent{ display: none !important; }
+</style>
+
+<!-- 鱼塘页头部修复（增强版）：多帧巩固 + PJAX 复挂载，仅添加不删除 -->
+<script data-pjax id="fcircle-header-hardfix">
 (function(){
-  const ROOT = document.querySelector('#hexo-circle-of-friends-root');
-  if(!ROOT) return;
-
-  const END_TEXT_RE = /尽头|没有更多|已到底|END/i;
-  let io = null, busy = false;
-
-  function getBtn(){
-    // 主题可能动态替换按钮，这里每次都现取
-    return document.getElementById('cf-more') || ROOT.querySelector('#cf-more');
-  }
-  function getState(){
-    return document.getElementById('cf-state') || ROOT.querySelector('#cf-state');
-  }
-  function isFinished(){
-    const st = getState();
-    return (!getBtn() && st) || (st && END_TEXT_RE.test((st.textContent||'').trim()));
-  }
-
-  function clickIfVisible(){
-    const btn = getBtn();
-    if(!btn || busy) return;
-    // 仅当按钮处于可见状态且在可视区内时才触发
-    const rect = btn.getBoundingClientRect();
-    const visible = !!(btn.offsetParent !== null && rect.height > 0 && rect.width > 0);
-    const inViewport = rect.top < window.innerHeight && rect.bottom > 0;
-    if(!visible || !inViewport) return;
-
-    busy = true
-    btn.click();
-    // 等待渲染完成，降低触发频率
-    setTimeout(()=> busy = false, 800);
-  }
-
-  function attachObserver(){
-    // 先清理旧的
-    if(io) { try{ io.disconnect(); }catch(e){} io = null; }
-
-    const btn = getBtn();
-    if(!btn){ 
-      // 没有按钮则可能是到底了，尝试显示状态；否则延迟再试一次
-      if(!isFinished()) setTimeout(attachObserver, 600);
-      return;
-    }
-    // 监听按钮进入可视区就自动点击
-    io = new IntersectionObserver((entries)=>{
-      if(busy) return;
-      entries.forEach(e=>{ if(e.isIntersecting) clickIfVisible(); });
-    }, { rootMargin: '0px', threshold: 0.01 });
-    io.observe(btn);
-  }
-
-  // DOM 变化时，按钮可能被替换，重新绑定观察器
-  const mo = new MutationObserver(()=>{
-    if(isFinished()){ if(io) io.disconnect(); return; }
-    attachObserver();
-  });
-  mo.observe(ROOT.parentNode || ROOT, { childList:true, subtree:true });
-
-  // 初始化
-  attachObserver();
-
-  // 兜底：首屏不满一页时，延时尝试点击一次
-  setTimeout(clickIfVisible, 400);
-})();
-</script>
-<!-- fcircle 头部样式修复：PJAX 再次进入同页时强制为非顶图样式 -->
-<script data-pjax id="fcircle-header-fix">
-(function(){
-  function isFcircle(){ return !!document.getElementById('hexo-circle-of-friends-root'); }
-  function fixHeader(){
-    if(!isFcircle()) return;
+  function inFcircle(){ return !!document.getElementById('hexo-circle-of-friends-root'); }
+  function apply(){
+    if(!inFcircle()) return;
     var header = document.getElementById('page-header');
     if(!header) return;
+    var nav = header.querySelector('nav');
 
-    // 强制使用 not-top-img，移除可能残留的透明/顶图类
+    // 目标：确保是“非顶图样式”
     header.classList.add('not-top-img');
     ['top-img','is-top-banner','header-transparent','is-top-img','page-banner'].forEach(function(c){
       header.classList.remove(c);
     });
-
-    // 导航透明类清理，避免点同一路由后仍保持透明
-    var nav = header.querySelector('nav');
     if(nav){
       ['nav-transparent','is-transparent','hide','header-transparent'].forEach(function(c){
         nav.classList.remove(c);
       });
-      // 不直接写死背景，让主题样式接管；只要移除透明类即可
     }
-
-    // body 同步一个标记（部分主题根据 body 类切换样式）
     document.body && document.body.classList.add('not-top-img-page');
     document.body && document.body.classList.remove('top-img-page');
   }
 
-  if(document.readyState !== 'loading') fixHeader();
-  else document.addEventListener('DOMContentLoaded', fixHeader, { once:true });
+  // 连续多帧加固，防止其它脚本晚一步又改回去
+  function reinforce(times){
+    times = times || 8;
+    function tick(n){
+      if(n<=0) return;
+      apply();
+      requestAnimationFrame(function(){ tick(n-1); });
+    }
+    tick(times);
+  }
 
-  // PJAX 完成后也处理一次
-  document.addEventListener('pjax:complete', function(){ setTimeout(fixHeader, 0); });
+  if(document.readyState !== 'loading') reinforce();
+  else document.addEventListener('DOMContentLoaded', function(){ reinforce(); }, { once:true });
+
+  // PJAX 完成后再次执行
+  document.addEventListener('pjax:complete', function(){
+    setTimeout(function(){ reinforce(); }, 0);
+  });
 })();
 </script>
-
 
 
         <style>
