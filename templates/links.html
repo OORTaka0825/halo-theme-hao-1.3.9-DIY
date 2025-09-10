@@ -17,6 +17,54 @@
 
         </header>
         <main class="layout hide-aside" id="content-inner">
+<!-- 仅 /links 页面：关闭懒加载（只改本页，兼容 PJAX，不影响全局） -->
+<script data-pjax id="links-no-lazy">
+(function(){
+  function isLinksPage(){
+    try{
+      return location.pathname.replace(/\/+$/,'').endsWith('/links');
+    }catch(e){ return true; }
+  }
+  function deLazyOnce(root){
+    if(!isLinksPage()) return;
+    var wrap = document.querySelector('#page') || document;
+    // 把 data-src / data-original / data-lazy-src / data-srcset 还原为真实 src / srcset
+    wrap.querySelectorAll('img').forEach(function(img){
+      var ds  = img.getAttribute('data-src') || img.getAttribute('data-original') || img.getAttribute('data-lazy-src');
+      var dss = img.getAttribute('data-srcset') || img.getAttribute('data-lazy-srcset');
+      if(ds && (!img.getAttribute('src') || /loading|placeholder|svg|base64/i.test(img.getAttribute('src')))){
+        img.setAttribute('src', ds);
+      }
+      if(dss && !img.getAttribute('srcset')){
+        img.setAttribute('srcset', dss);
+      }
+      // 移除懒加载相关
+      img.removeAttribute('data-src');
+      img.removeAttribute('data-original');
+      img.removeAttribute('data-lazy-src');
+      img.removeAttribute('data-srcset');
+      img.removeAttribute('data-lazy-srcset');
+      img.classList.remove('lazyload','lazy','lozad','lazyloaded','lazyloading');
+      // 强制即时加载
+      img.setAttribute('loading','eager');
+      img.setAttribute('decoding','sync');
+    });
+    wrap.querySelectorAll('source[data-srcset]').forEach(function(s){
+      s.setAttribute('srcset', s.getAttribute('data-srcset'));
+      s.removeAttribute('data-srcset');
+    });
+  }
+
+  function run(){
+    deLazyOnce(document);
+  }
+
+  if(document.readyState !== 'loading') run();
+  else document.addEventListener('DOMContentLoaded', run, { once:true });
+  document.addEventListener('pjax:complete', run);
+})();
+</script>
+
             <div id="page">
                 <th:block th:replace="~{macro/content-links :: content-links(${htmlType})}" />
                 <!-- 推荐博客分页 v4（主题色交互；无跳动；分页条居中） -->
@@ -173,56 +221,7 @@
                 </style>
 
             </div>
-        
-<!-- 友链页去懒加载：仅此页生效；不改全局 -->
-<script data-pjax id="links-no-lazy">
-(function(){
-  function deLazyOnce(scope){
-    scope = scope || document;
-    // 只处理 #page 内的图片，避免影响页头/页脚
-    var wrap = scope.querySelector('#page');
-    if(!wrap) return;
-
-    // 1) 常见属性搬运：data-src / data-original / data-lazy-src / data-srcset → src / srcset
-    wrap.querySelectorAll('img').forEach(function(img){
-      var ds = img.getAttribute('data-src') || img.getAttribute('data-original') || img.getAttribute('data-lazy-src');
-      var dss= img.getAttribute('data-srcset') || img.getAttribute('data-lazy-srcset');
-      if(ds && (!img.getAttribute('src') || /loading|placeholder|svg|base64/i.test(img.getAttribute('src')))){
-        img.setAttribute('src', ds);
-      }
-      if(dss && !img.getAttribute('srcset')){
-        img.setAttribute('srcset', dss);
-      }
-      // 2) 移除懒加载标记
-      img.removeAttribute('loading');
-      img.removeAttribute('data-src');
-      img.removeAttribute('data-original');
-      img.removeAttribute('data-lazy-src');
-      img.removeAttribute('data-srcset');
-      img.removeAttribute('data-lazy-srcset');
-      img.classList.remove('lazyload','lazy','lozad','lazyloaded','lazyloading');
-      // 3) 强制即时解码
-      img.setAttribute('loading','eager');
-      img.setAttribute('decoding','sync');
-    });
-
-    // 4) 某些主题会用 <source data-srcset> 包在 <picture>，也一并处理
-    wrap.querySelectorAll('source').forEach(function(s){
-      var ss = s.getAttribute('data-srcset');
-      if(ss){ s.setAttribute('srcset', ss); s.removeAttribute('data-srcset'); }
-    });
-  }
-
-  function init(){
-    deLazyOnce(document);
-  }
-
-  if(document.readyState !== 'loading') init();
-  else document.addEventListener('DOMContentLoaded', init, { once:true });
-  document.addEventListener('pjax:complete', init);
-})();
-</script>
-</main>
+        </main>
         <!-- 底部 -->
         <footer th:replace="~{modules/footer}"/>
     </div>
