@@ -2708,7 +2708,7 @@ spec:
         - $formkit: text
           name: LingQueMonitorID
           label: 51la网站统计：https://51.la/
-          help: 统计ID类型：id:"3N*****N3k"
+          help: 填入统计ID。类型：3e8j7Si43kD2NNbv
           placeholder: 请输入内容
         - $formkit: group
           name: map
