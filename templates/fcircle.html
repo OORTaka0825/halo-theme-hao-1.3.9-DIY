@@ -112,10 +112,24 @@
     pointer-events:none !important;
     overflow:hidden !important;
   }
+
+  /* 自定义“到底”提示，不受原按钮影响 */
+  #cf-end-tip{
+    display:none;
+    margin:24px auto 48px;
+    max-width:720px;
+    padding:12px 18px;
+    text-align:center;
+    border-radius:999px;
+    background: var(--heo-card, var(--heo-card-bg, rgba(255,255,255,0.08)));
+    color: var(--heo-secondtext, #e5e5e5);
+    box-shadow: 0 6px 18px rgba(0,0,0,.25);
+    user-select:none;
+  }
 </style>
 
 
-<!-- 自动加载：滚动到页面底部自动“点击加载更多”（更稳健版本） -->
+<!-- 自动加载：滚动到页面底部自动“点击加载更多”（v4，内置独立到底提示） -->
 <script data-pjax id="fcircle-auto-load">
 (function(){
   const ROOT = document.querySelector('#hexo-circle-of-friends-root');
@@ -128,11 +142,30 @@
   const getBtn   = ()=> document.getElementById('cf-more') || ROOT.querySelector('#cf-more');
   const getState = ()=> document.getElementById('cf-state') || ROOT.querySelector('#cf-state');
 
-  function isDone(){
+  function ensureEndTip(){
+    let tip = document.getElementById('cf-end-tip');
+    if(!tip){
+      tip = document.createElement('div');
+      tip.id = 'cf-end-tip';
+      tip.textContent = '一切皆有尽头！';
+      ROOT.insertAdjacentElement('afterend', tip);
+    }
+    return tip;
+  }
+  function showEnd(){
+    const tip = ensureEndTip();
+    tip.style.display = 'block';
+    // 同时把原按钮/状态条恢复可见（如果主题仍然会显示它的话）
+    const b = getBtn(); if(b) b.classList.remove('auto-hide');
+    const s = getState(); if(s) s.classList.remove('auto-hide');
+    window.removeEventListener('scroll', maybeTrigger);
+    window.removeEventListener('resize', maybeTrigger);
+  }
+
+  function isDoneByTheme(){
     const st = getState();
     const btn = getBtn();
     if(btn) seenBtnOnce = true;
-    // 只有见过按钮之后才允许因为“按钮消失”判断为结束，避免初始化阶段误判
     return (seenBtnOnce && !btn) || (st && END_TEXT_RE.test((st.textContent||'').trim()));
   }
 
@@ -140,12 +173,20 @@
     const btn = getBtn();
     if(!btn || busy) return;
     busy = true;
-    btn.click();                       // 触发下一页加载
-    setTimeout(()=> busy = false, 1000); // 简单节流，避免抖动
+
+    const before = ROOT.childElementCount;
+    btn.click(); // 触发下一页加载
+
+    setTimeout(()=>{
+      busy = false;
+      const after = ROOT.childElementCount;
+      // 如果没有新增任何元素且按钮也没了，视为到底
+      if(after <= before && !getBtn()) showEnd();
+    }, 1200);
   }
 
   function nearBottom(pad){
-    pad = pad ?? 800; // 距离底部多少像素开始加载
+    pad = pad ?? 800;
     const doc = document.documentElement;
     const scrolled = (window.pageYOffset || doc.scrollTop) + window.innerHeight;
     const total = Math.max(doc.scrollHeight, doc.offsetHeight, doc.clientHeight);
@@ -153,35 +194,31 @@
   }
 
   function maybeTrigger(){
-    if(isDone()){ showState(); return; }
+    if(isDoneByTheme()){ showEnd(); return; }
     if(nearBottom()) clickMore();
   }
 
+  // 折叠按钮（加载阶段隐藏视觉）
   function applyHide(){
     const btn = getBtn();
-    if(btn && !isDone()) btn.classList.add('auto-hide');
+    if(btn && !isDoneByTheme()) btn.classList.add('auto-hide');
   }
-  function showState(){
-    // 展示“已到底”状态条（可能是 #cf-state，也可能复用 #cf-more）
-    const st = getState() || getBtn();
-    if(st) st.classList.remove('auto-hide');
-  }
-
-  // 监听内容变化，新增卡片后继续判断
-  const mo = new MutationObserver(mutations => { maybeTrigger(); });
-  mo.observe(ROOT, {childList:true, subtree:true});
   applyHide();
+
+  // DOM 变化后继续判断
+  const mo = new MutationObserver(()=>{ applyHide(); maybeTrigger(); });
+  mo.observe(ROOT, {childList:true, subtree:true});
 
   // 监听滚动/窗口变化
   window.addEventListener('scroll', maybeTrigger, {passive:true});
   window.addEventListener('resize', maybeTrigger);
   document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) maybeTrigger(); });
 
-  // 多次尝试引导首轮加载（应对按钮创建较晚的情况）
+  // 引导首轮加载
   setTimeout(maybeTrigger, 300);
   setTimeout(maybeTrigger, 900);
   setTimeout(maybeTrigger, 1800);
-  setTimeout(showState, 2000);
+  setTimeout(()=>{ if(isDoneByTheme()) showEnd(); }, 2200);
 })();
 </script>
 
@@ -190,7 +227,21 @@
           .cf-manage-pannel[data-v-34921c7c]{width:80%!important;height:80%!important}
           .cf-article-author:hover{color:var(--heo-card-bg)!important}
           #cf-more:hover{background:var(--heo-lighttext)!important;color:var(--heo-card-bg)!important}
-        </style>
+        
+  /* 自定义“到底”提示，不受原按钮影响 */
+  #cf-end-tip{
+    display:none;
+    margin:24px auto 48px;
+    max-width:720px;
+    padding:12px 18px;
+    text-align:center;
+    border-radius:999px;
+    background: var(--heo-card, var(--heo-card-bg, rgba(255,255,255,0.08)));
+    color: var(--heo-secondtext, #e5e5e5);
+    box-shadow: 0 6px 18px rgba(0,0,0,.25);
+    user-select:none;
+  }
+</style>
 
       </div>
     </main>
