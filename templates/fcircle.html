@@ -100,56 +100,71 @@
         <link rel="stylesheet" th:href="${assets_link + '/libs/moments/heoMainColor.css'}">
         <script th:src="${assets_link + '/libs/moments/app.min.js'}"></script>
         <script th:src="${assets_link + '/libs/moments/bundle.js'}"></script>
-<!-- fcircle 顶图→下拉切换修复（仅添加，不改原逻辑） -->
-<script data-pjax id="fcircle-scroll-toggle-fix">
+<!-- fcircle 顶图⇄下拉 切换修复 v2（仅添加，不改/删任何原代码） -->
+<script data-pjax id="fcircle-scroll-toggle-v2">
 (function(){
-  function $id(id){ return document.getElementById(id); }
-  function inFcircle(){ return !!$id('hexo-circle-of-friends-root'); }
+  var SCROLLER_KEY = '__fcircleScrollFix';
+  function $(sel, ctx){ return (ctx||document).querySelector(sel); }
+  function inFcircle(){ return !!$('#hexo-circle-of-friends-root'); }
+  function navEl(){ return $('#page-header nav'); }
+  function headerEl(){ return $('#page-header'); }
 
-  function update(){
+  function getThreshold(){
+    // 阈值：鱼塘列表容器顶到文档顶的距离 - 导航高度（向下滚过此处 -> 深色）
+    var root = $('#hexo-circle-of-friends-root');
+    var nav = navEl();
+    if(!root || !nav) return 60;
+    var rootTopDoc = root.getBoundingClientRect().top + window.scrollY;
+    var nh = nav.offsetHeight || 60;
+    return Math.max(0, rootTopDoc - nh - 10);
+  }
+
+  function ensureHandler(){
     if(!inFcircle()) return;
-    var header = $id('page-header');
-    if(!header) return;
-    var nav = header.querySelector('nav');
-    var root = $id('hexo-circle-of-friends-root');
-    if(!nav || !root) return;
+    var nav = navEl();
+    var header = headerEl();
+    if(!nav || !header) return;
 
-    // 以鱼塘列表容器顶部作为分界：容器顶部超过导航高度 => 进入“下拉样式”
-    var navH = nav.offsetHeight || 64;
-    var top  = root.getBoundingClientRect().top;
-    var atTopBanner = top > (navH + 20);
-
-    if(atTopBanner){
-      // 顶图状态（透明）
-      header.classList.add('top-img');
-      header.classList.remove('not-top-img');
-      nav.classList.add('nav-transparent');
-    }else{
-      // 下拉状态（非透明）
-      header.classList.add('not-top-img');
-      header.classList.remove('top-img');
-      nav.classList.remove('nav-transparent');
+    // 先清一次，避免重复绑定
+    if(window[SCROLLER_KEY]){
+      window.removeEventListener('scroll', window[SCROLLER_KEY], {passive:true});
+      window.removeEventListener('resize', window[SCROLLER_KEY]);
     }
-  }
 
-  // 轻量节流
-  var ticking = false;
-  function onScroll(){
-    if(ticking) return;
-    ticking = true;
-    requestAnimationFrame(function(){ ticking = false; update(); });
-  }
+    var threshold = getThreshold();
+    var ticking = false;
+    function onScroll(){
+      if(ticking) return;
+      ticking = true;
+      requestAnimationFrame(function(){
+        ticking = false;
+        var y = window.scrollY || document.documentElement.scrollTop || 0;
+        if(y >= threshold){
+          // 下拉：深色
+          header.classList.add('not-top-img');
+          header.classList.remove('top-img');
+          nav.classList.remove('nav-transparent');
+        }else{
+          // 顶图：透明
+          header.classList.add('top-img');
+          header.classList.remove('not-top-img');
+          nav.classList.add('nav-transparent');
+        }
+      });
+    }
+    // 立即同步一次（进入页面时）
+    onScroll();
 
-  function init(){
-    if(!inFcircle()) return;
-    update();
-    window.addEventListener('scroll', onScroll, { passive: true });
+    // 绑定并记录
+    window.addEventListener('scroll', onScroll, {passive:true});
     window.addEventListener('resize', onScroll);
+    window[SCROLLER_KEY] = onScroll;
   }
 
-  if(document.readyState !== 'loading') init();
-  else document.addEventListener('DOMContentLoaded', init, { once:true });
-  document.addEventListener('pjax:complete', function(){ setTimeout(function(){ init(); update(); }, 0); });
+  // 初始化 & PJAX 完成后重挂
+  if(document.readyState !== 'loading') { setTimeout(ensureHandler, 0); }
+  else { document.addEventListener('DOMContentLoaded', function(){ setTimeout(ensureHandler, 0); }, { once:true }); }
+  document.addEventListener('pjax:complete', function(){ setTimeout(ensureHandler, 0); });
 })();
 </script>
 
