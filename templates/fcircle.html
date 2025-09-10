@@ -168,6 +168,43 @@
   setTimeout(clickIfVisible, 400);
 })();
 </script>
+<!-- fcircle 头部样式修复：PJAX 再次进入同页时强制为非顶图样式 -->
+<script data-pjax id="fcircle-header-fix">
+(function(){
+  function isFcircle(){ return !!document.getElementById('hexo-circle-of-friends-root'); }
+  function fixHeader(){
+    if(!isFcircle()) return;
+    var header = document.getElementById('page-header');
+    if(!header) return;
+
+    // 强制使用 not-top-img，移除可能残留的透明/顶图类
+    header.classList.add('not-top-img');
+    ['top-img','is-top-banner','header-transparent','is-top-img','page-banner'].forEach(function(c){
+      header.classList.remove(c);
+    });
+
+    // 导航透明类清理，避免点同一路由后仍保持透明
+    var nav = header.querySelector('nav');
+    if(nav){
+      ['nav-transparent','is-transparent','hide','header-transparent'].forEach(function(c){
+        nav.classList.remove(c);
+      });
+      // 不直接写死背景，让主题样式接管；只要移除透明类即可
+    }
+
+    // body 同步一个标记（部分主题根据 body 类切换样式）
+    document.body && document.body.classList.add('not-top-img-page');
+    document.body && document.body.classList.remove('top-img-page');
+  }
+
+  if(document.readyState !== 'loading') fixHeader();
+  else document.addEventListener('DOMContentLoaded', fixHeader, { once:true });
+
+  // PJAX 完成后也处理一次
+  document.addEventListener('pjax:complete', function(){ setTimeout(fixHeader, 0); });
+})();
+</script>
+
 
 
         <style>
