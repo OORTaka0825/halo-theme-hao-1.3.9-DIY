@@ -1192,7 +1192,7 @@ spec:
         - $formkit: group
           name: music
           label: 音乐卡片
-          help: 文档请看：https://githubfast.com/zonemeen/netease-recent-profile
+          help: 文档请看：https://github.com/zonemeen/netease-recent-profile
           value:
             musicUrl: /music
             lightMsimg: https://card-music.yyds.pink/?id=xxxxx&theme=card&themeColor=e60026&mode=light&size=300&show_random=1
@@ -1222,7 +1222,7 @@ spec:
         - $formkit: group
           name: steam
           label: Steam卡片
-          help: 文档请看：https://githubfast.com/yuyinws/steam-card
+          help: 文档请看：https://github.com/yuyinws/steam-card
           value:
             steamUrl: /
             cardSteam: https://card.yuy1n.io/card/xxxxxx/gradient1,badge,bg-game-1111460,games,screenshots,badges
@@ -2194,9 +2194,10 @@ spec:
           placeholder: 请输入跳转 url
         - $formkit: url
           name: apiurl
-          value: "https://moments.kunkunyu.com/"
+          value: "https://fcircle.oortaka.top/"
           label: token地址
           placeholder: 请输入token地址
+          help: 部署配置项目地址：https://github.com/Rock-Candy-Tea/hexo-circle-of-friends
         - $formkit: radio
           name: fcircleRandomFriendsEnable
           label: 友链鱼塘页面（钓鱼）
