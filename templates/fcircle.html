@@ -100,6 +100,75 @@
         <link rel="stylesheet" th:href="${assets_link + '/libs/moments/heoMainColor.css'}">
         <script th:src="${assets_link + '/libs/moments/app.min.js'}"></script>
         <script th:src="${assets_link + '/libs/moments/bundle.js'}"></script>
+<!-- 自动点击“加载更多”：按钮一进入可视区就自动点击（保留原按钮与到底提示） -->
+<script data-pjax id="fcircle-auto-click-more">
+(function(){
+  const ROOT = document.querySelector('#hexo-circle-of-friends-root');
+  if(!ROOT) return;
+
+  const END_TEXT_RE = /尽头|没有更多|已到底|END/i;
+  let io = null, busy = false;
+
+  function getBtn(){
+    // 主题可能动态替换按钮，这里每次都现取
+    return document.getElementById('cf-more') || ROOT.querySelector('#cf-more');
+  }
+  function getState(){
+    return document.getElementById('cf-state') || ROOT.querySelector('#cf-state');
+  }
+  function isFinished(){
+    const st = getState();
+    return (!getBtn() && st) || (st && END_TEXT_RE.test((st.textContent||'').trim()));
+  }
+
+  function clickIfVisible(){
+    const btn = getBtn();
+    if(!btn || busy) return;
+    // 仅当按钮处于可见状态且在可视区内时才触发
+    const rect = btn.getBoundingClientRect();
+    const visible = !!(btn.offsetParent !== null && rect.height > 0 && rect.width > 0);
+    const inViewport = rect.top < window.innerHeight && rect.bottom > 0;
+    if(!visible || !inViewport) return;
+
+    busy = true
+    btn.click();
+    // 等待渲染完成，降低触发频率
+    setTimeout(()=> busy = false, 800);
+  }
+
+  function attachObserver(){
+    // 先清理旧的
+    if(io) { try{ io.disconnect(); }catch(e){} io = null; }
+
+    const btn = getBtn();
+    if(!btn){ 
+      // 没有按钮则可能是到底了，尝试显示状态；否则延迟再试一次
+      if(!isFinished()) setTimeout(attachObserver, 600);
+      return;
+    }
+    // 监听按钮进入可视区就自动点击
+    io = new IntersectionObserver((entries)=>{
+      if(busy) return;
+      entries.forEach(e=>{ if(e.isIntersecting) clickIfVisible(); });
+    }, { rootMargin: '0px', threshold: 0.01 });
+    io.observe(btn);
+  }
+
+  // DOM 变化时，按钮可能被替换，重新绑定观察器
+  const mo = new MutationObserver(()=>{
+    if(isFinished()){ if(io) io.disconnect(); return; }
+    attachObserver();
+  });
+  mo.observe(ROOT.parentNode || ROOT, { childList:true, subtree:true });
+
+  // 初始化
+  attachObserver();
+
+  // 兜底：首屏不满一页时，延时尝试点击一次
+  setTimeout(clickIfVisible, 400);
+})();
+</script>
+
 
         <style>
           .cf-manage-pannel[data-v-34921c7c]{width:80%!important;height:80%!important}
