@@ -12863,7 +12863,7 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
     color: var(--heo-secondtext) !important;
     display: inline-block !important;     /* 让 padding 生效更稳定 */
     position: relative;                /* 关键：给内部 .tk-icon 提供定位参照 */
-    padding-left: 1em !important;            /* 关键：左侧给图标留出空间（可按视觉微调） */
+    padding-left: 1.4em;            /* 关键：左侧给图标留出空间（可按视觉微调） */
     margin-top: 6px !important;
     font-size: 0.51rem;
 }
@@ -12938,6 +12938,8 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
     border: none;
     border-top: var(--style-border-dashed);
 }
+
+/* 手机端评论图标和文字间隔 */
 @media (max-width: 768px){
   #twikoo .tk-extra { padding-left: 1.4em !important; }
 }
