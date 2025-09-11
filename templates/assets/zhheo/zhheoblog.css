@@ -13022,6 +13022,32 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
     color: var(--heo-secondtext);
 }
 
+/* —— 仅手机端：Twikoo UA 徽章间距 —— */
+@media (max-width: 768px) {
+  #twikoo .tk-extras{
+    display: flex !important;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start !important; /* 禁止被拉开两端 */
+    gap: 15px !important;                    /* ← 手机端徽章之间的间距，就改这里 */
+    -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+  }
+
+  #twikoo .tk-extras .tk-extra{
+    margin-right: 0 !important;  /* 间距交给 gap 控制 */
+    flex: 0 0 auto;              /* 防止子项被拉伸 */
+  }
+
+  /* iOS 旧内核不支持 flex-gap 的兜底（可保留） */
+  @supports not (gap: 5px) {
+    #twikoo .tk-extras { gap: 0 !important; }
+    #twikoo .tk-extras > .tk-extra { margin-right: 5px !important; }
+    #twikoo .tk-extras > .tk-extra:last-child { margin-right: 0 !important; }
+  }
+}
+
+
 /* 图片描述 */
 .img-alt {
     font-size: 12px;
