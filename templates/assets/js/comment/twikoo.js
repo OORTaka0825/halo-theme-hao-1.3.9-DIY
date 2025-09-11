@@ -40,42 +40,7 @@
             try { localStorage.setItem('tk_mail', mailVal); localStorage.setItem('twikoo_mail', mailVal); localStorage.setItem('mail', mailVal); } catch(e){}
         }
     }
-    function __nsmao_bind__(){
-        const box = document.getElementById('twikoo');
-        if(!box) return;
-        if (box.__nsmaoBound__) return; box.__nsmaoBound__ = true;
-        // 输入停止自动触发
-        const sel = 'input[name="nick"], input[placeholder*="昵称"], input[placeholder*="nick"]';
-        const nick = box.querySelector(sel);
-        let composing = false, timer = null;
-        function schedule(){ clearTimeout(timer); timer = setTimeout(()=>__nsmao_tryFill__(box), 380); }
-        if (nick){
-            nick.addEventListener('compositionstart', ()=>composing=true);
-            nick.addEventListener('compositionend', ()=>{ composing=false; schedule(); });
-            nick.addEventListener('input', ()=>{ if(!composing) schedule(); });
-            // Enter 触发
-            nick.addEventListener('keydown', e=>{
-                if (e.key==='Enter' || e.keyCode===13 || e.which===13){
-                    e.preventDefault(); e.stopPropagation();
-                    __nsmao_tryFill__(box).then(()=>{
-                        const mail = box.querySelector('input[name="mail"], input[type="email"]');
-                        if (mail) try { mail.focus(); } catch(e){}
-                    });
-                }
-            }, true);
-        }
-        // 容器捕获 Enter（更兜底）
-        box.addEventListener('keydown', e=>{
-            const t = e.target;
-            if ((e.key==='Enter' || e.keyCode===13 || e.which===13) && t && t.matches && t.matches(sel)){
-                e.preventDefault(); e.stopPropagation();
-                __nsmao_tryFill__(box);
-            }
-        }, true);
-        // 失焦兜底
-        box.addEventListener('blur', e=>{
-            if (e.target && e.target.matches && e.target.matches(sel)) __nsmao_tryFill__(box);
-        }, true);
+    function __nsmao_bind__(){        }, true);
         // PJAX 二次进入
         document.addEventListener('pjax:complete', ()=>__nsmao_bind__());
     }
