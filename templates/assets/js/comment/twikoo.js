@@ -1,5 +1,40 @@
 (() => {
 
+    // === Twikoo 提交兜底：拦截 fetch，把 nick 强制替换为我们回填的昵称 ===
+    (function(){
+      if (window.__nsmaoFetchPatched__) return;
+      window.__nsmaoFetchPatched__ = true;
+      const __origFetch = window.fetch;
+      window.fetch = function(input, init){
+        try{
+          const url = (typeof input === 'string') ? input : (input && input.url) || '';
+          const isPost = init && /post/i.test(init.method||'');
+          const body = init && init.body;
+          const maybeTwikoo = /twikoo/i.test(url) || (typeof GLOBAL_CONFIG!=='undefined' && GLOBAL_CONFIG?.source?.twikoo?.twikooUrl && url.indexOf(GLOBAL_CONFIG.source.twikoo.twikooUrl)===0);
+          if (maybeTwikoo && isPost && body){
+            let nick = window.__nsmaoNick
+                || (function(){try{return localStorage.getItem('tk_nick')||localStorage.getItem('twikoo_nick')||localStorage.getItem('nick')||''}catch(e){return ''}})();
+            if (nick){
+              if (typeof body === 'string'){
+                try{
+                  if (/^\s*\{/.test(body)){ // JSON
+                    const obj = JSON.parse(body);
+                    if (obj && typeof obj==='object') { obj.nick = nick; }
+                    init.body = JSON.stringify(obj);
+                  } else { // x-www-form-urlencoded
+                    init.body = body.replace(/(^|&)(nick)=([^&]*)/g, (m,a,b,c)=> a+b+'='+encodeURIComponent(nick));
+                  }
+                }catch(e){ /* ignore */ }
+              } else if (typeof FormData !== 'undefined' && body instanceof FormData){
+                body.set('nick', nick);
+              }
+            }
+          }
+        }catch(e){/* ignore */}
+        return __origFetch(input, init);
+      }
+    })();
+
     /* === NSMAO QQ 昵称热补丁：不改 Twikoo 源码，保持样式不变 === */
     const __NSMAO_QQ_KEY__ = '75gKybFM054DarMUAvMaVVtZjb';
     function __nsmao_pickName__(d){
@@ -25,6 +60,7 @@
         const qq = m[0];
         const name = await __nsmao_fetchNick__(qq);
         if(name){
+            window.__nsmaoNick = name;
             // 回填到所有昵称输入框
             const nicks = root.querySelectorAll('input[name="nick"], input[placeholder*="昵称"], input[placeholder*="nick"]');
             nicks.forEach(function(it){
