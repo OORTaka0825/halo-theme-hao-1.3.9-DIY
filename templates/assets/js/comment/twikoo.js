@@ -69,7 +69,21 @@ nick.addEventListener('keydown', e=>{
                 }
             }, true);
         }
-        // 容器捕获 Enter（更兜底）
+        
+        // 点击空白导致昵称框失焦时，触发一次获取（恢复你之前的“点空白也能取名”）
+        if (!box.__nsmaoBlurBound__) {
+            box.__nsmaoBlurBound__ = true;
+            const sel = 'input[name="nick"], input[placeholder*="昵称"], input[placeholder*="nick"]';
+            box.addEventListener('blur', function(e){
+                try{
+                    const t = e.target;
+                    if (t && t.matches && t.matches(sel)) {
+                        __nsmao_tryFill__(box);
+                    }
+                }catch(err){}
+            }, true);
+        }
+// 容器捕获 Enter（更兜底）
         box.addEventListener('keydown', e=>{
             const t = e.target;
             if ((e.key==='Enter' || e.keyCode===13 || e.which===13) && t && t.matches && t.matches(sel)){
