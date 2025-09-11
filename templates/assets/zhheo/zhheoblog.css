@@ -12760,11 +12760,6 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
 .tk-extras {
     margin-top: 0.5rem;
     padding-bottom: 0.5rem;
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    justify-content: flex-start; /* 禁止 space-between */
-    gap: 6px;                    /* 徽章与徽章的固定间距 */
 }
 
 .tk-icon.__comments:first-child {
@@ -12868,18 +12863,18 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
     border: var(--style-border-always);
     padding: 1px 5px 1px 2px;
     border-radius: 8px;
-    margin-right: 0 !important;   /* ← 交给容器的 gap 控 */
+    margin-right: 4px !important;
     color: var(--heo-secondtext) !important;
-    display: inline-block !important;    /* 让 padding 生效更稳定 */
-    position: relative;                  /* 给 .tk-icon 绝对定位参照 */
-    padding-left: 1.4em;                /* 左侧给图标留空间：再紧就降到 .75em */
+    display: inline-block !important;   /* 让 padding 生效更稳定 */
+    position: relative;                /* 关键：给内部 .tk-icon 提供定位参照 */
+    padding-left: 0.8em;             /* 关键：左侧给图标留出空间（可按视觉微调） */
     margin-top: 6px !important;
-    font-size: 0.53rem;
+    font-size: 0.5rem;
 }
 
 .tk-extra .tk-icon {
     position: absolute;
-    left: .38em;                  /* 文字更贴就再降到 .36/.35em */
+    left: .40em;                  /* 图标距徽章左侧，按视觉微调：.35em~.55em */
     top: 50%;
     transform: translateY(-50%);  /* 垂直居中关键 */
     width: 1em;
@@ -12937,7 +12932,7 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
 /* 评论时间 */
 .tk-time {
     color: var(--heo-secondtext) !important;
-    font-size: 0.6rem;
+    font-size: 0.7rem;
     margin-left: 0.4rem;
 }
 
@@ -13021,7 +13016,6 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
     font-size: 0.5rem;
     color: var(--heo-secondtext);
 }
-
 
 /* 图片描述 */
 .img-alt {
@@ -18763,41 +18757,4 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
 .type-button.active {
     background-color: #2196f3;
     color: #fff
-}
-
-#twikoo .tk-extras{
-  margin-top: 0.5rem;
-  padding-bottom: 0.5rem;
-  display: flex !important;
-  align-items: center;
-  flex-wrap: wrap;
-  justify-content: flex-start !important;
-  gap: 6px !important;
-}
-#twikoo .tk-extra{
-  background: var(--heo-card-bg);
-  border: var(--style-border-always);
-  border-radius: 8px;
-  padding: 1px 8px 1px 2px;
-  color: var(--heo-secondtext) !important;
-  display: inline-block !important;
-  position: relative;
-  padding-left: 0.8em;
-  margin-right: 0 !important;
-  margin-top: 6px !important;
-  font-size: 0.5rem;
-}
-#twikoo .tk-extra .tk-icon{
-  position: absolute !important;
-  left: .38em;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 1em;
-  height: 1em;
-  -webkit-mask-position: center;
-  -webkit-mask-repeat: no-repeat;
-  -webkit-mask-size: 1em 1em;
-          mask-position: center;
-          mask-repeat: no-repeat;
-          mask-size: 1em 1em;
 }
