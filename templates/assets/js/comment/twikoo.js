@@ -85,6 +85,25 @@
         const box = document.getElementById('twikoo');
         if(!box) return;
         window.__nsmaoQQNickPatched__ = true;
+        // 全局捕获 Enter：无论 Twikoo 内部如何处理，昵称输入框按回车都触发回填
+        if (!window.__nsmaoEnterCaptureBound__) {
+          window.__nsmaoEnterCaptureBound__ = true;
+          const __nsmaoNickSel = 'input[name="nick"], input[placeholder*="昵称"], input[placeholder*="nick"]';
+          const __nsmaoEnterHandler = async function(ev){
+            if (ev.key !== 'Enter') return;
+            const t = ev.target;
+            const boxNow = document.getElementById('twikoo');
+            if (!boxNow || !t || !boxNow.contains(t)) return;
+            if (!(t.matches && t.matches(__nsmaoNickSel))) return;
+            ev.preventDefault(); ev.stopPropagation();
+            try { await __nsmao_tryFill__(boxNow); } catch(e) {}
+            const mail = boxNow.querySelector('input[name="mail"], input[type="email"]');
+            if (mail) try { mail.focus(); } catch(e) {}
+          };
+          document.addEventListener('keydown', __nsmaoEnterHandler, true);
+          document.addEventListener('keyup', __nsmaoEnterHandler, true);
+        }
+
         // 首次渲染后兜底
         setTimeout(()=>__nsmao_tryFill__(box), 800);
         
