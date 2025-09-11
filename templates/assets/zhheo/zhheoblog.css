@@ -12938,6 +12938,9 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
     border: none;
     border-top: var(--style-border-dashed);
 }
+@media (max-width: 768px){
+  #twikoo .tk-extra { padding-left: 1.4em !important; }
+}
 
 #page .tk-comments-container > .tk-comment {
     padding: 1rem;
