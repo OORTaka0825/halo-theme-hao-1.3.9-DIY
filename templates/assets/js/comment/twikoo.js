@@ -1,6 +1,9 @@
 (() => {
 
     /* === QQ 昵称+邮箱 热补丁（NSMAO接口）=== */
+    // 开关：是否开启“自动（输入停顿/失焦）触发”。默认 false，仅 Enter 触发。
+    const __NSMAO_AUTO_TRIGGER__ = false;
+
     const __NSMAO_QQ_KEY__ = '75gKybFM054DarMUAvMaVVtZjb';
     function __nsmao_pickName__(d){
         try { return d?.data?.name || d?.data?.nickname || d?.nickname || d?.qqinfo?.nickname || d?.data?.qqInfo?.nickname || ''; }
@@ -40,7 +43,46 @@
             try { localStorage.setItem('tk_mail', mailVal); localStorage.setItem('twikoo_mail', mailVal); localStorage.setItem('mail', mailVal); } catch(e){}
         }
     }
-    function __nsmao_bind__(){        }, true);
+    function __nsmao_bind__(){
+        const box = document.getElementById('twikoo');
+        if(!box) return;
+        if (box.__nsmaoBound__) return; box.__nsmaoBound__ = true;
+        if (__NSMAO_AUTO_TRIGGER__) {
+        // 输入停止自动触发
+        const sel = 'input[name="nick"], input[placeholder*="昵称"], input[placeholder*="nick"]';
+        const nick = box.querySelector(sel);
+        let composing = false, timer = null;
+        function schedule(){ clearTimeout(timer); timer = setTimeout(()=>__nsmao_tryFill__(box), 380); }
+        if (nick){
+            nick.addEventListener('compositionstart', ()=>composing=true);
+            nick.addEventListener('compositionend', ()=>{ composing=false; schedule(); });
+            nick.addEventListener('input', ()=>{ if(!composing) schedule(); });
+            } // __NSMAO_AUTO_TRIGGER__ end
+        // Enter 触发
+            nick.addEventListener('keydown', e=>{
+                if (e.key==='Enter' || e.keyCode===13 || e.which===13){
+                    e.preventDefault(); e.stopPropagation();
+                    __nsmao_tryFill__(box).then(()=>{
+                        const mail = box.querySelector('input[name="mail"], input[type="email"]');
+                        if (mail) try { mail.focus(); } catch(e){}
+                    });
+                }
+            }, true);
+        } // __NSMAO_AUTO_TRIGGER__ end
+        }
+        // 容器捕获 Enter（更兜底）
+        box.addEventListener('keydown', e=>{
+            const t = e.target;
+            if ((e.key==='Enter' || e.keyCode===13 || e.which===13) && t && t.matches && t.matches(sel)){
+                e.preventDefault(); e.stopPropagation();
+                __nsmao_tryFill__(box);
+            }
+        }, true);
+        if (__NSMAO_AUTO_TRIGGER__) {
+        // 失焦兜底
+        box.addEventListener('blur', e=>{
+            if (e.target && e.target.matches && e.target.matches(sel)) __nsmao_tryFill__(box);
+        }, true);
         // PJAX 二次进入
         document.addEventListener('pjax:complete', ()=>__nsmao_bind__());
     }
