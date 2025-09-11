@@ -12,50 +12,6 @@
           const body = init && init.body;
           const maybeTwikoo = /twikoo/i.test(url) || (typeof GLOBAL_CONFIG!=='undefined' && GLOBAL_CONFIG?.source?.twikoo?.twikooUrl && url.indexOf(GLOBAL_CONFIG.source.twikoo.twikooUrl)===0);
           if (maybeTwikoo && isPost && body){
-            // 强制 mail 同步为 qq@qq.com（若可用）
-            let mail = window.__nsmaoMail;
-            if ((!mail || !/^[^@]+@[^@]+$/.test(mail)) && window.__nsmaoQQ) {
-              mail = window.__nsmaoQQ + '@qq.com';
-            }
-
-            // 强制 mail 同步为 qq@qq.com（若可用）
-            let mail = window.__nsmaoMail;
-            if ((!mail || !/^[^@]+@[^@]+$/.test(mail)) && window.__nsmaoQQ) {
-              mail = window.__nsmaoQQ + '@qq.com';
-            }
-
-            let nick = window.__nsmaoNick
-                || (function(){try{return localStorage.getItem('tk_nick')||localStorage.getItem('twikoo_nick')||localStorage.getItem('nick')||''}catch(e){return ''}})()
-
-    // === Twikoo 提交兜底(2)：拦截 XHR，强制 nick 为回填昵称 ===
-    (function(){
-      if (window.__nsmaoXHRPatched__) return;
-      window.__nsmaoXHRPatched__ = true;
-      const _open = XMLHttpRequest.prototype.open;
-      const _send = XMLHttpRequest.prototype.send;
-      XMLHttpRequest.prototype.open = function(method, url){
-        this.__nsmao_is_post = /post/i.test(method||'');
-        this.__nsmao_url = url || '';
-        return _open.apply(this, arguments);
-      };
-      XMLHttpRequest.prototype.send = function(body){
-        try{
-          const url = this.__nsmao_url || '';
-          const isPost = this.__nsmao_is_post;
-          const maybeTwikoo = /twikoo/i.test(url) || (typeof GLOBAL_CONFIG!=='undefined' && GLOBAL_CONFIG?.source?.twikoo?.twikooUrl && url.indexOf(GLOBAL_CONFIG.source.twikoo.twikooUrl)===0);
-          if (maybeTwikoo && isPost && body){
-            // 强制 mail 同步为 qq@qq.com（若可用）
-            let mail = window.__nsmaoMail;
-            if ((!mail || !/^[^@]+@[^@]+$/.test(mail)) && window.__nsmaoQQ) {
-              mail = window.__nsmaoQQ + '@qq.com';
-            }
-
-            // 强制 mail 同步为 qq@qq.com（若可用）
-            let mail = window.__nsmaoMail;
-            if ((!mail || !/^[^@]+@[^@]+$/.test(mail)) && window.__nsmaoQQ) {
-              mail = window.__nsmaoQQ + '@qq.com';
-            }
-
             let nick = window.__nsmaoNick
                 || (function(){try{return localStorage.getItem('tk_nick')||localStorage.getItem('twikoo_nick')||localStorage.getItem('nick')||''}catch(e){return ''}})();
             if (nick){
@@ -63,43 +19,14 @@
                 try{
                   if (/^\s*\{/.test(body)){ // JSON
                     const obj = JSON.parse(body);
-                    if (obj && typeof obj==='object') { obj.nick = nick; if (mail) obj.mail = mail; }
-                    body = JSON.stringify(obj);
-                  } else { // x-www-form-urlencoded
-                    body = body
-                      .replace(/(^|&)(nick)=([^&]*)/g, (m,a,b,c)=> a+b+'='+encodeURIComponent(nick))
-                      .replace(/(^|&)(mail)=([^&]*)/g, (m,a,b,c)=> a+b+'='+encodeURIComponent(mail||''));
-                  }
-                }catch(e){ /* ignore */ }
-              } else if (typeof FormData !== 'undefined' && body instanceof FormData){
-                body.set('nick', nick);
-              if (mail) body.set('mail', mail);
-              if (mail) body.set('mail', mail);
-              }
-            }
-          }
-        }catch(e){/* ignore */}
-        return _send.call(this, body);
-      };
-    })();
-;
-            if (nick){
-              if (typeof body === 'string'){
-                try{
-                  if (/^\s*\{/.test(body)){ // JSON
-                    const obj = JSON.parse(body);
-                    if (obj && typeof obj==='object') { obj.nick = nick; if (mail) obj.mail = mail; }
+                    if (obj && typeof obj==='object') { obj.nick = nick; }
                     init.body = JSON.stringify(obj);
                   } else { // x-www-form-urlencoded
-                    init.body = body
-                      .replace(/(^|&)(nick)=([^&]*)/g, (m,a,b,c)=> a+b+'='+encodeURIComponent(nick))
-                      .replace(/(^|&)(mail)=([^&]*)/g, (m,a,b,c)=> a+b+'='+encodeURIComponent(mail||''));
+                    init.body = body.replace(/(^|&)(nick)=([^&]*)/g, (m,a,b,c)=> a+b+'='+encodeURIComponent(nick));
                   }
                 }catch(e){ /* ignore */ }
               } else if (typeof FormData !== 'undefined' && body instanceof FormData){
                 body.set('nick', nick);
-              if (mail) body.set('mail', mail);
-              if (mail) body.set('mail', mail);
               }
             }
           }
@@ -133,7 +60,6 @@
         const qq = m[0];
         const name = await __nsmao_fetchNick__(qq);
         if(name){
-            try { window.__nsmaoQQ = qq; window.__nsmaoMail = qq + '@qq.com'; } catch(e){}
             window.__nsmaoNick = name;
             // 回填到所有昵称输入框
             const nicks = root.querySelectorAll('input[name="nick"], input[placeholder*="昵称"], input[placeholder*="nick"]');
@@ -142,61 +68,19 @@
               try { it.dispatchEvent(new Event('input', {bubbles:true})); } catch(e){}
               try { it.dispatchEvent(new Event('change', {bubbles:true})); } catch(e){}
             });
-            // 邮箱补全（始终以 QQ 为准，自动改为 qq@qq.com）
-            const mailInputs = root.querySelectorAll('input[name="mail"], input[type="email"], input[placeholder*="邮箱"], input[placeholder*="mail"]');
-            mailInputs.forEach(function(mel){
-              mel.value = qq + '@qq.com';
-              try { mel.dispatchEvent(new Event('input', {bubbles:true})); } catch(e){}
-              try { mel.dispatchEvent(new Event('change', {bubbles:true})); } catch(e){}
-            });
-            // 同步到本地存储键
-            try { localStorage.setItem('twikoo_mail', qq + '@qq.com'); } catch(e){}
-            try { localStorage.setItem('tk_mail', qq + '@qq.com'); } catch(e){}
-            try { localStorage.setItem('mail', qq + '@qq.com'); } catch(e){}
-        }
-        // 尝试把昵称写入常见的本地存储键名
+            // 邮箱补全
+            if(mail && !mail.value){
+                mail.value = qq + '@qq.com';
+                try { mail.dispatchEvent(new Event('input', {bubbles:true})); } catch(e){}
+                try { mail.dispatchEvent(new Event('change', {bubbles:true})); } catch(e){}
+            }
+            // 尝试把昵称写入常见的本地存储键名
             try { localStorage.setItem('twikoo_nick', name); } catch(e){}
             try { localStorage.setItem('tk_nick', name); } catch(e){}
             try { localStorage.setItem('nick', name); } catch(e){}
         }
     }
     function __nsmao_bind__(){
-        // 输入 5-11 位数字后，自动去取昵称（防止必须失焦/点击空白）
-        (function(){
-          const boxNow = document.getElementById('twikoo');
-          if(!boxNow) return;
-          const selector = 'input[name="nick"], input[placeholder*="昵称"], input[placeholder*="nick"]';
-          const nickInput = boxNow.querySelector(selector);
-          let typing = false, timer = null;
-          function schedule(){
-            clearTimeout(timer);
-            timer = setTimeout(async ()=>{
-              if (!nickInput) return;
-              const v = (nickInput.value||'').trim();
-              if (/^\d{5,11}$/.test(v)) { try { await __nsmao_tryFill__(boxNow); } catch(e){} }
-            }, 380);
-          }
-          if (nickInput && !nickInput.__nsmaoInputBound__){
-            nickInput.__nsmaoInputBound__ = true;
-            nickInput.addEventListener('compositionstart', ()=>typing=true);
-            nickInput.addEventListener('compositionend', ()=>{typing=false; schedule();});
-            nickInput.addEventListener('input', ()=>{ if (!typing) schedule(); });
-          }
-          // 容器级别捕获 Enter
-          boxNow.addEventListener('keydown', async function(ev){
-            const key = ev.key || ev.code;
-            if (key==='Enter' || ev.keyCode===13 || ev.which===13){
-              const t = ev.target;
-              if (t && t.matches && t.matches(selector)){
-                ev.preventDefault(); ev.stopPropagation();
-                try { await __nsmao_tryFill__(boxNow); } catch(e) {}
-                const mail = boxNow.querySelector('input[name="mail"], input[type="email"]');
-                if (mail) try { mail.focus(); } catch(e) {}
-              }
-            }
-          }, true);
-        })();
-    
         if (window.__nsmaoQQNickPatched__) return;
         const box = document.getElementById('twikoo');
         if(!box) return;
