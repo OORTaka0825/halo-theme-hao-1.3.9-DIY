@@ -12872,7 +12872,7 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
     color: var(--heo-secondtext) !important;
     display: inline-block !important;    /* 让 padding 生效更稳定 */
     position: relative;                  /* 给 .tk-icon 绝对定位参照 */
-    padding-left: 1.5em;                /* 左侧给图标留空间：再紧就降到 .75em */
+    padding-left: 1.4em;                /* 左侧给图标留空间：再紧就降到 .75em */
     margin-top: 6px !important;
     font-size: 0.53rem;
 }
