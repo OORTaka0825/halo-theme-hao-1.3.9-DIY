@@ -12874,7 +12874,7 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
 
 .tk-extra .tk-icon {
     position: absolute;
-    left: .50em;                  /* 图标距徽章左侧，按视觉微调：.35em~.55em */
+    left: .55em;                  /* 图标距徽章左侧，按视觉微调：.35em~.55em */
     top: 50%;
     transform: translateY(-50%);  /* 垂直居中关键 */
     width: 1em;
