@@ -12760,9 +12760,10 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
 .tk-extras {
     margin-top: 0.5rem;
     padding-bottom: 0.5rem;
-    display: flex;
+    display: flex !important;
     align-items: center;
     flex-wrap: wrap;
+    justify-content: flex-start !important; /* 关键：不要 space-between/around */
     gap: 8px;              /* ← 徽章之间的统一间隔，按需改成 4/8px */
 }
 
@@ -12874,6 +12875,7 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
     padding-left: 0.8em;             /* 关键：左侧给图标留出空间（可按视觉微调） */
     margin-top: 6px !important;
     font-size: 0.5rem;
+    flex: 0 0 auto;                     /* ← 关键：不要被拉伸填满 */
 }
 
 .tk-extra .tk-icon {
