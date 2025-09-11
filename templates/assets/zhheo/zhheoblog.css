@@ -12517,7 +12517,7 @@ img.tk-avatar-img {
 
 /* 昵称 */
 .tk-nick {
-    font-size: 1rem !important;
+    font-size: 0.75rem !important;
     line-height: 20px;
 }
 
