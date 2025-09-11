@@ -12760,11 +12760,11 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
 .tk-extras {
     margin-top: 0.5rem;
     padding-bottom: 0.5rem;
-    display: flex !important;
+    display: flex;
     align-items: center;
     flex-wrap: wrap;
-    justify-content: flex-start !important; /* 关键：不要 space-between/around */
-    gap: 8px;              /* ← 徽章之间的统一间隔，按需改成 4/8px */
+    justify-content: flex-start; /* 禁止 space-between */
+    gap: 6px;                    /* 徽章与徽章的固定间距 */
 }
 
 .tk-icon.__comments:first-child {
@@ -12870,17 +12870,16 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
     border-radius: 8px;
     margin-right: 0 !important;   /* ← 交给容器的 gap 控 */
     color: var(--heo-secondtext) !important;
-    display: inline-block !important;   /* 让 padding 生效更稳定 */
-    position: relative;                /* 关键：给内部 .tk-icon 提供定位参照 */
-    padding-left: 0.8em;             /* 关键：左侧给图标留出空间（可按视觉微调） */
+    display: inline-block !important;    /* 让 padding 生效更稳定 */
+    position: relative;                  /* 给 .tk-icon 绝对定位参照 */
+    padding-left: .80em;                /* 左侧给图标留空间：再紧就降到 .75em */
     margin-top: 6px !important;
     font-size: 0.5rem;
-    flex: 0 0 auto;                     /* ← 关键：不要被拉伸填满 */
 }
 
 .tk-extra .tk-icon {
     position: absolute;
-    left: .45em;                  /* 图标距徽章左侧，按视觉微调：.35em~.55em */
+    left: .38em;                  /* 文字更贴就再降到 .36/.35em */
     top: 50%;
     transform: translateY(-50%);  /* 垂直居中关键 */
     width: 1em;
