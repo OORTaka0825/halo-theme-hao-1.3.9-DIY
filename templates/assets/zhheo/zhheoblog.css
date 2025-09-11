@@ -12758,22 +12758,13 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
 }
 
 .tk-extras {
-    margin-top: 0.5rem;
-    padding-bottom: 0.5rem;
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    justify-content: flex-start; /* 禁止 space-between */
-    gap: 6px;                    /* 徽章与徽章的固定间距 */
-}
-
-.tk-icon.__comments:first-child {
-    width: 0.6em
-}
-
-.tk-icon.__comments {
-    /* margin-left: 0!important;
-    color: var(--heo-main)!important */
+margin-top: 0.5rem;
+padding-bottom: 0.5rem;
+display: flex !important;
+align-items: center;
+flex-wrap: wrap;
+justify-content: flex-start !important;
+gap: 6px !important;
 }
 
 .tk-row.actions {
@@ -12863,52 +12854,7 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
     }
 }
 
-.tk-extra {
-    background: var(--heo-card-bg);
-    border: var(--style-border-always);
-    padding: 1px 5px 1px 2px;
-    border-radius: 8px;
-    margin-right: 0 !important;   /* ← 交给容器的 gap 控 */
-    color: var(--heo-secondtext) !important;
-    display: inline-block !important;    /* 让 padding 生效更稳定 */
-    position: relative;                  /* 给 .tk-icon 绝对定位参照 */
-    padding-left: .80em;                /* 左侧给图标留空间：再紧就降到 .75em */
-    margin-top: 6px !important;
-    font-size: 0.5rem;
-}
 
-.tk-extra .tk-icon {
-    position: absolute;
-    left: .38em;                  /* 文字更贴就再降到 .36/.35em */
-    top: 50%;
-    transform: translateY(-50%);  /* 垂直居中关键 */
-    width: 1em;
-    height: 1em;
-    -webkit-mask-position: center;
-    -webkit-mask-repeat: no-repeat;
-    -webkit-mask-size: 1em 1em;
-            mask-position: center;
-            mask-repeat: no-repeat;
-            mask-size: 1em 1em;
-}
-
-.tk-expand {
-    background: var(--heo-card-bg) !important;
-    color: var(--heo-fontcolor) !important;
-    border: var(--style-border-always);
-    box-shadow: var(--heo-shadow-border);
-    border-radius: 12px;
-    -webkit-user-select: none;
-    position: relative;
-    z-index: 2
-}
-
-@media screen and (min-width: 769px) {
-    .tk-expand:hover {
-        background: var(--heo-theme) !important;
-        color: var(--heo-white) !important
-    }
-}
 
 .tk-comments-container > .tk-expand {
     margin: 12px;
