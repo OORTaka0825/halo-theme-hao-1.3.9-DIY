@@ -12757,10 +12757,6 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
     left: 0 */
 }
 
-.tk-extras {
-    margin-top: 0.5rem;
-    padding-bottom: 0.5rem;
-}
 
 .tk-icon.__comments:first-child {
     width: 0.6em
