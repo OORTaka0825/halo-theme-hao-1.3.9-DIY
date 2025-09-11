@@ -12859,13 +12859,13 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
     border: var(--style-border-always);
     padding: 1px 5px 1px 2px;
     border-radius: 8px;
-    margin-right: 0px !important;
+    margin-right: 3px !important;
     color: var(--heo-secondtext) !important;
     display: inline-block !important;     /* 让 padding 生效更稳定 */
     position: relative;                /* 关键：给内部 .tk-icon 提供定位参照 */
     padding-left: 1em;            /* 关键：左侧给图标留出空间（可按视觉微调） */
-    margin-top: 6px !important;
-    font-size: 0.51rem;
+    margin-top: 9px !important;
+    font-size: 0.5rem;
 }
 
 .tk-extra .tk-icon{
