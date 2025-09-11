@@ -12862,6 +12862,7 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
     margin-right: 4px !important;
     color: var(--heo-secondtext) !important;
     display: inline-block !important;   /* 让 padding 生效更稳定 */
+    padding-bottom: 0.5rem;
     position: relative;                /* 关键：给内部 .tk-icon 提供定位参照 */
     padding-left: 1.4em;             /* 关键：左侧给图标留出空间（可按视觉微调） */
     margin-top: 6px !important;
