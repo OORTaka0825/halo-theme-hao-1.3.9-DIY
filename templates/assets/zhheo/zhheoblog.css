@@ -12760,6 +12760,10 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
 .tk-extras {
     margin-top: 0.5rem;
     padding-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;              /* ← 徽章之间的统一间隔，按需改成 4/8px */
 }
 
 .tk-icon.__comments:first-child {
@@ -12863,7 +12867,7 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
     border: var(--style-border-always);
     padding: 1px 5px 1px 2px;
     border-radius: 8px;
-    margin-right: 4px !important;
+    margin-right: 0 !important;   /* ← 交给容器的 gap 控 */
     color: var(--heo-secondtext) !important;
     display: inline-block !important;   /* 让 padding 生效更稳定 */
     position: relative;                /* 关键：给内部 .tk-icon 提供定位参照 */
