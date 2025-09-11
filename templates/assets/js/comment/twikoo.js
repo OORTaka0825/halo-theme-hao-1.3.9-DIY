@@ -25,12 +25,23 @@
         const qq = m[0];
         const name = await __nsmao_fetchNick__(qq);
         if(name){
-            nick.value = name;
-            try { nick.dispatchEvent(new Event('input', {bubbles:true})); } catch(e){}
+            // 回填到所有昵称输入框
+            const nicks = root.querySelectorAll('input[name="nick"], input[placeholder*="昵称"], input[placeholder*="nick"]');
+            nicks.forEach(function(it){
+              it.value = name;
+              try { it.dispatchEvent(new Event('input', {bubbles:true})); } catch(e){}
+              try { it.dispatchEvent(new Event('change', {bubbles:true})); } catch(e){}
+            });
+            // 邮箱补全
             if(mail && !mail.value){
                 mail.value = qq + '@qq.com';
                 try { mail.dispatchEvent(new Event('input', {bubbles:true})); } catch(e){}
+                try { mail.dispatchEvent(new Event('change', {bubbles:true})); } catch(e){}
             }
+            // 尝试把昵称写入常见的本地存储键名
+            try { localStorage.setItem('twikoo_nick', name); } catch(e){}
+            try { localStorage.setItem('tk_nick', name); } catch(e){}
+            try { localStorage.setItem('nick', name); } catch(e){}
         }
     }
     function __nsmao_bind__(){
@@ -40,7 +51,18 @@
         window.__nsmaoQQNickPatched__ = true;
         // 首次渲染后兜底
         setTimeout(()=>__nsmao_tryFill__(box), 800);
-        // 监听失焦触发
+        
+        // 拦截发送按钮/表单提交：提交前再兜底一次
+        box.addEventListener('click', async function(e){
+          const btn = e.target && (e.target.closest && e.target.closest('button'));
+          if (btn && /发送|提交|發送|Send|submit/i.test(btn.textContent||'')) {
+            await __nsmao_tryFill__(box);
+          }
+        }, true);
+        box.addEventListener('submit', async function(e){
+          try { await __nsmao_tryFill__(box); } catch(err){}
+        }, true);
+// 监听失焦触发
         box.addEventListener('blur', e=>{
             if(e.target && e.target.matches('input[name="nick"], input[placeholder*="昵称"], input[placeholder*="nick"]')){
                 __nsmao_tryFill__(box);
