@@ -12,6 +12,8 @@
           const body = init && init.body;
           const maybeTwikoo = /twikoo/i.test(url) || (typeof GLOBAL_CONFIG!=='undefined' && GLOBAL_CONFIG?.source?.twikoo?.twikooUrl && url.indexOf(GLOBAL_CONFIG.source.twikoo.twikooUrl)===0);
           if (maybeTwikoo && isPost && body){
+            let mail = window.__nsmaoMail; try{ if(!mail){ mail = localStorage.getItem('tk_mail')||localStorage.getItem('twikoo_mail')||localStorage.getItem('mail')||'' } }catch(e){}
+
             let nick = window.__nsmaoNick
                 || (function(){try{return localStorage.getItem('tk_nick')||localStorage.getItem('twikoo_nick')||localStorage.getItem('nick')||''}catch(e){return ''}})();
             if (nick){
@@ -19,14 +21,17 @@
                 try{
                   if (/^\s*\{/.test(body)){ // JSON
                     const obj = JSON.parse(body);
-                    if (obj && typeof obj==='object') { obj.nick = nick; }
+                    if (obj && typeof obj==='object') { obj.nick = nick; if (mail) obj.mail = mail; }
                     init.body = JSON.stringify(obj);
                   } else { // x-www-form-urlencoded
-                    init.body = body.replace(/(^|&)(nick)=([^&]*)/g, (m,a,b,c)=> a+b+'='+encodeURIComponent(nick));
+                    init.body = body
+                      .replace(/(^|&)(nick)=([^&]*)/g, (m,a,b,c)=> a+b+'='+encodeURIComponent(nick))
+                      .replace(/(^|&)(mail)=([^&]*)/g, (m,a,b,c)=> a+b+'='+encodeURIComponent(mail||''));
                   }
                 }catch(e){ /* ignore */ }
               } else if (typeof FormData !== 'undefined' && body instanceof FormData){
                 body.set('nick', nick);
+              if (mail) body.set('mail', mail);
               }
             }
           }
@@ -68,13 +73,20 @@
               try { it.dispatchEvent(new Event('input', {bubbles:true})); } catch(e){}
               try { it.dispatchEvent(new Event('change', {bubbles:true})); } catch(e){}
             });
-            // 邮箱补全
-            if(mail && !mail.value){
-                mail.value = qq + '@qq.com';
-                try { mail.dispatchEvent(new Event('input', {bubbles:true})); } catch(e){}
-                try { mail.dispatchEvent(new Event('change', {bubbles:true})); } catch(e){}
-            }
-            // 尝试把昵称写入常见的本地存储键名
+            // 邮箱补全（以 QQ 为准，统一写入 qq@qq.com）
+            try { window.__nsmaoQQ = qq; window.__nsmaoMail = qq + '@qq.com'; } catch(e){}
+            const mailInputs = root.querySelectorAll('input[name="mail"], input[type="email"], input[placeholder*="邮箱"], input[placeholder*="mail"]');
+            mailInputs.forEach(function(mel){
+              mel.value = window.__nsmaoMail;
+              try { mel.dispatchEvent(new Event('input', {bubbles:true})); } catch(e){}
+              try { mel.dispatchEvent(new Event('change', {bubbles:true})); } catch(e){}
+            });
+            // 同步到本地存储
+            try { localStorage.setItem('twikoo_mail', window.__nsmaoMail); } catch(e){}
+            try { localStorage.setItem('tk_mail', window.__nsmaoMail); } catch(e){}
+            try { localStorage.setItem('mail', window.__nsmaoMail); } catch(e){}
+        }
+        // 尝试把昵称写入常见的本地存储键名
             try { localStorage.setItem('twikoo_nick', name); } catch(e){}
             try { localStorage.setItem('tk_nick', name); } catch(e){}
             try { localStorage.setItem('nick', name); } catch(e){}
