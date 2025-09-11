@@ -12859,28 +12859,22 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
     border: var(--style-border-always);
     padding: 1px 5px 1px 2px;
     border-radius: 8px;
-    margin-right: 4px !important;
+    margin-right: 0px !important;
     color: var(--heo-secondtext) !important;
-    display: inline-block !important;   /* 让 padding 生效更稳定 */
+    display: inline-block !important;     /* 让 padding 生效更稳定 */
     position: relative;                /* 关键：给内部 .tk-icon 提供定位参照 */
     padding-left: 1.4em;             /* 关键：左侧给图标留出空间（可按视觉微调） */
     margin-top: 6px !important;
     font-size: 0.51rem;
 }
 
-.tk-extra .tk-icon {
+.tk-extra .tk-icon{
     position: absolute;
-    left: .50em;                  /* 图标距徽章左侧，按视觉微调：.35em~.55em */
+    left: .45em;    /* 需要再贴就改 .42/.40em */
     top: 50%;
-    transform: translateY(-50%);  /* 垂直居中关键 */
+    transform: translateY(-50%);
     width: 1em;
     height: 1em;
-    -webkit-mask-position: center;
-    -webkit-mask-repeat: no-repeat;
-    -webkit-mask-size: 1em 1em;
-            mask-position: center;
-            mask-repeat: no-repeat;
-            mask-size: 1em 1em;
 }
 
 .tk-expand {
