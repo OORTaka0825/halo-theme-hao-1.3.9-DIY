@@ -926,25 +926,50 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 </script>
 
 
-<!-- 精简版：仅在 PJAX/首载后“单次同步”，不再绑定滚动监听，也不改 nav-visible，避免抖动 -->
-<script id="header-pjax-reinit-lite" data-pjax>
+<!-- 平衡版：PJAX/首载后做“一次同步 + 一次性增强”，既不抖动，也保证下拉后能出现 -->
+<script id="header-pjax-reinit-balanced" data-pjax>
 (function () {
-  function syncOnce () {
+  function init () {
     var header = document.getElementById('page-header');
     if (!header) return;
-    // 只管 fixed（阈值 2px），nav-visible 交给主题 main.js 自己控制（含上/下滚判定）
-    if (window.scrollY > 2) header.classList.add('nav-fixed');
-    else header.classList.remove('nav-fixed');
-    // 触发一次 scroll，让主题的 scrollFn 立即跑一遍
-    try { window.dispatchEvent(new Event('scroll')); } catch (e) {}
+    var nameEl = document.getElementById('page-name') || document.querySelector('.page-name, #name-container, .nav-max');
+    var threshold = 2;
+
+    // 单次同步（进入页面立刻对齐状态）
+    applyOnce();
+    setTimeout(applyOnce, 60);
+    setTimeout(applyOnce, 180);
+
+    // 一次性增强：直到首次超过阈值为止，确保能出现；触发后卸载监听避免与主题打架
+    function enhancer(){
+      if (window.scrollY > threshold) {
+        header.classList.add('nav-fixed');
+        if (nameEl) nameEl.classList.add('show');
+        window.removeEventListener('scroll', enhancer);
+      }
+    }
+    window.addEventListener('scroll', enhancer, { passive: true });
+
+    // 如果加载时就已在阈值以下/以上，也处理一次
+    if (window.scrollY > threshold) {
+      header.classList.add('nav-fixed');
+      if (nameEl) nameEl.classList.add('show');
+    }
+
+    function applyOnce(){
+      if (window.scrollY > threshold) {
+        header.classList.add('nav-fixed');
+        if (nameEl) nameEl.classList.add('show');
+      } else {
+        header.classList.remove('nav-fixed');
+        if (nameEl) nameEl.classList.remove('show');
+      }
+    }
   }
-  if (document.readyState !== 'loading') syncOnce();
-  document.addEventListener('DOMContentLoaded', syncOnce);
-  document.addEventListener('pjax:complete', function(){
-    // 让主题 refreshFn 先重绑完，再同步两次兜底
-    setTimeout(syncOnce, 0);
-    setTimeout(syncOnce, 80);
-  });
+
+  if (document.readyState !== 'loading') init();
+  document.addEventListener('DOMContentLoaded', init);
+  document.addEventListener('pjax:complete', init);
 })();
 </script>
 </body>
