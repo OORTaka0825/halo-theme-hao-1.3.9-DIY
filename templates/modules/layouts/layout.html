@@ -927,36 +927,70 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 
 <!-- 强化版：PJAX 后重绑滚动监听并立即同步“下拉条/页面名条”状态 -->
 
-<!-- 终版（平衡+回顶哨兵）：
-  1) PJAX/首载后“一次同步 + 一次性增强（首次下拉能拉起）”；
-  2) 仅对带头图页面(top-img)加“回到顶部哨兵”，确保回顶时恢复透明；
-  3) 不常驻改 nav-visible，避免与主题滚动逻辑打架。
+<!-- v5：页面级“头部模式”握手 + 平衡滚动
+  - 每次首载/PJAX 完成时：
+    1) 读取 window.__haoHeaderMode（若页面设置），否则用启发式检测是否为“带头图页”；
+    2) 根据结果切换 #page-header 的 top-img / not-top-img（根因修复，避免跨页残留）；
+    3) 执行 v4 的“单次同步 + 一次性增强 + 回顶哨兵(仅 top-img)”；
+  - 页面可在自身模板里加：
+    <script data-pjax>window.__haoHeaderMode='top-img'</script>
+    或
+    <script data-pjax>window.__haoHeaderMode='not-top-img'</script>
 -->
-<script id="header-pjax-reinit-v4" data-pjax>
+<script id="header-mode-and-reinit-v5" data-pjax>
 (function () {
-  var THRESHOLD = 2;  // 判定“在顶端”的阈值
+  var THRESHOLD = 2;
+
+  function resolveMode () {
+    if (typeof window.__haoHeaderMode === 'string') {
+      return window.__haoHeaderMode;
+    }
+    // 启发式：页面内容里如果存在大图/横幅/封面等容器，就判定为 top-img
+    var heroSel = [
+      '.home-banner', '.index-banner', '.post-cover', '.page-cover',
+      '.banner', '.cover', '#banner', '.hero', '.post-bg', '.top-feature',
+      '.index-cover', '.top-img-hero'
+    ].join(',');
+    var hasHero = !!document.querySelector(heroSel);
+    return hasHero ? 'top-img' : 'not-top-img';
+  }
+
+  function applyHeaderMode (mode) {
+    var header = document.getElementById('page-header');
+    if (!header) return;
+    if (mode === 'top-img') {
+      header.classList.add('top-img');
+      header.classList.remove('not-top-img');
+    } else {
+      header.classList.add('not-top-img');
+      header.classList.remove('top-img');
+    }
+  }
 
   function balancedInit () {
     var header = document.getElementById('page-header');
     if (!header) return;
     var nameEl = document.getElementById('page-name') || document.querySelector('.page-name, #name-container, .nav-max');
 
-    // ① 进入页面：做几次单次同步，覆盖延迟渲染
+    // 先根据页面模式切换 header 类，修复“跨页样式残留”
+    applyHeaderMode(resolveMode());
+
+    // 单次同步 + 兜底
     syncOnce();
     setTimeout(syncOnce, 60);
     setTimeout(syncOnce, 180);
 
-    // ② 一次性增强：确保“首次超过阈值时”能拉起（然后卸载，避免与主题打架）
+    // 一次性增强：首次超过阈值时拉起（随后卸载，避免与主题冲突）
     function enhancer(){
       if (window.scrollY > THRESHOLD) {
         header.classList.add('nav-fixed');
-        if (nameEl) nameEl.classList.add('show'); // 只保证能出现一次
+        if (nameEl) nameEl.classList.add('show');
         window.removeEventListener('scroll', enhancer);
       }
     }
     window.addEventListener('scroll', enhancer, { passive: true });
 
-    // ③ 仅对 top-img 页面添加“回到顶部哨兵”，确保回顶时复原透明态
+    // 仅 top-img 加回顶哨兵，保证回顶恢复透明
     if (header.classList.contains('top-img')) {
       topSentinel(header, nameEl);
     }
@@ -966,13 +1000,11 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
         header.classList.add('nav-fixed');
       } else {
         header.classList.remove('nav-fixed');
-        // 在顶端一定要去掉标题条（透明态）
         if (nameEl) nameEl.classList.remove('show');
       }
     }
   }
 
-  // “回顶哨兵”：仅在 top-img 页面工作；用 rAF 限流，只在越过阈值时切换，避免抖动
   function topSentinel(header, nameEl){
     var lastTop = null, ticking = false;
     function onScroll(){
@@ -982,26 +1014,33 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
         var atTop = window.scrollY <= THRESHOLD;
         if (atTop !== lastTop) {
           if (atTop) {
-            header.classList.remove('nav-fixed', 'nav-visible');
+            header.classList.remove('nav-fixed','nav-visible');
             if (nameEl) nameEl.classList.remove('show');
           } else {
             header.classList.add('nav-fixed');
-            // 是否显示标题条交给主题自己的逻辑
           }
           lastTop = atTop;
         }
         ticking = false;
       });
     }
-    // 首次执行一次
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
   }
 
-  // 首载 & PJAX 完成均初始化
-  if (document.readyState !== 'loading') balancedInit();
-  document.addEventListener('DOMContentLoaded', balancedInit);
-  document.addEventListener('pjax:complete', balancedInit);
+  function init(){
+    balancedInit();
+  }
+
+  // 清理旧脚本（v3/v4），避免重复
+  try {
+    var olds = document.querySelectorAll('script[id^="header-pjax-reinit"]');
+    olds.forEach(function(n){ n.remove && n.remove(); });
+  } catch(e) {}
+
+  if (document.readyState !== 'loading') init();
+  document.addEventListener('DOMContentLoaded', init);
+  document.addEventListener('pjax:complete', init);
 })();
 </script>
 </body>
