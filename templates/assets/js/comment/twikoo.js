@@ -14,9 +14,10 @@
             const j = await r.json(); return __nsmao_pickName__(j);
         }catch(e){ return ''; }
     }
-    async function __nsmao_tryFill__(root){
-        const nick = root.querySelector('input[name="nick"], input[placeholder*="昵称"], input[placeholder*="nick"]');
-        const mail = root.querySelector('input[name="mail"], input[type="email"], input[placeholder*="邮箱"], input[placeholder*="mail"]');
+    async function __nsmao_tryFill__(root, src){
+        const scope = (src && (src.closest("form") || src.closest(".tk-reply") || src.closest(".tk-comment") || src.closest(".tk-comment-item") || src.closest(".tk-comments") || src.closest("#twikoo"))) || root;
+        const nick = scope.querySelector('input[name="nick"], input[placeholder*="昵称"], input[placeholder*="nick"]');
+        const mail = scope.querySelector('input[name="mail"], input[type="email"], input[placeholder*="邮箱"], input[placeholder*="mail"]');
         if(!nick) return;
         const v = (nick.value||'').trim();
         const m = v.match(/^\d{5,11}$/);
@@ -31,7 +32,7 @@
             try { window.__nsmaoNick = name; } catch(e){}
             // 邮箱（统一为 qq@qq.com）
             const mailVal = qq + '@qq.com';
-            const mailInputs = root.querySelectorAll('input[name="mail"], input[type="email"], input[placeholder*="邮箱"], input[placeholder*="mail"]');
+            const mailInputs = (scope||root).querySelectorAll('input[name="mail"], input[type="email"], input[placeholder*="邮箱"], input[placeholder*="mail"]');
             mailInputs.forEach(el=>{
                 el.value = mailVal;
                 try { el.dispatchEvent(new Event('input', {bubbles:true})); } catch(e){}
@@ -62,7 +63,7 @@
 nick.addEventListener('keydown', e=>{
                 if (e.key==='Enter' || e.keyCode===13 || e.which===13){
                     e.preventDefault(); e.stopPropagation();
-                    __nsmao_tryFill__(box).then(()=>{
+                    __nsmao_tryFill__(box, nick).then(()=>{
                         const mail = box.querySelector('input[name="mail"], input[type="email"]');
                         if (mail) try { mail.focus(); } catch(e){}
                     });
@@ -78,7 +79,7 @@ nick.addEventListener('keydown', e=>{
                 try{
                     const t = e.target;
                     if (t && t.matches && t.matches(sel)) {
-                        __nsmao_tryFill__(box);
+                        __nsmao_tryFill__(box, t);
                     }
                 }catch(err){}
             }, true);
@@ -95,7 +96,7 @@ nick.addEventListener('keydown', e=>{
         
         if (false /* __NSMAO_ENTER_ONLY__ */) {
         box.addEventListener('blur', e=>{
-            if (e.target && e.target.matches && e.target.matches(sel)) __nsmao_tryFill__(box);
+            if (e.target && e.target.matches && e.target.matches(sel)) __nsmao_tryFill__(box, e.target);
         }, true);
         }
 
