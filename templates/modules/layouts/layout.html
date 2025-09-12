@@ -905,39 +905,45 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 })();
 </script>
 
-<!-- 强化版：PJAX 后重绑滚动监听并立即同步“下拉条/页面名条”状态 -->
-<script id="header-pjax-reinit" data-pjax>
+
+<script id="pjax-header-scroll-bootstrap">
+// 让打开 PJAX 时也和关闭 PJAX 一样，进页面立即同步一次“下拉条(nav-fixed/nav-visible)”状态
+(function(){
+  function forceSyncHeaderOnScroll(){
+    try{
+      // 触发一次 scroll，让 main.js 里的 scrollFn 立即跑一遍
+      window.dispatchEvent(new Event('scroll'));
+    }catch(e){}
+    // 再保险补一次
+    setTimeout(function(){ try{ window.dispatchEvent(new Event('scroll')); }catch(e){} }, 60);
+  }
+  // 首次进站
+  if (document.readyState !== 'loading') forceSyncHeaderOnScroll();
+  document.addEventListener('DOMContentLoaded', forceSyncHeaderOnScroll);
+  // 每次 PJAX 完成后都补一次
+  document.addEventListener('pjax:complete', forceSyncHeaderOnScroll);
+})();
+</script>
+
+
+<!-- 精简版：仅在 PJAX/首载后“单次同步”，不再绑定滚动监听，也不改 nav-visible，避免抖动 -->
+<script id="header-pjax-reinit-lite" data-pjax>
 (function () {
-  function computeHeaderState () {
-    var header   = document.getElementById('page-header');
+  function syncOnce () {
+    var header = document.getElementById('page-header');
     if (!header) return;
-    var pageName = document.getElementById('page-name') || document.querySelector('.page-name, #name-container, .nav-max');
-    var threshold = 2;
-    if (window.scrollY > threshold) {
-      header.classList.add('nav-fixed');
-      header.classList.add('nav-visible');
-      if (pageName) pageName.classList.add('show');
-    } else {
-      header.classList.remove('nav-fixed');
-      header.classList.remove('nav-visible');
-      if (pageName) pageName.classList.remove('show');
-    }
+    // 只管 fixed（阈值 2px），nav-visible 交给主题 main.js 自己控制（含上/下滚判定）
+    if (window.scrollY > 2) header.classList.add('nav-fixed');
+    else header.classList.remove('nav-fixed');
+    // 触发一次 scroll，让主题的 scrollFn 立即跑一遍
+    try { window.dispatchEvent(new Event('scroll')); } catch (e) {}
   }
-  function bindScrollWatcher () {
-    if (window.__haoHeaderScrollHandler) {
-      window.removeEventListener('scroll', window.__haoHeaderScrollHandler);
-    }
-    window.__haoHeaderScrollHandler = computeHeaderState;
-    window.addEventListener('scroll', window.__haoHeaderScrollHandler, { passive: true });
-    computeHeaderState();
-    setTimeout(computeHeaderState, 50);
-    setTimeout(computeHeaderState, 120);
-  }
-  if (document.readyState !== 'loading') bindScrollWatcher();
-  document.addEventListener('DOMContentLoaded', bindScrollWatcher);
-  document.addEventListener('pjax:complete', bindScrollWatcher);
-  ['pjax:send','pjax:afterReplace','pjax:success'].forEach(function (evt) {
-    document.addEventListener(evt, function(){ setTimeout(bindScrollWatcher, 0); });
+  if (document.readyState !== 'loading') syncOnce();
+  document.addEventListener('DOMContentLoaded', syncOnce);
+  document.addEventListener('pjax:complete', function(){
+    // 让主题 refreshFn 先重绑完，再同步两次兜底
+    setTimeout(syncOnce, 0);
+    setTimeout(syncOnce, 80);
   });
 })();
 </script>
