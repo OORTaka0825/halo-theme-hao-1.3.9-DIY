@@ -926,125 +926,39 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 </script>
 
 <!-- 强化版：PJAX 后重绑滚动监听并立即同步“下拉条/页面名条”状态 -->
-
-<!-- v6：页面级头部模式 + 顶端强制复位（多事件 + 观察器）
-  - 修复“跨页后回到顶部仍保持下拉样式”的顽固问题
-  - 逻辑：
-    1) 入口/ PJAX 完成：判定并设置 top-img / not-top-img
-    2) 单次同步 + 一次性增强（首下拉能拉起）
-    3) 若是 top-img 页：绑定顶端强制复位（监听 scroll/wheel/touch/resize 及 MutationObserver）
--->
-<script id="header-mode-and-reinit-v6" data-pjax>
+<script id="header-pjax-reinit" data-pjax>
 (function () {
-  var THRESHOLD = 2;
-
-  function resolveMode () {
-    if (typeof window.__haoHeaderMode === 'string') return window.__haoHeaderMode;
-    var heroSel = [
-      '.home-banner', '.index-banner', '.post-cover', '.page-cover',
-      '.banner', '.cover', '#banner', '.hero', '.post-bg', '.top-feature',
-      '.index-cover', '.top-img-hero'
-    ].join(',');
-    return document.querySelector(heroSel) ? 'top-img' : 'not-top-img';
-  }
-
-  function applyHeaderMode (mode, header) {
-    if (!header) header = document.getElementById('page-header');
+  function computeHeaderState () {
+    var header   = document.getElementById('page-header');
     if (!header) return;
-    if (mode === 'top-img') {
-      header.classList.add('top-img');
-      header.classList.remove('not-top-img');
+    var pageName = document.getElementById('page-name') || document.querySelector('.page-name, #name-container, .nav-max');
+    var threshold = 2;
+    if (window.scrollY > threshold) {
+      header.classList.add('nav-fixed');
+      header.classList.add('nav-visible');
+      if (pageName) pageName.classList.add('show');
     } else {
-      header.classList.add('not-top-img');
-      header.classList.remove('top-img');
+      header.classList.remove('nav-fixed');
+      header.classList.remove('nav-visible');
+      if (pageName) pageName.classList.remove('show');
     }
   }
-
-  function init() {
-    var header = document.getElementById('page-header');
-    if (!header) return;
-    var nameEl = document.getElementById('page-name') || document.querySelector('.page-name, #name-container, .nav-max');
-
-    applyHeaderMode(resolveMode(), header);
-
-    // 1) 单次同步
-    syncOnce();
-    setTimeout(syncOnce, 60);
-    setTimeout(syncOnce, 180);
-
-    // 2) 一次性增强：首超阈值拉起
-    function enhancer(){
-      if (getScrollTop() > THRESHOLD) {
-        header.classList.add('nav-fixed');
-        if (nameEl) nameEl.classList.add('show');
-        window.removeEventListener('scroll', enhancer);
-      }
+  function bindScrollWatcher () {
+    if (window.__haoHeaderScrollHandler) {
+      window.removeEventListener('scroll', window.__haoHeaderScrollHandler);
     }
-    window.addEventListener('scroll', enhancer, {passive:true});
-
-    // 3) 仅 top-img：顶端强制复位（多事件 + 观察器）
-    if (header.classList.contains('top-img')) {
-      topEnforce(header, nameEl);
-    }
-
-    function syncOnce(){
-      if (getScrollTop() > THRESHOLD) {
-        header.classList.add('nav-fixed');
-      } else {
-        header.classList.remove('nav-fixed', 'nav-visible');
-        if (nameEl) nameEl.classList.remove('show');
-      }
-    }
+    window.__haoHeaderScrollHandler = computeHeaderState;
+    window.addEventListener('scroll', window.__haoHeaderScrollHandler, { passive: true });
+    computeHeaderState();
+    setTimeout(computeHeaderState, 50);
+    setTimeout(computeHeaderState, 120);
   }
-
-  function getScrollTop(){
-    return window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
-  }
-
-  function topEnforce(header, nameEl){
-    var ticking = false;
-    function applyTopState(){
-      var atTop = getScrollTop() <= THRESHOLD;
-      if (atTop) {
-        header.classList.remove('nav-fixed', 'nav-visible');
-        if (nameEl) nameEl.classList.remove('show');
-      }
-    }
-    function onAnyScroll(){
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(function(){ applyTopState(); ticking = false; });
-    }
-    // 事件源尽可能全：有些主题在 wheel/touch 中改类
-    ['scroll', 'wheel', 'touchstart', 'touchmove', 'touchend', 'resize', 'orientationchange', 'pageshow'].forEach(function(evt){
-      window.addEventListener(evt, onAnyScroll, {passive:true});
-    });
-    // PJAX 完成也再校正一次
-    document.addEventListener('pjax:complete', function(){ setTimeout(applyTopState, 0); });
-
-    // 观察 header 的 class 变化：若在顶端被其它脚本误加 nav-fixed/show，则立即纠正
-    try {
-      var mo = new MutationObserver(function(){
-        if (getScrollTop() <= THRESHOLD) {
-          header.classList.remove('nav-fixed', 'nav-visible');
-          if (nameEl) nameEl.classList.remove('show');
-        }
-      });
-      mo.observe(header, {attributes:true, attributeFilter:['class']});
-    } catch(e) {}
-
-    // 首次也执行几次，覆盖异步动画
-    applyTopState();
-    setTimeout(applyTopState, 60);
-    setTimeout(applyTopState, 180);
-  }
-
-  // 清理旧版脚本，避免重复
-  try { document.querySelectorAll('script[id^="header-"][id*="reinit"]').forEach(function(n){ n.id !== 'header-mode-and-reinit-v6' && n.remove(); }); } catch(e){}
-
-  if (document.readyState !== 'loading') init();
-  document.addEventListener('DOMContentLoaded', init);
-  document.addEventListener('pjax:complete', init);
+  if (document.readyState !== 'loading') bindScrollWatcher();
+  document.addEventListener('DOMContentLoaded', bindScrollWatcher);
+  document.addEventListener('pjax:complete', bindScrollWatcher);
+  ['pjax:send','pjax:afterReplace','pjax:success'].forEach(function (evt) {
+    document.addEventListener(evt, function(){ setTimeout(bindScrollWatcher, 0); });
+  });
 })();
 </script>
 </body>
