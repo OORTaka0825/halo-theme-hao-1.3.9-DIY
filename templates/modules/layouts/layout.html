@@ -905,28 +905,6 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 })();
 </script>
 
-
-<!-- PJAX：页面高度晚到（图片/地图/瀑布流）时，补一次滚动初始化 -->
-<script id="pjax-scroll-late-init" data-pjax>
-(function(){
-  function lateBind(){
-    var tries = 40; // ~6s
-    var last = document.body.scrollHeight || 0;
-    var tick = setInterval(function(){
-      var h = document.body.scrollHeight || 0;
-      // 内容变高并超过首屏，说明可以绑定/重绑滚动了
-      if (h > window.innerHeight + 40 && h !== last){
-        try{ window.refreshFn && window.refreshFn() }catch(e){}
-        clearInterval(tick);
-      }
-      last = h;
-      if (--tries <= 0) clearInterval(tick);
-    }, 150);
-  }
-  document.addEventListener('pjax:complete', lateBind);
-  if (document.readyState !== 'loading') { lateBind(); }
-})();
-</script>
 </body>
 
 </html>
