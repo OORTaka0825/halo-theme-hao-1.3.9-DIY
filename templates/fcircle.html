@@ -412,3 +412,26 @@
   else document.addEventListener('DOMContentLoaded', init, { once: true });
 })();
 </script>
+
+<!-- 仅 PJAX：确保鱼塘页顶栏是 not-top-img（深色固定态），避免保留上页透明态 -->
+<script data-pjax id="fcircle-header-ensure-not-top">
+(function () {
+  function ensureFcircleHeader() {
+    // 只在 /fcircle 路由生效
+    if (!/\/fcircle\/?$/.test(location.pathname)) return;
+    var header = document.getElementById('page-header');
+    if (!header) return;
+
+    // 鱼塘页必须是“非头图”顶栏
+    header.classList.add('not-top-img');
+    header.classList.remove('top-img', 'full_page');
+
+    // 若主题根据滚动加 .nav-fixed，这里首屏已滚过就补一次
+    try { if (window.scrollY > 0) header.classList.add('nav-fixed'); } catch(e) {}
+  }
+
+  if (document.readyState !== 'loading') ensureFcircleHeader();
+  document.addEventListener('pjax:complete', ensureFcircleHeader);
+})();
+</script>
+
