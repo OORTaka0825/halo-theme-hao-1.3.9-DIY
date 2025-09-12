@@ -906,13 +906,25 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 </script>
 
 
-<!-- 仅触发主题的滚动计算（不改任何样式/类） -->
-<script id="pjax-header-scroll-bootstrap" data-pjax>
+<!-- PJAX：只为 #nav 做一次首帧计算（不改样式，不常驻监听） -->
+<script id="pjax-nav-bootstrap-exact" data-pjax>
 (function(){
-  function poke(){
-    try { window.dispatchEvent(new Event('scroll')); } catch(e){}
+  var THRESHOLD = 20; // 首帧判定阈值，避免 0/1px 抖动
+  function initOnce(){
+    var header = document.getElementById('page-header');
+    var nav    = document.getElementById('nav');
+    if (!header || !nav) return;
+    var y = window.pageYOffset || document.documentElement.scrollTop || 0;
+    // 只做首帧：当处于顶部则确保 nav 隐藏；当非顶部则确保 nav 显示且 header 进入固定态
+    if (y <= THRESHOLD){
+      header.classList.remove('nav-fixed','nav-visible');
+      nav.classList.remove('show');
+    }else{
+      header.classList.add('nav-fixed');
+      nav.classList.add('show');
+    }
   }
-  function run(){ poke(); setTimeout(poke, 60); setTimeout(poke, 160); }
+  function run(){ initOnce(); setTimeout(initOnce, 60); setTimeout(initOnce, 150); }
   if (document.readyState !== 'loading') run();
   document.addEventListener('DOMContentLoaded', run);
   document.addEventListener('pjax:complete', run);
