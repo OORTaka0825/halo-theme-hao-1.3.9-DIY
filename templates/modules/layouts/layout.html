@@ -905,6 +905,48 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 })();
 </script>
 
+
+<!-- PJAX Header Style Refresh (minimal, no new CSS) -->
+<script id="pjax-header-style-refresh" data-pjax>
+(function(){
+  function refreshHeaderOnce(){
+    var header = document.getElementById('page-header');
+    if (!header) return;
+
+    // 当前滚动位置
+    var y = window.pageYOffset || document.documentElement.scrollTop || 0;
+
+    // 1) 依据滚动位置，单次对齐 nav-fixed；不干预 nav-visible（交给主题）
+    if (y > 2) {
+      header.classList.add('nav-fixed');
+    } else {
+      header.classList.remove('nav-fixed');
+      header.classList.remove('nav-visible');
+      try {
+        var nameEl = document.getElementById('page-name') || document.querySelector('.page-name, #name-container, .nav-max');
+        if (nameEl) nameEl.classList.remove('show');
+      } catch(e){}
+    }
+
+    // 2) 轻触发主题的滚动监听，让主题按自身逻辑再对齐一遍（不会抖动）
+    try { window.dispatchEvent(new Event('scroll')); } catch(e){}
+    // 有些环境只在 scrollY 变化时触发回调，做一次无感移动
+    try {
+      window.scrollTo(0, y + 1);
+      window.scrollTo(0, y);
+    } catch(e){}
+  }
+
+  // 首次进入和 PJAX 完成后都运行一次；加少量延迟覆盖延后渲染
+  if (document.readyState !== 'loading') refreshHeaderOnce();
+  document.addEventListener('DOMContentLoaded', refreshHeaderOnce);
+  document.addEventListener('pjax:complete', function(){
+    refreshHeaderOnce();
+    setTimeout(refreshHeaderOnce, 60);
+    setTimeout(refreshHeaderOnce, 150);
+  });
+})();
+</script>
 </body>
 
 </html>
