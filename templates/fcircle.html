@@ -417,21 +417,42 @@
 <script data-pjax id="fcircle-header-ensure-not-top">
 (function () {
   function ensureFcircleHeader() {
-    // 只在 /fcircle 路由生效
     if (!/\/fcircle\/?$/.test(location.pathname)) return;
     var header = document.getElementById('page-header');
     if (!header) return;
-
-    // 鱼塘页必须是“非头图”顶栏
     header.classList.add('not-top-img');
     header.classList.remove('top-img', 'full_page');
-
-    // 若主题根据滚动加 .nav-fixed，这里首屏已滚过就补一次
     try { if (window.scrollY > 0) header.classList.add('nav-fixed'); } catch(e) {}
   }
-
   if (document.readyState !== 'loading') ensureFcircleHeader();
   document.addEventListener('pjax:complete', ensureFcircleHeader);
 })();
 </script>
 
+
+<!-- 兜底：若还是通过 PJAX 注入到了 /fcircle，则只在本次强制整页刷新一次，避免样式错乱 -->
+<script data-pjax id="fcircle-force-full-load-once">
+(function () {
+  // 只在 /fcircle 页面执行
+  if (!/\/fcircle\/?$/.test(location.pathname)) return;
+  var pjaxOn = !!(window.pjax && typeof pjax.loadUrl === 'function');
+  if (!pjaxOn) return; // 没开 PJAX 无需处理
+
+  // 若已经整页刷新过一次（上一跳设置），这里清掉标记并退出
+  if (sessionStorage.getItem('fcircle_full_once') === 'done') {
+    sessionStorage.removeItem('fcircle_full_once');
+    return;
+  }
+
+  // 若当前页面是 PJAX 注入（常见标志：<html> 上存在与 PJAX 相关的状态类/属性，这里采用“无法判定就不刷新”的保守策略）
+  // ——留给上面的全站拦截脚本来处理点击；这里仅作为兜底：当检测到顶栏仍处于透明头图态时，触发一次整页刷新。
+  try {
+    var header = document.getElementById('page-header');
+    var looksWrong = header && (header.classList.contains('top-img') || header.classList.contains('full_page'));
+    if (looksWrong) {
+      sessionStorage.setItem('fcircle_full_once', 'done');
+      return window.location.replace(location.href);
+    }
+  } catch (e) {}
+})();
+</script>
