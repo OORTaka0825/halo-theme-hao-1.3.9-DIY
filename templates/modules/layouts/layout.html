@@ -924,6 +924,43 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   document.addEventListener('pjax:complete', forceSyncHeaderOnScroll);
 })();
 </script>
+
+<!-- 强化版：PJAX 后重绑滚动监听并立即同步“下拉条/页面名条”状态 -->
+<script id="header-pjax-reinit" data-pjax>
+(function () {
+  function computeHeaderState () {
+    var header   = document.getElementById('page-header');
+    if (!header) return;
+    var pageName = document.getElementById('page-name') || document.querySelector('.page-name, #name-container, .nav-max');
+    var threshold = 2;
+    if (window.scrollY > threshold) {
+      header.classList.add('nav-fixed');
+      header.classList.add('nav-visible');
+      if (pageName) pageName.classList.add('show');
+    } else {
+      header.classList.remove('nav-fixed');
+      header.classList.remove('nav-visible');
+      if (pageName) pageName.classList.remove('show');
+    }
+  }
+  function bindScrollWatcher () {
+    if (window.__haoHeaderScrollHandler) {
+      window.removeEventListener('scroll', window.__haoHeaderScrollHandler);
+    }
+    window.__haoHeaderScrollHandler = computeHeaderState;
+    window.addEventListener('scroll', window.__haoHeaderScrollHandler, { passive: true });
+    computeHeaderState();
+    setTimeout(computeHeaderState, 50);
+    setTimeout(computeHeaderState, 120);
+  }
+  if (document.readyState !== 'loading') bindScrollWatcher();
+  document.addEventListener('DOMContentLoaded', bindScrollWatcher);
+  document.addEventListener('pjax:complete', bindScrollWatcher);
+  ['pjax:send','pjax:afterReplace','pjax:success'].forEach(function (evt) {
+    document.addEventListener(evt, function(){ setTimeout(bindScrollWatcher, 0); });
+  });
+})();
+</script>
 </body>
 
 </html>
