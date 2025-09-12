@@ -29,7 +29,9 @@
       <nav th:replace="~{modules/nav :: nav(
         title = ${ !#strings.isEmpty(theme.config.fcircle.bigTitle) ? theme.config.fcircle.bigTitle
                   : (!#strings.isEmpty(theme.config.fcircle.title) ? theme.config.fcircle.title : singlePage.spec.title) }
-      )}"></nav>
+      )}"><link rel="stylesheet" type="text/css" th:href="${assets_link + '/libs/fcircle/heo-fcircle3.css'}">
+
+</nav>
     </header>
 
     <main class="layout hide-aside" id="content-inner">
@@ -412,3 +414,34 @@
   else document.addEventListener('DOMContentLoaded', init, { once: true });
 })();
 </script>
+
+<!-- 让 /fcircle 的顶栏“下拉出现条纹/固定态”与 links 页面一致（PJAX 也生效） -->
+<script data-pjax id="fcircle-scroll-sync-like-links">
+(function(){
+  if (!/\/fcircle\/?$/.test(location.pathname)) return;
+  var header = document.getElementById('page-header');
+  if (!header) return;
+
+  // 与 links 一致：强制为 not-top-img，避免透明态
+  header.classList.add('not-top-img');
+  header.classList.remove('top-img', 'full_page');
+
+  // 下拉触发固定态（与 links 逻辑对齐）
+  function applyFixed(){
+    if (window.scrollY > 0) header.classList.add('nav-fixed');
+    else header.classList.remove('nav-fixed');
+  }
+  applyFixed();
+
+  // 避免重复绑定
+  if (!window.__fcircleScrollBound__) {
+    window.__fcircleScrollBound__ = true;
+    window.addEventListener('scroll', applyFixed, {passive:true});
+  }
+
+  // 某些主题会在 PJAX 后异步改 class，再补一刀
+  setTimeout(applyFixed, 50);
+  setTimeout(applyFixed, 200);
+})();
+</script>
+
