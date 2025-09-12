@@ -905,33 +905,6 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 })();
 </script>
 
-
-<script id="pjax-header-scroll-bootstrap">
-// 让打开 PJAX 时也和关闭 PJAX 一样，进页面立即同步一次“下拉条(nav-fixed/nav-visible)”状态
-(function(){
-  function forceSyncHeaderOnScroll(){
-    try{
-      // 触发一次 scroll，让 main.js 里的 scrollFn 立即跑一遍
-      window.dispatchEvent(new Event('scroll'));
-    }catch(e){}
-    // 再保险补一次
-    setTimeout(function(){ try{ window.dispatchEvent(new Event('scroll')); }catch(e){} }, 60);
-  }
-  // 首次进站
-  if (document.readyState !== 'loading') forceSyncHeaderOnScroll();
-  document.addEventListener('DOMContentLoaded', forceSyncHeaderOnScroll);
-  // 每次 PJAX 完成后都补一次
-  document.addEventListener('pjax:complete', forceSyncHeaderOnScroll);
-})();
-</script>
-
-<!-- Safe PJAX hook: only re-run theme init and update LazyLoad; no class/style changes -->
-<script id="pjax-safe-refresh" data-pjax>
-document.addEventListener('pjax:complete', function(){
-  try { window.refreshFn && window.refreshFn() } catch(e){}
-  try { window.lazyLoadInstance && window.lazyLoadInstance.update && window.lazyLoadInstance.update() } catch(e){}
-});
-</script>
 </body>
 
 </html>
