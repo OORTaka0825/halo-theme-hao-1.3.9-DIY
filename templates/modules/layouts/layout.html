@@ -353,7 +353,6 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
         
         document.addEventListener('pjax:complete', function () {
             window.refreshFn()
-            ;try{ window.scrollFn && window.scrollFn() }catch(e){}
             
             document.querySelectorAll('script[data-pjax]').forEach(item => {
                         const newScript = document.createElement('script')
@@ -924,6 +923,14 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
   // 每次 PJAX 完成后都补一次
   document.addEventListener('pjax:complete', forceSyncHeaderOnScroll);
 })();
+</script>
+
+<!-- Safe PJAX hook: only re-run theme init and update LazyLoad; no class/style changes -->
+<script id="pjax-safe-refresh" data-pjax>
+document.addEventListener('pjax:complete', function(){
+  try { window.refreshFn && window.refreshFn() } catch(e){}
+  try { window.lazyLoadInstance && window.lazyLoadInstance.update && window.lazyLoadInstance.update() } catch(e){}
+});
 </script>
 </body>
 
