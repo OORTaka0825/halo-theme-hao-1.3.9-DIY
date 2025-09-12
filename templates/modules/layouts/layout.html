@@ -353,6 +353,7 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
         
         document.addEventListener('pjax:complete', function () {
             window.refreshFn()
+            ;try{ window.scrollFn && window.scrollFn() }catch(e){}
             
             document.querySelectorAll('script[data-pjax]').forEach(item => {
                         const newScript = document.createElement('script')
@@ -906,28 +907,22 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 </script>
 
 
-<!-- PJAX：等主题完成 refresh 后，轻微滚动 1px 再复位，触发主题自身的下拉计算（不改任何样式） -->
-<script id="pjax-scroll-nudge-after-refresh" data-pjax>
+<script id="pjax-header-scroll-bootstrap">
+// 让打开 PJAX 时也和关闭 PJAX 一样，进页面立即同步一次“下拉条(nav-fixed/nav-visible)”状态
 (function(){
-  function nudge(){
-    var x = window.scrollX || window.pageXOffset || 0;
-    var y = window.scrollY || document.documentElement.scrollTop || 0;
+  function forceSyncHeaderOnScroll(){
     try{
-      // 两帧后再轻微滚动并复位，确保主题的滚动监听已重绑
-      requestAnimationFrame(function(){
-        requestAnimationFrame(function(){
-          window.scrollTo(x, y + 1);
-          requestAnimationFrame(function(){
-            window.scrollTo(x, y);
-          });
-        });
-      });
+      // 触发一次 scroll，让 main.js 里的 scrollFn 立即跑一遍
+      window.dispatchEvent(new Event('scroll'));
     }catch(e){}
+    // 再保险补一次
+    setTimeout(function(){ try{ window.dispatchEvent(new Event('scroll')); }catch(e){} }, 60);
   }
-  function run(){ nudge(); setTimeout(nudge, 120); setTimeout(nudge, 260); }
-  if (document.readyState !== 'loading') run();
-  document.addEventListener('DOMContentLoaded', run);
-  document.addEventListener('pjax:complete', run);
+  // 首次进站
+  if (document.readyState !== 'loading') forceSyncHeaderOnScroll();
+  document.addEventListener('DOMContentLoaded', forceSyncHeaderOnScroll);
+  // 每次 PJAX 完成后都补一次
+  document.addEventListener('pjax:complete', forceSyncHeaderOnScroll);
 })();
 </script>
 </body>

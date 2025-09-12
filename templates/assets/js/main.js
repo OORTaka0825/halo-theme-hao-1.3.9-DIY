@@ -293,7 +293,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const $cookies_window = document.getElementById('cookies-window')
         const isChatBtnHide = typeof chatBtnHide === 'function'
         const isChatBtnShow = typeof chatBtnShow === 'function'
-        window.addEventListener('scroll', btf.throttle(function (e) {
+        var __handler = btf.throttle(function (e) {
             const currentTop = window.scrollY || document.documentElement.scrollTop
             const isDown = scrollDirection(currentTop)
             if (currentTop > 0) {
@@ -329,7 +329,13 @@ document.addEventListener('DOMContentLoaded', function () {
             if (document.body.scrollHeight <= innerHeight) {
                 $rightside.style.cssText = 'opacity: 0.8; transform: translateX(-58px)'
             }
-        }, 200))
+        }, 200));
+        try{
+          if (window.__haoHeaderScrollHandler) window.removeEventListener('scroll', window.__haoHeaderScrollHandler);
+          window.__haoHeaderScrollHandler = __handler;
+          window.addEventListener('scroll', __handler);
+        }catch(e){}
+        
 
         // find the scroll direction
         function scrollDirection (currentTop) {
@@ -559,7 +565,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         sidebarFn()
         GLOBAL_CONFIG.isHome && scrollDownInIndex()
-        scrollFn()
+        scrollFn();
+        try{ window.scrollFn = scrollFn }catch(e){}
         addTableWrap()
         clickFnOfTagHide()
         tabsFn.clickFnOfTabs()
