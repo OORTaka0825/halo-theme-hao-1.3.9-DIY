@@ -927,36 +927,29 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 
 <!-- 强化版：PJAX 后重绑滚动监听并立即同步“下拉条/页面名条”状态 -->
 
-<!-- v5：页面级“头部模式”握手 + 平衡滚动
-  - 每次首载/PJAX 完成时：
-    1) 读取 window.__haoHeaderMode（若页面设置），否则用启发式检测是否为“带头图页”；
-    2) 根据结果切换 #page-header 的 top-img / not-top-img（根因修复，避免跨页残留）；
-    3) 执行 v4 的“单次同步 + 一次性增强 + 回顶哨兵(仅 top-img)”；
-  - 页面可在自身模板里加：
-    <script data-pjax>window.__haoHeaderMode='top-img'</script>
-    或
-    <script data-pjax>window.__haoHeaderMode='not-top-img'</script>
+<!-- v6：页面级头部模式 + 顶端强制复位（多事件 + 观察器）
+  - 修复“跨页后回到顶部仍保持下拉样式”的顽固问题
+  - 逻辑：
+    1) 入口/ PJAX 完成：判定并设置 top-img / not-top-img
+    2) 单次同步 + 一次性增强（首下拉能拉起）
+    3) 若是 top-img 页：绑定顶端强制复位（监听 scroll/wheel/touch/resize 及 MutationObserver）
 -->
-<script id="header-mode-and-reinit-v5" data-pjax>
+<script id="header-mode-and-reinit-v6" data-pjax>
 (function () {
   var THRESHOLD = 2;
 
   function resolveMode () {
-    if (typeof window.__haoHeaderMode === 'string') {
-      return window.__haoHeaderMode;
-    }
-    // 启发式：页面内容里如果存在大图/横幅/封面等容器，就判定为 top-img
+    if (typeof window.__haoHeaderMode === 'string') return window.__haoHeaderMode;
     var heroSel = [
       '.home-banner', '.index-banner', '.post-cover', '.page-cover',
       '.banner', '.cover', '#banner', '.hero', '.post-bg', '.top-feature',
       '.index-cover', '.top-img-hero'
     ].join(',');
-    var hasHero = !!document.querySelector(heroSel);
-    return hasHero ? 'top-img' : 'not-top-img';
+    return document.querySelector(heroSel) ? 'top-img' : 'not-top-img';
   }
 
-  function applyHeaderMode (mode) {
-    var header = document.getElementById('page-header');
+  function applyHeaderMode (mode, header) {
+    if (!header) header = document.getElementById('page-header');
     if (!header) return;
     if (mode === 'top-img') {
       header.classList.add('top-img');
@@ -967,76 +960,87 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
     }
   }
 
-  function balancedInit () {
+  function init() {
     var header = document.getElementById('page-header');
     if (!header) return;
     var nameEl = document.getElementById('page-name') || document.querySelector('.page-name, #name-container, .nav-max');
 
-    // 先根据页面模式切换 header 类，修复“跨页样式残留”
-    applyHeaderMode(resolveMode());
+    applyHeaderMode(resolveMode(), header);
 
-    // 单次同步 + 兜底
+    // 1) 单次同步
     syncOnce();
     setTimeout(syncOnce, 60);
     setTimeout(syncOnce, 180);
 
-    // 一次性增强：首次超过阈值时拉起（随后卸载，避免与主题冲突）
+    // 2) 一次性增强：首超阈值拉起
     function enhancer(){
-      if (window.scrollY > THRESHOLD) {
+      if (getScrollTop() > THRESHOLD) {
         header.classList.add('nav-fixed');
         if (nameEl) nameEl.classList.add('show');
         window.removeEventListener('scroll', enhancer);
       }
     }
-    window.addEventListener('scroll', enhancer, { passive: true });
+    window.addEventListener('scroll', enhancer, {passive:true});
 
-    // 仅 top-img 加回顶哨兵，保证回顶恢复透明
+    // 3) 仅 top-img：顶端强制复位（多事件 + 观察器）
     if (header.classList.contains('top-img')) {
-      topSentinel(header, nameEl);
+      topEnforce(header, nameEl);
     }
 
     function syncOnce(){
-      if (window.scrollY > THRESHOLD) {
+      if (getScrollTop() > THRESHOLD) {
         header.classList.add('nav-fixed');
       } else {
-        header.classList.remove('nav-fixed');
+        header.classList.remove('nav-fixed', 'nav-visible');
         if (nameEl) nameEl.classList.remove('show');
       }
     }
   }
 
-  function topSentinel(header, nameEl){
-    var lastTop = null, ticking = false;
-    function onScroll(){
+  function getScrollTop(){
+    return window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+  }
+
+  function topEnforce(header, nameEl){
+    var ticking = false;
+    function applyTopState(){
+      var atTop = getScrollTop() <= THRESHOLD;
+      if (atTop) {
+        header.classList.remove('nav-fixed', 'nav-visible');
+        if (nameEl) nameEl.classList.remove('show');
+      }
+    }
+    function onAnyScroll(){
       if (ticking) return;
       ticking = true;
-      requestAnimationFrame(function(){
-        var atTop = window.scrollY <= THRESHOLD;
-        if (atTop !== lastTop) {
-          if (atTop) {
-            header.classList.remove('nav-fixed','nav-visible');
-            if (nameEl) nameEl.classList.remove('show');
-          } else {
-            header.classList.add('nav-fixed');
-          }
-          lastTop = atTop;
-        }
-        ticking = false;
-      });
+      requestAnimationFrame(function(){ applyTopState(); ticking = false; });
     }
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
+    // 事件源尽可能全：有些主题在 wheel/touch 中改类
+    ['scroll', 'wheel', 'touchstart', 'touchmove', 'touchend', 'resize', 'orientationchange', 'pageshow'].forEach(function(evt){
+      window.addEventListener(evt, onAnyScroll, {passive:true});
+    });
+    // PJAX 完成也再校正一次
+    document.addEventListener('pjax:complete', function(){ setTimeout(applyTopState, 0); });
+
+    // 观察 header 的 class 变化：若在顶端被其它脚本误加 nav-fixed/show，则立即纠正
+    try {
+      var mo = new MutationObserver(function(){
+        if (getScrollTop() <= THRESHOLD) {
+          header.classList.remove('nav-fixed', 'nav-visible');
+          if (nameEl) nameEl.classList.remove('show');
+        }
+      });
+      mo.observe(header, {attributes:true, attributeFilter:['class']});
+    } catch(e) {}
+
+    // 首次也执行几次，覆盖异步动画
+    applyTopState();
+    setTimeout(applyTopState, 60);
+    setTimeout(applyTopState, 180);
   }
 
-  function init(){
-    balancedInit();
-  }
-
-  // 清理旧脚本（v3/v4），避免重复
-  try {
-    var olds = document.querySelectorAll('script[id^="header-pjax-reinit"]');
-    olds.forEach(function(n){ n.remove && n.remove(); });
-  } catch(e) {}
+  // 清理旧版脚本，避免重复
+  try { document.querySelectorAll('script[id^="header-"][id*="reinit"]').forEach(function(n){ n.id !== 'header-mode-and-reinit-v6' && n.remove(); }); } catch(e){}
 
   if (document.readyState !== 'loading') init();
   document.addEventListener('DOMContentLoaded', init);
