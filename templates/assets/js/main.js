@@ -559,8 +559,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         sidebarFn()
         GLOBAL_CONFIG.isHome && scrollDownInIndex()
-        scrollFn();
-    try{ window.addEventListener('resize', function(){ if(document.body.scrollHeight > window.innerHeight){ try{ window.refreshFn && window.refreshFn() }catch(e){} }}, {passive:true}) }catch(e){}
+        scrollFn()
         addTableWrap()
         clickFnOfTagHide()
         tabsFn.clickFnOfTabs()
