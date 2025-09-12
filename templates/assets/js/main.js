@@ -283,7 +283,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // 當滾動條小于 0 的時候
         if (document.body.scrollHeight <= innerHeight) {
             $rightside.style.cssText = 'opacity: 1; transform: translateX(-58px)'
-            return
+            /* no early return: always bind scroll even if first screen is short */
         }
 
         let initTop = 0
