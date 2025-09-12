@@ -89,7 +89,7 @@ nick.addEventListener('keydown', e=>{
             const t = e.target;
             if ((e.key==='Enter' || e.keyCode===13 || e.which===13) && t && t.matches && t.matches(sel)){
                 e.preventDefault(); e.stopPropagation();
-                __nsmao_tryFill__(box);
+                __nsmao_tryFill__(box, t);
             }
         }, true);
         // 失焦兜底
