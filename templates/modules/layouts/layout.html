@@ -906,25 +906,25 @@ html[data-theme='dark']      .global_background_img--light { display: none !impo
 </script>
 
 
-<!-- PJAX：只为 #nav 做一次首帧计算（不改样式，不常驻监听） -->
-<script id="pjax-nav-bootstrap-exact" data-pjax>
+<!-- PJAX：等主题完成 refresh 后，轻微滚动 1px 再复位，触发主题自身的下拉计算（不改任何样式） -->
+<script id="pjax-scroll-nudge-after-refresh" data-pjax>
 (function(){
-  var THRESHOLD = 20; // 首帧判定阈值，避免 0/1px 抖动
-  function initOnce(){
-    var header = document.getElementById('page-header');
-    var nav    = document.getElementById('nav');
-    if (!header || !nav) return;
-    var y = window.pageYOffset || document.documentElement.scrollTop || 0;
-    // 只做首帧：当处于顶部则确保 nav 隐藏；当非顶部则确保 nav 显示且 header 进入固定态
-    if (y <= THRESHOLD){
-      header.classList.remove('nav-fixed','nav-visible');
-      nav.classList.remove('show');
-    }else{
-      header.classList.add('nav-fixed');
-      nav.classList.add('show');
-    }
+  function nudge(){
+    var x = window.scrollX || window.pageXOffset || 0;
+    var y = window.scrollY || document.documentElement.scrollTop || 0;
+    try{
+      // 两帧后再轻微滚动并复位，确保主题的滚动监听已重绑
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){
+          window.scrollTo(x, y + 1);
+          requestAnimationFrame(function(){
+            window.scrollTo(x, y);
+          });
+        });
+      });
+    }catch(e){}
   }
-  function run(){ initOnce(); setTimeout(initOnce, 60); setTimeout(initOnce, 150); }
+  function run(){ nudge(); setTimeout(nudge, 120); setTimeout(nudge, 260); }
   if (document.readyState !== 'loading') run();
   document.addEventListener('DOMContentLoaded', run);
   document.addEventListener('pjax:complete', run);
