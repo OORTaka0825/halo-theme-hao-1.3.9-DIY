@@ -628,13 +628,20 @@ let halo = {
       };
       try { Prism.hooks.run('complete', env); } catch (e) {}
       // 如果 toolbar 这时出现了，但按钮在 toolbar 前，把它挪到 toolbar 后
-      var tb = pre.nextElementSibling && pre.nextElementSibling.classList && pre.nextElementSibling.classList.contains('toolbar') ? pre.nextElementSibling : null;
-      if (tb) {
-        var btn = (tb.nextElementSibling && tb.nextElementSibling.classList && tb.nextElementSibling.classList.contains('code-expand-btn'))
-                  ? tb.nextElementSibling
-                  : (pre.nextElementSibling && pre.nextElementSibling.classList && pre.nextElementSibling.classList.contains('code-expand-btn') ? pre.nextElementSibling : null);
-        if (btn) tb.insertAdjacentElement('afterend', btn);
+      // 统一把按钮放到 wrapper(.code-toolbar) 之后，避免被包裹层遮挡
+      var wrapper = (pre.parentElement && pre.parentElement.classList && pre.parentElement.classList.contains('code-toolbar')) ? pre.parentElement : pre;
+      var btn = null;
+      // 优先找 wrapper 后的按钮
+      if (wrapper.nextElementSibling && wrapper.nextElementSibling.classList && wrapper.nextElementSibling.classList.contains('code-expand-btn')) {
+        btn = wrapper.nextElementSibling;
+      } else {
+        // 可能被插在 pre 或 toolbar 后，统统搬到 wrapper 后
+        if (pre.nextElementSibling && pre.nextElementSibling.classList && pre.nextElementSibling.classList.contains('code-expand-btn')) btn = pre.nextElementSibling;
+        var tb = (pre.nextElementSibling && pre.nextElementSibling.classList && pre.nextElementSibling.classList.contains('toolbar')) ? pre.nextElementSibling : null;
+        if (!btn && tb && tb.nextElementSibling && tb.nextElementSibling.classList && tb.nextElementSibling.classList.contains('code-expand-btn')) btn = tb.nextElementSibling;
       }
+      if (btn) wrapper.insertAdjacentElement('afterend', btn);
+
     });
   }
 
