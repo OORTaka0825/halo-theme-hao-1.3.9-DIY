@@ -135,13 +135,8 @@ let halo = {
 
             var r = a.element.parentNode;
             var toolbar = r.nextElementSibling;
-            if (!toolbar || !toolbar.classList || !toolbar.classList.contains('toolbar')) {
-                var _tmpToolbar = document.createElement('div');
-                _tmpToolbar.className = 'toolbar';
-                r.parentNode.insertBefore(_tmpToolbar, r.nextSibling);
-                toolbar = _tmpToolbar;
-            }
-//标题
+
+            //标题
             isEnableTitle && toolbar.classList.add("c-title")
             //标题分割线
             isEnableHr && toolbar.classList.add("c-hr")
@@ -214,14 +209,12 @@ let halo = {
                 ele.className = "code-expand-btn";
                 ele.innerHTML = '<i class="haofont hao-icon-angle-double-down"></i>';
                 ele.addEventListener("click", expandCode);
-                var __wrapper = (r.parentElement && r.parentElement.classList && r.parentElement.classList.contains('code-toolbar')) ? r.parentElement : r;
-                __wrapper.insertAdjacentElement('afterend', ele);
+                r.offsetParent.appendChild(ele);
             }
 
             // 右上角箭头：仅在「限制高度 ↔ 全量」之间切换；不再进入“仅标题”折叠
             const prismShrinkFn = () => {
-                const __wrapper = (r.parentElement && r.parentElement.classList && r.parentElement.classList.contains('code-toolbar')) ? r.parentElement : r;
-                const $btnWrap = __wrapper.nextElementSibling;
+                const $btnWrap = r.offsetParent.lastElementChild;
                 const hasBottomBtn = $btnWrap && $btnWrap.classList && $btnWrap.classList.contains('code-expand-btn');
 
                 // A：当前是“全量展开”→ 点击右上角 = 回到“限制高度”
@@ -502,233 +495,4 @@ let halo = {
   window.addEventListener('load', mountCopyOnShareLink);
   document.addEventListener('pjax:complete', mountCopyOnShareLink);
   document.addEventListener('page:loaded', mountCopyOnShareLink);
-})();
-
-/* === Prism 首屏 & PJAX 增量初始化（安全版，无观察器、无多次全量高亮）=== */
-(function () {
-  if (window.__PRISM_PJAX_SAFE__) return;
-  window.__PRISM_PJAX_SAFE__ = true;
-
-  function addToolsOnce() {
-    try {
-      if (window.halo && typeof halo.addPrismTool === 'function') {
-        halo.addPrismTool(); // 内部自带防重复
-      }
-    } catch (e) {}
-  }
-
-  function hasTokens(el) {
-    try { return !!(el.querySelector && el.querySelector('.token')); } catch(e) { return false; }
-  }
-  function isHydrated(el) {
-    return el.hasAttribute && el.hasAttribute('data-prism-hydrated') || hasTokens(el);
-  }
-  function mark(el) {
-    try { el.setAttribute('data-prism-hydrated', '1'); } catch(e) {}
-  }
-
-  function highlightIncremental() {
-    if (!window.Prism) return;
-    const scope = document.getElementById('article-container') || document;
-    const list = scope.querySelectorAll('pre > code[class*="language-"]');
-    let worked = false;
-    list.forEach(code => {
-      if (isHydrated(code)) return;
-      try {
-        if (Prism.highlightElement) {
-          Prism.highlightElement(code);
-          mark(code);
-          worked = true;
-        } else if (Prism.highlightAllUnder || Prism.highlightAll) {
-          // 极端兜底：仍未提供单元素高亮时，退回全量，但基本不会命中
-          (Prism.highlightAllUnder ? Prism.highlightAllUnder : Prism.highlightAll)(scope);
-          worked = true;
-        }
-      } catch (e) {}
-    });
-
-    // 若没有需要新高亮的，但 toolbar 未挂上，为其补跑一次 complete 钩子
-    if (!worked && Prism.hooks && Prism.plugins && Prism.plugins.toolbar) {
-      list.forEach(code => {
-        const pre = code.parentNode;
-        if (!pre) return;
-        const hasToolbar = pre.querySelector('.custom-item') ||
-          (pre.nextElementSibling && pre.nextElementSibling.classList && pre.nextElementSibling.classList.contains('code-expand-btn')) ||
-          (pre.parentNode && pre.parentNode.querySelector && pre.parentNode.querySelector('.toolbar'));
-        if (hasToolbar) return;
-
-        const m = (code.className || '').match(/language-([\w-]+)/);
-        const lang = m ? m[1] : 'none';
-        const env = {
-          element: code,
-          language: lang,
-          grammar: Prism.languages[lang] || Prism.languages.none,
-          code: code.textContent || ''
-        };
-        try { Prism.hooks.run('complete', env); } catch(e) {}
-      });
-    }
-  }
-
-  function run() {
-    addToolsOnce();
-    requestAnimationFrame(highlightIncremental);
-  }
-
-  window.addEventListener('load', run);
-  document.addEventListener('page:loaded', run);
-  document.addEventListener('pjax:complete', run);
-})();
-
-/* ====== Prism Toolbar 兜底 + 首次 PJAX 强化启动（最终版） ====== */
-(function () {
-  if (window.__PRISM_FINAL_BOOT__) return;
-  window.__PRISM_FINAL_BOOT__ = true;
-
-  function Q(sel, root){ return (root||document).querySelector(sel); }
-  function QA(sel, root){ return (root||document).querySelectorAll(sel); }
-
-  function loadCSS(href, mark) {
-    return new Promise(function (resolve) {
-      if (Q('link[data-'+mark+']')) return resolve();
-      var l = document.createElement('link');
-      l.rel = 'stylesheet';
-      l.href = href;
-      l.setAttribute('data-'+mark, '');
-      l.onload = resolve;
-      document.head.appendChild(l);
-    });
-  }
-  function loadJS(src, mark) {
-    return new Promise(function (resolve) {
-      if (Q('script[data-'+mark+']')) return resolve();
-      var s = document.createElement('script');
-      s.src = src;
-      s.defer = true;
-      s.setAttribute('data-'+mark, '');
-      s.onload = resolve;
-      document.head.appendChild(s);
-    });
-  }
-
-  function runCompleteForAll(container){
-    if (!window.Prism) return;
-    var root = container || document.getElementById('article-container') || document;
-    var list = QA('pre > code[class*="language-"]', root);
-    list.forEach(function(codeEl){
-      var pre = codeEl.parentNode;
-      if (!pre) return;
-      // 若已经有 toolbar 且后面紧跟按钮，就不再补
-      var hasTB = pre.nextElementSibling && pre.nextElementSibling.classList && pre.nextElementSibling.classList.contains('toolbar');
-      var hasBtn = hasTB && pre.nextElementSibling.nextElementSibling && pre.nextElementSibling.nextElementSibling.classList && pre.nextElementSibling.nextElementSibling.classList.contains('code-expand-btn');
-      if (hasTB && hasBtn) return;
-
-      // 触发 complete，让 toolbar/plugin & 你自定义逻辑都跑一遍
-      var cls = codeEl.className || '';
-      var m = cls.match(/language-([\w-]+)/);
-      var lang = (m && m[1]) || 'none';
-      var env = {
-        element: codeEl,
-        language: lang,
-        grammar: (Prism.languages && (Prism.languages[lang] || Prism.languages.none)) || undefined,
-        code: codeEl.textContent || ''
-      };
-      try { Prism.hooks.run('complete', env); } catch (e) {}
-      // 如果 toolbar 这时出现了，但按钮在 toolbar 前，把它挪到 toolbar 后
-      // 统一把按钮放到 wrapper(.code-toolbar) 之后，避免被包裹层遮挡
-      var wrapper = (pre.parentElement && pre.parentElement.classList && pre.parentElement.classList.contains('code-toolbar')) ? pre.parentElement : pre;
-      var btn = null;
-      // 优先找 wrapper 后的按钮
-      if (wrapper.nextElementSibling && wrapper.nextElementSibling.classList && wrapper.nextElementSibling.classList.contains('code-expand-btn')) {
-        btn = wrapper.nextElementSibling;
-      } else {
-        // 可能被插在 pre 或 toolbar 后，统统搬到 wrapper 后
-        if (pre.nextElementSibling && pre.nextElementSibling.classList && pre.nextElementSibling.classList.contains('code-expand-btn')) btn = pre.nextElementSibling;
-        var tb = (pre.nextElementSibling && pre.nextElementSibling.classList && pre.nextElementSibling.classList.contains('toolbar')) ? pre.nextElementSibling : null;
-        if (!btn && tb && tb.nextElementSibling && tb.nextElementSibling.classList && tb.nextElementSibling.classList.contains('code-expand-btn')) btn = tb.nextElementSibling;
-      }
-      if (btn) wrapper.insertAdjacentElement('afterend', btn);
-
-    });
-  }
-
-  function highlight(container){
-    if (!window.Prism) return;
-    var root = container || document.getElementById('article-container') || document;
-    if (Prism.highlightAllUnder) Prism.highlightAllUnder(root);
-    else if (Prism.highlightAll) Prism.highlightAll();
-  }
-
-  function ensureToolbarThenBoot(){
-    if (!window.Prism) return;
-    function boot(){
-      try { if (window.halo && typeof halo.addPrismTool === 'function') halo.addPrismTool(); } catch (e) {}
-      // 先高亮一次，再对所有已渲染代码块补跑 complete（处理“插件后到”）
-      try { highlight(); } catch (e) {}
-      try { runCompleteForAll(); } catch (e) {}
-    }
-    if (Prism.plugins && Prism.plugins.toolbar) {
-      boot();
-    } else {
-      var ver = '1.29.0';
-      var css = 'https://unpkg.com/prismjs@' + ver + '/plugins/toolbar/prism-toolbar.min.css';
-      var js  = 'https://unpkg.com/prismjs@' + ver + '/plugins/toolbar/prism-toolbar.min.js';
-      loadCSS(css, 'prism-toolbar').then(function(){ return loadJS(js, 'prism-toolbar'); }).then(boot);
-    }
-  }
-
-  let scheduled = false;
-  function schedule() {
-    if (scheduled) return;
-    scheduled = true;
-    requestAnimationFrame(function(){
-      scheduled = false;
-      ensureToolbarThenBoot();
-    });
-  }
-
-  window.addEventListener('load', schedule, {passive:true});
-  document.addEventListener('DOMContentLoaded', schedule, {passive:true});
-  document.addEventListener('page:loaded', schedule, {passive:true});
-  document.addEventListener('pjax:complete', schedule, {passive:true});
-  document.addEventListener('pjax:end', schedule, {passive:true});
-  document.addEventListener('pjax:success', schedule, {passive:true});
-})();
-
-/* --- ensure code-expand-btn sits after .code-toolbar wrapper (PJAX/first-pass safe) --- */
-(function(){
-  function fixOne(pre){
-    if (!pre || !pre.parentElement) return;
-    var wrapper = (pre.parentElement.classList && pre.parentElement.classList.contains('code-toolbar')) ? pre.parentElement : pre;
-    // candidates: wrapper.next, pre.next, toolbar.next
-    var btn = null;
-    if (wrapper.nextElementSibling && wrapper.nextElementSibling.classList && wrapper.nextElementSibling.classList.contains('code-expand-btn')) {
-      btn = wrapper.nextElementSibling;
-    } else {
-      var tb = (pre.nextElementSibling && pre.nextElementSibling.classList && pre.nextElementSibling.classList.contains('toolbar')) ? pre.nextElementSibling : null;
-      var cand = [pre.nextElementSibling, tb && tb.nextElementSibling].filter(Boolean);
-      for (var i=0;i<cand.length;i++){
-        var el = cand[i];
-        if (el && el.classList && el.classList.contains('code-expand-btn')) { btn = el; break; }
-      }
-    }
-    if (btn && btn.previousElementSibling !== wrapper) {
-      wrapper.insertAdjacentElement('afterend', btn);
-    }
-  }
-  function scan(){
-    var root = document.getElementById('article-container') || document;
-    var list = root.querySelectorAll('pre > code[class*="language-"]');
-    for (var i=0;i<list.length;i++){
-      fixOne(list[i].parentNode);
-    }
-  }
-  // run on load and on PJAX hooks
-  if (document.readyState !== 'loading') { setTimeout(scan); }
-  document.addEventListener('DOMContentLoaded', scan, {passive:true});
-  window.addEventListener('load', scan, {passive:true});
-  document.addEventListener('page:loaded', scan, {passive:true});
-  document.addEventListener('pjax:complete', scan, {passive:true});
-  document.addEventListener('pjax:end', scan, {passive:true});
-  document.addEventListener('pjax:success', scan, {passive:true});
 })();
