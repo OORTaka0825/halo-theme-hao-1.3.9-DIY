@@ -274,28 +274,3 @@
 }
 
 /*代码块*/
-
-/* === Fix: PJAX 首次进入时底部按钮出现一条深色条的问题 ===
-   原因：.code-expand-btn 使用了超强的 backdrop-filter（blur 500px），
-        在 PJAX 首帧合成时有时会对底层背景做强模糊，看起来像一条“黑/绿条”。
-   解决：移除 backdrop-filter，显式保持透明背景；其它样式保持不变。
-*/
-#article-container .code-expand-btn,
-#post-comment .code-expand-btn{
-  background: transparent !important;
-  -webkit-backdrop-filter: none !important;
-  backdrop-filter: none !important;
-  box-shadow: none !important;
-}
-
-/* 如果你只想要顶部那条红色分隔线，统一在这里控制 */
-#article-container .code-expand-btn,
-#post-comment .code-expand-btn{
-  border-top: 1px solid var(--code-expand-divider, transparent);
-}
-
-/* 示例：可在自定义 CSS 里设置不同主题下的分隔线颜色
-:root{ --code-expand-divider: rgba(178,168,168,.3); }
-[data-theme="dark"]{ --code-expand-divider: rgba(178,168,168,.3); }
-[data-theme="light"]{ --code-expand-divider: rgba(178,168,168,.3); }
-*/
