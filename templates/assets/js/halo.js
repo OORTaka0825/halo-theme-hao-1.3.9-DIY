@@ -490,3 +490,34 @@ let halo = {
   document.addEventListener('pjax:complete', mountCopyOnShareLink);
   document.addEventListener('page:loaded', mountCopyOnShareLink);
 })();
+
+/* === Prism 在首屏与 PJAX 后主动初始化（一次到位）=== */
+(function () {
+  function bootPrism() {
+    try {
+      // 先挂上我们对 Prism 的增强（复制/展开等）
+      if (window.halo && typeof halo.addPrismTool === 'function') {
+        halo.addPrismTool();
+      }
+    } catch (e) {}
+
+    // 然后触发高亮：优先对文章容器，找不到就全局
+    try {
+      if (window.Prism) {
+        const container =
+          document.getElementById('article-container') || document;
+        if (typeof Prism.highlightAllUnder === 'function') {
+          // 下一帧再跑，确保 PJAX 内容已插入
+          requestAnimationFrame(() => Prism.highlightAllUnder(container));
+        } else if (typeof Prism.highlightAll === 'function') {
+          requestAnimationFrame(() => Prism.highlightAll());
+        }
+      }
+    } catch (e) {}
+  }
+
+  // 首次加载 + PJAX 完成 + 主题的 page:loaded 事件
+  window.addEventListener('load', bootPrism);
+  document.addEventListener('pjax:complete', bootPrism);
+  document.addEventListener('page:loaded', bootPrism);
+})();
