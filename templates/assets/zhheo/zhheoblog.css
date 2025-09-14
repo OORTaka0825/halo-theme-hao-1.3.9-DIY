@@ -18796,3 +18796,19 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
   100% { opacity: .55; text-shadow: 0 0 0 currentColor; filter: brightness(.9); }
 }
 
+/* 让代码块底部“展开/收起”箭头闪烁 */
+#article-container .code-expand-btn i,
+#post-comment .code-expand-btn i{
+  animation: code-twinkle 1.2s ease-in-out infinite;
+  /* 可按需微调： */
+  /* animation-duration: 1.2s;   // 速度 */
+  /* text-shadow 强度/滤镜亮度就是“闪”的感觉 */
+}
+
+/* 如果用户开启了减少动效，则自动关闭闪烁（无障碍友好） */
+@media (prefers-reduced-motion: reduce) {
+  #article-container .code-expand-btn i,
+  #post-comment .code-expand-btn i{
+    animation: none !important;
+  }
+}
