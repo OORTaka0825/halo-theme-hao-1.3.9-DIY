@@ -136,8 +136,6 @@ let halo = {
             var r = a.element.parentNode;
             var toolbar = r.nextElementSibling;
             if (!toolbar || !toolbar.classList || !toolbar.classList.contains('toolbar')) {
-                // Prism toolbar 尚未插入，兜底创建（避免后续对 toolbar.classList 的调用报错）；
-                // 等插件完成后，Prism.hooks.complete 会把真正的 toolbar 插入到 .code-toolbar 中。
                 var _tmpToolbar = document.createElement('div');
                 _tmpToolbar.className = 'toolbar';
                 r.parentNode.insertBefore(_tmpToolbar, r.nextSibling);
@@ -216,14 +214,14 @@ let halo = {
                 ele.className = "code-expand-btn";
                 ele.innerHTML = '<i class="haofont hao-icon-angle-double-down"></i>';
                 ele.addEventListener("click", expandCode);
-                var wrapper = (r.parentElement && r.parentElement.classList && r.parentElement.classList.contains('code-toolbar')) ? r.parentElement : r;
-                wrapper.insertAdjacentElement('afterend', ele);
+                var __wrapper = (r.parentElement && r.parentElement.classList && r.parentElement.classList.contains('code-toolbar')) ? r.parentElement : r;
+                __wrapper.insertAdjacentElement('afterend', ele);
             }
 
             // 右上角箭头：仅在「限制高度 ↔ 全量」之间切换；不再进入“仅标题”折叠
             const prismShrinkFn = () => {
-                const wrapper = (r.parentElement && r.parentElement.classList && r.parentElement.classList.contains('code-toolbar')) ? r.parentElement : r;
-                const $btnWrap = wrapper.nextElementSibling;
+                const __wrapper = (r.parentElement && r.parentElement.classList && r.parentElement.classList.contains('code-toolbar')) ? r.parentElement : r;
+                const $btnWrap = __wrapper.nextElementSibling;
                 const hasBottomBtn = $btnWrap && $btnWrap.classList && $btnWrap.classList.contains('code-expand-btn');
 
                 // A：当前是“全量展开”→ 点击右上角 = 回到“限制高度”
@@ -695,4 +693,42 @@ let halo = {
   document.addEventListener('pjax:complete', schedule, {passive:true});
   document.addEventListener('pjax:end', schedule, {passive:true});
   document.addEventListener('pjax:success', schedule, {passive:true});
+})();
+
+/* --- ensure code-expand-btn sits after .code-toolbar wrapper (PJAX/first-pass safe) --- */
+(function(){
+  function fixOne(pre){
+    if (!pre || !pre.parentElement) return;
+    var wrapper = (pre.parentElement.classList && pre.parentElement.classList.contains('code-toolbar')) ? pre.parentElement : pre;
+    // candidates: wrapper.next, pre.next, toolbar.next
+    var btn = null;
+    if (wrapper.nextElementSibling && wrapper.nextElementSibling.classList && wrapper.nextElementSibling.classList.contains('code-expand-btn')) {
+      btn = wrapper.nextElementSibling;
+    } else {
+      var tb = (pre.nextElementSibling && pre.nextElementSibling.classList && pre.nextElementSibling.classList.contains('toolbar')) ? pre.nextElementSibling : null;
+      var cand = [pre.nextElementSibling, tb && tb.nextElementSibling].filter(Boolean);
+      for (var i=0;i<cand.length;i++){
+        var el = cand[i];
+        if (el && el.classList && el.classList.contains('code-expand-btn')) { btn = el; break; }
+      }
+    }
+    if (btn && btn.previousElementSibling !== wrapper) {
+      wrapper.insertAdjacentElement('afterend', btn);
+    }
+  }
+  function scan(){
+    var root = document.getElementById('article-container') || document;
+    var list = root.querySelectorAll('pre > code[class*="language-"]');
+    for (var i=0;i<list.length;i++){
+      fixOne(list[i].parentNode);
+    }
+  }
+  // run on load and on PJAX hooks
+  if (document.readyState !== 'loading') { setTimeout(scan); }
+  document.addEventListener('DOMContentLoaded', scan, {passive:true});
+  window.addEventListener('load', scan, {passive:true});
+  document.addEventListener('page:loaded', scan, {passive:true});
+  document.addEventListener('pjax:complete', scan, {passive:true});
+  document.addEventListener('pjax:end', scan, {passive:true});
+  document.addEventListener('pjax:success', scan, {passive:true});
 })();
