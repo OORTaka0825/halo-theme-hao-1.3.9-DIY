@@ -30,9 +30,11 @@ let halo = {
 
         if (!Prism.plugins.toolbar) {
             console.warn('Copy to Clipboard plugin loaded before Toolbar plugin.');
-
             return;
         }
+        // 防重复挂载（避免 PJAX 多次叠加）
+        if (window.__PRISM_TOOL_PATCHED__) return;
+        window.__PRISM_TOOL_PATCHED__ = true;
 
         const enable = GLOBAL_CONFIG.prism.enable;
         if (!enable) return;
@@ -41,8 +43,11 @@ let halo = {
         const isEnableLine = GLOBAL_CONFIG.prism.enable_line;
         const isEnableCopy = GLOBAL_CONFIG.prism.enable_copy;
         const isEnableExpander = GLOBAL_CONFIG.prism.enable_expander;
-        const prismLimit = GLOBAL_CONFIG.prism.prism_limit;
+        const prismLimit = Number(GLOBAL_CONFIG.prism.prism_limit || GLOBAL_CONFIG.prism.height_limit || 300);
         const isEnableHeightLimit = GLOBAL_CONFIG.prism.enable_height_limit;
+
+        // 与主题保持一致：高度限制 +30 作为缓冲
+        const LIMIT = prismLimit + 30;
 
         // https://stackoverflow.com/a/30810322/7595472
 
@@ -50,12 +55,9 @@ let halo = {
         function fallbackCopyTextToClipboard(copyInfo) {
             var textArea = document.createElement('textarea');
             textArea.value = copyInfo.getText();
-
-            // Avoid scrolling to bottom
             textArea.style.top = '0';
             textArea.style.left = '0';
             textArea.style.position = 'fixed';
-
             document.body.appendChild(textArea);
             textArea.focus();
             textArea.select();
@@ -90,25 +92,11 @@ let halo = {
             }
         }
 
-        /**
-         * Selects the text content of the given element.
-         *
-         * @param {Element} element
-         */
         function selectElementText(element) {
-            // https://stackoverflow.com/a/20079910/7595472
             window.getSelection().selectAllChildren(element);
         }
 
-        /**
-         * Traverses up the DOM tree to find data attributes that override the default plugin settings.
-         *
-         * @param {Element} startElement An element to start from.
-         * @returns {Settings} The plugin settings.
-         * @typedef {Record<"copy" | "copy-error" | "copy-success" | "copy-timeout", string | number>} Settings
-         */
         function getSettings(startElement) {
-            /** @type {Settings} */
             var settings = {
                 'copy': 'Copy',
                 'copy-error': 'Press Ctrl+C to copy',
@@ -130,23 +118,24 @@ let halo = {
             return settings;
         }
 
+        // —— 这里开始挂钩 toolbar，注入复制/折叠/底部按钮 ——
         var r = Prism.plugins.toolbar.hook = function (a) {
-
-
+            // r 是 <pre>，toolbar 是其紧邻工具条
             var r = a.element.parentNode;
             var toolbar = r.nextElementSibling;
 
-            //标题
+            // 标题与分割线
             isEnableTitle && toolbar.classList.add("c-title")
-            //标题分割线
             isEnableHr && toolbar.classList.add("c-hr")
+
+            // 自定义工具容器（右上角）
             var customItem = document.createElement("div");
             customItem.className = 'custom-item absolute top-0'
 
-            //复制
+            // 复制
+            var copy;
             if (isEnableCopy) {
-                var copy = document.createElement("i");
-
+                copy = document.createElement("i");
                 copy.className = 'haofont hao-icon-paste copy-button code-copy cursor-pointer'
                 customItem.appendChild(copy)
 
@@ -162,99 +151,100 @@ let halo = {
                         },
                         error: function () {
                             setState('copy-error');
-
                             setTimeout(function () {
                                 selectElementText(a.element);
                             }, 1);
-
                             resetText();
                         }
                     });
-
                 });
-
             }
 
-            const prismToolsFn = function (e) {
-                const $target = e.target.classList;
-                if ($target.contains("code-expander")) prismShrinkFn(this);
+            // 顶部折叠/展开逻辑与底部按钮共用
+            let expander;
+            const prismToolsFn = function () {
+                toggleExpand();
             };
 
-            // 折叠图标（右上角）：默认“向左”
             if (isEnableExpander) {
-                var expander = document.createElement("i");
+                expander = document.createElement("i");
                 expander.className = 'fa-sharp fa-solid haofont hao-icon-angle-left code-expander cursor-pointer'
                 customItem.appendChild(expander)
-
                 expander.addEventListener('click', prismToolsFn)
             }
 
-            // 底部“展开”按钮：点击后进入全量，并把右上角图标切为“向下”
-            const expandCode = function () {
-                this.classList.add("expand-done");
-                this.style.display = "none";
-                r.classList.add("expand-done");
+            // —— 新的底部“展开/收起”按钮（插在代码块之后，不遮挡代码） ——
+            let bottomBtn;
 
-                try {
-                    if (expander) {
-                        expander.classList.remove('hao-icon-angle-left');
-                        expander.classList.add('hao-icon-angle-down');
-                    }
-                } catch (e) {}
-            };
-
-            if (isEnableHeightLimit && r.offsetHeight > prismLimit) {
-                r.classList.add("close")
-                const ele = document.createElement("div");
-                ele.className = "code-expand-btn";
-                ele.innerHTML = '<i class="haofont hao-icon-angle-double-down"></i>';
-                ele.addEventListener("click", expandCode);
-                const anchor = (r.nextElementSibling && r.nextElementSibling.classList && r.nextElementSibling.classList.contains('toolbar')) ? r.nextElementSibling : r;
-                const nextBtn = anchor.nextElementSibling;
-                if (nextBtn && nextBtn.classList && nextBtn.classList.contains('code-expand-btn')) nextBtn.remove();
-                anchor.insertAdjacentElement('afterend', ele);
+            // 设置为“限制高度”状态
+            function setLimited() {
+                r.classList.remove('expand-done');
+                r.style.maxHeight = LIMIT + 'px';
+                r.style.overflow = 'hidden';
+                if (bottomBtn) {
+                    bottomBtn.classList.remove('expand-done');
+                    // 保持向下图标，展开时通过 .expand-done 旋转，不切换类名
+                    // if (i) i.className = 'haofont hao-icon-angle-double-down';
+                    bottomBtn.style.display = 'flex';
+                }
+                if (expander) {
+                    expander.classList.remove('hao-icon-angle-down');
+                    expander.classList.add('hao-icon-angle-left');
+                }
             }
 
-            // 右上角箭头：仅在「限制高度 ↔ 全量」之间切换；不再进入“仅标题”折叠
-            const prismShrinkFn = () => {
-                const anchor = (r.nextElementSibling && r.nextElementSibling.classList && r.nextElementSibling.classList.contains('toolbar')) ? r.nextElementSibling : r;
-                const $btnWrap = (anchor.nextElementSibling && anchor.nextElementSibling.classList && anchor.nextElementSibling.classList.contains('code-expand-btn')) ? anchor.nextElementSibling : null;
-                const hasBottomBtn = $btnWrap && $btnWrap.classList && $btnWrap.classList.contains('code-expand-btn');
-
-                // A：当前是“全量展开”→ 点击右上角 = 回到“限制高度”
-                if (r.classList.contains('expand-done')) {
-                    r.classList.remove('expand-done');
-                    if (hasBottomBtn) {
-                        $btnWrap.style.display = 'block';
-                        $btnWrap.classList.remove('expand-done'); // 底部箭头恢复“向下”
-                    }
-                    try {
-                        if (expander) {
-                            expander.classList.remove('hao-icon-angle-down');
-                            expander.classList.add('hao-icon-angle-left'); // 右上角恢复“向左”
-                        }
-                    } catch (e) {}
-                    return;
-                }
-
-                // B：当前是“限制高度”→ 点击右上角 = 全量展开
+            // 设置为“完全展开”状态
+            function setExpanded() {
                 r.classList.add('expand-done');
-                if (hasBottomBtn) {
-                    $btnWrap.classList.add('expand-done'); // 与底部逻辑保持一致（随后隐藏）
-                    $btnWrap.style.display = 'none';
+                r.style.maxHeight = 'none';
+                r.style.overflow = 'visible';
+                if (bottomBtn) {
+                    bottomBtn.classList.add('expand-done'); // 旋转“向上”
+                    // 保持向下图标，展开时通过 .expand-done 旋转，不切换类名
+                    // if (i) i.className = 'haofont hao-icon-angle-double-up';
+                    bottomBtn.style.display = 'flex';
                 }
-                try {
-                    if (expander) {
-                        expander.classList.remove('hao-icon-angle-left');
-                        expander.classList.add('hao-icon-angle-down'); // 右上角切为“向下”
-                    }
-                } catch (e) {}
-            };
+                if (expander) {
+                    expander.classList.remove('hao-icon-angle-left');
+                    expander.classList.add('hao-icon-angle-down');
+                }
+            }
+
+            function toggleExpand() {
+                if (r.classList.contains('expand-done')) setLimited();
+                else setExpanded();
+            }
+
+            // 先清理老按钮，避免重复（包括容器内和相邻兄弟节点）
+            r.querySelectorAll('.code-expand-btn').forEach(el => el.remove());
+            let sib = r.nextElementSibling;
+            while (sib && sib.classList && sib.classList.contains('code-expand-btn')) {
+                sib.remove();
+                sib = r.nextElementSibling;
+            }
+
+            // 仅当高度超过限制时才渲染底部按钮与限制高度
+            const needLimit = isEnableHeightLimit && r.scrollHeight > LIMIT;
+            if (needLimit) {
+                // 默认限制高度
+                setLimited();
+
+                // 按钮插在代码块“后面”，避免遮挡最后一行
+                bottomBtn = document.createElement("div");
+                bottomBtn.className = "code-expand-btn";
+                bottomBtn.innerHTML = '<i class="haofont hao-icon-angle-double-down"></i>';
+                r.insertAdjacentElement('afterend', bottomBtn);
+                bottomBtn.addEventListener("click", toggleExpand);
+            } else {
+                // 不需要限制：清理状态
+                r.style.maxHeight = '';
+                r.style.overflow = '';
+                r.classList.remove('expand-done');
+            }
 
             toolbar.appendChild(customItem)
 
             var settings = getSettings(a.element);
-
 
             function resetText() {
                 setTimeout(function () {
@@ -264,9 +254,9 @@ let halo = {
 
             /** @param {"copy" | "copy-error" | "copy-success"} state */
             function setState(state) {
+                if (!copy) return;
                 copy.setAttribute('data-copy-state', state);
             }
-
         };
         Prism.hooks.add("complete", r)
     },
