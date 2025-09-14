@@ -136,6 +136,7 @@ let halo = {
             var r = a.element.parentNode;
             var toolbar = r.nextElementSibling;
             var __hasTB = toolbar && toolbar.classList;
+            // 标题与分割线（容错：toolbar 可能稍后才插入）
             if (__hasTB) {
               isEnableTitle && toolbar.classList.add('c-title');
               isEnableHr && toolbar.classList.add('c-hr');
@@ -209,12 +210,16 @@ let halo = {
                 ele.className = "code-expand-btn";
                 ele.innerHTML = '<i class="haofont hao-icon-angle-double-down"></i>';
                 ele.addEventListener("click", expandCode);
-                r.offsetParent.appendChild(ele);
+                const anchor = (r.nextElementSibling && r.nextElementSibling.classList && r.nextElementSibling.classList.contains('toolbar')) ? r.nextElementSibling : r;
+                const nextBtn = anchor.nextElementSibling;
+                if (nextBtn && nextBtn.classList && nextBtn.classList.contains('code-expand-btn')) nextBtn.remove();
+                anchor.insertAdjacentElement('afterend', ele);
             }
 
             // 右上角箭头：仅在「限制高度 ↔ 全量」之间切换；不再进入“仅标题”折叠
             const prismShrinkFn = () => {
-                const $btnWrap = r.offsetParent.lastElementChild;
+                const anchor = (r.nextElementSibling && r.nextElementSibling.classList && r.nextElementSibling.classList.contains('toolbar')) ? r.nextElementSibling : r;
+                const $btnWrap = (anchor.nextElementSibling && anchor.nextElementSibling.classList && anchor.nextElementSibling.classList.contains('code-expand-btn')) ? anchor.nextElementSibling : null;
                 const hasBottomBtn = $btnWrap && $btnWrap.classList && $btnWrap.classList.contains('code-expand-btn');
 
                 // A：当前是“全量展开”→ 点击右上角 = 回到“限制高度”
@@ -249,9 +254,14 @@ let halo = {
 
             if (__hasTB) {
               toolbar.appendChild(customItem);
+              // 若底部按钮在 toolbar 前，挪到 toolbar 后
+              var btn = (toolbar.nextElementSibling && toolbar.nextElementSibling.classList && toolbar.nextElementSibling.classList.contains('code-expand-btn'))
+                          ? toolbar.nextElementSibling
+                          : (r.nextElementSibling && r.nextElementSibling.classList && r.nextElementSibling.classList.contains('code-expand-btn')
+                              ? r.nextElementSibling
+                              : null);
+              if (btn) toolbar.insertAdjacentElement('afterend', btn);
             } else {
-              // 尝试在后续帧补挂一次（最多 6 帧）
-              
               (function __appendTB(attempt){
                 if (attempt > 6) return;
                 var tb = r.nextElementSibling;
@@ -259,20 +269,16 @@ let halo = {
                   if (isEnableTitle) tb.classList.add('c-title');
                   if (isEnableHr) tb.classList.add('c-hr');
                   tb.appendChild(customItem);
-                  // 确保底部按钮始终在 toolbar 之后（避免先渲染在 <pre> 后面，toolbar 后到导致被挡/不显示）
                   var btn = (tb.nextElementSibling && tb.nextElementSibling.classList && tb.nextElementSibling.classList.contains('code-expand-btn'))
                               ? tb.nextElementSibling
                               : (r.nextElementSibling && r.nextElementSibling.classList && r.nextElementSibling.classList.contains('code-expand-btn')
                                   ? r.nextElementSibling
                                   : null);
-                  if (btn) {
-                    tb.insertAdjacentElement('afterend', btn);
-                  }
+                  if (btn) tb.insertAdjacentElement('afterend', btn);
                 } else {
                   requestAnimationFrame(function(){ __appendTB(attempt+1); });
                 }
               })(0);
-;
             }
 
             var settings = getSettings(a.element);
