@@ -491,33 +491,59 @@ let halo = {
   document.addEventListener('page:loaded', mountCopyOnShareLink);
 })();
 
-/* === Prism 在首屏与 PJAX 后主动初始化（一次到位）=== */
+/* === Prism 在首屏与 PJAX 后主动初始化（更稳健版）=== */
 (function () {
-  function bootPrism() {
+  function highlightNow() {
     try {
-      // 先挂上我们对 Prism 的增强（复制/展开等）
+      if (!window.Prism) return;
+      const container = document.getElementById('article-container') || document;
+      if (typeof Prism.highlightAllUnder === 'function') {
+        Prism.highlightAllUnder(container);
+      } else if (typeof Prism.highlightAll === 'function') {
+        Prism.highlightAll();
+      }
+    } catch (e) {}
+  }
+
+  function bootPrism() {
+    // 先挂工具（带防重入）
+    try {
       if (window.halo && typeof halo.addPrismTool === 'function') {
         halo.addPrismTool();
       }
     } catch (e) {}
 
-    // 然后触发高亮：优先对文章容器，找不到就全局
+    // 立即与延迟各跑一次，覆盖 PJAX 插入时序差异
+    requestAnimationFrame(highlightNow);
+    setTimeout(highlightNow, 80);
+    setTimeout(highlightNow, 300);
+
+    // 临时观察 1.2s，若有代码块后插入再补跑一次
     try {
-      if (window.Prism) {
-        const container =
-          document.getElementById('article-container') || document;
-        if (typeof Prism.highlightAllUnder === 'function') {
-          // 下一帧再跑，确保 PJAX 内容已插入
-          requestAnimationFrame(() => Prism.highlightAllUnder(container));
-        } else if (typeof Prism.highlightAll === 'function') {
-          requestAnimationFrame(() => Prism.highlightAll());
+      const target = document.getElementById('article-container') || document.body;
+      const mo = new MutationObserver((muts) => {
+        for (const m of muts) {
+          if (!m.addedNodes) continue;
+          for (const n of m.addedNodes) {
+            if (n.nodeType !== 1) continue;
+            if ((n.matches && (n.matches('pre[class*="language-"], code[class*="language-"]'))) ||
+                (n.querySelector && n.querySelector('pre[class*="language-"], code[class*="language-"]'))) {
+              highlightNow();
+              mo.disconnect();
+              return;
+            }
+          }
         }
-      }
+      });
+      mo.observe(target, { childList: true, subtree: true });
+      setTimeout(() => mo.disconnect(), 1200);
     } catch (e) {}
   }
 
-  // 首次加载 + PJAX 完成 + 主题的 page:loaded 事件
+  // 首次加载 + PJAX 相关事件 + 主题常见事件
   window.addEventListener('load', bootPrism);
   document.addEventListener('pjax:complete', bootPrism);
+  document.addEventListener('pjax:end', bootPrism);
+  document.addEventListener('pjax:success', bootPrism);
   document.addEventListener('page:loaded', bootPrism);
 })();
