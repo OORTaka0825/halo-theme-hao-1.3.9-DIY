@@ -180,15 +180,15 @@
     display: none;
 }
 
-/* 代码展开图标 */
+/* 代码展开图标（放到代码块下方，不遮挡内容） */
 #article-container .code-expand-btn ,
 #post-comment .code-expand-btn{
     transition: 0.3s;
     backdrop-filter: saturate(180%) blur(500px);
     -webkit-backdrop-filter: blur(20px);
     transform: translateZ(0);
-    position: absolute;
-    bottom: 0px;
+    position: static;          /* 由 absolute 改为 static */
+    bottom: auto;
     z-index: 10;
     width: 100%;
     text-align: center;
@@ -198,6 +198,7 @@
     align-items: center;
     justify-content: center;
     height: 32px;
+    margin-top: 8px;           /* 与代码留出间距 */
 }
 
 #article-container .code-expand-btn:hover i,
@@ -212,14 +213,13 @@
     line-height: 1;
 }
 
-
 #article-container .code-expand-btn.expand-done,
 #post-comment .code-expand-btn.expand-done{
     -webkit-transform: rotate(180deg);
     -moz-transform: rotate(180deg);
     -o-transform: rotate(180deg);
     -ms-transform: rotate(180deg);
-    transform: rotate(180deg);
+    transform: rotate(180deg);  /* 展开后“向上” */
 }
 
 #article-container pre,
@@ -246,85 +246,31 @@
     height: 100%;
 }
 
+/* 关键：代码容器允许显示底部按钮 */
+#article-container .code-toolbar,
+#post-comment .code-toolbar{
+    overflow: visible !important;
+}
 
 @-moz-keyframes code-expand-key {
-    0% {
-        opacity: .6;
-        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=60)";
-        filter: alpha(opacity=60)
-    }
-
-    50% {
-        opacity: .1;
-        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=10)";
-        filter: alpha(opacity=10)
-    }
-
-    100% {
-        opacity: .6;
-        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=60)";
-        filter: alpha(opacity=60)
-    }
+    0% { opacity: .6; }
+    50% { opacity: .1; }
+    100% { opacity: .6; }
 }
-
 @-webkit-keyframes code-expand-key {
-    0% {
-        opacity: .6;
-        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=60)";
-        filter: alpha(opacity=60)
-    }
-
-    50% {
-        opacity: .1;
-        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=10)";
-        filter: alpha(opacity=10)
-    }
-
-    100% {
-        opacity: .6;
-        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=60)";
-        filter: alpha(opacity=60)
-    }
+    0% { opacity: .6; }
+    50% { opacity: .1; }
+    100% { opacity: .6; }
 }
-
 @-o-keyframes code-expand-key {
-    0% {
-        opacity: .6;
-        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=60)";
-        filter: alpha(opacity=60)
-    }
-
-    50% {
-        opacity: .1;
-        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=10)";
-        filter: alpha(opacity=10)
-    }
-
-    100% {
-        opacity: .6;
-        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=60)";
-        filter: alpha(opacity=60)
-    }
+    0% { opacity: .6; }
+    50% { opacity: .1; }
+    100% { opacity: .6; }
 }
-
 @keyframes code-expand-key {
-    0% {
-        opacity: .6;
-        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=60)";
-        filter: alpha(opacity=60)
-    }
-
-    50% {
-        opacity: .1;
-        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=10)";
-        filter: alpha(opacity=10)
-    }
-
-    100% {
-        opacity: .6;
-        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=60)";
-        filter: alpha(opacity=60)
-    }
+    0% { opacity: .6; }
+    50% { opacity: .1; }
+    100% { opacity: .6; }
 }
 
 /*代码块*/
