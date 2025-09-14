@@ -135,8 +135,15 @@ let halo = {
 
             var r = a.element.parentNode;
             var toolbar = r.nextElementSibling;
-
-            //标题
+            if (!toolbar || !toolbar.classList || !toolbar.classList.contains('toolbar')) {
+                // Prism toolbar 尚未插入，兜底创建（避免后续对 toolbar.classList 的调用报错）；
+                // 等插件完成后，Prism.hooks.complete 会把真正的 toolbar 插入到 .code-toolbar 中。
+                var _tmpToolbar = document.createElement('div');
+                _tmpToolbar.className = 'toolbar';
+                r.parentNode.insertBefore(_tmpToolbar, r.nextSibling);
+                toolbar = _tmpToolbar;
+            }
+//标题
             isEnableTitle && toolbar.classList.add("c-title")
             //标题分割线
             isEnableHr && toolbar.classList.add("c-hr")
@@ -209,12 +216,14 @@ let halo = {
                 ele.className = "code-expand-btn";
                 ele.innerHTML = '<i class="haofont hao-icon-angle-double-down"></i>';
                 ele.addEventListener("click", expandCode);
-                r.offsetParent.appendChild(ele);
+                var wrapper = (r.parentElement && r.parentElement.classList && r.parentElement.classList.contains('code-toolbar')) ? r.parentElement : r;
+                wrapper.insertAdjacentElement('afterend', ele);
             }
 
             // 右上角箭头：仅在「限制高度 ↔ 全量」之间切换；不再进入“仅标题”折叠
             const prismShrinkFn = () => {
-                const $btnWrap = r.offsetParent.lastElementChild;
+                const wrapper = (r.parentElement && r.parentElement.classList && r.parentElement.classList.contains('code-toolbar')) ? r.parentElement : r;
+                const $btnWrap = wrapper.nextElementSibling;
                 const hasBottomBtn = $btnWrap && $btnWrap.classList && $btnWrap.classList.contains('code-expand-btn');
 
                 // A：当前是“全量展开”→ 点击右上角 = 回到“限制高度”
