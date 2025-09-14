@@ -30,6 +30,7 @@ let halo = {
 
         if (!Prism.plugins.toolbar) {
             console.warn('Copy to Clipboard plugin loaded before Toolbar plugin.');
+
             return;
         }
 
@@ -40,11 +41,8 @@ let halo = {
         const isEnableLine = GLOBAL_CONFIG.prism.enable_line;
         const isEnableCopy = GLOBAL_CONFIG.prism.enable_copy;
         const isEnableExpander = GLOBAL_CONFIG.prism.enable_expander;
-        const prismLimit = Number(GLOBAL_CONFIG.prism.prism_limit || GLOBAL_CONFIG.prism.height_limit || 300);
+        const prismLimit = GLOBAL_CONFIG.prism.prism_limit;
         const isEnableHeightLimit = GLOBAL_CONFIG.prism.enable_height_limit;
-
-        // 与主题保持一致：高度限制 +30 作为缓冲
-        const LIMIT = prismLimit + 30;
 
         // https://stackoverflow.com/a/30810322/7595472
 
@@ -52,9 +50,12 @@ let halo = {
         function fallbackCopyTextToClipboard(copyInfo) {
             var textArea = document.createElement('textarea');
             textArea.value = copyInfo.getText();
+
+            // Avoid scrolling to bottom
             textArea.style.top = '0';
             textArea.style.left = '0';
             textArea.style.position = 'fixed';
+
             document.body.appendChild(textArea);
             textArea.focus();
             textArea.select();
@@ -89,11 +90,25 @@ let halo = {
             }
         }
 
+        /**
+         * Selects the text content of the given element.
+         *
+         * @param {Element} element
+         */
         function selectElementText(element) {
+            // https://stackoverflow.com/a/20079910/7595472
             window.getSelection().selectAllChildren(element);
         }
 
+        /**
+         * Traverses up the DOM tree to find data attributes that override the default plugin settings.
+         *
+         * @param {Element} startElement An element to start from.
+         * @returns {Settings} The plugin settings.
+         * @typedef {Record<"copy" | "copy-error" | "copy-success" | "copy-timeout", string | number>} Settings
+         */
         function getSettings(startElement) {
+            /** @type {Settings} */
             var settings = {
                 'copy': 'Copy',
                 'copy-error': 'Press Ctrl+C to copy',
@@ -115,24 +130,23 @@ let halo = {
             return settings;
         }
 
-        // —— 这里开始挂钩 toolbar，注入复制/折叠/底部按钮 ——
         var r = Prism.plugins.toolbar.hook = function (a) {
-            // r 是 <pre>，toolbar 是其紧邻工具条
+
+
             var r = a.element.parentNode;
             var toolbar = r.nextElementSibling;
 
-            // 标题与分割线
+            //标题
             isEnableTitle && toolbar.classList.add("c-title")
+            //标题分割线
             isEnableHr && toolbar.classList.add("c-hr")
-
-            // 自定义工具容器（右上角）
             var customItem = document.createElement("div");
             customItem.className = 'custom-item absolute top-0'
 
-            // 复制
-            var copy;
+            //复制
             if (isEnableCopy) {
-                copy = document.createElement("i");
+                var copy = document.createElement("i");
+
                 copy.className = 'haofont hao-icon-paste copy-button code-copy cursor-pointer'
                 customItem.appendChild(copy)
 
@@ -148,92 +162,95 @@ let halo = {
                         },
                         error: function () {
                             setState('copy-error');
+
                             setTimeout(function () {
                                 selectElementText(a.element);
                             }, 1);
+
                             resetText();
                         }
                     });
+
                 });
+
             }
 
-            // 顶部折叠/展开逻辑与底部按钮共用
-            let expander;
-            const prismToolsFn = function () {
-                toggleExpand();
+            const prismToolsFn = function (e) {
+                const $target = e.target.classList;
+                if ($target.contains("code-expander")) prismShrinkFn(this);
             };
 
+            // 折叠图标（右上角）：默认“向左”
             if (isEnableExpander) {
-                expander = document.createElement("i");
+                var expander = document.createElement("i");
                 expander.className = 'fa-sharp fa-solid haofont hao-icon-angle-left code-expander cursor-pointer'
                 customItem.appendChild(expander)
+
                 expander.addEventListener('click', prismToolsFn)
             }
 
-            // —— 新的底部“展开/收起”按钮（插在代码块之后，不遮挡代码） ——
-            let bottomBtn;
+            // 底部“展开”按钮：点击后进入全量，并把右上角图标切为“向下”
+            const expandCode = function () {
+                this.classList.add("expand-done");
+                this.style.display = "none";
+                r.classList.add("expand-done");
 
-            // 设置为“限制高度”状态
-            function setLimited() {
-                r.classList.remove('expand-done');
-                r.style.maxHeight = LIMIT + 'px';
-                r.style.overflow = 'hidden';
-                if (bottomBtn) {
-                    bottomBtn.classList.remove('expand-done');
-                    const i = bottomBtn.querySelector('i');
-                    if (i) i.className = 'haofont hao-icon-angle-double-down';
-                    bottomBtn.style.display = 'flex';
-                }
-                if (expander) {
-                    expander.classList.remove('hao-icon-angle-down');
-                    expander.classList.add('hao-icon-angle-left');
-                }
+                try {
+                    if (expander) {
+                        expander.classList.remove('hao-icon-angle-left');
+                        expander.classList.add('hao-icon-angle-down');
+                    }
+                } catch (e) {}
+            };
+
+            if (isEnableHeightLimit && r.offsetHeight > prismLimit) {
+                r.classList.add("close")
+                const ele = document.createElement("div");
+                ele.className = "code-expand-btn";
+                ele.innerHTML = '<i class="haofont hao-icon-angle-double-down"></i>';
+                ele.addEventListener("click", expandCode);
+                r.offsetParent.appendChild(ele);
             }
 
-            // 设置为“完全展开”状态
-            function setExpanded() {
+            // 右上角箭头：仅在「限制高度 ↔ 全量」之间切换；不再进入“仅标题”折叠
+            const prismShrinkFn = () => {
+                const $btnWrap = r.offsetParent.lastElementChild;
+                const hasBottomBtn = $btnWrap && $btnWrap.classList && $btnWrap.classList.contains('code-expand-btn');
+
+                // A：当前是“全量展开”→ 点击右上角 = 回到“限制高度”
+                if (r.classList.contains('expand-done')) {
+                    r.classList.remove('expand-done');
+                    if (hasBottomBtn) {
+                        $btnWrap.style.display = 'block';
+                        $btnWrap.classList.remove('expand-done'); // 底部箭头恢复“向下”
+                    }
+                    try {
+                        if (expander) {
+                            expander.classList.remove('hao-icon-angle-down');
+                            expander.classList.add('hao-icon-angle-left'); // 右上角恢复“向左”
+                        }
+                    } catch (e) {}
+                    return;
+                }
+
+                // B：当前是“限制高度”→ 点击右上角 = 全量展开
                 r.classList.add('expand-done');
-                r.style.maxHeight = 'none';
-                r.style.overflow = 'visible';
-                if (bottomBtn) {
-                    bottomBtn.classList.add('expand-done'); // 让图标旋转“向上”
-                    const i = bottomBtn.querySelector('i');
-                    if (i) i.className = 'haofont hao-icon-angle-double-up';
-                    bottomBtn.style.display = 'flex';
+                if (hasBottomBtn) {
+                    $btnWrap.classList.add('expand-done'); // 与底部逻辑保持一致（随后隐藏）
+                    $btnWrap.style.display = 'none';
                 }
-                if (expander) {
-                    expander.classList.remove('hao-icon-angle-left');
-                    expander.classList.add('hao-icon-angle-down');
-                }
-            }
-
-            function toggleExpand() {
-                if (r.classList.contains('expand-done')) setLimited();
-                else setExpanded();
-            }
-
-            // 仅当高度超过限制时才渲染底部按钮与限制高度
-            const needLimit = isEnableHeightLimit && r.scrollHeight > LIMIT;
-            if (needLimit) {
-                // 默认限制高度
-                setLimited();
-
-                // 按钮插在代码块“后面”，避免遮挡最后一行
-                bottomBtn = document.createElement("div");
-                bottomBtn.className = "code-expand-btn";
-                bottomBtn.innerHTML = '<i class="haofont hao-icon-angle-double-down"></i>';
-                r.offsetParent.appendChild(bottomBtn);
-                bottomBtn.addEventListener("click", toggleExpand);
-            } else {
-                // 不需要限制：清理状态
-                r.style.maxHeight = '';
-                r.style.overflow = '';
-                r.classList.remove('expand-done');
-            }
+                try {
+                    if (expander) {
+                        expander.classList.remove('hao-icon-angle-left');
+                        expander.classList.add('hao-icon-angle-down'); // 右上角切为“向下”
+                    }
+                } catch (e) {}
+            };
 
             toolbar.appendChild(customItem)
 
             var settings = getSettings(a.element);
+
 
             function resetText() {
                 setTimeout(function () {
@@ -243,9 +260,9 @@ let halo = {
 
             /** @param {"copy" | "copy-error" | "copy-success"} state */
             function setState(state) {
-                if (!copy) return;
                 copy.setAttribute('data-copy-state', state);
             }
+
         };
         Prism.hooks.add("complete", r)
     },
@@ -480,40 +497,78 @@ let halo = {
   document.addEventListener('page:loaded', mountCopyOnShareLink);
 })();
 
-/* === Prism 首屏 & PJAX 初始化（精简稳定版，无观察器、无重复循环）=== */
+/* === Prism 首屏 & PJAX 增量初始化（安全版，无观察器、无多次全量高亮）=== */
 (function () {
-  // 等待 Prism + Toolbar 就绪再执行 fn，最多等 2s（40 * 50ms）
-  function prismReady(fn) {
-    if (window.Prism && Prism.plugins && Prism.plugins.toolbar) return fn();
-    var n = 0, timer = setInterval(function () {
-      if (window.Prism && Prism.plugins && Prism.plugins.toolbar) {
-        clearInterval(timer); fn();
-      } else if (++n > 40) {
-        clearInterval(timer);
+  if (window.__PRISM_PJAX_SAFE__) return;
+  window.__PRISM_PJAX_SAFE__ = true;
+
+  function addToolsOnce() {
+    try {
+      if (window.halo && typeof halo.addPrismTool === 'function') {
+        halo.addPrismTool(); // 内部自带防重复
       }
-    }, 50);
+    } catch (e) {}
   }
 
-  function bootPrismOnce() {
-    prismReady(function () {
+  function hasTokens(el) {
+    try { return !!(el.querySelector && el.querySelector('.token')); } catch(e) { return false; }
+  }
+  function isHydrated(el) {
+    return el.hasAttribute && el.hasAttribute('data-prism-hydrated') || hasTokens(el);
+  }
+  function mark(el) {
+    try { el.setAttribute('data-prism-hydrated', '1'); } catch(e) {}
+  }
+
+  function highlightIncremental() {
+    if (!window.Prism) return;
+    const scope = document.getElementById('article-container') || document;
+    const list = scope.querySelectorAll('pre > code[class*="language-"]');
+    let worked = false;
+    list.forEach(code => {
+      if (isHydrated(code)) return;
       try {
-        // 先挂我们的增强（函数内部自带防重复）
-        if (window.halo && typeof halo.addPrismTool === 'function') {
-          halo.addPrismTool();
+        if (Prism.highlightElement) {
+          Prism.highlightElement(code);
+          mark(code);
+          worked = true;
+        } else if (Prism.highlightAllUnder || Prism.highlightAll) {
+          // 极端兜底：仍未提供单元素高亮时，退回全量，但基本不会命中
+          (Prism.highlightAllUnder ? Prism.highlightAllUnder : Prism.highlightAll)(scope);
+          worked = true;
         }
       } catch (e) {}
-
-      try {
-        // 只对文章区域执行高亮；没有则全局
-        var container = document.getElementById('article-container') || document;
-        if (Prism.highlightAllUnder) Prism.highlightAllUnder(container);
-        else if (Prism.highlightAll) Prism.highlightAll();
-      } catch (e) {}
     });
+
+    // 若没有需要新高亮的，但 toolbar 未挂上，为其补跑一次 complete 钩子
+    if (!worked && Prism.hooks && Prism.plugins && Prism.plugins.toolbar) {
+      list.forEach(code => {
+        const pre = code.parentNode;
+        if (!pre) return;
+        const hasToolbar = pre.querySelector('.custom-item') ||
+          (pre.nextElementSibling && pre.nextElementSibling.classList && pre.nextElementSibling.classList.contains('code-expand-btn')) ||
+          (pre.parentNode && pre.parentNode.querySelector && pre.parentNode.querySelector('.toolbar'));
+        if (hasToolbar) return;
+
+        const m = (code.className || '').match(/language-([\w-]+)/);
+        const lang = m ? m[1] : 'none';
+        const env = {
+          element: code,
+          language: lang,
+          grammar: Prism.languages[lang] || Prism.languages.none,
+          code: code.textContent || ''
+        };
+        try { Prism.hooks.run('complete', env); } catch(e) {}
+      });
+    }
   }
 
-  // 首次加载 + PJAX 完成 + 主题常用事件
-  window.addEventListener('load', bootPrismOnce);
-  document.addEventListener('page:loaded', bootPrismOnce);
-  document.addEventListener('pjax:complete', bootPrismOnce);
+  function run() {
+    addToolsOnce();
+    requestAnimationFrame(highlightIncremental);
+  }
+
+  window.addEventListener('load', run);
+  document.addEventListener('page:loaded', run);
+  document.addEventListener('pjax:complete', run);
 })();
