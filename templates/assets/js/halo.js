@@ -31,12 +31,10 @@ let halo = {
         if (!Prism.plugins.toolbar) {
             console.warn('Copy to Clipboard plugin loaded before Toolbar plugin.');
             return;
-
+        }
         // 防重复挂载（避免 PJAX 多次叠加）
         if (window.__PRISM_TOOL_PATCHED__) return;
         window.__PRISM_TOOL_PATCHED__ = true;
-
-        }
 
         const enable = GLOBAL_CONFIG.prism.enable;
         if (!enable) return;
@@ -185,8 +183,8 @@ let halo = {
                 r.style.overflow = 'hidden';
                 if (bottomBtn) {
                     bottomBtn.classList.remove('expand-done');
-                    const i = bottomBtn.querySelector('i');
-                    if (i) i.className = 'haofont hao-icon-angle-double-down';
+                    // 保持向下图标，展开时通过 .expand-done 旋转，不切换类名
+                    // if (i) i.className = 'haofont hao-icon-angle-double-down';
                     bottomBtn.style.display = 'flex';
                 }
                 if (expander) {
@@ -201,9 +199,9 @@ let halo = {
                 r.style.maxHeight = 'none';
                 r.style.overflow = 'visible';
                 if (bottomBtn) {
-                    bottomBtn.classList.add('expand-done'); // 让图标旋转“向上”
-                    const i = bottomBtn.querySelector('i');
-                    if (i) i.className = 'haofont hao-icon-angle-double-up';
+                    bottomBtn.classList.add('expand-done'); // 旋转“向上”
+                    // 保持向下图标，展开时通过 .expand-done 旋转，不切换类名
+                    // if (i) i.className = 'haofont hao-icon-angle-double-up';
                     bottomBtn.style.display = 'flex';
                 }
                 if (expander) {
