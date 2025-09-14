@@ -251,6 +251,7 @@ let halo = {
               toolbar.appendChild(customItem);
             } else {
               // 尝试在后续帧补挂一次（最多 6 帧）
+              
               (function __appendTB(attempt){
                 if (attempt > 6) return;
                 var tb = r.nextElementSibling;
@@ -258,10 +259,20 @@ let halo = {
                   if (isEnableTitle) tb.classList.add('c-title');
                   if (isEnableHr) tb.classList.add('c-hr');
                   tb.appendChild(customItem);
+                  // 确保底部按钮始终在 toolbar 之后（避免先渲染在 <pre> 后面，toolbar 后到导致被挡/不显示）
+                  var btn = (tb.nextElementSibling && tb.nextElementSibling.classList && tb.nextElementSibling.classList.contains('code-expand-btn'))
+                              ? tb.nextElementSibling
+                              : (r.nextElementSibling && r.nextElementSibling.classList && r.nextElementSibling.classList.contains('code-expand-btn')
+                                  ? r.nextElementSibling
+                                  : null);
+                  if (btn) {
+                    tb.insertAdjacentElement('afterend', btn);
+                  }
                 } else {
                   requestAnimationFrame(function(){ __appendTB(attempt+1); });
                 }
               })(0);
+;
             }
 
             var settings = getSettings(a.element);
