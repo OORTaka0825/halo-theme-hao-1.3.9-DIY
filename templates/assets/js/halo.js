@@ -31,11 +31,6 @@ let halo = {
         if (!Prism.plugins.toolbar) {
             console.warn('Copy to Clipboard plugin loaded before Toolbar plugin.');
             return;
-
-        // 防重复挂载（避免 PJAX 多次叠加）
-        if (window.__PRISM_TOOL_PATCHED__) return;
-        window.__PRISM_TOOL_PATCHED__ = true;
-
         }
 
         const enable = GLOBAL_CONFIG.prism.enable;
@@ -217,14 +212,6 @@ let halo = {
                 else setExpanded();
             }
 
-            // 先清理老按钮，避免重复（包括容器内和相邻兄弟节点）
-            r.querySelectorAll('.code-expand-btn').forEach(el => el.remove());
-            let sib = r.nextElementSibling;
-            while (sib && sib.classList && sib.classList.contains('code-expand-btn')) {
-                sib.remove();
-                sib = r.nextElementSibling;
-            }
-
             // 仅当高度超过限制时才渲染底部按钮与限制高度
             const needLimit = isEnableHeightLimit && r.scrollHeight > LIMIT;
             if (needLimit) {
@@ -235,7 +222,7 @@ let halo = {
                 bottomBtn = document.createElement("div");
                 bottomBtn.className = "code-expand-btn";
                 bottomBtn.innerHTML = '<i class="haofont hao-icon-angle-double-down"></i>';
-                r.insertAdjacentElement('afterend', bottomBtn);
+                r.offsetParent.appendChild(bottomBtn);
                 bottomBtn.addEventListener("click", toggleExpand);
             } else {
                 // 不需要限制：清理状态
@@ -493,79 +480,40 @@ let halo = {
   document.addEventListener('page:loaded', mountCopyOnShareLink);
 })();
 
-/* === Prism 在首屏与 PJAX 后主动初始化（Hydrate 版）=== */
+/* === Prism 首屏 & PJAX 初始化（精简稳定版，无观察器、无重复循环）=== */
 (function () {
-  function highlightNow() {
-    try {
-      if (!window.Prism) return;
-      const container = document.getElementById('article-container') || document;
-      if (typeof Prism.highlightAllUnder === 'function') {
-        Prism.highlightAllUnder(container);
-      } else if (typeof Prism.highlightAll === 'function') {
-        Prism.highlightAll();
+  // 等待 Prism + Toolbar 就绪再执行 fn，最多等 2s（40 * 50ms）
+  function prismReady(fn) {
+    if (window.Prism && Prism.plugins && Prism.plugins.toolbar) return fn();
+    var n = 0, timer = setInterval(function () {
+      if (window.Prism && Prism.plugins && Prism.plugins.toolbar) {
+        clearInterval(timer); fn();
+      } else if (++n > 40) {
+        clearInterval(timer);
       }
-    } catch (e) {}
+    }, 50);
   }
 
-  // 对已经是“高亮后”的代码块，强制触发一次 complete 钩子，
-  // 以便挂载 toolbar/展开按钮（防止某些场景下未触发）
-  function hydrateToolbar() {
-    try {
-      if (!window.Prism || !Prism.hooks || !Prism.plugins || !Prism.plugins.toolbar) return;
-      const container = document.getElementById('article-container') || document;
-      const codes = container.querySelectorAll('pre > code[class*="language-"]');
-      codes.forEach(codeEl => {
-        const pre = codeEl.parentNode;
-        // 判定是否已处理过：自定义按钮/toolbar/底部按钮任一存在即跳过
-        if (pre.querySelector('.custom-item') ||
-            (pre.nextElementSibling && pre.nextElementSibling.classList && pre.nextElementSibling.classList.contains('code-expand-btn')) ||
-            (pre.parentNode && pre.parentNode.querySelector && pre.parentNode.querySelector('.toolbar'))) {
-          return;
+  function bootPrismOnce() {
+    prismReady(function () {
+      try {
+        // 先挂我们的增强（函数内部自带防重复）
+        if (window.halo && typeof halo.addPrismTool === 'function') {
+          halo.addPrismTool();
         }
-        const m = (codeEl.className || '').match(/language-([\w-]+)/);
-        const lang = m ? m[1] : 'none';
-        const env = {
-          element: codeEl,
-          language: lang,
-          grammar: Prism.languages[lang] || Prism.languages.none,
-          code: codeEl.textContent || ''
-        };
-        Prism.hooks.run('complete', env);
-      });
-    } catch (e) {}
+      } catch (e) {}
+
+      try {
+        // 只对文章区域执行高亮；没有则全局
+        var container = document.getElementById('article-container') || document;
+        if (Prism.highlightAllUnder) Prism.highlightAllUnder(container);
+        else if (Prism.highlightAll) Prism.highlightAll();
+      } catch (e) {}
+    });
   }
 
-  function bootPrism() {
-    // 先挂工具（带防重入）
-    try {
-      if (window.halo && typeof halo.addPrismTool === 'function') {
-        halo.addPrismTool();
-      }
-    } catch (e) {}
-
-    // 高亮 + 多次兜底
-    requestAnimationFrame(highlightNow);
-    setTimeout(highlightNow, 80);
-    setTimeout(highlightNow, 300);
-
-    // 再次兜底：对可能已经带 token 的代码块手动触发 toolbar 挂载
-    requestAnimationFrame(hydrateToolbar);
-    setTimeout(hydrateToolbar, 100);
-    setTimeout(hydrateToolbar, 380);
-
-    // 观察 1.5s，有新增代码块则再次处理
-    try {
-      const target = document.getElementById('article-container') || document.body;
-      const mo = new MutationObserver(() => { highlightNow(); hydrateToolbar(); });
-      mo.observe(target, { childList: true, subtree: true });
-      setTimeout(() => mo.disconnect(), 1500);
-    } catch (e) {}
-  }
-
-  // 首屏 & 常见 PJAX 事件
-  window.addEventListener('load', bootPrism);
-  document.addEventListener('pjax:complete', bootPrism);
-  document.addEventListener('pjax:end', bootPrism);
-  document.addEventListener('pjax:success', bootPrism);
-  document.addEventListener('page:loaded', bootPrism);
+  // 首次加载 + PJAX 完成 + 主题常用事件
+  window.addEventListener('load', bootPrismOnce);
+  document.addEventListener('page:loaded', bootPrismOnce);
+  document.addEventListener('pjax:complete', bootPrismOnce);
 })();
