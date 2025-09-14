@@ -18759,7 +18759,7 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
 :root[data-theme="light"] #article-container .code-expand-btn,
 :root[data-theme="light"] #post-comment .code-expand-btn{
   background: #fbb505 !important;          /* 改这里：日间背景色 */
-  border-top: none !important; /* 可选：分隔线颜色 */
+  border-top: 1px solid #00fffff7 !important; /* 可选：分隔线颜色 */
 }
 :root[data-theme="light"] .code-expand-btn i{
   color: #2563eb !important;                /* 改这里：日间图标颜色 */
@@ -18773,7 +18773,7 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
 :root[data-theme="dark"] #article-container .code-expand-btn,
 :root[data-theme="dark"] #post-comment .code-expand-btn{
   background: rgba(153, 231, 9, 0.05) !important;   /* 改这里：夜间背景色 */
-  border-top:  none !important; /* 可选：分隔线 */
+  border-top: 1px solid rgb(255, 0, 0) !important; /* 可选：分隔线 */
 }
 :root[data-theme="dark"] .code-expand-btn i{
   color: #60a5fa !important;                       /* 改这里：夜间图标颜色 */
