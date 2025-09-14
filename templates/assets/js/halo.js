@@ -490,3 +490,67 @@ let halo = {
   document.addEventListener('pjax:complete', mountCopyOnShareLink);
   document.addEventListener('page:loaded', mountCopyOnShareLink);
 })();
+
+/* === Prism 首屏 & PJAX 初始化（一次调度，安全版）=== */
+(function () {
+  if (window.__PRISM_PJAX_BOOT__) return;
+  window.__PRISM_PJAX_BOOT__ = true;
+
+  let scheduled = false;
+  function scheduleBoot() {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(runBoot);
+  }
+
+  function runBoot() {
+    scheduled = false;
+
+    // 1) 挂载我们对 Prism 的增强（函数内部自带防重复）
+    try {
+      if (window.halo && typeof halo.addPrismTool === 'function') {
+        halo.addPrismTool();
+      }
+    } catch (e) {}
+
+    // 2) 触发高亮（仅对文章容器；无则全局）
+    try {
+      if (window.Prism) {
+        const container = document.getElementById('article-container') || document;
+        if (typeof Prism.highlightAllUnder === 'function') {
+          Prism.highlightAllUnder(container);
+        } else if (typeof Prism.highlightAll === 'function') {
+          Prism.highlightAll();
+        }
+
+        // 3) 兜底：若某些代码已带 token 但未挂到我们的工具栏/底部按钮，则手动触发一次 complete
+        if (Prism.hooks && Prism.plugins && Prism.plugins.toolbar) {
+          const codes = container.querySelectorAll('pre > code[class*="language-"]');
+          codes.forEach(codeEl => {
+            const pre = codeEl.parentNode;
+            if (!pre) return;
+            const hasToolbarOrBtn =
+              pre.querySelector('.custom-item') ||
+              (pre.nextElementSibling && pre.nextElementSibling.classList && pre.nextElementSibling.classList.contains('code-expand-btn')) ||
+              (pre.parentNode && pre.parentNode.querySelector && pre.parentNode.querySelector('.toolbar'));
+            if (hasToolbarOrBtn) return;
+
+            const m = (codeEl.className || '').match(/language-([\w-]+)/);
+            const lang = m ? m[1] : 'none';
+            const env = {
+              element: codeEl,
+              language: lang,
+              grammar: (Prism.languages && (Prism.languages[lang] || Prism.languages.none)) || undefined,
+              code: codeEl.textContent || ''
+            };
+            try { Prism.hooks.run('complete', env); } catch (_) {}
+          });
+        }
+      }
+    } catch (e) {}
+  }
+
+  window.addEventListener('load', scheduleBoot);
+  document.addEventListener('page:loaded', scheduleBoot);
+  document.addEventListener('pjax:complete', scheduleBoot);
+})();
