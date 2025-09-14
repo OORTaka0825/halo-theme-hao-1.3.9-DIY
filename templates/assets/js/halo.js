@@ -491,10 +491,10 @@ let halo = {
   document.addEventListener('page:loaded', mountCopyOnShareLink);
 })();
 
-/* === Prism 首屏 & PJAX 初始化（一次调度，安全版）=== */
+/* === Prism 首屏 & PJAX 初始化（事件扩充分支，轻量一次调度）=== */
 (function () {
-  if (window.__PRISM_PJAX_BOOT__) return;
-  window.__PRISM_PJAX_BOOT__ = true;
+  if (window.__PRISM_PJAX_BOOT_V2__) return;
+  window.__PRISM_PJAX_BOOT_V2__ = true;
 
   let scheduled = false;
   function scheduleBoot() {
@@ -550,7 +550,11 @@ let halo = {
     } catch (e) {}
   }
 
+  // 首屏 + 多种 PJAX 实现常用事件（只做一次调度）
   window.addEventListener('load', scheduleBoot);
+  document.addEventListener('DOMContentLoaded', scheduleBoot);
   document.addEventListener('page:loaded', scheduleBoot);
   document.addEventListener('pjax:complete', scheduleBoot);
+  document.addEventListener('pjax:end', scheduleBoot);
+  document.addEventListener('pjax:success', scheduleBoot);
 })();
