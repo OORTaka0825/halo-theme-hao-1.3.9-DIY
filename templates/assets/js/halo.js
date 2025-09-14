@@ -492,70 +492,81 @@ let halo = {
 })();
 
 
-/* ===== APPEND-ONLY: bottom expand bar for theme's built-in Prism code block ===== */
-(function () {
-
-  if (window.__THEME_CODE_EXPAND_INSTALLED__) return;
-  window.__THEME_CODE_EXPAND_INSTALLED__ = true;
-
+/* ===== PJAX fallback for code highlight + bottom expand bar (idempotent) ===== */
+(function(){
   function getMax() {
     var n = parseInt(getComputedStyle(document.documentElement)
       .getPropertyValue('--heo-code-max-height')) || 0;
     return Math.max(200, n || 300);
   }
 
-  function getWrapper(pre) {
-    var p = pre.parentElement;
-    return (p && p.classList && p.classList.contains('code-toolbar')) ? p : pre;
-  }
-
-  function installFor(pre) {
-    if (!pre) return;
-    var wrap = getWrapper(pre);
-    if (wrap.nextElementSibling && wrap.nextElementSibling.classList &&
-        wrap.nextElementSibling.classList.contains('code-expand-btn')) return;
-    if (pre.scrollHeight - pre.clientHeight < 20) return;
-
-    var MAX_H = getMax();
-    if (!pre.style.maxHeight) pre.style.maxHeight = MAX_H + 'px';
-    pre.style.overflow = 'auto';
-
-    var btn = document.createElement('div');
-    btn.className = 'code-expand-btn';
-    btn.innerHTML = '<i class="fa-solid fa-angles-down"></i>';
-    wrap.insertAdjacentElement('afterend', btn);
-
-    var open = false;
-    function apply() {
-      if (open) {
-        pre.style.maxHeight = 'none';
-        btn.classList.add('open');
-      } else {
-        pre.style.maxHeight = MAX_H + 'px';
-        btn.classList.remove('open');
+  function ensureHighlight(root){
+    var box = root || document.getElementById('article-container') || document;
+    try{
+      if (window.Prism && Prism.highlightAllUnder){
+        Prism.highlightAllUnder(box);
+      }else if (window.hljs && hljs.highlightElement){
+        box.querySelectorAll('pre code').forEach(function(el){
+          if (!el.dataset || el.dataset.highlighted !== 'yes'){
+            hljs.highlightElement(el);
+            try{ el.dataset.highlighted = 'yes'; }catch(_){}
+          }
+        });
       }
-    }
-    btn.addEventListener('click', function () {
-      open = !open;
-      apply();
-    });
-    apply();
+    }catch(e){}
   }
 
-  function scan(root) {
+  function ensureExpand(root){
     var box = root || document.getElementById('article-container') || document;
     var list = box.querySelectorAll('pre > code[class*="language-"]');
-    list.forEach(function (code) { 
+    list.forEach(function(code){
       var pre = code.closest('pre');
-      if (pre) installFor(pre);
+      if (!pre) return;
+      var p = pre.parentElement;
+      var wrap = (p && p.classList && p.classList.contains('code-toolbar')) ? p : pre;
+      // already has bottom bar?
+      if (wrap.nextElementSibling && wrap.nextElementSibling.classList &&
+          wrap.nextElementSibling.classList.contains('code-expand-btn')) return;
+
+      if (pre.scrollHeight - pre.clientHeight < 20) return;
+
+      var MAX_H = getMax();
+      if (!pre.style.maxHeight) pre.style.maxHeight = MAX_H + 'px';
+      pre.style.overflow = 'auto';
+
+      var btn = document.createElement('div');
+      btn.className = 'code-expand-btn';
+      btn.innerHTML = '<i class="fa-solid fa-angles-down"></i>';
+      wrap.insertAdjacentElement('afterend', btn);
+
+      var open = false;
+      function apply(){
+        if (open) { pre.style.maxHeight = 'none'; btn.classList.add('open'); }
+        else { pre.style.maxHeight = MAX_H + 'px'; btn.classList.remove('open'); }
+      }
+      btn.addEventListener('click', function(){ open = !open; apply(); });
+      apply();
     });
   }
 
-  if (document.readyState !== 'loading') setTimeout(scan, 0);
-  document.addEventListener('DOMContentLoaded', function(){ scan(); }, {passive:true});
-  window.addEventListener('load', function(){ scan(); }, {passive:true});
-  document.addEventListener('page:loaded', function(){ scan(); }, {passive:true});
-  document.addEventListener('pjax:complete', function(){ scan(); }, {passive:true});
-  document.addEventListener('pjax:success', function(){ scan(); }, {passive:true});
+  function kick(){
+    var i = 0, max = 18;
+    var timer = setInterval(function(){
+      i++;
+      ensureHighlight();
+      ensureExpand();
+      // 粗略收敛：完成几轮后停止
+      if (i >= max) clearInterval(timer);
+    }, 120);
+  }
+
+  // 首次与 PJAX 进入都补齐
+  if (document.readyState !== 'loading') setTimeout(kick, 0);
+  document.addEventListener('DOMContentLoaded', kick, {passive:true});
+  window.addEventListener('load', kick, {passive:true});
+  document.addEventListener('page:loaded', kick, {passive:true});
+  document.addEventListener('pjax:complete', kick, {passive:true});
+  document.addEventListener('pjax:success', kick, {passive:true});
+  document.addEventListener('pjax:end', kick, {passive:true});
 })();
 
