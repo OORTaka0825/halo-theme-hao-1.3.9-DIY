@@ -328,33 +328,3 @@
 }
 
 /*代码块*/
-
-
-/* === APPEND-ONLY: bottom expand bar for theme's built-in Prism code block === */
-#article-container .code-expand-btn,
-#post-comment .code-expand-btn{
-  display:block;
-  height:38px;
-  line-height:38px;
-  text-align:center;
-  cursor:pointer;
-  user-select:none;
-  border-top:1px solid var(--heo-card-border, rgba(200,200,200,.2));
-  background:transparent;
-}
-
-#article-container .code-expand-btn i,
-#post-comment .code-expand-btn i{
-  display:inline-block;
-  transition: transform .25s ease, opacity .25s ease;
-  opacity:.6;
-  font-size:14px;
-}
-
-/* 展开后：向上翻转 */
-#article-container .code-expand-btn.open i,
-#post-comment .code-expand-btn.open i{
-  transform: rotate(180deg);
-  opacity:1;
-}
-
