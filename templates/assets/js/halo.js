@@ -24,12 +24,14 @@ let halo = {
      * 只适用于halo的代码渲染
      */
     addPrismTool: () => {
-        if (typeof Prism === 'undefined' || typeof document === 'undefined') {
-            return;
-        }
+        if (typeof Prism === 'undefined' || typeof document === 'undefined') return;
+
+        // 防重复挂载（PJAX多次执行时）
+        if (window.__PRISM_TOOL_INSTALLED__) return;
+        window.__PRISM_TOOL_INSTALLED__ = true;
 
         if (!Prism.plugins.toolbar) {
-            console.warn('Copy to Clipboard plugin loaded before Toolbar plugin.');
+            console.warn('Prism toolbar plugin is required.');
             return;
         }
 
@@ -45,8 +47,6 @@ let halo = {
 
         // 与主题保持一致：高度限制 +30 作为缓冲
         const LIMIT = prismLimit + 30;
-
-        // https://stackoverflow.com/a/30810322/7595472
 
         /** @param {CopyInfo} copyInfo */
         function fallbackCopyTextToClipboard(copyInfo) {
@@ -116,8 +116,8 @@ let halo = {
         }
 
         // —— 这里开始挂钩 toolbar，注入复制/折叠/底部按钮 ——
-        var r = Prism.plugins.toolbar.hook = function (a) {
-            // r 是 <pre>，toolbar 是其紧邻工具条
+        var hook = Prism.plugins.toolbar.hook = function (a) {
+            // r 是 <pre> 的父容器 .code-toolbar
             var r = a.element.parentNode;
             var toolbar = r.nextElementSibling;
 
@@ -129,7 +129,7 @@ let halo = {
             var customItem = document.createElement("div");
             customItem.className = 'custom-item absolute top-0'
 
-            // 复制
+            // 复制按钮
             var copy;
             if (isEnableCopy) {
                 copy = document.createElement("i");
@@ -142,7 +142,7 @@ let halo = {
                             return a.element.textContent;
                         },
                         success: function () {
-                            btf.snackbarShow('复制成功')
+                            btf?.snackbarShow?.('复制成功')
                             setState('copy-success');
                             resetText();
                         },
@@ -157,7 +157,7 @@ let halo = {
                 });
             }
 
-            // 顶部折叠/展开逻辑与底部按钮共用
+            // 顶部折叠/展开图标
             let expander;
             const prismToolsFn = function () {
                 toggleExpand();
@@ -212,6 +212,15 @@ let halo = {
                 else setExpanded();
             }
 
+            // ▼▼▼ 先清理老按钮，避免重复（包括容器内和相邻兄弟节点） ▼▼▼
+            r.querySelectorAll('.code-expand-btn').forEach(el => el.remove());
+            let sib = r.nextElementSibling;
+            while (sib && sib.classList && sib.classList.contains('code-expand-btn')) {
+                sib.remove();
+                sib = r.nextElementSibling;
+            }
+            // ▲▲▲ 清理结束 ▲▲▲
+
             // 仅当高度超过限制时才渲染底部按钮与限制高度
             const needLimit = isEnableHeightLimit && r.scrollHeight > LIMIT;
             if (needLimit) {
@@ -222,7 +231,7 @@ let halo = {
                 bottomBtn = document.createElement("div");
                 bottomBtn.className = "code-expand-btn";
                 bottomBtn.innerHTML = '<i class="haofont hao-icon-angle-double-down"></i>';
-                r.offsetParent.appendChild(bottomBtn);
+                r.insertAdjacentElement('afterend', bottomBtn);
                 bottomBtn.addEventListener("click", toggleExpand);
             } else {
                 // 不需要限制：清理状态
@@ -247,7 +256,7 @@ let halo = {
                 copy.setAttribute('data-copy-state', state);
             }
         };
-        Prism.hooks.add("complete", r)
+        Prism.hooks.add("complete", hook)
     },
 
     addScript: (e, t, n) => {
