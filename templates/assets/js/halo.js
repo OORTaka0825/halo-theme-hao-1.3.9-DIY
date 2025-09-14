@@ -209,12 +209,16 @@ let halo = {
                 ele.className = "code-expand-btn";
                 ele.innerHTML = '<i class="haofont hao-icon-angle-double-down"></i>';
                 ele.addEventListener("click", expandCode);
-                r.offsetParent.appendChild(ele);
+                const anchor = (r.nextElementSibling && r.nextElementSibling.classList && r.nextElementSibling.classList.contains('toolbar')) ? r.nextElementSibling : r;
+                const nextBtn = anchor.nextElementSibling;
+                if (nextBtn && nextBtn.classList && nextBtn.classList.contains('code-expand-btn')) nextBtn.remove();
+                anchor.insertAdjacentElement('afterend', ele);
             }
 
             // 右上角箭头：仅在「限制高度 ↔ 全量」之间切换；不再进入“仅标题”折叠
             const prismShrinkFn = () => {
-                const $btnWrap = r.offsetParent.lastElementChild;
+                const anchor = (r.nextElementSibling && r.nextElementSibling.classList && r.nextElementSibling.classList.contains('toolbar')) ? r.nextElementSibling : r;
+                const $btnWrap = (anchor.nextElementSibling && anchor.nextElementSibling.classList && anchor.nextElementSibling.classList.contains('code-expand-btn')) ? anchor.nextElementSibling : null;
                 const hasBottomBtn = $btnWrap && $btnWrap.classList && $btnWrap.classList.contains('code-expand-btn');
 
                 // A：当前是“全量展开”→ 点击右上角 = 回到“限制高度”
@@ -495,80 +499,4 @@ let halo = {
   window.addEventListener('load', mountCopyOnShareLink);
   document.addEventListener('pjax:complete', mountCopyOnShareLink);
   document.addEventListener('page:loaded', mountCopyOnShareLink);
-})();
-
-/* === Prism 首屏 & PJAX 增量初始化（安全版，无观察器、无多次全量高亮）=== */
-(function () {
-  if (window.__PRISM_PJAX_SAFE__) return;
-  window.__PRISM_PJAX_SAFE__ = true;
-
-  function addToolsOnce() {
-    try {
-      if (window.halo && typeof halo.addPrismTool === 'function') {
-        halo.addPrismTool(); // 内部自带防重复
-      }
-    } catch (e) {}
-  }
-
-  function hasTokens(el) {
-    try { return !!(el.querySelector && el.querySelector('.token')); } catch(e) { return false; }
-  }
-  function isHydrated(el) {
-    return el.hasAttribute && el.hasAttribute('data-prism-hydrated') || hasTokens(el);
-  }
-  function mark(el) {
-    try { el.setAttribute('data-prism-hydrated', '1'); } catch(e) {}
-  }
-
-  function highlightIncremental() {
-    if (!window.Prism) return;
-    const scope = document.getElementById('article-container') || document;
-    const list = scope.querySelectorAll('pre > code[class*="language-"]');
-    let worked = false;
-    list.forEach(code => {
-      if (isHydrated(code)) return;
-      try {
-        if (Prism.highlightElement) {
-          Prism.highlightElement(code);
-          mark(code);
-          worked = true;
-        } else if (Prism.highlightAllUnder || Prism.highlightAll) {
-          // 极端兜底：仍未提供单元素高亮时，退回全量，但基本不会命中
-          (Prism.highlightAllUnder ? Prism.highlightAllUnder : Prism.highlightAll)(scope);
-          worked = true;
-        }
-      } catch (e) {}
-    });
-
-    // 若没有需要新高亮的，但 toolbar 未挂上，为其补跑一次 complete 钩子
-    if (!worked && Prism.hooks && Prism.plugins && Prism.plugins.toolbar) {
-      list.forEach(code => {
-        const pre = code.parentNode;
-        if (!pre) return;
-        const hasToolbar = pre.querySelector('.custom-item') ||
-          (pre.nextElementSibling && pre.nextElementSibling.classList && pre.nextElementSibling.classList.contains('code-expand-btn')) ||
-          (pre.parentNode && pre.parentNode.querySelector && pre.parentNode.querySelector('.toolbar'));
-        if (hasToolbar) return;
-
-        const m = (code.className || '').match(/language-([\w-]+)/);
-        const lang = m ? m[1] : 'none';
-        const env = {
-          element: code,
-          language: lang,
-          grammar: Prism.languages[lang] || Prism.languages.none,
-          code: code.textContent || ''
-        };
-        try { Prism.hooks.run('complete', env); } catch(e) {}
-      });
-    }
-  }
-
-  function run() {
-    addToolsOnce();
-    requestAnimationFrame(highlightIncremental);
-  }
-
-  window.addEventListener('load', run);
-  document.addEventListener('page:loaded', run);
-  document.addEventListener('pjax:complete', run);
 })();
