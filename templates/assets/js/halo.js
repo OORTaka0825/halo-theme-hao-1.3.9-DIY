@@ -31,10 +31,12 @@ let halo = {
         if (!Prism.plugins.toolbar) {
             console.warn('Copy to Clipboard plugin loaded before Toolbar plugin.');
             return;
-        }
+
         // 防重复挂载（避免 PJAX 多次叠加）
         if (window.__PRISM_TOOL_PATCHED__) return;
         window.__PRISM_TOOL_PATCHED__ = true;
+
+        }
 
         const enable = GLOBAL_CONFIG.prism.enable;
         if (!enable) return;
@@ -183,8 +185,8 @@ let halo = {
                 r.style.overflow = 'hidden';
                 if (bottomBtn) {
                     bottomBtn.classList.remove('expand-done');
-                    // 保持向下图标，展开时通过 .expand-done 旋转，不切换类名
-                    // if (i) i.className = 'haofont hao-icon-angle-double-down';
+                    const i = bottomBtn.querySelector('i');
+                    if (i) i.className = 'haofont hao-icon-angle-double-down';
                     bottomBtn.style.display = 'flex';
                 }
                 if (expander) {
@@ -199,9 +201,9 @@ let halo = {
                 r.style.maxHeight = 'none';
                 r.style.overflow = 'visible';
                 if (bottomBtn) {
-                    bottomBtn.classList.add('expand-done'); // 旋转“向上”
-                    // 保持向下图标，展开时通过 .expand-done 旋转，不切换类名
-                    // if (i) i.className = 'haofont hao-icon-angle-double-up';
+                    bottomBtn.classList.add('expand-done'); // 让图标旋转“向上”
+                    const i = bottomBtn.querySelector('i');
+                    if (i) i.className = 'haofont hao-icon-angle-double-up';
                     bottomBtn.style.display = 'flex';
                 }
                 if (expander) {
@@ -491,7 +493,7 @@ let halo = {
   document.addEventListener('page:loaded', mountCopyOnShareLink);
 })();
 
-/* === Prism 在首屏与 PJAX 后主动初始化（更稳健版）=== */
+/* === Prism 在首屏与 PJAX 后主动初始化（Hydrate 版）=== */
 (function () {
   function highlightNow() {
     try {
@@ -505,6 +507,34 @@ let halo = {
     } catch (e) {}
   }
 
+  // 对已经是“高亮后”的代码块，强制触发一次 complete 钩子，
+  // 以便挂载 toolbar/展开按钮（防止某些场景下未触发）
+  function hydrateToolbar() {
+    try {
+      if (!window.Prism || !Prism.hooks || !Prism.plugins || !Prism.plugins.toolbar) return;
+      const container = document.getElementById('article-container') || document;
+      const codes = container.querySelectorAll('pre > code[class*="language-"]');
+      codes.forEach(codeEl => {
+        const pre = codeEl.parentNode;
+        // 判定是否已处理过：自定义按钮/toolbar/底部按钮任一存在即跳过
+        if (pre.querySelector('.custom-item') ||
+            (pre.nextElementSibling && pre.nextElementSibling.classList && pre.nextElementSibling.classList.contains('code-expand-btn')) ||
+            (pre.parentNode && pre.parentNode.querySelector && pre.parentNode.querySelector('.toolbar'))) {
+          return;
+        }
+        const m = (codeEl.className || '').match(/language-([\w-]+)/);
+        const lang = m ? m[1] : 'none';
+        const env = {
+          element: codeEl,
+          language: lang,
+          grammar: Prism.languages[lang] || Prism.languages.none,
+          code: codeEl.textContent || ''
+        };
+        Prism.hooks.run('complete', env);
+      });
+    } catch (e) {}
+  }
+
   function bootPrism() {
     // 先挂工具（带防重入）
     try {
@@ -513,34 +543,26 @@ let halo = {
       }
     } catch (e) {}
 
-    // 立即与延迟各跑一次，覆盖 PJAX 插入时序差异
+    // 高亮 + 多次兜底
     requestAnimationFrame(highlightNow);
     setTimeout(highlightNow, 80);
     setTimeout(highlightNow, 300);
 
-    // 临时观察 1.2s，若有代码块后插入再补跑一次
+    // 再次兜底：对可能已经带 token 的代码块手动触发 toolbar 挂载
+    requestAnimationFrame(hydrateToolbar);
+    setTimeout(hydrateToolbar, 100);
+    setTimeout(hydrateToolbar, 380);
+
+    // 观察 1.5s，有新增代码块则再次处理
     try {
       const target = document.getElementById('article-container') || document.body;
-      const mo = new MutationObserver((muts) => {
-        for (const m of muts) {
-          if (!m.addedNodes) continue;
-          for (const n of m.addedNodes) {
-            if (n.nodeType !== 1) continue;
-            if ((n.matches && (n.matches('pre[class*="language-"], code[class*="language-"]'))) ||
-                (n.querySelector && n.querySelector('pre[class*="language-"], code[class*="language-"]'))) {
-              highlightNow();
-              mo.disconnect();
-              return;
-            }
-          }
-        }
-      });
+      const mo = new MutationObserver(() => { highlightNow(); hydrateToolbar(); });
       mo.observe(target, { childList: true, subtree: true });
-      setTimeout(() => mo.disconnect(), 1200);
+      setTimeout(() => mo.disconnect(), 1500);
     } catch (e) {}
   }
 
-  // 首次加载 + PJAX 相关事件 + 主题常见事件
+  // 首屏 & 常见 PJAX 事件
   window.addEventListener('load', bootPrism);
   document.addEventListener('pjax:complete', bootPrism);
   document.addEventListener('pjax:end', bootPrism);
