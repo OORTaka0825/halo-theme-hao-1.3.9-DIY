@@ -490,3 +490,32 @@ let halo = {
   document.addEventListener('pjax:complete', mountCopyOnShareLink);
   document.addEventListener('page:loaded', mountCopyOnShareLink);
 })();
+
+/* === Prism 主题跟随系统/后台选择自动切换（最小补丁）=== */
+(function () {
+  function applyCodeTheme() {
+    try {
+      if (window.halo && typeof halo.dataCodeTheme === 'function') {
+        halo.dataCodeTheme();
+      }
+    } catch (e) {}
+  }
+  // 首次加载 & PJAX 完成
+  window.addEventListener('load', applyCodeTheme);
+  document.addEventListener('page:loaded', applyCodeTheme);
+  document.addEventListener('pjax:complete', applyCodeTheme);
+  // 监听 <html data-theme="..."> 变化（黑暗/浅色切换）
+  try {
+    const mo = new MutationObserver(function (muts) {
+      for (const m of muts) {
+        if (m.type === 'attributes' && m.attributeName === 'data-theme') {
+          applyCodeTheme();
+        }
+      }
+    });
+    mo.observe(document.documentElement, { attributes: true });
+  } catch (e) {}
+  // 兜底：延迟再执行一次（避免异步加载时机问题）
+  setTimeout(applyCodeTheme, 50);
+  setTimeout(applyCodeTheme, 400);
+})();
