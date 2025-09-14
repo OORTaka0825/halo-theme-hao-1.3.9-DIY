@@ -28,9 +28,8 @@ let halo = {
             return;
         }
 
-        if (!Prism.plugins.toolbar) {
-            console.warn('Copy to Clipboard plugin loaded before Toolbar plugin.');
-            return;
+        if (!Prism.plugins || !Prism.plugins.toolbar) {
+            // toolbar 可能稍后才注册；这里不提前返回，后续逻辑已做容错
         }
         // 防重复挂载（避免 PJAX 多次叠加）
         if (window.__PRISM_TOOL_PATCHED__) return;
@@ -123,10 +122,10 @@ let halo = {
             // r 是 <pre>，toolbar 是其紧邻工具条
             var r = a.element.parentNode;
             var toolbar = r.nextElementSibling;
+            var __hasTB = toolbar && toolbar.classList;
 
             // 标题与分割线
-            isEnableTitle && toolbar.classList.add("c-title")
-            isEnableHr && toolbar.classList.add("c-hr")
+            if (__hasTB) { isEnableTitle && toolbar.classList.add("c-title"); isEnableHr && toolbar.classList.add("c-hr"); }
 
             // 自定义工具容器（右上角）
             var customItem = document.createElement("div");
@@ -242,7 +241,7 @@ let halo = {
                 r.classList.remove('expand-done');
             }
 
-            toolbar.appendChild(customItem)
+            if (__hasTB) toolbar.appendChild(customItem)
 
             var settings = getSettings(a.element);
 
@@ -489,72 +488,4 @@ let halo = {
   window.addEventListener('load', mountCopyOnShareLink);
   document.addEventListener('pjax:complete', mountCopyOnShareLink);
   document.addEventListener('page:loaded', mountCopyOnShareLink);
-})();
-
-/* === Prism 首屏 & PJAX 初始化（事件扩充分支，轻量一次调度）=== */
-(function () {
-  if (window.__PRISM_PJAX_BOOT_V2__) return;
-  window.__PRISM_PJAX_BOOT_V2__ = true;
-
-  let scheduled = false;
-  function scheduleBoot() {
-    if (scheduled) return;
-    scheduled = true;
-    requestAnimationFrame(runBoot);
-  }
-
-  function runBoot() {
-    scheduled = false;
-
-    // 1) 挂载我们对 Prism 的增强（函数内部自带防重复）
-    try {
-      if (window.halo && typeof halo.addPrismTool === 'function') {
-        halo.addPrismTool();
-      }
-    } catch (e) {}
-
-    // 2) 触发高亮（仅对文章容器；无则全局）
-    try {
-      if (window.Prism) {
-        const container = document.getElementById('article-container') || document;
-        if (typeof Prism.highlightAllUnder === 'function') {
-          Prism.highlightAllUnder(container);
-        } else if (typeof Prism.highlightAll === 'function') {
-          Prism.highlightAll();
-        }
-
-        // 3) 兜底：若某些代码已带 token 但未挂到我们的工具栏/底部按钮，则手动触发一次 complete
-        if (Prism.hooks && Prism.plugins && Prism.plugins.toolbar) {
-          const codes = container.querySelectorAll('pre > code[class*="language-"]');
-          codes.forEach(codeEl => {
-            const pre = codeEl.parentNode;
-            if (!pre) return;
-            const hasToolbarOrBtn =
-              pre.querySelector('.custom-item') ||
-              (pre.nextElementSibling && pre.nextElementSibling.classList && pre.nextElementSibling.classList.contains('code-expand-btn')) ||
-              (pre.parentNode && pre.parentNode.querySelector && pre.parentNode.querySelector('.toolbar'));
-            if (hasToolbarOrBtn) return;
-
-            const m = (codeEl.className || '').match(/language-([\w-]+)/);
-            const lang = m ? m[1] : 'none';
-            const env = {
-              element: codeEl,
-              language: lang,
-              grammar: (Prism.languages && (Prism.languages[lang] || Prism.languages.none)) || undefined,
-              code: codeEl.textContent || ''
-            };
-            try { Prism.hooks.run('complete', env); } catch (_) {}
-          });
-        }
-      }
-    } catch (e) {}
-  }
-
-  // 首屏 + 多种 PJAX 实现常用事件（只做一次调度）
-  window.addEventListener('load', scheduleBoot);
-  document.addEventListener('DOMContentLoaded', scheduleBoot);
-  document.addEventListener('page:loaded', scheduleBoot);
-  document.addEventListener('pjax:complete', scheduleBoot);
-  document.addEventListener('pjax:end', scheduleBoot);
-  document.addEventListener('pjax:success', scheduleBoot);
 })();
