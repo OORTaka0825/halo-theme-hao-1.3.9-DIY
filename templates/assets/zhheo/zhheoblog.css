@@ -18753,15 +18753,3 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
     background-color: #2196f3;
     color: #fff
 }
-
-
-
-/* === IPv6/IPv4 定位徽章样式（沿用 .tk-extra 基础样式） === */
-.tk-ip-region { margin-left: 6px !important; }
-.tk-ip-badge{ display:inline-flex; align-items:center; gap:6px; padding:2px 10px; border-radius:999px; font-size:12px; line-height:1; white-space:nowrap; background:rgba(0,0,0,.55); color:#fff; margin-right:6px; }
-.tk-ip-badge svg{ width:12px; height:12px; opacity:.9; }
-@media (prefers-color-scheme: light){
-  .tk-ip-badge{ background:rgba(0,0,0,.08); color:#333; }
-  .tk-ip-badge svg{ fill:#333; }
-}
-/* === /定位徽章样式 === */
