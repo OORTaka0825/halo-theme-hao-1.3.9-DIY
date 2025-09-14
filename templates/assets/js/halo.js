@@ -492,20 +492,27 @@ let halo = {
 })();
 
 
-/* ===== PJAX fallback for code highlight + bottom expand bar (idempotent) ===== */
+/* ===== PJAX robust observer for Prism code blocks (highlight + bottom bar) ===== */
 (function(){
-  function getMax() {
+  if (window.__CODE_OBSERVER_INSTALLED__) return;
+  window.__CODE_OBSERVER_INSTALLED__ = true;
+
+  function ready(cb){
+    if (document.readyState !== 'loading') cb();
+    else document.addEventListener('DOMContentLoaded', cb, {once:true});
+  }
+
+  function getMax(){
     var n = parseInt(getComputedStyle(document.documentElement)
       .getPropertyValue('--heo-code-max-height')) || 0;
     return Math.max(200, n || 300);
   }
 
-  function ensureHighlight(root){
+  function highlight(root){
     var box = root || document.getElementById('article-container') || document;
     try{
-      if (window.Prism && Prism.highlightAllUnder){
-        Prism.highlightAllUnder(box);
-      }else if (window.hljs && hljs.highlightElement){
+      if (window.Prism && Prism.highlightAllUnder) Prism.highlightAllUnder(box);
+      else if (window.hljs && hljs.highlightElement){
         box.querySelectorAll('pre code').forEach(function(el){
           if (!el.dataset || el.dataset.highlighted !== 'yes'){
             hljs.highlightElement(el);
@@ -516,7 +523,7 @@ let halo = {
     }catch(e){}
   }
 
-  function ensureExpand(root){
+  function expandify(root){
     var box = root || document.getElementById('article-container') || document;
     var list = box.querySelectorAll('pre > code[class*="language-"]');
     list.forEach(function(code){
@@ -524,10 +531,8 @@ let halo = {
       if (!pre) return;
       var p = pre.parentElement;
       var wrap = (p && p.classList && p.classList.contains('code-toolbar')) ? p : pre;
-      // already has bottom bar?
       if (wrap.nextElementSibling && wrap.nextElementSibling.classList &&
           wrap.nextElementSibling.classList.contains('code-expand-btn')) return;
-
       if (pre.scrollHeight - pre.clientHeight < 20) return;
 
       var MAX_H = getMax();
@@ -549,24 +554,46 @@ let halo = {
     });
   }
 
-  function kick(){
-    var i = 0, max = 18;
-    var timer = setInterval(function(){
-      i++;
-      ensureHighlight();
-      ensureExpand();
-      // 粗略收敛：完成几轮后停止
-      if (i >= max) clearInterval(timer);
-    }, 120);
+  function process(root){
+    highlight(root);
+    expandify(root);
   }
 
-  // 首次与 PJAX 进入都补齐
-  if (document.readyState !== 'loading') setTimeout(kick, 0);
-  document.addEventListener('DOMContentLoaded', kick, {passive:true});
+  function kick(){
+    process();
+    // retry window in case Prism is slow
+    var tries = 0, max = 40;
+    var t = setInterval(function(){
+      tries++;
+      process();
+      if (tries >= max) clearInterval(t);
+    }, 150);
+  }
+
+  function observe(){
+    var host = document.getElementById('article-container') || document.body;
+    if (!host) return;
+    var obs = new MutationObserver(function(muts){
+      var need = false;
+      for (var m of muts){
+        if (m.addedNodes && m.addedNodes.length){
+          need = true; break;
+        }
+      }
+      if (need) process(host);
+    });
+    obs.observe(host, {childList:true, subtree:true});
+  }
+
+  ready(function(){
+    kick();
+    observe();
+  });
+
   window.addEventListener('load', kick, {passive:true});
   document.addEventListener('page:loaded', kick, {passive:true});
-  document.addEventListener('pjax:complete', kick, {passive:true});
   document.addEventListener('pjax:success', kick, {passive:true});
+  document.addEventListener('pjax:complete', kick, {passive:true});
   document.addEventListener('pjax:end', kick, {passive:true});
 })();
 
