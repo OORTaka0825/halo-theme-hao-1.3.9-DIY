@@ -31,6 +31,11 @@ let halo = {
         if (!Prism.plugins.toolbar) {
             console.warn('Copy to Clipboard plugin loaded before Toolbar plugin.');
             return;
+
+        // 防重复挂载（避免 PJAX 多次叠加）
+        if (window.__PRISM_TOOL_PATCHED__) return;
+        window.__PRISM_TOOL_PATCHED__ = true;
+
         }
 
         const enable = GLOBAL_CONFIG.prism.enable;
@@ -212,6 +217,14 @@ let halo = {
                 else setExpanded();
             }
 
+            // 先清理老按钮，避免重复（包括容器内和相邻兄弟节点）
+            r.querySelectorAll('.code-expand-btn').forEach(el => el.remove());
+            let sib = r.nextElementSibling;
+            while (sib && sib.classList && sib.classList.contains('code-expand-btn')) {
+                sib.remove();
+                sib = r.nextElementSibling;
+            }
+
             // 仅当高度超过限制时才渲染底部按钮与限制高度
             const needLimit = isEnableHeightLimit && r.scrollHeight > LIMIT;
             if (needLimit) {
@@ -222,7 +235,7 @@ let halo = {
                 bottomBtn = document.createElement("div");
                 bottomBtn.className = "code-expand-btn";
                 bottomBtn.innerHTML = '<i class="haofont hao-icon-angle-double-down"></i>';
-                r.offsetParent.appendChild(bottomBtn);
+                r.insertAdjacentElement('afterend', bottomBtn);
                 bottomBtn.addEventListener("click", toggleExpand);
             } else {
                 // 不需要限制：清理状态
