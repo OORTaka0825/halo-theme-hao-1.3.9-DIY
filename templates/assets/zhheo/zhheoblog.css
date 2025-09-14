@@ -18782,3 +18782,27 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
 :root[data-theme="dark"] #post-comment .code-expand-btn:hover{
   background: rgb(96, 165, 250) !important;     /* 可选：夜间悬停背景 */
 }
+
+
+/* 让代码块和按钮完全贴合 */
+#article-container pre[class*="language-"],
+#post-comment pre[class*="language-"]{ margin-bottom:0 !important; }
+#article-container .code-expand-btn,
+#post-comment .code-expand-btn{ margin-top:0 !important; }
+
+/* 去掉“黑色背景”和阴影，只保留你要的那条分割线 */
+#article-container .code-expand-btn,
+#post-comment .code-expand-btn{
+  background: transparent !important;    /* 关键：去掉黑底 */
+  box-shadow: none !important;           /* 主题若加了投影，这里一并去掉 */
+  height: 24px !important;               /* 按需调细 */
+  line-height: 24px !important;
+  padding: 0 !important;
+}
+/* 某些主题会用伪元素画底层背景，这里也关掉 */
+#article-container .code-expand-btn::before,
+#article-container .code-expand-btn::after,
+#post-comment .code-expand-btn::before,
+#post-comment .code-expand-btn::after{
+  display: none !important;
+}
