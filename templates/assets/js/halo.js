@@ -84,7 +84,7 @@ let halo = {
                 navigator.clipboard.writeText(copyInfo.getText()).then(copyInfo.success, function () {
                     // try the fallback in case `writeText` didn't work
                     fallbackCopyTextToClipboard(copyInfo);
-                });
+                }); copy._bound = true; }
             } else {
                 fallbackCopyTextToClipboard(copyInfo);
             }
@@ -132,6 +132,7 @@ let halo = {
 
         var r = Prism.plugins.toolbar.hook = function (a) {
 
+
             var r = a.element.parentNode;
             var toolbar = r.nextElementSibling;
 
@@ -139,17 +140,18 @@ let halo = {
             isEnableTitle && toolbar.classList.add("c-title")
             //标题分割线
             isEnableHr && toolbar.classList.add("c-hr")
-            var customItem = toolbar.querySelector('.custom-item') || document.createElement("div");
-            if (!customItem.classList.contains("custom-item")) { customItem.className = 'custom-item absolute top-0'; }
+            var customItem = document.createElement("div");
+            customItem.className = 'custom-item absolute top-0'
 
             //复制
-            if (isEnableCopy && !customItem.querySelector('.copy-button')) {
-                var copy = document.createElement("i");
+            if (isEnableCopy) {
+                var copy = customItem.querySelector('.copy-button');
+                if (!copy) { copy = document.createElement("i");
 
                 copy.className = 'haofont hao-icon-paste copy-button code-copy cursor-pointer'
-                customItem.appendChild(copy)
+                customItem.appendChild(copy) }
 
-                copy.addEventListener('click', function () {
+                if (!copy._bound) { copy.addEventListener('click', function () {
                     copyTextToClipboard({
                         getText: function () {
                             return a.element.textContent;
@@ -168,68 +170,44 @@ let halo = {
 
                             resetText();
                         }
-                    });
+                    }); copy._bound = true; }
 
-                });
+                }); copy._bound = true; }
 
             }
 
-const prismToolsFn = function(e){ try{ e.stopImmediatePropagation(); e.stopPropagation(); e.preventDefault(); }catch(_){} if (e && e.target && e.target.classList && e.target.classList.contains('code-expander')) prismShrinkFn(this); };
+            const prismToolsFn = function (e) {
+                const $target = e.target.classList;
+                if ($target.contains("code-expander")) prismShrinkFn(this);
+            };
 
-// 折叠图标（右上角）：默认“向左”
-            if (isEnableExpander && !customItem.querySelector('.code-expander')) {
-                // 先清理右上角已有的箭头，确保只留一个
-                try {
-                    customItem.querySelectorAll('i.hao-icon-angle-left, i.hao-icon-angle-down, .code-expander').forEach(function(n){ n.remove(); });
-                } catch(e) {}
-                // 创建唯一的箭头（默认向左）
-                var expander = document.createElement('i');
-                expander.className = 'fa-sharp fa-solid haofont hao-icon-angle-left code-expander cursor-pointer'
-                customItem.appendChild(expander)
-                expander.addEventListener('click', function(e){
-                    try{ e.stopImmediatePropagation(); e.stopPropagation(); e.preventDefault(); }catch(_){}
-                    prismShrinkFn(this);
-                })
+            // 折叠图标（右上角）：默认“向左”
+            if (isEnableExpander) {
+                var expander = customItem.querySelector('.code-expander');
+                if (!expander) {
+                    expander = document.createElement('i');
+                    expander.className = 'fa-sharp fa-solid haofont hao-icon-angle-left code-expander cursor-pointer'
+                    customItem.appendChild(expander)
+                }
+                expander.addEventListener('click', prismToolsFn)
             }
+
             // 底部“展开”按钮：点击后进入全量，并把右上角图标切为“向下”
             const expandCode = function () {
-                // 切换“限制高度 ↔ 全量展开”
-                const isExpanded = r.classList.contains('expand-done');
-                if (isExpanded) {
-                    // 已展开 -> 收起到限制高度
-                    r.classList.remove('expand-done');
-                    this.classList.remove('expand-done'); // 底部箭头恢复“向下”
-                    this.style.display = 'flex'; // 始终显示在底部
-                    try { r.style.paddingBottom = (this.offsetHeight + 5) + 'px'; } catch (e) {}
-                    try {
-                        if (expander) {
-                            expander.classList.remove('hao-icon-angle-down');
-                            expander.classList.add('hao-icon-angle-left'); // 右上角恢复“向左”
-                        // 强制只保留一个右上角箭头
-                        try { customItem.querySelectorAll('i').forEach(function(n){ if(n !== expander) n.remove(); }); } catch(e) {}
-                            
-                        
-                            
-                        }
-                    } catch (e) {}
-                } else {
-                    // 限制高度 -> 全量展开
-                    r.classList.add('expand-done');
-                    this.classList.add('expand-done'); // 底部箭头翻转“向上”
-                    this.style.display = 'flex';        // 不要隐藏
-                    try { r.style.paddingBottom = (this.offsetHeight + 5) + 'px'; } catch (e) {}
-                    try {
-                        if (expander) {
-                            expander.classList.remove('hao-icon-angle-left');
-                            expander.classList.add('hao-icon-angle-down'); // 右上角切为“向下”
-                        // 强制只保留一个右上角箭头
-                        try { customItem.querySelectorAll('i').forEach(function(n){ if(n !== expander) n.remove(); }); } catch(e) {}
-                        
-                        
-                        
-                        }
-                    } catch (e) {}
-                }
+                                                this.classList.add('expand-done');
+                this.style.display = 'block'; // 保持底部按钮可见
+                r.classList.add('expand-done');
+                try {
+                    /* keep default icon; container rotation handled by CSS */
+                } catch (e) {}
+                try {
+                    if (typeof expander !== 'undefined' && expander) {
+                        expander.className = 'fa-sharp fa-solid haofont code-expander cursor-pointer hao-icon-angle-down';
+                    }
+                } catch (e) {}
+                try { r.style.paddingBottom = (this.offsetHeight + 6) + 'px'; } catch (e) {}
+
+
             };
 
             if (isEnableHeightLimit && r.offsetHeight > prismLimit) {
@@ -239,7 +217,7 @@ const prismToolsFn = function(e){ try{ e.stopImmediatePropagation(); e.stopPropa
                 ele.innerHTML = '<i class="haofont hao-icon-angle-double-down"></i>';
                 ele.addEventListener("click", expandCode);
                 r.offsetParent.appendChild(ele);
-                try { r.style.paddingBottom = (ele.offsetHeight + 5) + "px"; } catch (e) {}
+                try { r.style.paddingBottom = (ele.offsetHeight + 6) + 'px'; } catch (e) {}
             }
 
             // 右上角箭头：仅在「限制高度 ↔ 全量」之间切换；不再进入“仅标题”折叠
@@ -251,19 +229,18 @@ const prismToolsFn = function(e){ try{ e.stopImmediatePropagation(); e.stopPropa
                 if (r.classList.contains('expand-done')) {
                     r.classList.remove('expand-done');
                     if (hasBottomBtn) {
-                        $btnWrap.style.display = 'flex';
+                        $btnWrap.style.display = 'block';
+                        try { /* keep default icon; container rotation handled by CSS */ } catch(e) {}
+                        try { r.style.paddingBottom = ($btnWrap.offsetHeight + 6) + 'px'; } catch(e) {}
+
+                        try { var _i = $btnWrap.querySelector('i'); if (_i) { _i.classList.remove('hao-icon-angle-double-up'); _i.classList.add('hao-icon-angle-double-down'); } } catch(e) {}
+                        try { r.style.paddingBottom = ($btnWrap.offsetHeight + 6) + 'px'; } catch(e) {}
+
                         $btnWrap.classList.remove('expand-done'); // 底部箭头恢复“向下”
-                        try { r.style.paddingBottom = ($btnWrap.offsetHeight + 5) + 'px'; } catch (e) {}
                     }
                     try {
                         if (expander) {
-                            expander.classList.remove('hao-icon-angle-down');
-                            expander.classList.add('hao-icon-angle-left'); // 右上角恢复“向左”
-                        // 强制只保留一个右上角箭头
-                        try { customItem.querySelectorAll('i').forEach(function(n){ if(n !== expander) n.remove(); }); } catch(e) {}
-                            
-                        
-                            
+                            expander.className = 'fa-sharp fa-solid haofont code-expander cursor-pointer hao-icon-angle-left'; // 右上角恢复“向左”
                         }
                     } catch (e) {}
                     return;
@@ -272,28 +249,21 @@ const prismToolsFn = function(e){ try{ e.stopImmediatePropagation(); e.stopPropa
                 // B：当前是“限制高度”→ 点击右上角 = 全量展开
                 r.classList.add('expand-done');
                 if (hasBottomBtn) {
-                    $btnWrap.classList.add('expand-done'); // 与底部逻辑保持一致（随后隐藏）
-                    $btnWrap.style.display = 'flex';
-                    try { r.style.paddingBottom = ($btnWrap.offsetHeight + 5) + 'px'; } catch (e) {}
+                    $btnWrap.classList.add('expand-done');
+                    $btnWrap.style.display = 'block';
+                    try { var _i2 = $btnWrap.querySelector('i'); if (_i2) { _i2.classList.remove('hao-icon-angle-double-down'); _i2.classList.add('hao-icon-angle-double-up'); } } catch(e) {}
                 }
                 try {
                     if (expander) {
-                        expander.classList.remove('hao-icon-angle-left');
-                        expander.classList.add('hao-icon-angle-down'); // 右上角切为“向下”
-                        // 强制只保留一个右上角箭头
-                        try { customItem.querySelectorAll('i').forEach(function(n){ if(n !== expander) n.remove(); }); } catch(e) {}
-                        
-                        
-                        
+                        expander.className = 'fa-sharp fa-solid haofont code-expander cursor-pointer hao-icon-angle-down'; // 右上角切为“向下”
                     }
                 } catch (e) {}
             };
 
             toolbar.appendChild(customItem)
-            
-            
 
             var settings = getSettings(a.element);
+
 
             function resetText() {
                 setTimeout(function () {
@@ -327,7 +297,7 @@ const prismToolsFn = function(e){ try{ e.stopImmediatePropagation(); e.stopPropa
             speed: 20,
             hover: !0,
             loop: !0
-        });
+        }); copy._bound = true; }
         let t = saveToLocal.get("danmu");
         if (t)
             e.batchSend(t, !0);
@@ -518,7 +488,7 @@ const prismToolsFn = function(e){ try{ e.stopImmediatePropagation(); e.stopPropa
 
     window.__shareLinkCopy__ = new ClipboardJS('.share-link .haofont.hao-icon-link', {
       text: () => location.href.split('#')[0]
-    });
+    }); copy._bound = true; }
 
     const ok = () => (window.btf && btf.snackbarShow) ? btf.snackbarShow('链接已复制') : console.log('copied');
     window.__shareLinkCopy__.on('success', ok);
@@ -531,7 +501,7 @@ const prismToolsFn = function(e){ try{ e.stopImmediatePropagation(); e.stopPropa
         document.execCommand('copy'); document.body.removeChild(t);
         ok();
       } catch (_) {}
-    });
+    }); copy._bound = true; }
   }
 
   // 首屏 & PJAX 完成后都挂载
@@ -539,14 +509,3 @@ const prismToolsFn = function(e){ try{ e.stopImmediatePropagation(); e.stopPropa
   document.addEventListener('pjax:complete', mountCopyOnShareLink);
   document.addEventListener('page:loaded', mountCopyOnShareLink);
 })();
-
-window.addEventListener('resize', function(){
-  try{
-    document.querySelectorAll('.code-expand-btn').forEach(function(btn){
-      var pre = btn && btn.parentElement ? btn.parentElement.querySelector('pre') : null;
-      if (!pre) return;
-      pre.style.paddingBottom = (btn.offsetHeight + 5) + 'px';
-    });
-  }catch(e){}
-});
-
