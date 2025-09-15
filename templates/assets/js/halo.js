@@ -192,7 +192,7 @@ const prismToolsFn = function (e) {
                 // 创建唯一的箭头（默认向左）
                 var expander = document.createElement('i');
                 try {
-                    var _wrap = r && r.offsetParent ? r.offsetParent.querySelector('.code-expand-btn') : null;
+                    var _wrap = r ? r.querySelector('.code-expand-btn') : null;
                     var _isExpanded = !!(_wrap && _wrap.classList && _wrap.classList.contains('expand-done'));
                     expander.className = 'fa-sharp fa-solid haofont code-expander cursor-pointer ' + (_isExpanded ? 'hao-icon-angle-down' : 'hao-icon-angle-left');
                 } catch(e) {
