@@ -550,3 +550,30 @@ window.addEventListener('resize', function(){
   }catch(e){}
 });
 
+
+
+// ---- Sync top-right arrow with bottom expand bar (robust, handles refresh) ----
+if (!window.__hao_code_expand_sync__) {
+  window.__hao_code_expand_sync__ = true;
+  document.addEventListener('click', function(ev){
+    try {
+      var t = ev.target;
+      if (!t || !t.closest) return;
+      var wrap = t.closest('.code-expand-btn');
+      if (!wrap) return;
+      // After the UI toggled classes, sync the arrow
+      setTimeout(function(){
+        try {
+          var root = wrap.closest('.code-toolbar');
+          if (!root) return;
+          var exp = root.querySelector('.custom-item .code-expander');
+          if (!exp) return;
+          var expanded = wrap.classList.contains('expand-done');
+          if (expanded){ exp.classList.remove('hao-icon-angle-left'); exp.classList.add('hao-icon-angle-down'); }
+          else { exp.classList.remove('hao-icon-angle-down'); exp.classList.add('hao-icon-angle-left'); }
+        } catch(e) {}
+      }, 0);
+    } catch(e) {}
+  }, true);
+}
+// ---- end sync ----
