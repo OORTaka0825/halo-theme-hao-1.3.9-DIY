@@ -174,35 +174,7 @@ let halo = {
 
             }
 
-            
-
-            
-            // —— 保底：清理右上角重复箭头（只保留我们管理的 .code-expander） ——
-            const _purgeExpanderIcons = () => {
-                try {
-                    var toolbarHost = customItem;
-                    if (!toolbarHost) return;
-                    var list = toolbarHost.querySelectorAll('i.hao-icon-angle-left, i.hao-icon-angle-down');
-                    for (var i = 0; i < list.length; i++) {
-                        if (list[i] !== expander) {
-                            // 只保留带有 .code-expander 的那个；其余移除
-                            if (!list[i].classList.contains('code-expander')) {
-                                list[i].remove();
-                            }
-                        }
-                    }
-                    // 再把 .code-expander 也去重，只留第一个
-                    var exList = toolbarHost.querySelectorAll('.code-expander');
-                    for (var k = 0; k < exList.length; k++) {
-                        if (exList[k] !== expander) exList[k].remove();
-                    }
-                } catch (e) {}
-            };
-
-const prismToolsFn = function (e) {
-    const $t = e.target.classList;
-    if ($t.contains('code-expander')) prismShrinkFn(this);
-};
+const prismToolsFn = function(e){ try{ e.stopImmediatePropagation(); e.stopPropagation(); e.preventDefault(); }catch(_){} if (e && e.target && e.target.classList && e.target.classList.contains('code-expander')) prismShrinkFn(this); };
 
 // 折叠图标（右上角）：默认“向左”
             if (isEnableExpander) {
@@ -214,7 +186,10 @@ const prismToolsFn = function (e) {
                 var expander = document.createElement('i');
                 expander.className = 'fa-sharp fa-solid haofont hao-icon-angle-left code-expander cursor-pointer'
                 customItem.appendChild(expander)
-                expander.addEventListener('click', prismToolsFn)
+                expander.addEventListener('click', function(e){
+                    try{ e.stopImmediatePropagation(); e.stopPropagation(); e.preventDefault(); }catch(_){}
+                    prismShrinkFn(this);
+                })
             }
             // 底部“展开”按钮：点击后进入全量，并把右上角图标切为“向下”
             const expandCode = function () {
@@ -314,6 +289,8 @@ const prismToolsFn = function (e) {
                 } catch (e) {}
             };
 
+            // 先删除旧的 custom-item，避免重复
+            try { toolbar.querySelectorAll('.custom-item').forEach(n => n.remove()); } catch (e) {}
             toolbar.appendChild(customItem)
             
             
