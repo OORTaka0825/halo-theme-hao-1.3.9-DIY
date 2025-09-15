@@ -198,7 +198,7 @@ let halo = {
                     r.classList.remove('expand-done');
                     this.classList.remove('expand-done'); // 底部箭头恢复“向下”
                     this.style.display = 'flex'; // 始终显示在底部
-                    try { r.style.paddingBottom = (this.offsetHeight + 6) + 'px'; } catch (e) {}
+                    try { r.style.paddingBottom = (this.offsetHeight + 5) + 'px'; } catch (e) {}
                     try {
                         if (expander) {
                             expander.classList.remove('hao-icon-angle-down');
@@ -210,7 +210,7 @@ let halo = {
                     r.classList.add('expand-done');
                     this.classList.add('expand-done'); // 底部箭头翻转“向上”
                     this.style.display = 'flex';        // 不要隐藏
-                    try { r.style.paddingBottom = (this.offsetHeight + 6) + 'px'; } catch (e) {}
+                    try { r.style.paddingBottom = (this.offsetHeight + 5) + 'px'; } catch (e) {}
                     try {
                         if (expander) {
                             expander.classList.remove('hao-icon-angle-left');
@@ -227,7 +227,7 @@ let halo = {
                 ele.innerHTML = '<i class="haofont hao-icon-angle-double-down"></i>';
                 ele.addEventListener("click", expandCode);
                 r.offsetParent.appendChild(ele);
-                try { r.style.paddingBottom = (ele.offsetHeight + 6) + "px"; } catch (e) {}
+                try { r.style.paddingBottom = (ele.offsetHeight + 5) + "px"; } catch (e) {}
             }
 
             // 右上角箭头：仅在「限制高度 ↔ 全量」之间切换；不再进入“仅标题”折叠
@@ -241,7 +241,7 @@ let halo = {
                     if (hasBottomBtn) {
                         $btnWrap.style.display = 'flex';
                         $btnWrap.classList.remove('expand-done'); // 底部箭头恢复“向下”
-                        try { r.style.paddingBottom = ($btnWrap.offsetHeight + 6) + 'px'; } catch (e) {}
+                        try { r.style.paddingBottom = ($btnWrap.offsetHeight + 5) + 'px'; } catch (e) {}
                     }
                     try {
                         if (expander) {
@@ -257,7 +257,7 @@ let halo = {
                 if (hasBottomBtn) {
                     $btnWrap.classList.add('expand-done'); // 与底部逻辑保持一致（随后隐藏）
                     $btnWrap.style.display = 'flex';
-                    try { r.style.paddingBottom = ($btnWrap.offsetHeight + 6) + 'px'; } catch (e) {}
+                    try { r.style.paddingBottom = ($btnWrap.offsetHeight + 5) + 'px'; } catch (e) {}
                 }
                 try {
                     if (expander) {
@@ -523,7 +523,7 @@ window.addEventListener('resize', function(){
     document.querySelectorAll('.code-expand-btn').forEach(function(btn){
       var pre = btn && btn.parentElement ? btn.parentElement.querySelector('pre') : null;
       if (!pre) return;
-      pre.style.paddingBottom = (btn.offsetHeight + 6) + 'px';
+      pre.style.paddingBottom = (btn.offsetHeight + 5) + 'px';
     });
   }catch(e){}
 });
