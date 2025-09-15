@@ -180,7 +180,30 @@ let halo = {
                 if ($target.contains("code-expander")) prismShrinkFn(this);
             };
 
-            // 折叠图标（右上角）：默认“向左”
+            
+            // —— 保底：清理右上角重复箭头（只保留我们管理的 .code-expander） ——
+            const _purgeExpanderIcons = () => {
+                try {
+                    var toolbarHost = customItem;
+                    if (!toolbarHost) return;
+                    var list = toolbarHost.querySelectorAll('i.hao-icon-angle-left, i.hao-icon-angle-down');
+                    for (var i = 0; i < list.length; i++) {
+                        if (list[i] !== expander) {
+                            // 只保留带有 .code-expander 的那个；其余移除
+                            if (!list[i].classList.contains('code-expander')) {
+                                list[i].remove();
+                            }
+                        }
+                    }
+                    // 再把 .code-expander 也去重，只留第一个
+                    var exList = toolbarHost.querySelectorAll('.code-expander');
+                    for (var k = 0; k < exList.length; k++) {
+                        if (exList[k] !== expander) exList[k].remove();
+                    }
+                } catch (e) {}
+            };
+
+// 折叠图标（右上角）：默认“向左”
             if (isEnableExpander) {
                 var expander = customItem.querySelector('.code-expander');
                 if (!expander) {
@@ -207,6 +230,7 @@ let halo = {
                 } catch(e) {}
 
                 expander.addEventListener('click', prismToolsFn)
+                _purgeExpanderIcons();
             }
             // 底部“展开”按钮：点击后进入全量，并把右上角图标切为“向下”
             const expandCode = function () {
@@ -222,6 +246,8 @@ let halo = {
                         if (expander) {
                             expander.classList.remove('hao-icon-angle-down');
                             expander.classList.add('hao-icon-angle-left'); // 右上角恢复“向左”
+                        _purgeExpanderIcons();
+                            _purgeExpanderIcons();
                         }
                     } catch (e) {}
                 } else {
@@ -234,6 +260,8 @@ let halo = {
                         if (expander) {
                             expander.classList.remove('hao-icon-angle-left');
                             expander.classList.add('hao-icon-angle-down'); // 右上角切为“向下”
+                        _purgeExpanderIcons();
+                        _purgeExpanderIcons();
                         }
                     } catch (e) {}
                 }
@@ -266,6 +294,8 @@ let halo = {
                         if (expander) {
                             expander.classList.remove('hao-icon-angle-down');
                             expander.classList.add('hao-icon-angle-left'); // 右上角恢复“向左”
+                        _purgeExpanderIcons();
+                            _purgeExpanderIcons();
                         }
                     } catch (e) {}
                     return;
@@ -282,11 +312,14 @@ let halo = {
                     if (expander) {
                         expander.classList.remove('hao-icon-angle-left');
                         expander.classList.add('hao-icon-angle-down'); // 右上角切为“向下”
+                        _purgeExpanderIcons();
+                        _purgeExpanderIcons();
                     }
                 } catch (e) {}
             };
 
             toolbar.appendChild(customItem)
+            _purgeExpanderIcons();
 
             var settings = getSettings(a.element);
 
