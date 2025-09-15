@@ -193,17 +193,20 @@ let halo = {
 
             // 底部“展开”按钮：点击后进入全量，并把右上角图标切为“向下”
             const expandCode = function () {
-                                this.classList.add('expand-done');
+                                                this.classList.add('expand-done');
                 this.style.display = 'block'; // 保持底部按钮可见
                 r.classList.add('expand-done');
                 try {
                     const icon = this.querySelector('i');
-                    if (icon) { icon.classList.remove('hao-icon-angle-double-down'); icon.classList.add('hao-icon-angle-double-up'); }
+                    if (icon) { icon.style.transform = 'rotate(180deg)'; }
                 } catch (e) {}
                 try {
-                    if (expander) { expander.classList.remove('hao-icon-angle-left'); expander.classList.add('hao-icon-angle-down'); }
+                    if (typeof expander !== 'undefined' && expander) {
+                        expander.className = 'fa-sharp fa-solid haofont code-expander cursor-pointer hao-icon-angle-down';
+                    }
                 } catch (e) {}
-                try { r.style.paddingBottom = (this.offsetHeight + 8) + 'px'; } catch (e) {}
+                try { r.style.paddingBottom = (this.offsetHeight + 6) + 'px'; } catch (e) {}
+
 
             };
 
@@ -214,7 +217,7 @@ let halo = {
                 ele.innerHTML = '<i class="haofont hao-icon-angle-double-down"></i>';
                 ele.addEventListener("click", expandCode);
                 r.offsetParent.appendChild(ele);
-                try { r.style.paddingBottom = (ele.offsetHeight + 8) + 'px'; } catch (e) {}
+                try { r.style.paddingBottom = (ele.offsetHeight + 6) + 'px'; } catch (e) {}
             }
 
             // 右上角箭头：仅在「限制高度 ↔ 全量」之间切换；不再进入“仅标题”折叠
@@ -227,15 +230,17 @@ let halo = {
                     r.classList.remove('expand-done');
                     if (hasBottomBtn) {
                         $btnWrap.style.display = 'block';
+                        try { var _i = $btnWrap.querySelector('i'); if (_i) { _i.style.transform = 'rotate(0deg)'; } } catch(e) {}
+                        try { r.style.paddingBottom = ($btnWrap.offsetHeight + 6) + 'px'; } catch(e) {}
+
                         try { var _i = $btnWrap.querySelector('i'); if (_i) { _i.classList.remove('hao-icon-angle-double-up'); _i.classList.add('hao-icon-angle-double-down'); } } catch(e) {}
-                        try { r.style.paddingBottom = ($btnWrap.offsetHeight + 8) + 'px'; } catch(e) {}
+                        try { r.style.paddingBottom = ($btnWrap.offsetHeight + 6) + 'px'; } catch(e) {}
 
                         $btnWrap.classList.remove('expand-done'); // 底部箭头恢复“向下”
                     }
                     try {
                         if (expander) {
-                            expander.classList.remove('hao-icon-angle-down');
-                            expander.classList.add('hao-icon-angle-left'); // 右上角恢复“向左”
+                            expander.className = 'fa-sharp fa-solid haofont code-expander cursor-pointer hao-icon-angle-left'; // 右上角恢复“向左”
                         }
                     } catch (e) {}
                     return;
@@ -250,8 +255,7 @@ let halo = {
                 }
                 try {
                     if (expander) {
-                        expander.classList.remove('hao-icon-angle-left');
-                        expander.classList.add('hao-icon-angle-down'); // 右上角切为“向下”
+                        expander.className = 'fa-sharp fa-solid haofont code-expander cursor-pointer hao-icon-angle-down'; // 右上角切为“向下”
                     }
                 } catch (e) {}
             };
