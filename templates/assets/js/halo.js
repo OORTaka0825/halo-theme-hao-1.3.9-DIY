@@ -196,7 +196,10 @@ const prismToolsFn = function (e) {
                 expander.addEventListener('click', prismToolsFn)
             }
             // 底部“展开”按钮：点击后进入全量，并把右上角图标切为“向下”
-            const expandCode = function () {
+            const _saveExpandScrollY = (el)=>{try{el.dataset._expandScrollY = String(window.pageYOffset||document.documentElement.scrollTop||document.body.scrollTop||0);}catch(e){}};
+const _restoreExpandScrollY = (el)=>{try{var y=parseInt(el.dataset._expandScrollY||'');if(!isNaN(y)){setTimeout(function(){window.scrollTo({top:y,behavior:'auto'});},0);}}catch(e){}};
+
+const expandCode = function () {
                 // 切换“限制高度 ↔ 全量展开”
                 const isExpanded = r.classList.contains('expand-done');
                 if (isExpanded) {
@@ -205,6 +208,7 @@ const prismToolsFn = function (e) {
                     this.classList.remove('expand-done'); // 底部箭头恢复“向下”
                     this.style.display = 'flex'; // 始终显示在底部
                     try { r.style.paddingBottom = (this.offsetHeight + 5) + 'px'; } catch (e) {}
+                    _restoreExpandScrollY(r);
                     try {
                         if (expander) {
                             expander.classList.remove('hao-icon-angle-down');
@@ -213,6 +217,7 @@ const prismToolsFn = function (e) {
                     } catch (e) {}
                 } else {
                     // 限制高度 -> 全量展开
+                    _saveExpandScrollY(r);
                     r.classList.add('expand-done');
                     this.classList.add('expand-done'); // 底部箭头翻转“向上”
                     this.style.display = 'flex';        // 不要隐藏
@@ -249,12 +254,14 @@ const prismToolsFn = function (e) {
                         $btnWrap.classList.remove('expand-done'); // 底部箭头恢复“向下”
                         try { r.style.paddingBottom = ($btnWrap.offsetHeight + 5) + 'px'; } catch (e) {}
                     }
+                    _restoreExpandScrollY(r);
                     try {
                         if (expander) {
                             expander.classList.remove('hao-icon-angle-down');
                             expander.classList.add('hao-icon-angle-left'); // 右上角恢复“向左”
 }
                     } catch (e) {}
+                    _restoreExpandScrollY(r);
                     return;
                 }
 
