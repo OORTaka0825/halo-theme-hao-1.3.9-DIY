@@ -139,15 +139,19 @@ let halo = {
             isEnableTitle && toolbar.classList.add("c-title")
             //标题分割线
             isEnableHr && toolbar.classList.add("c-hr")
-            var customItem = document.createElement("div");
-            customItem.className = 'custom-item absolute top-0'
+            var customItem = toolbar.querySelector('.custom-item');
+            var __reuse = !!customItem;
+            if (!customItem) {
+                customItem = document.createElement("div");
+                customItem.className = 'custom-item absolute top-0'
+            }
 
             //复制
             if (isEnableCopy) {
-                var copy = document.createElement("i");
+                var copy = customItem.querySelector('.copy-button') || document.createElement("i");
 
                 copy.className = 'haofont hao-icon-paste copy-button code-copy cursor-pointer'
-                customItem.appendChild(copy)
+                if (!copy.parentNode) { customItem.appendChild(copy)
 
                 copy.addEventListener('click', function () {
                     copyTextToClipboard({
@@ -170,7 +174,7 @@ let halo = {
                         }
                     });
 
-                });
+                }); }
 
             }
 
@@ -208,7 +212,7 @@ const prismToolsFn = function (e) {
             if (isEnableExpander) {
                 // 先清理右上角已有的箭头，确保只留一个
                 try {
-                    customItem.querySelectorAll('i.hao-icon-angle-left, i.hao-icon-angle-down, .code-expander').forEach(function(n){ n.remove(); });
+                    customItem.querySelectorAll('.code-expander, i.hao-icon-angle-left, i.hao-icon-angle-down').forEach(function(n){ n.remove(); });
                 } catch(e) {}
                 // 创建唯一的箭头（默认向左）
                 var expander = document.createElement('i');
@@ -314,7 +318,7 @@ const prismToolsFn = function (e) {
                 } catch (e) {}
             };
 
-            toolbar.appendChild(customItem)
+            if (!__reuse) toolbar.appendChild(customItem)
             
             
 
