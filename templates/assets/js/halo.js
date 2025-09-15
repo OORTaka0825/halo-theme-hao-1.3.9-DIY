@@ -203,6 +203,35 @@ let halo = {
                 } catch (e) {}
             };
 
+
+// —— 观察并清理右上角重复箭头（谁加的都删，只留我们这一个） ——
+function _watchAndPurgeExpander(host, expander){
+  try{
+    if (!host || !expander) return;
+    expander.dataset.expander = '1';
+    // 立即清一次
+    var kill = function(){
+      try{
+        // 移除所有非本体的 .code-expander
+        host.querySelectorAll('.code-expander').forEach(function(n){
+          if (n !== expander) n.remove();
+        });
+        // 移除没有 .code-expander 的裸箭头（left/down）
+        host.querySelectorAll('i.hao-icon-angle-left:not([data-expander="1"]), i.hao-icon-angle-down:not([data-expander="1"])').forEach(function(n){
+          if (n !== expander) n.remove();
+        });
+      }catch(e){}
+    };
+    kill();
+    // 监听“有人往这里塞新箭头”的行为，立刻删除
+    if (!host._expanderObserver){
+      var mo = new MutationObserver(function(){ kill(); });
+      mo.observe(host, {childList:true, subtree:true});
+      host._expanderObserver = mo;
+    }
+  }catch(e){}
+}
+
 // 折叠图标（右上角）：默认“向左”
             if (isEnableExpander) {
                 var expander = customItem.querySelector('.code-expander');
@@ -246,6 +275,7 @@ let halo = {
                         if (expander) {
                             expander.classList.remove('hao-icon-angle-down');
                             expander.classList.add('hao-icon-angle-left'); // 右上角恢复“向左”
+                            _watchAndPurgeExpander(customItem, expander)
                         _purgeExpanderIcons();
                             _purgeExpanderIcons();
                         }
@@ -260,6 +290,7 @@ let halo = {
                         if (expander) {
                             expander.classList.remove('hao-icon-angle-left');
                             expander.classList.add('hao-icon-angle-down'); // 右上角切为“向下”
+                        _watchAndPurgeExpander(customItem, expander)
                         _purgeExpanderIcons();
                         _purgeExpanderIcons();
                         }
@@ -294,6 +325,7 @@ let halo = {
                         if (expander) {
                             expander.classList.remove('hao-icon-angle-down');
                             expander.classList.add('hao-icon-angle-left'); // 右上角恢复“向左”
+                            _watchAndPurgeExpander(customItem, expander)
                         _purgeExpanderIcons();
                             _purgeExpanderIcons();
                         }
@@ -312,6 +344,7 @@ let halo = {
                     if (expander) {
                         expander.classList.remove('hao-icon-angle-left');
                         expander.classList.add('hao-icon-angle-down'); // 右上角切为“向下”
+                        _watchAndPurgeExpander(customItem, expander)
                         _purgeExpanderIcons();
                         _purgeExpanderIcons();
                     }
@@ -319,6 +352,7 @@ let halo = {
             };
 
             toolbar.appendChild(customItem)
+            _watchAndPurgeExpander(customItem, expander)
             _purgeExpanderIcons();
 
             var settings = getSettings(a.element);
