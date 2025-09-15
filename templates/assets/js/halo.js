@@ -139,11 +139,11 @@ let halo = {
             isEnableTitle && toolbar.classList.add("c-title")
             //标题分割线
             isEnableHr && toolbar.classList.add("c-hr")
-            var customItem = document.createElement("div");
-            customItem.className = 'custom-item absolute top-0'
+            var customItem = toolbar.querySelector('.custom-item') || document.createElement("div");
+            if (!customItem.classList.contains("custom-item")) { customItem.className = 'custom-item absolute top-0'; }
 
             //复制
-            if (isEnableCopy) {
+            if (isEnableCopy && !customItem.querySelector('.copy-button')) {
                 var copy = document.createElement("i");
 
                 copy.className = 'haofont hao-icon-paste copy-button code-copy cursor-pointer'
@@ -177,7 +177,7 @@ let halo = {
 const prismToolsFn = function(e){ try{ e.stopImmediatePropagation(); e.stopPropagation(); e.preventDefault(); }catch(_){} if (e && e.target && e.target.classList && e.target.classList.contains('code-expander')) prismShrinkFn(this); };
 
 // 折叠图标（右上角）：默认“向左”
-            if (isEnableExpander) {
+            if (isEnableExpander && !customItem.querySelector('.code-expander')) {
                 // 先清理右上角已有的箭头，确保只留一个
                 try {
                     customItem.querySelectorAll('i.hao-icon-angle-left, i.hao-icon-angle-down, .code-expander').forEach(function(n){ n.remove(); });
@@ -289,8 +289,6 @@ const prismToolsFn = function(e){ try{ e.stopImmediatePropagation(); e.stopPropa
                 } catch (e) {}
             };
 
-            // 先删除旧的 custom-item，避免重复
-            try { toolbar.querySelectorAll('.custom-item').forEach(n => n.remove()); } catch (e) {}
             toolbar.appendChild(customItem)
             
             
