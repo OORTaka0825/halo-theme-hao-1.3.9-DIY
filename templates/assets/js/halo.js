@@ -199,6 +199,14 @@ const prismToolsFn = function (e) {
             const _saveExpandScrollY = (el)=>{try{el.dataset._expandScrollY = String(window.pageYOffset||document.documentElement.scrollTop||document.body.scrollTop||0);}catch(e){}};
 const _restoreExpandScrollY = (el)=>{try{var y=parseInt(el.dataset._expandScrollY||'');if(!isNaN(y)){setTimeout(function(){window.scrollTo({top:y,behavior:'auto'});},0);}}catch(e){}};
 
+const _syncTopRightExpander = (r, toDown)=>{ try{ 
+  var tb = r && r.offsetParent ? r.offsetParent.querySelector('.toolbar') : null;
+  var exp = tb ? tb.querySelector('.custom-item .code-expander') : null;
+  if (!exp) return;
+  if (toDown){ exp.classList.remove('hao-icon-angle-left'); exp.classList.add('hao-icon-angle-down'); }
+  else { exp.classList.remove('hao-icon-angle-down'); exp.classList.add('hao-icon-angle-left'); }
+}catch(e){} };
+
 const expandCode = function () {
                 // 切换“限制高度 ↔ 全量展开”
                 const isExpanded = r.classList.contains('expand-done');
@@ -270,6 +278,7 @@ const expandCode = function () {
                 if (hasBottomBtn) {
                     $btnWrap.classList.add('expand-done'); // 与底部逻辑保持一致（随后隐藏）
                     $btnWrap.style.display = 'flex';
+                    _syncTopRightExpander(r, true);
                     try { r.style.paddingBottom = ($btnWrap.offsetHeight + 5) + 'px'; } catch (e) {}
                 }
                 try {
