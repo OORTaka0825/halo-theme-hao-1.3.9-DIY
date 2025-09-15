@@ -261,7 +261,7 @@ const expandCode = function () {
                         $btnWrap.classList.remove('expand-done'); // 底部箭头恢复“向下”
                         try { r.style.paddingBottom = ($btnWrap.offsetHeight + 5) + 'px'; } catch (e) {}
                     }
-                    _restoreExpandScrollY(r);
+                    
                     try {
                         if (expander) {
                             expander.classList.remove('hao-icon-angle-down');
