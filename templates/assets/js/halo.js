@@ -188,11 +188,10 @@ let halo = {
                     expander.className = 'fa-sharp fa-solid haofont hao-icon-angle-left code-expander cursor-pointer'
                     customItem.appendChild(expander)
                 }
-                // 删除多余的 .code-expander（如果有）
-                var _extras = customItem.querySelectorAll('.code-expander');
-                for (var _i=1; _i<_extras.length; _i++) { _extras[_i].remove(); }
                 expander.addEventListener('click', prismToolsFn)
-            }            // 底部“展开”按钮：点击后进入全量，并把右上角图标切为“向下”
+            }
+
+            // 底部“展开”按钮：点击后进入全量，并把右上角图标切为“向下”
             const expandCode = function () {
                                                 this.classList.add('expand-done');
                 this.style.display = 'block'; // 保持底部按钮可见
@@ -217,7 +216,6 @@ let halo = {
                 ele.innerHTML = '<i class="haofont hao-icon-angle-double-down"></i>';
                 ele.addEventListener("click", expandCode);
                 r.offsetParent.appendChild(ele);
-                try { r.style.paddingBottom = (ele.offsetHeight + 6) + "px"; } catch(e) {}
                 try { r.style.paddingBottom = (ele.offsetHeight + 6) + 'px'; } catch (e) {}
             }
 
@@ -230,7 +228,7 @@ let halo = {
                 if (r.classList.contains('expand-done')) {
                     r.classList.remove('expand-done');
                     if (hasBottomBtn) {
-                        $btnWrap.style.display = ''; // respect CSS flex
+                        $btnWrap.style.display = 'block';
                         try { /* keep default icon; container rotation handled by CSS */ } catch(e) {}
                         try { r.style.paddingBottom = ($btnWrap.offsetHeight + 6) + 'px'; } catch(e) {}
 
@@ -251,7 +249,7 @@ let halo = {
                 r.classList.add('expand-done');
                 if (hasBottomBtn) {
                     $btnWrap.classList.add('expand-done');
-                    $btnWrap.style.display = ''; // respect CSS flex
+                    $btnWrap.style.display = 'block';
                     try { var _i2 = $btnWrap.querySelector('i'); if (_i2) { _i2.classList.remove('hao-icon-angle-double-down'); _i2.classList.add('hao-icon-angle-double-up'); } } catch(e) {}
                 }
                 try {
