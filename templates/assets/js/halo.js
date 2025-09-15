@@ -182,13 +182,32 @@ let halo = {
 
             // 折叠图标（右上角）：默认“向左”
             if (isEnableExpander) {
-                var expander = document.createElement("i");
-                expander.className = 'fa-sharp fa-solid haofont hao-icon-angle-left code-expander cursor-pointer'
-                customItem.appendChild(expander)
+                var expander = customItem.querySelector('.code-expander');
+                if (!expander) {
+                    expander = document.createElement('i');
+                    expander.className = 'fa-sharp fa-solid haofont hao-icon-angle-left code-expander cursor-pointer'
+                    customItem.appendChild(expander)
+                }
+                // ——去重：清理多余的右上角箭头，仅保留一个 .code-expander ——
+                try {
+                    var exList = customItem.querySelectorAll('.code-expander');
+                    for (var k = 0; k < exList.length; k++) {
+                        if (exList[k] !== expander) exList[k].remove();
+                    }
+                    // 同时清理没有 .code-expander 的裸箭头（left/down），避免重复
+                    var stray = customItem.querySelectorAll('i.hao-icon-angle-left:not(.code-expander), i.hao-icon-angle-down:not(.code-expander)');
+                    stray.forEach(function(n){ if (n !== expander) n.remove(); });
+                    // 再延迟一帧兜底一次（处理 PJAX 重绑定后晚于我们插入的情况）
+                    setTimeout(function(){
+                        var nodes = customItem.querySelectorAll('.code-expander');
+                        for (var i=0;i<nodes.length;i++){ if (nodes[i] !== expander) nodes[i].remove(); }
+                        var stray2 = customItem.querySelectorAll('i.hao-icon-angle-left:not(.code-expander), i.hao-icon-angle-down:not(.code-expander)');
+                        stray2.forEach(function(n){ if (n !== expander) n.remove(); });
+                    },0);
+                } catch(e) {}
 
                 expander.addEventListener('click', prismToolsFn)
             }
-
             // 底部“展开”按钮：点击后进入全量，并把右上角图标切为“向下”
             const expandCode = function () {
                 // 切换“限制高度 ↔ 全量展开”
