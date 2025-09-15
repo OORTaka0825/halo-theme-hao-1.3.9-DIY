@@ -291,6 +291,8 @@ function _watchAndPurgeExpander(host, expander){
                         if (expander) {
                             expander.classList.remove('hao-icon-angle-down');
                             expander.classList.add('hao-icon-angle-left'); // 右上角恢复“向左”
+                        // 强制只保留一个右上角箭头
+                        try { customItem.querySelectorAll('i').forEach(function(n){ if(n !== expander) n.remove(); }); } catch(e) {}
                             _watchAndPurgeExpander(customItem, expander)
                         _purgeExpanderIcons();
                             _purgeExpanderIcons();
@@ -306,6 +308,8 @@ function _watchAndPurgeExpander(host, expander){
                         if (expander) {
                             expander.classList.remove('hao-icon-angle-left');
                             expander.classList.add('hao-icon-angle-down'); // 右上角切为“向下”
+                        // 强制只保留一个右上角箭头
+                        try { customItem.querySelectorAll('i').forEach(function(n){ if(n !== expander) n.remove(); }); } catch(e) {}
                         _watchAndPurgeExpander(customItem, expander)
                         _purgeExpanderIcons();
                         _purgeExpanderIcons();
@@ -341,6 +345,8 @@ function _watchAndPurgeExpander(host, expander){
                         if (expander) {
                             expander.classList.remove('hao-icon-angle-down');
                             expander.classList.add('hao-icon-angle-left'); // 右上角恢复“向左”
+                        // 强制只保留一个右上角箭头
+                        try { customItem.querySelectorAll('i').forEach(function(n){ if(n !== expander) n.remove(); }); } catch(e) {}
                             _watchAndPurgeExpander(customItem, expander)
                         _purgeExpanderIcons();
                             _purgeExpanderIcons();
@@ -360,6 +366,8 @@ function _watchAndPurgeExpander(host, expander){
                     if (expander) {
                         expander.classList.remove('hao-icon-angle-left');
                         expander.classList.add('hao-icon-angle-down'); // 右上角切为“向下”
+                        // 强制只保留一个右上角箭头
+                        try { customItem.querySelectorAll('i').forEach(function(n){ if(n !== expander) n.remove(); }); } catch(e) {}
                         _watchAndPurgeExpander(customItem, expander)
                         _purgeExpanderIcons();
                         _purgeExpanderIcons();
