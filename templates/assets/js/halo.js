@@ -185,26 +185,34 @@ let halo = {
                 var expander = customItem.querySelector('.code-expander');
                 if (!expander) {
                     expander = document.createElement('i');
-                    expander.className = 'fa-sharp fa-solid haofont hao-icon-angle-left code-expander cursor-pointer'
-                    customItem.appendChild(expander)
+                    expander.className = 'fa-sharp fa-solid haofont code-expander cursor-pointer hao-icon-angle-left';
+                    customItem.appendChild(expander);
                 }
+                // ——去重：只保留一个 .code-expander
+                var exList = customItem.querySelectorAll('.code-expander');
+                for (var k = 0; k < exList.length; k++) { if (exList[k] !== expander) exList[k].remove(); }
+                // ——兜底：删除无 .code-expander 类的“裸箭头”
+                var stray = customItem.querySelectorAll('i.hao-icon-angle-left:not(.code-expander), i.hao-icon-angle-down:not(.code-expander)');
+                stray.forEach(function(n){ if (n !== expander) n.remove(); });
                 expander.addEventListener('click', prismToolsFn)
             }
 
             // 底部“展开”按钮：点击后进入全量，并把右上角图标切为“向下”
             const expandCode = function () {
-                                                this.classList.add('expand-done');
-                this.style.display = 'block'; // 保持底部按钮可见
+                                                                this.classList.add('expand-done');
+                this.style.display = ''; // 使用CSS的display:flex，不破坏布局
                 r.classList.add('expand-done');
                 try {
-                    /* keep default icon; container rotation handled by CSS */
+                  var _ii = this.querySelector('i');
+                  if (_ii) { _ii.classList.remove('hao-icon-angle-double-up'); _ii.classList.add('hao-icon-angle-double-down'); }
                 } catch (e) {}
                 try {
-                    if (typeof expander !== 'undefined' && expander) {
-                        expander.className = 'fa-sharp fa-solid haofont code-expander cursor-pointer hao-icon-angle-down';
-                    }
+                  if (typeof expander !== 'undefined' && expander) {
+                    expander.className = 'fa-sharp fa-solid haofont code-expander cursor-pointer hao-icon-angle-down';
+                  }
                 } catch (e) {}
                 try { r.style.paddingBottom = (this.offsetHeight + 6) + 'px'; } catch (e) {}
+                
 
 
             };
@@ -228,19 +236,14 @@ let halo = {
                 if (r.classList.contains('expand-done')) {
                     r.classList.remove('expand-done');
                     if (hasBottomBtn) {
-                        $btnWrap.style.display = 'block';
-                        try { /* keep default icon; container rotation handled by CSS */ } catch(e) {}
-                        try { r.style.paddingBottom = ($btnWrap.offsetHeight + 6) + 'px'; } catch(e) {}
-
+                        $btnWrap.style.display = '';
                         try { var _i = $btnWrap.querySelector('i'); if (_i) { _i.classList.remove('hao-icon-angle-double-up'); _i.classList.add('hao-icon-angle-double-down'); } } catch(e) {}
                         try { r.style.paddingBottom = ($btnWrap.offsetHeight + 6) + 'px'; } catch(e) {}
-
-                        $btnWrap.classList.remove('expand-done'); // 底部箭头恢复“向下”
+                        $btnWrap.classList.remove('expand-done');
+                    } // 底部箭头恢复“向下”
                     }
                     try {
-                        if (expander) {
-                            expander.className = 'fa-sharp fa-solid haofont code-expander cursor-pointer hao-icon-angle-left'; // 右上角恢复“向左”
-                        }
+                        if (expander) { expander.className = 'fa-sharp fa-solid haofont code-expander cursor-pointer hao-icon-angle-left'; }
                     } catch (e) {}
                     return;
                 }
@@ -249,13 +252,11 @@ let halo = {
                 r.classList.add('expand-done');
                 if (hasBottomBtn) {
                     $btnWrap.classList.add('expand-done');
-                    $btnWrap.style.display = 'block';
-                    try { var _i2 = $btnWrap.querySelector('i'); if (_i2) { _i2.classList.remove('hao-icon-angle-double-down'); _i2.classList.add('hao-icon-angle-double-up'); } } catch(e) {}
+                    $btnWrap.style.display = '';
+                    try { var _i2 = $btnWrap.querySelector('i'); if (_i2) { _i2.classList.remove('hao-icon-angle-double-up'); _i2.classList.add('hao-icon-angle-double-down'); } } catch(e) {}
                 }
                 try {
-                    if (expander) {
-                        expander.className = 'fa-sharp fa-solid haofont code-expander cursor-pointer hao-icon-angle-down'; // 右上角切为“向下”
-                    }
+                    if (expander) { expander.className = 'fa-sharp fa-solid haofont code-expander cursor-pointer hao-icon-angle-down'; }
                 } catch (e) {}
             };
 
