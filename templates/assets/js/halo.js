@@ -191,16 +191,31 @@ let halo = {
 
             // 底部“展开”按钮：点击后进入全量，并把右上角图标切为“向下”
             const expandCode = function () {
-                this.classList.add("expand-done");
-                this.style.display = "none";
-                r.classList.add("expand-done");
-
-                try {
-                    if (expander) {
-                        expander.classList.remove('hao-icon-angle-left');
-                        expander.classList.add('hao-icon-angle-down');
-                    }
-                } catch (e) {}
+                // 切换“限制高度 ↔ 全量展开”
+                const isExpanded = r.classList.contains('expand-done');
+                if (isExpanded) {
+                    // 已展开 -> 收起到限制高度
+                    r.classList.remove('expand-done');
+                    this.classList.remove('expand-done'); // 底部箭头恢复“向下”
+                    this.style.display = 'flex'; // 始终显示在底部
+                    try {
+                        if (expander) {
+                            expander.classList.remove('hao-icon-angle-down');
+                            expander.classList.add('hao-icon-angle-left'); // 右上角恢复“向左”
+                        }
+                    } catch (e) {}
+                } else {
+                    // 限制高度 -> 全量展开
+                    r.classList.add('expand-done');
+                    this.classList.add('expand-done'); // 底部箭头翻转“向上”
+                    this.style.display = 'flex';        // 不要隐藏
+                    try {
+                        if (expander) {
+                            expander.classList.remove('hao-icon-angle-left');
+                            expander.classList.add('hao-icon-angle-down'); // 右上角切为“向下”
+                        }
+                    } catch (e) {}
+                }
             };
 
             if (isEnableHeightLimit && r.offsetHeight > prismLimit) {
@@ -221,7 +236,7 @@ let halo = {
                 if (r.classList.contains('expand-done')) {
                     r.classList.remove('expand-done');
                     if (hasBottomBtn) {
-                        $btnWrap.style.display = 'block';
+                        $btnWrap.style.display = 'flex';
                         $btnWrap.classList.remove('expand-done'); // 底部箭头恢复“向下”
                     }
                     try {
@@ -237,7 +252,7 @@ let halo = {
                 r.classList.add('expand-done');
                 if (hasBottomBtn) {
                     $btnWrap.classList.add('expand-done'); // 与底部逻辑保持一致（随后隐藏）
-                    $btnWrap.style.display = 'none';
+                    $btnWrap.style.display = 'flex';
                 }
                 try {
                     if (expander) {
