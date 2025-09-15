@@ -175,10 +175,26 @@ let halo = {
 
             }
 
-            const prismToolsFn = function (e) {
-                const $target = e.target.classList;
-                if ($target.contains("code-expander")) prismShrinkFn(this);
-            };
+            
+const prismToolsFn = function (e) {
+    // 右上角点击前，先把同区域的多余箭头全部删掉（谁插的都删）
+    try {
+        var host = this && this.parentElement ? this.parentElement : null; // customItem
+        if (host) {
+            var nodes = host.querySelectorAll('.code-expander');
+            for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i] !== this) nodes[i].remove();
+            }
+            var stray = host.querySelectorAll('i.hao-icon-angle-left, i.hao-icon-angle-down');
+            for (var j = 0; j < stray.length; j++) {
+                if (stray[j] !== this) stray[j].remove();
+            }
+        }
+    } catch (err) {}
+    const $target = e.target.classList;
+    if ($target.contains("code-expander")) prismShrinkFn(this);
+};
+
 
             
             // —— 保底：清理右上角重复箭头（只保留我们管理的 .code-expander） ——
