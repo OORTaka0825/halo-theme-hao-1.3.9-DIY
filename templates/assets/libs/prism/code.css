@@ -213,9 +213,8 @@
 }
 
 
-/* 改为只旋转图标，避免容器翻转导致图标被吞/错位 */
-#article-container .code-expand-btn.expand-done i,
-#post-comment .code-expand-btn.expand-done i{
+#article-container .code-expand-btn.expand-done,
+#post-comment .code-expand-btn.expand-done{
     -webkit-transform: rotate(180deg);
     -moz-transform: rotate(180deg);
     -o-transform: rotate(180deg);
