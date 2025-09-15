@@ -132,7 +132,6 @@ let halo = {
 
         var r = Prism.plugins.toolbar.hook = function (a) {
 
-
             var r = a.element.parentNode;
             var toolbar = r.nextElementSibling;
 
@@ -176,25 +175,6 @@ let halo = {
             }
 
             
-const prismToolsFn = function (e) {
-    // 右上角点击前，先把同区域的多余箭头全部删掉（谁插的都删）
-    try {
-        var host = this && this.parentElement ? this.parentElement : null; // customItem
-        if (host) {
-            var nodes = host.querySelectorAll('.code-expander');
-            for (var i = 0; i < nodes.length; i++) {
-                if (nodes[i] !== this) nodes[i].remove();
-            }
-            var stray = host.querySelectorAll('i.hao-icon-angle-left, i.hao-icon-angle-down');
-            for (var j = 0; j < stray.length; j++) {
-                if (stray[j] !== this) stray[j].remove();
-            }
-        }
-    } catch (err) {}
-    const $target = e.target.classList;
-    if ($target.contains("code-expander")) prismShrinkFn(this);
-};
-
 
             
             // —— 保底：清理右上角重复箭头（只保留我们管理的 .code-expander） ——
@@ -219,63 +199,22 @@ const prismToolsFn = function (e) {
                 } catch (e) {}
             };
 
-
-// —— 观察并清理右上角重复箭头（谁加的都删，只留我们这一个） ——
-function _watchAndPurgeExpander(host, expander){
-  try{
-    if (!host || !expander) return;
-    expander.dataset.expander = '1';
-    // 立即清一次
-    var kill = function(){
-      try{
-        // 移除所有非本体的 .code-expander
-        host.querySelectorAll('.code-expander').forEach(function(n){
-          if (n !== expander) n.remove();
-        });
-        // 移除没有 .code-expander 的裸箭头（left/down）
-        host.querySelectorAll('i.hao-icon-angle-left:not([data-expander="1"]), i.hao-icon-angle-down:not([data-expander="1"])').forEach(function(n){
-          if (n !== expander) n.remove();
-        });
-      }catch(e){}
-    };
-    kill();
-    // 监听“有人往这里塞新箭头”的行为，立刻删除
-    if (!host._expanderObserver){
-      var mo = new MutationObserver(function(){ kill(); });
-      mo.observe(host, {childList:true, subtree:true});
-      host._expanderObserver = mo;
-    }
-  }catch(e){}
-}
+const prismToolsFn = function (e) {
+    const $t = e.target.classList;
+    if ($t.contains('code-expander')) prismShrinkFn(this);
+};
 
 // 折叠图标（右上角）：默认“向左”
             if (isEnableExpander) {
-                var expander = customItem.querySelector('.code-expander');
-                if (!expander) {
-                    expander = document.createElement('i');
-                    expander.className = 'fa-sharp fa-solid haofont hao-icon-angle-left code-expander cursor-pointer'
-                    customItem.appendChild(expander)
-                }
-                // ——去重：清理多余的右上角箭头，仅保留一个 .code-expander ——
+                // 先清理右上角已有的箭头，确保只留一个
                 try {
-                    var exList = customItem.querySelectorAll('.code-expander');
-                    for (var k = 0; k < exList.length; k++) {
-                        if (exList[k] !== expander) exList[k].remove();
-                    }
-                    // 同时清理没有 .code-expander 的裸箭头（left/down），避免重复
-                    var stray = customItem.querySelectorAll('i.hao-icon-angle-left:not(.code-expander), i.hao-icon-angle-down:not(.code-expander)');
-                    stray.forEach(function(n){ if (n !== expander) n.remove(); });
-                    // 再延迟一帧兜底一次（处理 PJAX 重绑定后晚于我们插入的情况）
-                    setTimeout(function(){
-                        var nodes = customItem.querySelectorAll('.code-expander');
-                        for (var i=0;i<nodes.length;i++){ if (nodes[i] !== expander) nodes[i].remove(); }
-                        var stray2 = customItem.querySelectorAll('i.hao-icon-angle-left:not(.code-expander), i.hao-icon-angle-down:not(.code-expander)');
-                        stray2.forEach(function(n){ if (n !== expander) n.remove(); });
-                    },0);
+                    customItem.querySelectorAll('i.hao-icon-angle-left, i.hao-icon-angle-down, .code-expander').forEach(function(n){ n.remove(); });
                 } catch(e) {}
-
+                // 创建唯一的箭头（默认向左）
+                var expander = document.createElement('i');
+                expander.className = 'fa-sharp fa-solid haofont hao-icon-angle-left code-expander cursor-pointer'
+                customItem.appendChild(expander)
                 expander.addEventListener('click', prismToolsFn)
-                _purgeExpanderIcons();
             }
             // 底部“展开”按钮：点击后进入全量，并把右上角图标切为“向下”
             const expandCode = function () {
@@ -293,9 +232,9 @@ function _watchAndPurgeExpander(host, expander){
                             expander.classList.add('hao-icon-angle-left'); // 右上角恢复“向左”
                         // 强制只保留一个右上角箭头
                         try { customItem.querySelectorAll('i').forEach(function(n){ if(n !== expander) n.remove(); }); } catch(e) {}
-                            _watchAndPurgeExpander(customItem, expander)
-                        _purgeExpanderIcons();
-                            _purgeExpanderIcons();
+                            
+                        
+                            
                         }
                     } catch (e) {}
                 } else {
@@ -310,9 +249,9 @@ function _watchAndPurgeExpander(host, expander){
                             expander.classList.add('hao-icon-angle-down'); // 右上角切为“向下”
                         // 强制只保留一个右上角箭头
                         try { customItem.querySelectorAll('i').forEach(function(n){ if(n !== expander) n.remove(); }); } catch(e) {}
-                        _watchAndPurgeExpander(customItem, expander)
-                        _purgeExpanderIcons();
-                        _purgeExpanderIcons();
+                        
+                        
+                        
                         }
                     } catch (e) {}
                 }
@@ -347,9 +286,9 @@ function _watchAndPurgeExpander(host, expander){
                             expander.classList.add('hao-icon-angle-left'); // 右上角恢复“向左”
                         // 强制只保留一个右上角箭头
                         try { customItem.querySelectorAll('i').forEach(function(n){ if(n !== expander) n.remove(); }); } catch(e) {}
-                            _watchAndPurgeExpander(customItem, expander)
-                        _purgeExpanderIcons();
-                            _purgeExpanderIcons();
+                            
+                        
+                            
                         }
                     } catch (e) {}
                     return;
@@ -368,19 +307,18 @@ function _watchAndPurgeExpander(host, expander){
                         expander.classList.add('hao-icon-angle-down'); // 右上角切为“向下”
                         // 强制只保留一个右上角箭头
                         try { customItem.querySelectorAll('i').forEach(function(n){ if(n !== expander) n.remove(); }); } catch(e) {}
-                        _watchAndPurgeExpander(customItem, expander)
-                        _purgeExpanderIcons();
-                        _purgeExpanderIcons();
+                        
+                        
+                        
                     }
                 } catch (e) {}
             };
 
             toolbar.appendChild(customItem)
-            _watchAndPurgeExpander(customItem, expander)
-            _purgeExpanderIcons();
+            
+            
 
             var settings = getSettings(a.element);
-
 
             function resetText() {
                 setTimeout(function () {
@@ -626,7 +564,6 @@ function _watchAndPurgeExpander(host, expander){
   document.addEventListener('pjax:complete', mountCopyOnShareLink);
   document.addEventListener('page:loaded', mountCopyOnShareLink);
 })();
-
 
 window.addEventListener('resize', function(){
   try{
