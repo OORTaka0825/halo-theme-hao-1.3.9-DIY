@@ -206,7 +206,7 @@ const prismToolsFn = function (e) {
 const _restoreExpandScrollY = (el)=>{try{var y=parseInt(el.dataset._expandScrollY||'');if(!isNaN(y)){setTimeout(function(){window.scrollTo({top:y,behavior:'auto'});},0);}}catch(e){}};
 
 const _syncTopRightExpander = (r, toDown)=>{ try{ 
-  var tb = r && r.offsetParent ? r.offsetParent.querySelector('.toolbar') : null;
+  var tb = r ? r.nextElementSibling : null;
   var exp = tb ? tb.querySelector('.custom-item .code-expander') : null;
   if (!exp) return;
   if (toDown){ exp.classList.remove('hao-icon-angle-left'); exp.classList.add('hao-icon-angle-down'); }
