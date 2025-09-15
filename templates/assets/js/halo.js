@@ -197,8 +197,7 @@ let halo = {
                 this.style.display = 'block'; // 保持底部按钮可见
                 r.classList.add('expand-done');
                 try {
-                    const icon = this.querySelector('i');
-                    if (icon) { icon.style.transform = 'rotate(180deg)'; }
+                    /* keep default icon; container rotation handled by CSS */
                 } catch (e) {}
                 try {
                     if (typeof expander !== 'undefined' && expander) {
@@ -230,7 +229,7 @@ let halo = {
                     r.classList.remove('expand-done');
                     if (hasBottomBtn) {
                         $btnWrap.style.display = 'block';
-                        try { var _i = $btnWrap.querySelector('i'); if (_i) { _i.style.transform = 'rotate(0deg)'; } } catch(e) {}
+                        try { /* keep default icon; container rotation handled by CSS */ } catch(e) {}
                         try { r.style.paddingBottom = ($btnWrap.offsetHeight + 6) + 'px'; } catch(e) {}
 
                         try { var _i = $btnWrap.querySelector('i'); if (_i) { _i.classList.remove('hao-icon-angle-double-up'); _i.classList.add('hao-icon-angle-double-down'); } } catch(e) {}
