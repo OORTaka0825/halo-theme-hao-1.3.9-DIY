@@ -2884,7 +2884,7 @@ blockquote footer cite::before {
     padding: 0px;
     background-color: var(--sidebar-bg);
     box-shadow: rgba(0, 0, 0, 0.5) 0px 5px 20px -4px;
-    animation: 0.3s ease 0.1s 1 normal both running sub_menus;
+    animation: 0.4s ease 0.1s 1 normal both running sub_menus;
     border-radius: 5px;
     white-space: nowrap;
 }
@@ -4654,7 +4654,7 @@ html {
     transition: 0.3s;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    top: 35px;
+    top: 33px;
 }
 
 #nav .menus_items .menus_item .menus_item_child:hover {
@@ -17656,7 +17656,7 @@ code:not([class]) {
 }
 
 #nav .menus_items .menus_item .menus_item_child {
-    padding: 2px 2px 4px 2px;
+    padding: 2.2px 2px 0px 2px;
     border-radius: 55px;
 }
 
