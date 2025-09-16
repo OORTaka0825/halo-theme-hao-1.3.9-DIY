@@ -18758,21 +18758,21 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
 /* ——日间（浅色模式）—— */
 :root[data-theme="light"] #article-container .code-expand-btn,
 :root[data-theme="light"] #post-comment .code-expand-btn{
-  background: #fbb505 !important;          /* 改这里：日间背景色 */
+  background: #7f868842 !important;          /* 改这里：日间背景色 */
   border-top: 0 !important; /* 可选：分隔线颜色 */
 }
 :root[data-theme="light"] .code-expand-btn i{
-  color: #2563eb !important;                /* 改这里：日间图标颜色 */
+  color: #ff00dd !important;                /* 改这里：日间图标颜色 */
 }
 :root[data-theme="light"] #article-container .code-expand-btn:hover,
 :root[data-theme="light"] #post-comment .code-expand-btn:hover{
-  background: #eef2ff !important;           /* 可选：日间悬停背景 */
+  background: #c2b4c236 !important;           /* 可选：日间悬停背景 */
 }
 
 /* ——夜间（深色模式）—— */
 :root[data-theme="dark"] #article-container .code-expand-btn,
 :root[data-theme="dark"] #post-comment .code-expand-btn{
-  background: rgba(153, 231, 9, 0.05) !important;   /* 改这里：夜间背景色 */
+  background: rgba(99, 112, 118, 0.21) !important;   /* 改这里：夜间背景色 */
   border-top: 0 !important; /* 可选：分隔线 */
 }
 :root[data-theme="dark"] .code-expand-btn i{
@@ -18780,7 +18780,7 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
 }
 :root[data-theme="dark"] #article-container .code-expand-btn:hover,
 :root[data-theme="dark"] #post-comment .code-expand-btn:hover{
-  background: rgb(96, 165, 250) !important;     /* 可选：夜间悬停背景 */
+  background: rgb(8, 127, 182, 0.46) !important;     /* 可选：夜间悬停背景 */
 }
 
 
