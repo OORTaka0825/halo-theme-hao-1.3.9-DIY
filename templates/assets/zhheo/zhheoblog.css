@@ -18805,3 +18805,15 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
     animation: none !important;
   }
 }
+
+/* 让页面的 <article class="post heo-card"> 拥有与 .tabs 同款的卡片外观 */
+.post.heo-card{
+  background: var(--heo-card-bg);
+  border: 1px solid var(--heo-card-border, transparent);
+  border-radius: 16px;
+  box-shadow: var(--heo-shadow-black, 0 10px 30px -10px rgba(0,0,0,.6));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: clamp(16px, 2vw, 28px);
+  overflow: visible;
+}
