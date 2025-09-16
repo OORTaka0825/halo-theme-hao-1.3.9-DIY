@@ -18791,11 +18791,3 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
   /* animation-duration: 1.2s;   // 速度 */
   /* text-shadow 强度/滤镜亮度就是“闪”的感觉 */
 }
-
-/* 如果用户开启了减少动效，则自动关闭闪烁（无障碍友好） */
-@media (prefers-reduced-motion: reduce) {
-  #article-container .code-expand-btn i,
-  #post-comment .code-expand-btn i{
-    animation: none !important;
-  }
-}
