@@ -6298,7 +6298,7 @@ img.footer_mini_logo:hover {
     display: flex;
     align-items: center;
     border-radius: 100px;
-    padding: 0.2rem 0.5rem;
+    padding: 0.2rem 0.6rem;
     width: 100%;
     color: var(--heo-fontcolor) !important;
     text-shadow: none !important;
@@ -17651,7 +17651,7 @@ code:not([class]) {
 
 /* 导航栏中间样式 */
 #menus > div.menus_items a {
-    font-size: 16.8px;
+    font-size: 16.5px;
     font-weight: 700;
 }
 
