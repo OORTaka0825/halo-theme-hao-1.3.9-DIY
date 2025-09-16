@@ -18785,10 +18785,7 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
 
 
 /* 让代码块和按钮完全贴合 */
-#article-container pre[class*="language-"],
-#post-comment pre[class*="language-"]{ margin-bottom:0 !important; }
-#article-container .code-expand-btn,
-#post-comment .code-expand-btn{ margin-top:0 !important; }
+
 
 @keyframes code-twinkle {
   0%   { opacity: .55; text-shadow: 0 0 0 currentColor; filter: brightness(.9); }
