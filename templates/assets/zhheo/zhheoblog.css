@@ -18766,7 +18766,7 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
 }
 :root[data-theme="light"] #article-container .code-expand-btn:hover,
 :root[data-theme="light"] #post-comment .code-expand-btn:hover{
-  background: #c2b4c236 !important;           /* 可选：日间悬停背景 */
+  background: #84468ec4 !important;           /* 可选：日间悬停背景 */
 }
 
 /* ——夜间（深色模式）—— */
