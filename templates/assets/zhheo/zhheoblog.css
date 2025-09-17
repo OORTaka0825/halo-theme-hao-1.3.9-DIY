@@ -12860,7 +12860,7 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
     padding: 1px 8px;
     align-items: center;
     border-radius: 8px;
-    margin-right: 3px !important;
+    margin-right: 0 !important;
     color: var(--heo-secondtext) !important;
     display: inline-flex !important;     /* 让 padding 生效更稳定 */
     margin-top: 12px !important;
@@ -12873,6 +12873,10 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
     width: 1em;
     height: 1em;
     flex-shrink: 0;
+}
+
+.tk-extra + .tk-extra{
+    margin-left: 8px !important;
 }
 
 .tk-expand {
