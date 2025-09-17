@@ -128,7 +128,28 @@ nick.addEventListener('keydown', e=>{
                 $("textarea").focusout(function () {
                     heo_intype = false;
                 });
-            }
+            
+/* === Patch: Normalize invisible spaces in tk-extra badges === */
+(function __fixTkExtraGaps__(root) {
+  try {
+    if (!root) root = document;
+    var container = root.getElementById ? root.getElementById('twikoo') : root;
+    (container || root).querySelectorAll('.tk-extra .tk-icon + *').forEach(function (el) {
+      el.normalize();
+      el.childNodes.forEach(function (n) {
+        if (n.nodeType === 3) {
+          n.textContent = n.textContent
+            .replace(/[\u00A0\u202F\u2009\u200A\u200B\uFEFF]/g, ' ')
+            .replace(/\s+/g, ' ')
+            .replace(/^\s+/, '');
+        }
+      });
+    });
+  } catch (e) {
+    console && console.debug && console.debug('[tk-extra patch]', e);
+  }
+})(document);
+}
         }, null))
     }
 
