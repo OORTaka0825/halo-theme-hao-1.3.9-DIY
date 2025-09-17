@@ -12941,7 +12941,7 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
 
 /* 手机端评论图标和文字间隔 */
 @media (max-width: 768px){
-  #twikoo .tk-extra { padding-left: 1.4em !important; }
+  #twikoo .tk-extra { padding-left: 1.85em !important; }
 }
 
 #page .tk-comments-container > .tk-comment {
