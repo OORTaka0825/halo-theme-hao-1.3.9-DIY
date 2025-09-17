@@ -18850,3 +18850,11 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
 .page #article-container img,
 .page .post-content img,
 .page .page-content img { position: relative; z-index: 1; }
+
+.tk-extra{
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+               Arial, "Noto Sans", "PingFang SC", "Microsoft YaHei", sans-serif !important;
+  font-size: 12px !important;      /* 已经加过就保持 px，不用 rem/em */
+  letter-spacing: 0;                /* 保险：禁掉字距变化 */
+  font-variant-ligatures: none;     /* 保险：禁掉连字带来的度量差 */
+}
