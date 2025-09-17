@@ -254,13 +254,8 @@
 <!-- preload selected font only -->
 <th:block th:switch="${theme.config.style.global_font}">
   <link th:case="'zhankukuaile'"   rel="preload" href="https://oortaka.top/ziti/zhankukuaile.woff2"  as="font" type="font/woff2" crossorigin>
-  <link th:case="'zhankugdh'"      rel="preload" href="https://oortaka.top/ziti/zhankugdh.woff2"      as="font" type="font/woff2" crossorigin>
-  <link th:case="'zhankuyuyang'"   rel="preload" href="https://oortaka.top/ziti/zhankuyuyang.woff2"   as="font" type="font/woff2" crossorigin>
-  <link th:case="'zhankuheiti'"    rel="preload" href="https://oortaka.top/ziti/zhankuheiti.woff2"    as="font" type="font/woff2" crossorigin>
-  <link th:case="'zhankuwenyi'"    rel="preload" href="https://oortaka.top/ziti/zhankuwenyi.woff2"    as="font" type="font/woff2" crossorigin>
-  <link th:case="'zhankuhuangyou'" rel="preload" href="https://oortaka.top/ziti/zhankuhuangyou.woff2" as="font" type="font/woff2" crossorigin>
-  <link th:case="'zhankuxiaowei'"  rel="preload" href="https://oortaka.top/ziti/zhankuxiaowei.woff2"  as="font" type="font/woff2" crossorigin>
-  <link th:case="'zhuziawan'"      rel="preload" href="https://oortaka.top/ziti/zhuziawan.woff2"      as="font" type="font/woff2" crossorigin>
+<link th:case="'zhankuyuyang'"   rel="preload" href="https://oortaka.top/ziti/zhankuyuyang.woff2"   as="font" type="font/woff2" crossorigin>
+<link th:case="'zhuziawan'"      rel="preload" href="https://oortaka.top/ziti/zhuziawan.woff2"      as="font" type="font/woff2" crossorigin>
 </th:block>
 
 <!-- build the same effect as: * { font-family: "xxx" !important } -->
@@ -270,31 +265,11 @@
       @font-face{font-family:'siteFontForce';src:url('https://oortaka.top/ziti/zhankukuaile.woff2') format('woff2');font-display:swap;}
       * { font-family:'siteFontForce' !important; }
     </style>
-    <style th:case="'zhankugdh'" id="webfonts-force-all-single">
-      @font-face{font-family:'siteFontForce';src:url('https://oortaka.top/ziti/zhankugdh.woff2') format('woff2');font-display:swap;}
-      * { font-family:'siteFontForce' !important; }
-    </style>
-    <style th:case="'zhankuyuyang'" id="webfonts-force-all-single">
+<style th:case="'zhankuyuyang'" id="webfonts-force-all-single">
       @font-face{font-family:'siteFontForce';src:url('https://oortaka.top/ziti/zhankuyuyang.woff2') format('woff2');font-display:swap;}
       * { font-family:'siteFontForce' !important; }
     </style>
-    <style th:case="'zhankuheiti'" id="webfonts-force-all-single">
-      @font-face{font-family:'siteFontForce';src:url('https://oortaka.top/ziti/zhankuheiti.woff2') format('woff2');font-display:swap;}
-      * { font-family:'siteFontForce' !important; }
-    </style>
-    <style th:case="'zhankuwenyi'" id="webfonts-force-all-single">
-      @font-face{font-family:'siteFontForce';src:url('https://oortaka.top/ziti/zhankuwenyi.woff2') format('woff2');font-display:swap;}
-      * { font-family:'siteFontForce' !important; }
-    </style>
-    <style th:case="'zhankuhuangyou'" id="webfonts-force-all-single">
-      @font-face{font-family:'siteFontForce';src:url('https://oortaka.top/ziti/zhankuhuangyou.woff2') format('woff2');font-display:swap;}
-      * { font-family:'siteFontForce' !important; }
-    </style>
-    <style th:case="'zhankuxiaowei'" id="webfonts-force-all-single">
-      @font-face{font-family:'siteFontForce';src:url('https://oortaka.top/ziti/zhankuxiaowei.woff2') format('woff2');font-display:swap;}
-      * { font-family:'siteFontForce' !important; }
-    </style>
-    <style th:case="'zhuziawan'" id="webfonts-force-all-single">
+<style th:case="'zhuziawan'" id="webfonts-force-all-single">
       @font-face{font-family:'siteFontForce';src:url('https://oortaka.top/ziti/zhuziawan.woff2') format('woff2');font-display:swap;}
       * { font-family:'siteFontForce' !important; }
     </style>

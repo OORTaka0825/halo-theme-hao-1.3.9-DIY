@@ -3261,18 +3261,8 @@ spec:
               value: off
             - label: 筑紫A丸
               value: zhuziawan
-            - label: 站酷高端黑
-              value: zhankugdh
             - label: 站酷仓耳渔阳体
               value: zhankuyuyang
-            - label: 站酷酷黑体
-              value: zhankuheiti
-            - label: 站酷文艺体
-              value: zhankuwenyi
-            - label: 站酷庆科黄油体
-              value: zhankuhuangyou
-            - label: 站酷小薇LOGO体
-              value: zhankuxiaowei
             - label: 站酷快乐体
               value: zhankukuaile
         - $formkit: select
