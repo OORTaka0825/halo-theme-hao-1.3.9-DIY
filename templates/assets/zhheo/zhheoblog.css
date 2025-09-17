@@ -6163,7 +6163,7 @@ div#poem_sentence {
 div#poem_info {
     display: flex;
     color: var(--heo-secondtext);
-    font-size: 0.5rem;
+    font-size: 12px;
     justify-content: center;
     flex-wrap: wrap;
 }
@@ -7229,7 +7229,7 @@ li.tree-list-item {
 }
 
 .funds-tips {
-    font-size: 0.5rem;
+    font-size: 12px;
     width: 100%;
     text-align: center;
     color: var(--heo-secondtext);
@@ -9380,7 +9380,7 @@ span.recent-post-top-text {
     margin-bottom: auto;
     border-radius: 8px;
     padding: 2px 6px;
-    font-size: 0.5rem;
+    font-size: 12px;
     margin-left: 8px;
 }
 
@@ -12864,7 +12864,7 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
     display: inline-flex !important;
     align-items: center;
     margin-top: 12px !important;
-    font-size: 0.5rem;
+    font-size: 12px;
 }
 
 .tk-extra .tk-icon{
@@ -12873,9 +12873,9 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 1em;
-    height: 1em;
-    flex: 0 0 1em;
+    width: 16px;
+    height: 16px;
+    flex: 0 0 16px;
 }
 .tk-extra .tk-icon img,
 .tk-extra .tk-icon svg{
@@ -13016,7 +13016,7 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
 }
 
 .tk-replies .tk-content span:first-child:not(.token) {
-    font-size: 0.5rem;
+    font-size: 12px;
     color: var(--heo-secondtext);
 }
 
