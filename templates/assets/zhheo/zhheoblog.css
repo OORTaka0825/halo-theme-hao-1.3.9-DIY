@@ -6163,7 +6163,7 @@ div#poem_sentence {
 div#poem_info {
     display: flex;
     color: var(--heo-secondtext);
-    font-size: 12px;
+    font-size: 0.5rem;
     justify-content: center;
     flex-wrap: wrap;
 }
@@ -7229,7 +7229,7 @@ li.tree-list-item {
 }
 
 .funds-tips {
-    font-size: 12px;
+    font-size: 0.5rem;
     width: 100%;
     text-align: center;
     color: var(--heo-secondtext);
@@ -9380,7 +9380,7 @@ span.recent-post-top-text {
     margin-bottom: auto;
     border-radius: 8px;
     padding: 2px 6px;
-    font-size: 12px;
+    font-size: 0.5rem;
     margin-left: 8px;
 }
 
@@ -12857,33 +12857,25 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
 .tk-extra {
     background: var(--heo-card-bg);
     border: var(--style-border-always);
-    padding: 1px 8px;
+    padding: 1px 5px 1px 2px;
     border-radius: 8px;
     margin-right: 3px !important;
     color: var(--heo-secondtext) !important;
-    display: inline-flex !important;
-    align-items: center;
+    display: inline-block !important;     /* 让 padding 生效更稳定 */
+    position: relative;                /* 关键：给内部 .tk-icon 提供定位参照 */
+    padding-left: 1em;            /* 关键：左侧给图标留出空间（可按视觉微调） */
     margin-top: 12px !important;
-    font-size: 12px;
+    font-size: 0.5rem;
 }
 
 .tk-extra .tk-icon{
-    position: static;
-    margin-right: 6px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 16px;
-    height: 16px;
-    flex: 0 0 16px;
+    position: absolute;
+    left: .45em;    /* 需要再贴就改 .42/.40em */
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1em;
+    height: 1em;
 }
-.tk-extra .tk-icon img,
-.tk-extra .tk-icon svg{
-    width: 100%;
-    height: 100%;
-    display: block;
-}
-
 
 .tk-expand {
     background: var(--heo-card-bg) !important;
@@ -12949,7 +12941,7 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
 
 /* 手机端评论图标和文字间隔 */
 @media (max-width: 768px){
-  #twikoo .tk-extra { padding-left: 0 !important; }
+  #twikoo .tk-extra { padding-left: 1.4em !important; }
 }
 
 #page .tk-comments-container > .tk-comment {
@@ -13016,7 +13008,7 @@ button.el-button.tk-cancel.el-button--default.el-button--small {
 }
 
 .tk-replies .tk-content span:first-child:not(.token) {
-    font-size: 12px;
+    font-size: 0.5rem;
     color: var(--heo-secondtext);
 }
 
@@ -18850,15 +18842,3 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
 .page #article-container img,
 .page .post-content img,
 .page .page-content img { position: relative; z-index: 1; }
-
-.tk-extra .tk-icon + *{
-  margin-left: 0 !important;
-}
-
-/* 2) 再用一个固定宽度的伪元素来当间距（6px 可自调） */
-/* 注意：这招只是掩盖空格的可视效果，根因还是模板里的空格 */
-.tk-extra .tk-icon + *::before{
-  content:"";
-  display:inline-block;
-  width:6px;
-}
