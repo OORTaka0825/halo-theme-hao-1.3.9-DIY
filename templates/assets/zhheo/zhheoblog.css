@@ -18851,10 +18851,14 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
 .page .post-content img,
 .page .page-content img { position: relative; z-index: 1; }
 
-.tk-extra{
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
-               Arial, "Noto Sans", "PingFang SC", "Microsoft YaHei", sans-serif !important;
-  font-size: 12px !important;      /* 已经加过就保持 px，不用 rem/em */
-  letter-spacing: 0;                /* 保险：禁掉字距变化 */
-  font-variant-ligatures: none;     /* 保险：禁掉连字带来的度量差 */
+.tk-extra .tk-icon + *{
+  margin-left: 0 !important;
+}
+
+/* 2) 再用一个固定宽度的伪元素来当间距（6px 可自调） */
+/* 注意：这招只是掩盖空格的可视效果，根因还是模板里的空格 */
+.tk-extra .tk-icon + *::before{
+  content:"";
+  display:inline-block;
+  width:6px;
 }
