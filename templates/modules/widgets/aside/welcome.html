@@ -38,6 +38,13 @@
   filter: blur(0);                      /* 悬停清晰 */
   background: transparent !important;   /* 悬停也不显示底色 */
   }
+  #welcome-info .ip-mask{
+  display:inline-block;
+  border-radius:6px;   /* 圆角大小可改 */
+  overflow:hidden;     /* 关键：裁掉 blur 溢出 */
+  vertical-align:baseline;
+  background: transparent; /* 保持透明；想要“白雾芯片”可换成 rgba(255,255,255,.18) 并加 backdrop-filter */
+}
 </style>
 
 <div class="card-widget card-announcement" th:fragment="welcome">
