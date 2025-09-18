@@ -120,7 +120,7 @@ function showWelcome() {
   }
 
   const hour = new Date().getHours();
-  let greet = "夜深了，早点休息~";
+  let greet = "🛌 夜深了，收拾心绪睡个好觉~";
   if (hour >= 5 && hour < 11) greet = "🌤️ 早上好，一日之计在于晨";
   else if (hour >= 11 && hour < 13) greet = "☀️ 中午好，记得午休喔~";
   else if (hour >= 13 && hour < 17) greet = "🕞 下午好，饮茶先啦！";
