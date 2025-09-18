@@ -22,13 +22,6 @@
   #welcome-info .ip-hide:focus::before { content: attr(data-ip); }
 
   /* ★ 仅悬停显示：白雾模糊，鼠标移上去清晰，移出恢复模糊 */
-  #welcome-info .ip-mask{
-  display:inline-block;
-  border-radius:6px;   /* 圆角大小可改 */
-  overflow:hidden;     /* 关键：裁掉 blur 溢出 */
-  vertical-align:baseline;
-  background: transparent; /* 保持透明；想要“白雾芯片”可换成 rgba(255,255,255,.18) 并加 backdrop-filter */
-}
   #welcome-info .ip-blur{
     display:inline-block;
     filter: blur(5px);
