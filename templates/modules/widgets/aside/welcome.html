@@ -23,12 +23,13 @@
 
   /* ★ 仅悬停显示：白雾模糊，鼠标移上去清晰，移出恢复模糊 */
   #welcome-info .ip-blur{
-    display:inline-block;
-    filter: blur(8px);
-    transition: filter .2s ease, background .2s ease;
-    user-select: none;        /* 模糊时避免被复制 */
-    cursor: default;
+  overflow: hidden !important;   /* 关键：裁切滤镜外溢 */
+  border-radius: 6px !important; /* 圆角大小可调 */
+  padding: 0 2px !important;     /* 给模糊一点缓冲，避免边缘被截得太硬 */
+  filter: blur(8px);             /* 仍保持你的模糊强度 */
+  transition: filter .2s ease;
   }
+
   #welcome-info .ip-blur:hover{
     filter: blur(0);
     background: rgba(255,255,255,0.08);
