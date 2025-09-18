@@ -28,9 +28,6 @@
     transition: filter .2s ease, background .2s ease;
     user-select: none;        /* 模糊时避免被复制 */
     cursor: default;
-    overflow: hidden;                 /* 防止极端情况外溢 */
-    clip-path: inset(0 round 6px);    /* ← 圆角大小按需改，如 8px/10px */
-    padding: 0 4px;                   /* 可选：给边缘一点缓冲，避免硬切 */
   }
   #welcome-info .ip-blur:hover{
     filter: blur(0);
