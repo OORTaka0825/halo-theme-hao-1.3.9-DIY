@@ -2,7 +2,6 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <!-- 小板报 -->
 
-<!-- 注入唯一来源的配置：把原先 site-config.html 的两段迁移到这里 -->
 <script th:inline="javascript">
   (function () {
     window.GLOBAL_CONFIG = window.GLOBAL_CONFIG || {};
@@ -15,20 +14,41 @@
   })();
 </script>
 
-<!-- ★ 新增：仅对小板报 IP 文本生效的隐藏样式 -->
+<!-- 这里保留你之前添加过的 ip-hide 样式，无需删除 -->
 <style>
-  /* 默认用圆点占位；鼠标悬停（或聚焦）才显示真实 IP */
   #welcome-info .ip-hide { cursor: pointer; user-select: none; }
   #welcome-info .ip-hide::before { content: "••••••••••"; }
   #welcome-info .ip-hide:hover::before,
   #welcome-info .ip-hide:focus::before { content: attr(data-ip); }
+
+  /* ★ 新增：白雾模糊效果（不改变文本宽度，不会抖动） */
+  #welcome-info .ip-blur{
+    display:inline-block;
+    padding:2px 6px;
+    border-radius:6px;
+    background: rgba(255,255,255,0.18);
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+    filter: blur(8px);
+    transition: filter .2s ease, background .2s ease;
+    cursor: pointer;
+    user-select: none; /* 模糊时不让复制 */
+  }
+  #welcome-info .ip-blur:hover,
+  #welcome-info .ip-blur:focus,
+  #welcome-info .ip-blur.reveal{
+    filter: blur(0);
+    background: rgba(255,255,255,0.08);
+    user-select: text; /* 显示后可复制 */
+  }
 </style>
 
 <div class="card-widget card-announcement" th:fragment="welcome">
-    <div class="item-headline"><i class="haofont hao-icon-bullhorn"
-                                  style="font-size: 0.9rem;font-weight: 700;"></i><span>小板报</span></div>
-
-    <div id="welcome-info"></div>
+  <div class="item-headline">
+    <i class="haofont hao-icon-bullhorn" style="font-size: 0.9rem;font-weight: 700;"></i>
+    <span>小板报</span>
+  </div>
+  <div id="welcome-info"></div>
 </div>
 
 </html>
