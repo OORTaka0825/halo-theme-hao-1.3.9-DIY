@@ -15,6 +15,15 @@
   })();
 </script>
 
+<!-- ★ 新增：仅对小板报 IP 文本生效的隐藏样式 -->
+<style>
+  /* 默认用圆点占位；鼠标悬停（或聚焦）才显示真实 IP */
+  #welcome-info .ip-hide { cursor: pointer; user-select: none; }
+  #welcome-info .ip-hide::before { content: "••••••••••"; }
+  #welcome-info .ip-hide:hover::before,
+  #welcome-info .ip-hide:focus::before { content: attr(data-ip); }
+</style>
+
 <div class="card-widget card-announcement" th:fragment="welcome">
     <div class="item-headline"><i class="haofont hao-icon-bullhorn"
                                   style="font-size: 0.9rem;font-weight: 700;"></i><span>小板报</span></div>

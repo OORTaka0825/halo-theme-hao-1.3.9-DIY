@@ -145,7 +145,8 @@ function showWelcome() {
 
   if (ip.includes(":")) ip = "好复杂，咱看不懂~(ipv6)";
 
-  const html = ` <b><span style="color: var(--kouseki-ip-color);font-size: var(--kouseki-gl-size)">${pos}</span></b> 的小友💖<br>${desc}🍂<br>当前位置距博主约 <b><span style="color: var(--kouseki-ip-color)">${dist}</span></b> 公里！<br>您的IP地址为：<b><span>${ip}</span></b><br>${greet} <br>`;
+  // ★ 唯一改动：IP 用隐藏占位 span，CSS 悬停/聚焦才显示
+  const html = ` <b><span style="color: var(--kouseki-ip-color);font-size: var(--kouseki-gl-size)">${pos}</span></b> 的小友💖<br>${desc}🍂<br>当前位置距博主约 <b><span style="color: var(--kouseki-ip-color)">${dist}</span></b> 公里！<br>您的IP地址为：<b><span class="ip-hide" data-ip="${ip}" title="悬停显示"></span></b><br>${greet} <br>`;
 
   // ★ 改动 1 的配套：安全赋值，不再抛错/打日志
   box.innerHTML = html;
