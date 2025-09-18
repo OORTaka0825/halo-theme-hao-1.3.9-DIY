@@ -24,11 +24,6 @@
   /* ★ 仅悬停显示：白雾模糊，鼠标移上去清晰，移出恢复模糊 */
   #welcome-info .ip-blur{
     display:inline-block;
-    padding:2px 6px;
-    border-radius:6px;
-    background: rgba(255,255,255,0.18);
-    -webkit-backdrop-filter: blur(2px);
-    backdrop-filter: blur(2px);
     filter: blur(8px);
     transition: filter .2s ease, background .2s ease;
     user-select: none;        /* 模糊时避免被复制 */
@@ -38,6 +33,10 @@
     filter: blur(0);
     background: rgba(255,255,255,0.08);
     user-select: text;        /* 悬停显示后可复制 */
+  }
+  #welcome-info .ip-blur:hover{
+  filter: blur(0);                      /* 悬停清晰 */
+  background: transparent !important;   /* 悬停也不显示底色 */
   }
 </style>
 
