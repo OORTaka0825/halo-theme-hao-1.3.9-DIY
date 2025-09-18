@@ -92,29 +92,17 @@ function showWelcome() {
 
   if (ip.includes(":")) ip = "好复杂，咱看不懂~(ipv6)";
 
-  /* ★ 关键改动：真实 IP 文本常驻，用 .ip-blur 做模糊白雾 */
+  /* 真实 IP 文本常驻，用 .ip-blur 做模糊，鼠标悬停显示 */
   const html = `欢迎来自 <b><span style="color: var(--kouseki-ip-color);">${pos}</span></b> 的小友 💖<br>
     ${desc}🍂<br>
     当前位置距博主约 <b><span style="color: var(--kouseki-ip-color)">${dist}</span></b> 公里！<br>
-    您的IP地址为：<b><span class="ip-blur" title="悬停/点击显示">${ip}</span></b><br>
+    您的IP地址为：<b><span class="ip-blur" title="鼠标移入显示">${ip}</span></b><br>
     ${greet} <br>`;
 
   box.innerHTML = html;
 
-  // 触屏/键盘可切换显示
-  try {
-    var ipNode = box.querySelector('.ip-blur');
-    if (ipNode) {
-      ipNode.setAttribute('tabindex','0');
-      ipNode.addEventListener('click', function(){ ipNode.classList.toggle('reveal'); });
-      ipNode.addEventListener('keydown', function(e){
-        if(e.key==='Enter' || e.key===' '){
-          e.preventDefault();
-          ipNode.classList.toggle('reveal');
-        }
-      });
-    }
-  } catch(e) {}
+  /* 取消点击/键盘切换（按你的要求不需要）
+     —— 这里不再绑定任何事件 —— */
 }
 
 // 首次与 PJAX 触发
