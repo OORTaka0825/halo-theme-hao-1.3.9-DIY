@@ -133,7 +133,8 @@ function showWelcome() {
   const html = `欢迎来自 <b><span style="color: var(--kouseki-ip-color);">${pos}</span></b> 的小友 💖<br>
     ${desc}🍂<br>
     当前位置距博主约 <b><span style="color: var(--kouseki-ip-color)">${dist}</span></b> 公里！<br>
-    您的IP地址为：<b><span class="ip-blur" title="鼠标移入显示">${ip}</span></b><br>
+    您的IP地址为：<b><span class="ip-mask"><span class="ip-blur">${ip}</span></span></b><br>
+
     ${greet} <br>`;
 
   box.innerHTML = html;
