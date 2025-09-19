@@ -34,6 +34,27 @@
                         }
 
                         @media screen and (min-width: 600px) {
+  #form-wrap{
+    height: auto !important;
+    top: 0 !important;
+    overflow: visible !important;
+  }
+  #form-wrap:hover{
+    height: auto !important;
+    top: 0 !important;
+  }
+  #envelope{
+    padding-top: 0 !important;   /* 原来是 200px */
+    margin-top: 0 !important;
+  }
+}
+/* 保险：小屏同样不裁切 */
+@media screen and (max-width: 600px) {
+  #form-wrap{ height:auto !important; overflow:visible !important; }
+  #envelope{ padding-top:0 !important; }
+}
+
+                        @media screen and (min-width: 600px) {
                             #article-container img {
                                 margin: 0 auto 0
                             }
