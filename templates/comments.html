@@ -18,23 +18,27 @@
         </header>
 
         <main class="layout hide-aside" id="content-inner">
-            
-            <!-- ★★★ 仅留言板页面的样式修正：不使用横幅大背景与画布（新增） ★★★ -->
-            <style>
-              /* 有些页面模板会统一注入这层横幅容器，这里仅在留言板页将其清空 */
-              .author-content.author-content-item.essayPage.single{
-                background: none !important;
-                box-shadow: none !important;
-                border: 0 !important;
-                min-height: 0 !important;
-                padding: 0 !important;
-                margin: 0 !important;
-              }
-              /* 若有随横幅注入的画布，这里也关闭 */
-              #header_canvas{ display:none !important; }
-            </style>
-            <!-- ★★★ 新增样式结束 ★★★ -->
 
+            <!-- ===== 仅留言板本页的强力去背景作用域（新增） ===== -->
+            <style>
+              /* 作用域标记下，清空 #page 自身与直接子级/伪元素的底色、阴影、边框 */
+              .gb-scope #page,
+              .gb-scope #page::before,
+              .gb-scope #page::after,
+              .gb-scope #page > *,
+              .gb-scope #page > *::before,
+              .gb-scope #page > *::after {
+                background: transparent !important;
+                box-shadow: none !important;
+                border: none !important;
+              }
+              /* 某些主题会全局注入这层横幅画布，这里在留言板关闭 */
+              .gb-scope #header_canvas { display: none !important; }
+            </style>
+            <!-- ===== 新增样式结束 ===== -->
+
+            <!-- ★ 将原有内容整体包在 gb-scope 内（新增外层，不改里层结构） -->
+            <div class="gb-scope">
             <div id="page">
 
                 <th:block th:if="${theme.config.envelope_comment.enable_envelope_comment}">
@@ -277,10 +281,6 @@
                     </style>
                 </th:block>
 
-
-
-
-
                 <hr>
                 <!--/* 评论组件 */-->
                 <th:block th:replace="~{modules/comment :: comment(group = 'content.halo.run',
@@ -289,7 +289,7 @@
                   allowComment = ${singlePage.spec.allowComment})}" />
 
             </div>
-
+            </div><!-- /.gb-scope 结束 -->
 
         </main>
         <!-- 底部 -->
