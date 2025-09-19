@@ -13,7 +13,13 @@
     <div class="page">
 
         <!-- 头部导航栏 -->
-        
+        <nav th:replace="~{modules/nav :: nav(
+        title = ${ !#strings.isEmpty(theme.config.fcircle.bigTitle) ? theme.config.fcircle.bigTitle
+                  : (!#strings.isEmpty(theme.config.fcircle.title) ? theme.config.fcircle.title : singlePage.spec.title) }
+      )}"><link rel="stylesheet" type="text/css" th:href="${assets_link + '/libs/fcircle/heo-fcircle3.css'}">
+
+</nav>
+    </header>
 
         <main class="layout hide-aside" id="content-inner">
             <div id="page-plain" class="page-plain">
