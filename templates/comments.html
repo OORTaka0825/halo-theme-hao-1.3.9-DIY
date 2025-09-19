@@ -9,15 +9,16 @@
                 _type = 'website')}"></th:block>
 </th:block>
 <th:block th:fragment="content">
-    <div class="post" id="body-wrap">
-        
+
+    <div class="page" id="body-wrap">
+
         <!-- 头部导航栏 -->
         <header class="not-top-img" id="page-header">
             <nav th:replace="~{modules/nav :: nav(title = ${singlePage.spec.title})}"></nav>
         </header>
 
         <main class="layout hide-aside" id="content-inner">
-            <div id="page-plain" class="page-plain">  <!-- ✅ 改名即可 -->
+            <div id="page">
 
                 <th:block th:if="${theme.config.envelope_comment.enable_envelope_comment}">
                     <th:block th:if="${not #strings.isEmpty(theme.config.envelope_comment.title)}"
@@ -31,7 +32,6 @@
                                 display: none !important
                             }
                         }
-                        
 
                         @media screen and (min-width: 600px) {
                             #article-container img {
