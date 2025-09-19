@@ -15,8 +15,51 @@
             <nav th:replace="~{modules/nav :: nav(title = ${singlePage.spec.title})}"></nav>
         </header>
 
+        <!-- 仅留言板导航配色：在无 #body-wrap 时，强制与普通页面一致 -->
+        <style>
+          /* 顶栏底色改为主题二级背景，而不是透明叠底 */
+          #page-header{
+            background: var(--heo-secondbg, rgba(255,255,255,.86)) !important;
+            box-shadow: none !important;
+            -webkit-backdrop-filter: none !important;
+            backdrop-filter: none !important;
+          }
+          /* 顶栏文字/图标颜色与普通页面一致 */
+          #page-header, #page-header *{
+            color: var(--heo-font-color, #1f2d3d) !important;
+            -webkit-text-fill-color: currentColor !important;
+          }
+          /* 普通菜单链接 */
+          #page-header .menus a{
+            color: var(--heo-font-color, #1f2d3d) !important;
+          }
+          /* 当前/选中菜单项的高亮（覆盖多种可能的激活类） */
+          #page-header .menus .current,
+          #page-header .menus .active,
+          #page-header .menus .menu-item.active,
+          #page-header .menus .menu-item.current,
+          #page-header .menus .router-link-active,
+          #page-header .menus .is-active{
+            background: var(--heo-card, rgba(0,0,0,.08)) !important;
+            color: var(--heo-theme, #3b82f6) !important;
+            border-radius: 9999px !important;
+          }
+          #page-header .menus .current *,
+          #page-header .menus .active *{
+            color: var(--heo-theme, #3b82f6) !important;
+          }
+          /* 次级菜单胶囊/分类条 */
+          #page-header .menus .sub-menu,
+          #page-header .menus .menu-bar{
+            background: var(--heo-secondbg, rgba(255,255,255,.86)) !important;
+            box-shadow: none !important;
+            -webkit-backdrop-filter: none !important;
+            backdrop-filter: none !important;
+          }
+        </style>
+
         <main class="layout hide-aside" id="content-inner">
-            <div id="page-plain" class="page-plain">  <!-- ✅ 改名即可 -->
+            <div id="page-plain" class="page-plain">  <!-- ✅ 保留你现有的容器命名 -->
 
                 <th:block th:if="${theme.config.envelope_comment.enable_envelope_comment}">
                     <th:block th:if="${not #strings.isEmpty(theme.config.envelope_comment.title)}"
