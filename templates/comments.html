@@ -11,7 +11,7 @@
 <th:block th:fragment="content">
 
         <!-- 头部导航栏 -->
-        <header class="not-top-img" id="page-header">
+    
             <nav th:replace="~{modules/nav :: nav(title = ${singlePage.spec.title})}"></nav>
         </header>
 
@@ -88,7 +88,7 @@
                             }
 
                             .formmain {
-                                background: #ff0000;
+                                background: #fff;
                                 width: 95%;
                                 max-width: 800px;
                                 margin: auto auto;
@@ -168,7 +168,7 @@
 
                     <style>
                         .default-style a {
-                            color: #ff0000;
+                            color: #eee;
                         }
 
                         :root {
@@ -183,7 +183,7 @@
                         }
 
                         #article-container a:not(.headerlink, .fancybox):hover {
-                            color: #ff0000;
+                            color: #fff;
                             border-radius: 5px;
                             text-decoration: none;
                             background-color: var(--hao-purple);
@@ -215,7 +215,7 @@
 
                         div#danmuBtn button {
                             background: var(--hao-purple);
-                            color: rgb(255, 0, 0);
+                            color: white;
                             padding: 8px 20px;
                             margin: 0 20px;
                             border-radius: 100px;
@@ -231,7 +231,7 @@
                             border-radius: 100px;
                             background-color: rgba(0, 0, 0, 0.5);
                             padding: 6px 16px 6px 6px;
-                            color: #ff0000;
+                            color: #eee;
                         }
 
                         .default-style:hover {
