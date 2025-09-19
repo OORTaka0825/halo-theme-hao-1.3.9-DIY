@@ -18,7 +18,8 @@
         </header>
 
         <main class="layout hide-aside" id="content-inner">
-            <div id="page">
+            <!-- 关键修改：避免触发全站 #page 的毛玻璃样式 -->
+            <div id="page-plain" class="page-plain">
 
                 <th:block th:if="${theme.config.envelope_comment.enable_envelope_comment}">
                     <th:block th:if="${not #strings.isEmpty(theme.config.envelope_comment.title)}"
