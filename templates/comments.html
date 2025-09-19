@@ -18,6 +18,23 @@
         </header>
 
         <main class="layout hide-aside" id="content-inner">
+            
+            <!-- ★★★ 仅留言板页面的样式修正：不使用横幅大背景与画布（新增） ★★★ -->
+            <style>
+              /* 有些页面模板会统一注入这层横幅容器，这里仅在留言板页将其清空 */
+              .author-content.author-content-item.essayPage.single{
+                background: none !important;
+                box-shadow: none !important;
+                border: 0 !important;
+                min-height: 0 !important;
+                padding: 0 !important;
+                margin: 0 !important;
+              }
+              /* 若有随横幅注入的画布，这里也关闭 */
+              #header_canvas{ display:none !important; }
+            </style>
+            <!-- ★★★ 新增样式结束 ★★★ -->
+
             <div id="page">
 
                 <th:block th:if="${theme.config.envelope_comment.enable_envelope_comment}">
