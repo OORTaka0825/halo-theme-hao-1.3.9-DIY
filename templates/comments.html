@@ -16,8 +16,7 @@
         </header>
 
         <main class="layout hide-aside" id="content-inner">
-            <!-- 关键修改：避免触发全站 #page 的毛玻璃样式 -->
-            <div id="page-plain" class="page-plain">
+            <div id="page">
 
                 <th:block th:if="${theme.config.envelope_comment.enable_envelope_comment}">
                     <th:block th:if="${not #strings.isEmpty(theme.config.envelope_comment.title)}"
@@ -260,6 +259,9 @@
                 </th:block>
 
 
+
+
+
                 <hr>
                 <!--/* 评论组件 */-->
                 <th:block th:replace="~{modules/comment :: comment(group = 'content.halo.run',
@@ -267,6 +269,7 @@
                   name = ${singlePage.metadata.name},
                   allowComment = ${singlePage.spec.allowComment})}" />
 
+            </div>
 
 
         </main>
