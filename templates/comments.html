@@ -10,25 +10,35 @@
 </th:block>
 <th:block th:fragment="content">
 
-  
+    <div class="page" id="body-wrap">
 
         <!-- 头部导航栏 -->
         <header class="not-top-img" id="page-header">
             <nav th:replace="~{modules/nav :: nav(title = ${singlePage.spec.title})}"></nav>
         </header>
         <style>
-  /* 等价于：#body-wrap #page-header.not-top-img { … } */
-  #page-header.not-top-img{
-    background: var(--heo-secondbg);
-    color: var(--heo-font-color);
+  /* 1) 关闭 body-wrap 自带的“卡片皮肤” */
+  #body-wrap{
+    background: transparent !important;
+    box-shadow: none !important;
+    border: 0 !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    overflow: visible !important;
   }
-  #page-header.not-top-img *{ color: var(--heo-font-color); }
+  #body-wrap::before, #body-wrap::after{ content:none !important; display:none !important; }
 
-  /* 等价于：#body-wrap #page-header .menus .active { … } */
-  #page-header .menus .active,
-  #page-header .menus .current,
-  #page-header .menus .is-active{
-    color: var(--heo-theme);
+  /* 2) 主题常见：把正文第一层再上皮肤 —— 一并关掉 */
+  #body-wrap > .layout > div:first-child,
+  #body-wrap #page,
+  #body-wrap #page::before,
+  #body-wrap #page::after{
+    background: transparent !important;
+    box-shadow: none !important;
+    border: 0 !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    overflow: visible !important;
   }
 </style>
 
