@@ -14,6 +14,36 @@
 
         <!-- 头部导航栏 -->
         <header class="not-top-img" id="page-header">
+            <style>
+/* 仅留言板：把包着整块的那层大卡片直接取消掉 */
+#content-inner > #page,
+#content-inner > #page-plain,
+#content-inner > .page-plain,
+#content-inner > .page,
+#content-inner > div:first-child {
+  display: contents !important;         /* 关键：容器不渲染盒子，子元素原地保留 */
+  background: none !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+#content-inner > #page::before,
+#content-inner > #page::after,
+#content-inner > #page-plain::before,
+#content-inner > #page-plain::after,
+#content-inner > .page-plain::before,
+#content-inner > .page-plain::after,
+#content-inner > .page::before,
+#content-inner > .page::after,
+#content-inner > div:first-child::before,
+#content-inner > div:first-child::after {
+  content: none !important;             /* 避免伪元素继续画阴影/高光 */
+}
+</style>
+
             <nav th:replace="~{modules/nav :: nav(title = ${singlePage.spec.title})}"></nav>
         </header>
 
