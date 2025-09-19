@@ -10,8 +10,6 @@
 </th:block>
 <th:block th:fragment="content">
 
-    <div class="" id="">
-
         <!-- 头部导航栏 -->
         <header class="not-top-img" id="page-header">
             <nav th:replace="~{modules/nav :: nav(title = ${singlePage.spec.title})}"></nav>
@@ -262,9 +260,6 @@
                 </th:block>
 
 
-
-
-
                 <hr>
                 <!--/* 评论组件 */-->
                 <th:block th:replace="~{modules/comment :: comment(group = 'content.halo.run',
@@ -272,7 +267,6 @@
                   name = ${singlePage.metadata.name},
                   allowComment = ${singlePage.spec.allowComment})}" />
 
-            </div>
 
 
         </main>
