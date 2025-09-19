@@ -19,26 +19,33 @@
 
         <main class="layout hide-aside" id="content-inner">
 
-            <!-- ===== 仅留言板本页的强力去背景作用域（新增） ===== -->
+            <!-- ===== 新增：仅留言板本页去掉“毛玻璃大背景容器” ===== -->
             <style>
-              /* 作用域标记下，清空 #page 自身与直接子级/伪元素的底色、阴影、边框 */
-              .gb-scope #page,
-              .gb-scope #page::before,
-              .gb-scope #page::after,
-              .gb-scope #page > *,
-              .gb-scope #page > *::before,
-              .gb-scope #page > *::after {
+              /* 1) 去掉本页 #page 的毛玻璃与阴影、描边、底色 */
+              #content-inner #page,
+              #content-inner #page::before,
+              #content-inner #page::after{
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
                 background: transparent !important;
                 box-shadow: none !important;
                 border: none !important;
               }
-              /* 某些主题会全局注入这层横幅画布，这里在留言板关闭 */
-              .gb-scope #header_canvas { display: none !important; }
+              /* 2) 有些主题把毛玻璃写在直接子级或伪元素上，这里一起关掉 */
+              #content-inner #page > *,
+              #content-inner #page > *::before,
+              #content-inner #page > *::after{
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+                background: transparent !important;
+                box-shadow: none !important;
+                border: none !important;
+              }
+              /* 3) 若全局注入了横幅画布，这里也关闭 */
+              #content-inner #header_canvas{ display:none !important; }
             </style>
             <!-- ===== 新增样式结束 ===== -->
 
-            <!-- ★ 将原有内容整体包在 gb-scope 内（新增外层，不改里层结构） -->
-            <div class="gb-scope">
             <div id="page">
 
                 <th:block th:if="${theme.config.envelope_comment.enable_envelope_comment}">
@@ -289,7 +296,7 @@
                   allowComment = ${singlePage.spec.allowComment})}" />
 
             </div>
-            </div><!-- /.gb-scope 结束 -->
+
 
         </main>
         <!-- 底部 -->
