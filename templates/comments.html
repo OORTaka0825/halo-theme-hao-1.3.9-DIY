@@ -10,6 +10,7 @@
 </th:block>
 <th:block th:fragment="content">
 
+    <div class="page">
 
         <!-- 头部导航栏 -->
         <header class="not-top-img" id="page-header">
@@ -17,7 +18,7 @@
         </header>
 
         <main class="layout hide-aside" id="content-inner">
-            <div class="page" id="body-wrap">
+            <div id="page">
 
                 <th:block th:if="${theme.config.envelope_comment.enable_envelope_comment}">
                     <th:block th:if="${not #strings.isEmpty(theme.config.envelope_comment.title)}"
