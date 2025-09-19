@@ -14,38 +14,28 @@
 
         <!-- 头部导航栏 -->
         <header class="not-top-img" id="page-header">
-            <style>
-/* 仅留言板：把包着整块的那层大卡片直接取消掉 */
-#content-inner > #page,
-#content-inner > #page-plain,
-#content-inner > .page-plain,
-#content-inner > .page,
-#content-inner > div:first-child {
-  display: contents !important;         /* 关键：容器不渲染盒子，子元素原地保留 */
-  background: none !important;
-  box-shadow: none !important;
-  border: 0 !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  -webkit-backdrop-filter: none !important;
-  backdrop-filter: none !important;
-}
-#content-inner > #page::before,
-#content-inner > #page::after,
-#content-inner > #page-plain::before,
-#content-inner > #page-plain::after,
-#content-inner > .page-plain::before,
-#content-inner > .page-plain::after,
-#content-inner > .page::before,
-#content-inner > .page::after,
-#content-inner > div:first-child::before,
-#content-inner > div:first-child::after {
-  content: none !important;             /* 避免伪元素继续画阴影/高光 */
-}
-</style>
-
             <nav th:replace="~{modules/nav :: nav(title = ${singlePage.spec.title})}"></nav>
         </header>
+
+        <!-- 仅本页：取消 #content-inner 里这一层黑色大容器（非透明，直接不渲染盒子） -->
+        <style>
+          #content-inner > #page{
+            display: contents !important;           /* 关键：容器不生成盒子，子元素原地保留 */
+            background: none !important;
+            box-shadow: none !important;
+            border: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            overflow: visible !important;
+            -webkit-backdrop-filter: none !important;
+            backdrop-filter: none !important;
+          }
+          #content-inner > #page::before,
+          #content-inner > #page::after{
+            content: none !important;               /* 关闭伪元素绘制的高光/阴影 */
+            display: none !important;
+          }
+        </style>
 
         <main class="layout hide-aside" id="content-inner">
             <div id="page">
