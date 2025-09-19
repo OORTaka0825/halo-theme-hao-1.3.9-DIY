@@ -10,12 +10,32 @@
 </th:block>
 <th:block th:fragment="content">
 
-  
-
         <!-- 头部导航栏 -->
         <header class="not-top-img" id="page-header">
             <nav th:replace="~{modules/nav :: nav(title = ${singlePage.spec.title})}"></nav>
         </header>
+
+        <!-- 等价于：#body-wrap #page-header.not-top-img / #body-wrap #page-header .menus .active -->
+        <style>
+          /* 等价改写：#body-wrap #page-header.not-top-img {...} */
+          #page-header.not-top-img{
+            background: var(--heo-secondbg);
+            color: var(--heo-font-color);
+          }
+          /* 让内部文字/图标也随正文色（部分主题对子元素单独设色） */
+          #page-header.not-top-img *{
+            color: var(--heo-font-color);
+          }
+          /* 等价改写：#body-wrap #page-header .menus .active {...} */
+          #page-header .menus .active{
+            color: var(--heo-theme);
+          }
+          /* 兼容其它可能的激活类名 */
+          #page-header .menus .current,
+          #page-header .menus .is-active{
+            color: var(--heo-theme);
+          }
+        </style>
 
         <main class="layout hide-aside" id="content-inner">
             <div id="page-plain" class="page-plain">
@@ -26,18 +46,10 @@
                     </th:block>
                     <style>
                         @media screen and (max-width: 600px) {
-
-                            #afterimg,
-                            #beforeimg {
-                                display: none !important
-                            }
+                            #afterimg, #beforeimg { display: none !important }
                         }
-
                         @media screen and (min-width: 600px) {
-                            #article-container img {
-                                margin: 0 auto 0
-                            }
-
+                            #article-container img { margin: 0 auto 0 }
                             #form-wrap {
                                 overflow: hidden;
                                 height: 447px;
@@ -46,12 +58,10 @@
                                 transition: all 1s ease-in-out .3s;
                                 z-index: 0
                             }
-
                             #form-wrap:hover {
                                 height: [[${theme.config.envelope_comment.height}]]px;
                                 top: -200px
                             }
-
                             #beforeimg {
                                 position: absolute;
                                 bottom: 126px;
@@ -62,7 +72,6 @@
                                 z-index: -100;
                                 pointer-events: none
                             }
-
                             #afterimg {
                                 position: absolute;
                                 bottom: -2px;
@@ -73,7 +82,6 @@
                                 z-index: 100;
                                 pointer-events: none
                             }
-
                             #envelope {
                                 position: relative;
                                 overflow: visible;
@@ -82,12 +90,10 @@
                                 transition: all 1s ease-in-out .3s;
                                 padding-top: 200px
                             }
-
                             #maincontent {
                                 width: 530px;
                                 margin: 20px auto 0
                             }
-
                             .formmain {
                                 background: #fff;
                                 width: 95%;
@@ -100,16 +106,9 @@
                                 box-shadow: 0 0 20px 0 #000
                             }
                         }
-
-                        [data-theme=dark] .formmain {
-                            background: #323232
-                        }
-
-                        [data-theme=dark] .comments {
-                            background: #5a5a5a !important
-                        }
+                        [data-theme=dark] .formmain { background: #323232 }
+                        [data-theme=dark] .comments { background: #5a5a5a !important }
                     </style>
-
 
                     <div id="article-container">
                         <div id="maincontent">
@@ -129,9 +128,7 @@
                                                 <div class="comments"
                                                      style="text-align:center;border-bottom:#ddd 1px solid;border-left:#ddd 1px solid;padding-bottom:20px;background-color:#eee;margin:15px 0;padding-left:20px;padding-right:20px;border-top:#ddd 1px solid;border-right:#ddd 1px solid;padding-top:20px"
                                                      th:with="message = ${theme.config.envelope_comment.messageList}">
-
                                                     <div th:each="data : ${message}">[[${data.content}]]</div>
-
                                                 </div>
                                                 <div class="bottomcontent" style="text-align:center;margin-top:40px">
                                                     <img class="bottomimg no-lightbox entered loaded"
@@ -153,43 +150,30 @@
                 </th:block>
 
                 <div class="flink" id="article-container">
-                    <th:block  th:utext="${singlePage.content.content}"></th:block>
+                    <th:block th:utext="${singlePage.content.content}"></th:block>
                 </div>
-
 
                 <th:block th:if="${ theme.config.comments.commentsEnable &&
                         #strings.contains('Twikoo,Artalk,Waline',theme.config.comments.use) &&
                         theme.config.envelope_comment.enable_danmu }">
-                    <div id="danmuBtn">
-
-                    </div>
-                    <div id="danmu">
-                    </div>
-
+                    <div id="danmuBtn"></div>
+                    <div id="danmu"></div>
 
                     <style>
-                        .default-style a {
-                            color: #eee;
-                        }
-
-                        :root {
-                            --hao-purple: #4976f5;
-                        }
-
+                        .default-style a { color: #eee; }
+                        :root { --hao-purple: #4976f5; }
                         #article-container a:not(.headerlink, .fancybox) {
                             font-weight: 700;
                             color: #4c4948;
                             padding: 0 3px;
                             border-bottom: 2px var(--hao-purple) solid;
                         }
-
                         #article-container a:not(.headerlink, .fancybox):hover {
                             color: #fff;
                             border-radius: 5px;
                             text-decoration: none;
                             background-color: var(--hao-purple);
                         }
-
                         #danmu {
                             width: 100%;
                             height: calc(100% - 60px);
@@ -199,21 +183,9 @@
                             z-index: 1;
                             pointer-events: none;
                         }
-
-                        .hidedanmu {
-                            opacity: 0;
-                        }
-
-                        .hidedanmu * {
-                            pointer-events: none !important;
-                        }
-
-                        div#danmuBtn {
-                            display: flex;
-                            justify-content: center;
-                            margin: 20px;
-                        }
-
+                        .hidedanmu { opacity: 0; }
+                        .hidedanmu * { pointer-events: none !important; }
+                        div#danmuBtn { display: flex; justify-content: center; margin: 20px; }
                         div#danmuBtn button {
                             background: var(--hao-purple);
                             color: white;
@@ -221,7 +193,6 @@
                             margin: 0 20px;
                             border-radius: 100px;
                         }
-
                         .default-style {
                             pointer-events: all;
                             cursor: pointer;
@@ -234,12 +205,10 @@
                             padding: 6px 16px 6px 6px;
                             color: #eee;
                         }
-
                         .default-style:hover {
                             background-color: rgba(0, 0, 0, 0.7);
                             transition: .3s
                         }
-
                         .default-style img {
                             pointer-events: none;
                             height: 30px;
@@ -247,7 +216,6 @@
                             margin: 0 5px 0 0 !important;
                             border-radius: 50%;
                         }
-
                         .default-style p {
                             line-height: 1;
                             pointer-events: none;
@@ -260,25 +228,18 @@
                     </style>
                 </th:block>
 
-
-
-
-
                 <hr>
                 <!--/* 评论组件 */-->
                 <th:block th:replace="~{modules/comment :: comment(group = 'content.halo.run',
                   kind = 'SinglePage',
                   name = ${singlePage.metadata.name},
                   allowComment = ${singlePage.spec.allowComment})}" />
-
             </div>
-
-
         </main>
+
         <!-- 底部 -->
         <footer th:replace="~{modules/footer}"/>
     </div>
 
 </th:block>
-
 </html>
