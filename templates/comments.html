@@ -9,51 +9,14 @@
                 _type = 'website')}"></th:block>
 </th:block>
 <th:block th:fragment="content">
-
-    <div class="page" id="body-wrap">
-        <!-- 仅留言板页：保留 body-wrap（用于导航配色），但关闭它自带的卡片皮肤 -->
-<style>
-  /* 去掉 body-wrap 自带的底色、阴影、毛玻璃、边框、裁切与固定高度 */
-  #body-wrap{
-    background: transparent !important;
-    box-shadow: none !important;
-    border: none !important;
-    overflow: visible !important;
-    height: auto !important;
-    min-height: unset !important;
-    -webkit-backdrop-filter: none !important;
-    backdrop-filter: none !important;
-    padding: 0 !important;   /* 防止内缩造成“没包住”的错觉 */
-    margin: 0 !important;
-  }
-  /* 有些主题把装饰写在伪元素里，这里一并关闭 */
-  #body-wrap::before,
-  #body-wrap::after{
-    content: none !important;
-    display: none !important;
-  }
-  /* 常见：body-wrap 的第一个子层再套一层皮肤，这里顺手关掉 */
-  #body-wrap > .page,
-  #body-wrap > .page::before,
-  #body-wrap > .page::after,
-  #body-wrap > .layout,
-  #body-wrap > .layout::before,
-  #body-wrap > .layout::after{
-    background: transparent !important;
-    box-shadow: none !important;
-    border: none !important;
-    -webkit-backdrop-filter: none !important;
-    backdrop-filter: none !important;
-  }
-</style>
-
+        
         <!-- 头部导航栏 -->
         <header class="not-top-img" id="page-header">
             <nav th:replace="~{modules/nav :: nav(title = ${singlePage.spec.title})}"></nav>
         </header>
 
         <main class="layout hide-aside" id="content-inner">
-            <div id="page">
+            <div id="page-plain" class="page-plain">  <!-- ✅ 改名即可 -->
 
                 <th:block th:if="${theme.config.envelope_comment.enable_envelope_comment}">
                     <th:block th:if="${not #strings.isEmpty(theme.config.envelope_comment.title)}"
