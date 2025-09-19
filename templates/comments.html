@@ -9,57 +9,68 @@
                 _type = 'website')}"></th:block>
 </th:block>
 <th:block th:fragment="content">
-        
+        <!-- 仅留言板：模拟 #body-wrap 存在时的导航配色 -->
+<style>
+  /* 导航容器的底色：主题“卡片/二级背景” */
+  #page-header{
+    background: var(--heo-secondbg, rgba(255,255,255,.86)) !important;
+    box-shadow: none !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  /* 导航内的所有文字 / 图标颜色：主题正文色 */
+  #page-header, #page-header *{
+    color: var(--heo-font-color, #1f2d3d) !important;
+    -webkit-text-fill-color: currentColor !important;
+  }
+
+  /* 顶部主菜单普通链接 */
+  #page-header .menus a{
+    color: var(--heo-font-color, #1f2d3d) !important;
+  }
+  #page-header .menus a:hover{
+    color: var(--heo-theme, #3b82f6) !important;
+  }
+
+  /* 当前/选中菜单项高亮：和主题胶囊风一致 */
+  #page-header .menus .current,
+  #page-header .menus .active,
+  #page-header .menus .menu-item.active,
+  #page-header .menus .menu-item.current,
+  #page-header .menus .router-link-active,
+  #page-header .menus .is-active{
+    background: var(--heo-card, rgba(0,0,0,.08)) !important;
+    color: var(--heo-theme, #3b82f6) !important;
+    border-radius: 9999px !important;
+  }
+  #page-header .menus .current *,
+  #page-header .menus .active *{
+    color: var(--heo-theme, #3b82f6) !important;
+  }
+
+  /* 二级菜单/胶囊条（如果这一页有） */
+  #page-header .menus .sub-menu,
+  #page-header .menus .menu-bar{
+    background: var(--heo-secondbg, rgba(255,255,255,.86)) !important;
+    box-shadow: none !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  /* 夜间模式也按主题变量来（主题自己会切变量） */
+  [data-theme="dark"] #page-header{
+    background: var(--heo-secondbg, rgba(32,32,32,.86)) !important;
+  }
+</style>
+
         <!-- 头部导航栏 -->
         <header class="not-top-img" id="page-header">
             <nav th:replace="~{modules/nav :: nav(title = ${singlePage.spec.title})}"></nav>
         </header>
 
-        <!-- 仅留言板导航配色：在无 #body-wrap 时，强制与普通页面一致 -->
-        <style>
-          /* 顶栏底色改为主题二级背景，而不是透明叠底 */
-          #page-header{
-            background: var(--heo-secondbg, rgba(255,255,255,.86)) !important;
-            box-shadow: none !important;
-            -webkit-backdrop-filter: none !important;
-            backdrop-filter: none !important;
-          }
-          /* 顶栏文字/图标颜色与普通页面一致 */
-          #page-header, #page-header *{
-            color: var(--heo-font-color, #1f2d3d) !important;
-            -webkit-text-fill-color: currentColor !important;
-          }
-          /* 普通菜单链接 */
-          #page-header .menus a{
-            color: var(--heo-font-color, #1f2d3d) !important;
-          }
-          /* 当前/选中菜单项的高亮（覆盖多种可能的激活类） */
-          #page-header .menus .current,
-          #page-header .menus .active,
-          #page-header .menus .menu-item.active,
-          #page-header .menus .menu-item.current,
-          #page-header .menus .router-link-active,
-          #page-header .menus .is-active{
-            background: var(--heo-card, rgba(0,0,0,.08)) !important;
-            color: var(--heo-theme, #3b82f6) !important;
-            border-radius: 9999px !important;
-          }
-          #page-header .menus .current *,
-          #page-header .menus .active *{
-            color: var(--heo-theme, #3b82f6) !important;
-          }
-          /* 次级菜单胶囊/分类条 */
-          #page-header .menus .sub-menu,
-          #page-header .menus .menu-bar{
-            background: var(--heo-secondbg, rgba(255,255,255,.86)) !important;
-            box-shadow: none !important;
-            -webkit-backdrop-filter: none !important;
-            backdrop-filter: none !important;
-          }
-        </style>
-
         <main class="layout hide-aside" id="content-inner">
-            <div id="page-plain" class="page-plain">  <!-- ✅ 保留你现有的容器命名 -->
+            <div id="page-plain" class="page-plain">  <!-- ✅ 改名即可 -->
 
                 <th:block th:if="${theme.config.envelope_comment.enable_envelope_comment}">
                     <th:block th:if="${not #strings.isEmpty(theme.config.envelope_comment.title)}"
