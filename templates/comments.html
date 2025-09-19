@@ -10,15 +10,15 @@
 </th:block>
 <th:block th:fragment="content">
 
-    <div class="page" id="body-wrap">
+
 
         <!-- 头部导航栏 -->
-        <header class="not-top-img" id="page-header">
+        <header class="top-img" id="page-header">
             <nav th:replace="~{modules/nav :: nav(title = ${singlePage.spec.title})}"></nav>
         </header>
 
         <main class="layout hide-aside" id="content-inner">
-            <div id="page">
+            <div id="page-plain" class="page-plain">
 
                 <th:block th:if="${theme.config.envelope_comment.enable_envelope_comment}">
                     <th:block th:if="${not #strings.isEmpty(theme.config.envelope_comment.title)}"
@@ -128,9 +128,9 @@
                                                     来自[[${site.title}]]的留言:</h3>
                                                 <div class="comments"
                                                      style="text-align:center;border-bottom:#ddd 1px solid;border-left:#ddd 1px solid;padding-bottom:20px;background-color:#eee;margin:15px 0;padding-left:20px;padding-right:20px;border-top:#ddd 1px solid;border-right:#ddd 1px solid;padding-top:20px"
-                                                     th:with="message = ${theme.config.envelope_comment.message_list}">
+                                                     th:with="message = ${theme.config.envelope_comment.messageList}">
 
-                                                    <div th:each="data : ${message}">[[${data}]]</div>
+                                                    <div th:each="data : ${message}">[[${data.content}]]</div>
 
                                                 </div>
                                                 <div class="bottomcontent" style="text-align:center;margin-top:40px">
@@ -156,13 +156,123 @@
                     <th:block  th:utext="${singlePage.content.content}"></th:block>
                 </div>
 
+
+                <th:block th:if="${ theme.config.comments.commentsEnable &&
+                        #strings.contains('Twikoo,Artalk,Waline',theme.config.comments.use) &&
+                        theme.config.envelope_comment.enable_danmu }">
+                    <div id="danmuBtn">
+
+                    </div>
+                    <div id="danmu">
+                    </div>
+
+
+                    <style>
+                        .default-style a {
+                            color: #eee;
+                        }
+
+                        :root {
+                            --hao-purple: #4976f5;
+                        }
+
+                        #article-container a:not(.headerlink, .fancybox) {
+                            font-weight: 700;
+                            color: #4c4948;
+                            padding: 0 3px;
+                            border-bottom: 2px var(--hao-purple) solid;
+                        }
+
+                        #article-container a:not(.headerlink, .fancybox):hover {
+                            color: #fff;
+                            border-radius: 5px;
+                            text-decoration: none;
+                            background-color: var(--hao-purple);
+                        }
+
+                        #danmu {
+                            width: 100%;
+                            height: calc(100% - 60px);
+                            position: fixed;
+                            left: 0;
+                            top: 60px;
+                            z-index: 1;
+                            pointer-events: none;
+                        }
+
+                        .hidedanmu {
+                            opacity: 0;
+                        }
+
+                        .hidedanmu * {
+                            pointer-events: none !important;
+                        }
+
+                        div#danmuBtn {
+                            display: flex;
+                            justify-content: center;
+                            margin: 20px;
+                        }
+
+                        div#danmuBtn button {
+                            background: var(--hao-purple);
+                            color: white;
+                            padding: 8px 20px;
+                            margin: 0 20px;
+                            border-radius: 100px;
+                        }
+
+                        .default-style {
+                            pointer-events: all;
+                            cursor: pointer;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            font-size: 16px;
+                            border-radius: 100px;
+                            background-color: rgba(0, 0, 0, 0.5);
+                            padding: 6px 16px 6px 6px;
+                            color: #eee;
+                        }
+
+                        .default-style:hover {
+                            background-color: rgba(0, 0, 0, 0.7);
+                            transition: .3s
+                        }
+
+                        .default-style img {
+                            pointer-events: none;
+                            height: 30px;
+                            width: 30px;
+                            margin: 0 5px 0 0 !important;
+                            border-radius: 50%;
+                        }
+
+                        .default-style p {
+                            line-height: 1;
+                            pointer-events: none;
+                            margin: 0 !important;
+                            max-width: 300px;
+                            white-space: nowrap;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                        }
+                    </style>
+                </th:block>
+
+
+
+
+
                 <hr>
                 <!--/* 评论组件 */-->
                 <th:block th:replace="~{modules/comment :: comment(group = 'content.halo.run',
                   kind = 'SinglePage',
                   name = ${singlePage.metadata.name},
                   allowComment = ${singlePage.spec.allowComment})}" />
+
             </div>
+
 
         </main>
         <!-- 底部 -->
