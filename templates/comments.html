@@ -1,44 +1,52 @@
 <!DOCTYPE html>
-<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
-<head>
-  <!-- 继承站点通用 <head>，保持原有样式与资源 -->
-  <th:block th:replace="modules/head :: head"></th:block>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{modules/layouts/layout :: layout(content = ~{::content}, htmlType = 'comments', title = ${singlePage.spec.title + ' | ' + site.title}, head = ~{::head})}">
 
-  <!-- 本页 Open Graph（保留） -->
-  <th:block th:replace="modules/common/open-graph :: open-graph(
+<!-- 追加 head（保持你的 OG 等） -->
+<th:block th:fragment="head">
+  <th:block th:replace="~{modules/common/open-graph :: open-graph(
       _title = ${singlePage.spec.title},
       _permalink = ${singlePage.status.permalink},
       _cover = ${singlePage.spec.cover},
       _excerpt = ${singlePage.status.excerpt},
       _type = 'website'
-  )"></th:block>
-</head>
+  )}"></th:block>
+  <style>
+    /* 本页兜底，避免整块变黑 */
+    #body-wrap #page-header.not-top-img{ background: var(--heo-secondbg); color: var(--heo-font-color); }
+    #body-wrap .page .bbtalk-card,
+    #body-wrap .page .envelope,
+    #body-wrap .page .card-comment,
+    #body-wrap .page .tk-comments{
+      background: var(--heo-card-bg);
+      color: var(--heo-font-color);
+      box-shadow: var(--heo-shadow-border);
+      border-radius: 16px;
+      border: var(--style-border);
+    }
+    #body-wrap .page .envelope{ position:relative; z-index:2; }
+    #nav{ z-index:20; }
+  </style>
+</th:block>
 
-<body>
-  <!-- 背景容器 -->
-  <div id="web_bg"></div>
+<!-- 内容片段开始 -->
+<th:block th:fragment="content">
 
-  <!-- ✅ 保留整站外壳，两层结构 -->
+  <!-- ✅ 按你的要求，这里加上 #body-wrap > .page 的本地外壳 -->
   <div id="body-wrap">
     <div class="page">
 
-      <!-- 顶部导航 -->
-      <th:block th:replace="modules/header :: header"></th:block>
+      <header id="page-header" class="not-top-img">
+        <nav th:replace="~{modules/nav :: nav(title = ${singlePage.spec.title})}"></nav>
+      </header>
 
-      <!-- 页面主体 -->
       <main id="content-inner" class="layout hide-aside">
         <div id="page" class="page-comments">
-
-          <!-- 页面头图标题（与 not-top-img 行为一致） -->
-          <header id="page-header" class="not-top-img">
-            <nav th:replace="modules/nav :: nav(title = ${singlePage.spec.title})"></nav>
-          </header>
 
           <!-- 信封留言板（原样保留） -->
           <th:block th:if="${theme.config.envelope_comment.enable_envelope_comment}">
             <th:block th:if="${not #strings.isEmpty(theme.config.envelope_comment.title)}"
-                      th:utext="${theme.config.envelope_comment.title}">
-            </th:block>
+                      th:utext="${theme.config.envelope_comment.title}"></th:block>
 
             <style>
               @media screen and (max-width: 600px) { #afterimg, #beforeimg { display: none !important } }
@@ -100,7 +108,7 @@
             <th:block th:utext="${singlePage.content.content}"></th:block>
           </div>
 
-          <!-- 弹幕（保留，按原条件渲染） -->
+          <!-- 弹幕（保留） -->
           <th:block th:if="${ theme.config.comments.commentsEnable &&
                              #strings.contains('Twikoo,Artalk,Waline',theme.config.comments.use) &&
                              theme.config.envelope_comment.enable_danmu }">
@@ -126,23 +134,19 @@
           <hr>
 
           <!-- 评论组件（保留） -->
-          <th:block th:replace="modules/comment :: comment(
+          <th:block th:replace="~{modules/comment :: comment(
               group = 'content.halo.run',
               kind  = 'SinglePage',
               name  = ${singlePage.metadata.name},
               allowComment = ${singlePage.spec.allowComment}
-          )"></th:block>
+          )}"></th:block>
 
         </div>
       </main>
 
-      <!-- 页脚（只保留一份，由本页输出） -->
-      <th:block th:replace="modules/footer :: footer"></th:block>
+      <!-- ⚠️ 按你的要求：本页不再输出全局 footer（由 layout 渲染或不渲染） -->
 
     </div>
   </div>
-
-  <!-- 站点脚本（保持原有顺序与内容） -->
-  <th:block th:replace="modules/scripts :: scripts"></th:block>
-</body>
+</th:block>
 </html>
