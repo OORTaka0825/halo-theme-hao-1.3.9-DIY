@@ -7,6 +7,55 @@
                 _cover = ${singlePage.spec.cover},
                 _excerpt = ${singlePage.status.excerpt},
                 _type = 'website')}"></th:block>
+
+    <!-- Scoped fix: make the whole page a single card when using <div class='page' id='body-wrap'> -->
+    <style>
+      /* === One-piece card skin for comments page (combined wrapper variant) === */
+      #body-wrap.page { 
+        background: var(--heo-card-bg);
+        color: var(--heo-font-color);
+        border: var(--style-border);
+        border-radius: 16px;
+        box-shadow: var(--heo-shadow-border);
+        overflow: hidden;
+      }
+      #body-wrap.page #page-header {
+        margin: 0;
+        border-bottom: var(--style-border);
+      }
+      /* preserve your not-top-img color scheme */
+      #body-wrap.page #page-header.not-top-img { 
+        background: var(--heo-secondbg);
+        color: var(--heo-font-color);
+      }
+      #body-wrap.page #content-inner.layout { padding: 0; }
+      #body-wrap.page #page { padding: 1rem 1.25rem; }
+
+      /* neutralize inner small cards (to avoid "segmented" look) */
+      #body-wrap.page .card,
+      #body-wrap.page .card-widget,
+      #body-wrap.page .bbtalk-card,
+      #body-wrap.page .card-comment,
+      #body-wrap.page #article-container.flink {
+        background: transparent !important;
+        box-shadow: none !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        padding-left: 0; padding-right: 0;
+      }
+      /* stitch blocks with gentle separators */
+      #body-wrap.page #page > * + * {
+        margin-top: 1rem;
+        border-top: var(--style-border);
+        padding-top: 1rem;
+      }
+      /* you already have an <hr>; hide it to avoid duplicate lines */
+      #body-wrap.page #page hr { display: none; }
+
+      /* envelope z-index so it won't be covered by nav */
+      #body-wrap.page .envelope { position: relative; z-index: 2; }
+      #nav { z-index: 20; }
+    </style>
 </th:block>
 <th:block th:fragment="content">
 
@@ -260,10 +309,6 @@
                     </style>
                 </th:block>
 
-
-
-
-
                 <hr>
                 <!--/* 评论组件 */-->
                 <th:block th:replace="~{modules/comment :: comment(group = 'content.halo.run',
@@ -272,8 +317,6 @@
                   allowComment = ${singlePage.spec.allowComment})}" />
 
             </div>
-
-
         </main>
         <!-- 底部 -->
         <footer th:replace="~{modules/footer}"/>
