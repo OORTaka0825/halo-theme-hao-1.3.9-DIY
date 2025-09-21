@@ -18831,41 +18831,4 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
   z-index: -1;
 }
 
-/* 仅留言板页：彻底关闭顶部那块容器（以及卡片外层）的“底部黑条”装饰 */
-
-/* 1) 信封那块 card / bbtalk 容器的底边伪元素 */
-#page.page-comments > .card::after,
-#page.page-comments > .bbtalk-card::after,
-#page.page-comments > #article-container::after {
-  content: none !important;
-  display: none !important;
-}
-
-/* 2) 把底边线/阴影一起干掉，避免再画出一条“黑条” */
-#page.page-comments > .card,
-#page.page-comments > .bbtalk-card,
-#page.page-comments > #article-container {
-  border-bottom: 0 !important;
-  box-shadow: none !important;
-  background-clip: padding-box !important;  /* 防止阴影外溢形成条纹 */
-  margin-bottom: 0 !important;
-  padding-bottom: 0 !important;
-}
-
-/* 3) 如果背板画在 #page 本身（常见 ::before/::after），也只在留言板页关闭 */
-#page.page-comments::before,
-#page.page-comments::after {
-  content: none !important;
-  display: none !important;
-}
-
-/* 4) 有些主题会在“第一个 article-container”下再画一条装饰条，这里也兜底关闭 */
-#page.page-comments > #article-container:first-of-type::before,
-#page.page-comments > #article-container:first-of-type::after {
-  content: none !important;
-  display: none !important;
-}
-
-/* 5) 你的页面底下有 <hr> 分隔线，留言板里也隐藏，避免看起来像“底部黑条” */
-#page.page-comments > hr { display: none !important; }
 
