@@ -18831,8 +18831,3 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
   z-index: -1;
 }
 
-
-/* 图片、列表等内容在卡片之上 */
-.page #article-container img,
-.page .post-content img,
-.page .page-content img { position: relative; z-index: 1; }
