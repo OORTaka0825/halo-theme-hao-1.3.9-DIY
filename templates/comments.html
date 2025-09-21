@@ -40,17 +40,20 @@
                             }
 
                             #form-wrap {
+                                left: 50%;
                                 overflow: hidden;
                                 height: 447px;
-                                position: relative;
+                                position: absolute;
                                 top: 0;
-                                transition: all 1s ease-in-out .3s;
+                                transform: translateX(-50%);
+                                bottom: auto;      /* ← 不要再用 bottom:0 */
+                                transition: height 1s ease-in-out .3s;
                                 z-index: 0
                             }
 
                             #form-wrap:hover {
                                 height: [[${theme.config.envelope_comment.height}]]px;
-                                top: 0px
+                            
                             }
 
                             #beforeimg {
