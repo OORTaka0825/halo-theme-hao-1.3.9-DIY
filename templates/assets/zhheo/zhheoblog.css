@@ -18812,6 +18812,7 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
 .page .post-content,
 .page .page-content {
   position: relative;
+  z-index: 1;
 }
 
 /* 卡片背景层（发光+毛玻璃），变量与文章页保持一致 */
