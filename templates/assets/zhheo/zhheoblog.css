@@ -18842,3 +18842,56 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
 .page #article-container img,
 .page .post-content img,
 .page .page-content img { position: relative; z-index: 1; }
+
+/* ===== 合并外壳兼容补丁：适配 <div class="page" id="body-wrap"> ===== */
+
+/* 1) 保留 not-top-img 的头部配色（合并外壳也生效） */
+#body-wrap.page #page-header.not-top-img {
+  background: var(--heo-secondbg);
+  color: var(--heo-font-color);
+}
+
+/* 2) 让主要块使用卡片皮肤（背景/圆角/阴影/边框） */
+#body-wrap.page .card,
+#body-wrap.page .card-widget,
+#body-wrap.page .bbtalk-card,
+#body-wrap.page .tk-comments,
+#body-wrap.page .tk-content,
+#body-wrap.page .card-comment,
+#body-wrap.page #article-container.flink {
+  background: var(--heo-card-bg);
+  color: var(--heo-font-color);
+  box-shadow: var(--heo-shadow-border);
+  border-radius: 16px;
+  border: var(--style-border);
+}
+
+/* 3) 信封留言板层级兜底，避免被顶栏压住 */
+#body-wrap.page .envelope { position: relative; z-index: 2; }
+#nav { z-index: 20; }
+
+/* 4) 留言板页的分隔线柔和一点（可选） */
+#body-wrap.page hr {
+  border: none;
+  border-top: var(--style-border-alt);
+  opacity: .6;
+  margin: 1rem 0;
+}
+
+/* 5) 一次性兼容两种外壳结构（当你将来换回 #body-wrap > .page 也不需要改 CSS） */
+:is(#body-wrap .page, #body-wrap.page) #content-inner.layout { /* 挂钩位，按需增加规则 */ }
+:is(#body-wrap .page, #body-wrap.page) #page { /* 挂钩位 */ }
+
+/* 6) 文内链接的小样式（你原文件里有同类样式，这里兼容两种结构） */
+:is(#body-wrap .page, #body-wrap.page) #article-container a:not(.headerlink, .fancybox) {
+  font-weight: 700;
+  color: #4c4948;
+  padding: 0 3px;
+  border-bottom: 2px var(--heo-theme) solid;
+}
+:is(#body-wrap .page, #body-wrap.page) #article-container a:not(.headerlink, .fancybox):hover {
+  color: #fff;
+  border-radius: 5px;
+  text-decoration: none;
+  background-color: var(--heo-theme);
+}
