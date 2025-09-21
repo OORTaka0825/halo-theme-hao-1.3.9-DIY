@@ -18806,8 +18806,8 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
   }
 }
 
-/* —— 单页正文统一套用“文章同款”发光卡片 —— */
-/* 命中你页面常见的三个容器：#article-container / .post-content / .page-content */
+/* 自定义页面背景模块-—— 单页正文统一套用“文章同款”发光卡片 —— */
+/* 自定义页面背景模块-命中你页面常见的三个容器：#article-container / .post-content / .page-content */
 .page #article-container,
 .page .post-content,
 .page .page-content {
@@ -18815,7 +18815,7 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
   z-index: 1;
 }
 
-/* 卡片背景层（发光+毛玻璃），变量与文章页保持一致 */
+/* 自定义页面背景模块-卡片背景层（发光+毛玻璃），变量与文章页保持一致 */
 .page #article-container::before,
 .page .post-content::before,
 .page .page-content::before {
@@ -18831,7 +18831,7 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
   z-index: -1;
 }
 
-/* 只关掉“被标记为 no-card 的 #article-container”的卡片效果与伪元素 */
+/* 留言板模块背景透明 */
 #article-container.no-card {
   background: transparent !important;
   border: 0 !important;
