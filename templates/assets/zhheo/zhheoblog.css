@@ -18831,20 +18831,4 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
   z-index: -1;
 }
 
-/* 仅留言板页：关闭所有 #article-container 的卡片伪元素与外观（解决底部黑色圆角条） */
-#page.page-comments #article-container {
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  margin-bottom: 0 !important;
-  padding-bottom: 0 !important;
-}
-#page.page-comments #article-container::before,
-#page.page-comments #article-container::after {
-  content: none !important;
-  display: none !important;
-}
-
-/* 若模板里有 <hr>，在留言板页也隐藏，避免再多一条线 */
-#page.page-comments hr { display: none !important; }
 
