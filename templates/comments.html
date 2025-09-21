@@ -7,10 +7,29 @@
                 _cover = ${singlePage.spec.cover},
                 _excerpt = ${singlePage.status.excerpt},
                 _type = 'website')}"></th:block>
+
+    <!-- Scoped fix ONLY for this page: remove the outer black frame -->
+    <style>
+      /* page marker: #body-wrap.is-guestbook (we add this class below) */
+      #body-wrap.is-guestbook{
+        background: transparent !important;
+        box-shadow: none !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+      }
+      /* if a global ::before backplate was applied on #page, turn it off on this page only */
+      #body-wrap.is-guestbook #page::before{
+        content: none !important;
+        display: none !important;
+      }
+      /* avoid a joining line under header on this page */
+      #body-wrap.is-guestbook #page-header{ border: 0 !important; }
+    </style>
 </th:block>
 <th:block th:fragment="content">
 
-    <div class="page" id="body-wrap">
+    <!-- add marker class is-guestbook so our CSS hits ONLY this page -->
+    <div class="page is-guestbook" id="body-wrap">
 
         <!-- 头部导航栏 -->
         <header class="not-top-img" id="page-header">
@@ -260,10 +279,6 @@
                     </style>
                 </th:block>
 
-
-
-
-
                 <hr>
                 <!--/* 评论组件 */-->
                 <th:block th:replace="~{modules/comment :: comment(group = 'content.halo.run',
@@ -272,8 +287,6 @@
                   allowComment = ${singlePage.spec.allowComment})}" />
 
             </div>
-
-
         </main>
         <!-- 底部 -->
         <footer th:replace="~{modules/footer}"/>
