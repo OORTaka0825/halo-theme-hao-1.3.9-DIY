@@ -18831,19 +18831,14 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
   z-index: -1;
 }
 
-#page.page-comments #article-container.no-card,
-#body-wrap.is-guestbook #article-container.no-card{
+/* 标记为 .no-card 的容器不出卡片伪元素 */
+#article-container.no-card,
+#article-container.no-card::before,
+#article-container.no-card::after {
   background: transparent !important;
   border: 0 !important;
   box-shadow: none !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
-#page.page-comments #article-container.no-card::before,
-#page.page-comments #article-container.no-card::after,
-#body-wrap.is-guestbook #article-container.no-card::before,
-#body-wrap.is-guestbook #article-container.no-card::after{
   content: none !important;
-  display: none !important;
+  display: block !important;  /* 保底：避免被 display:none 的伪元素影响 */
 }
 
