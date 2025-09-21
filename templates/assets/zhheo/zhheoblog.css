@@ -18806,3 +18806,26 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
   }
 }
 
+/* —— 单页正文统一套用“文章同款”发光卡片 —— */
+/* 命中你页面常见的三个容器：#article-container / .post-content / .page-content */
+.page #article-container,
+.page .post-content,
+.page .page-content {
+  position: relative;
+  z-index: 1;
+}
+
+
+
+/* 如果正文里本来就用了 .tabs（例如你的“友链文章”），防止出现双层卡片 */
+.page #article-container:has(.tabs)::before,
+.page .post-content:has(.tabs)::before,
+.page .page-content:has(.tabs)::before {
+  display: none;
+}
+
+/* 图片、列表等内容在卡片之上 */
+.page #article-container img,
+.page .post-content img,
+.page .page-content img { position: relative; z-index: 1; }
+
