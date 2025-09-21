@@ -26,6 +26,7 @@
                     </th:block>
                     <style>
                         @media screen and (max-width: 600px) {
+                            #page-header { margin-bottom: 12px; }
 
                             #afterimg,
                             #beforeimg {
@@ -49,7 +50,7 @@
 
                             #form-wrap:hover {
                                 height: [[${theme.config.envelope_comment.height}]]px;
-                                top: -100px
+                                top: 0px
                             }
 
                             #beforeimg {
@@ -80,12 +81,13 @@
                                 width: 500px;
                                 margin: 0 auto;
                                 transition: all 1s ease-in-out .3s;
-                                padding-top: 200px
+                                padding-top: 200px;
+                                padding-top: 140px
                             }
 
                             #maincontent {
                                 width: 530px;
-                                margin: 20px auto 0
+                                margin: 12px auto 0
                             }
 
                             .formmain {
