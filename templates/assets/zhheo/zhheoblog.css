@@ -18831,3 +18831,22 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
   z-index: -1;
 }
 
+/* 仅留言板页去掉外层黑框 —— 兼容两种外壳写法 */
+:is(#body-wrap.page, #body-wrap .page):has(#page.page-comments) {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+}
+
+/* 若之前给整个 #page 加过 ::before 背板（发光/毛玻璃），留言板页关闭它 */
+:is(#body-wrap.page, #body-wrap .page) #page.page-comments::before {
+  content: none !important;
+  display: none !important;
+}
+
+/* 让头部和内容之间不要再出现“拼接线” */
+:is(#body-wrap.page, #body-wrap .page) #page.page-comments > #page-header,
+:is(#body-wrap.page, #body-wrap .page) #page-header {
+  border: 0 !important;
+}
