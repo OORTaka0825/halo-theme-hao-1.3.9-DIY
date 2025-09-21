@@ -26,7 +26,6 @@
                     </th:block>
                     <style>
                         @media screen and (max-width: 600px) {
-                            #page-header { margin-bottom: 12px; }
 
                             #afterimg,
                             #beforeimg {
@@ -40,20 +39,17 @@
                             }
 
                             #form-wrap {
-                                left: 50%;
                                 overflow: hidden;
                                 height: 447px;
-                                position: absolute;
+                                position: relative;
                                 top: 0;
-                                transform: translateX(-50%);
-                                bottom: auto;      /* ← 不要再用 bottom:0 */
-                                transition: height 1s ease-in-out .3s;
+                                transition: all 1s ease-in-out .3s;
                                 z-index: 0
                             }
 
                             #form-wrap:hover {
                                 height: [[${theme.config.envelope_comment.height}]]px;
-                            
+                                top: -150px
                             }
 
                             #beforeimg {
@@ -84,13 +80,12 @@
                                 width: 500px;
                                 margin: 0 auto;
                                 transition: all 1s ease-in-out .3s;
-                                padding-top: 200px;
-                                padding-top: 140px
+                                padding-top: 200px
                             }
 
                             #maincontent {
                                 width: 530px;
-                                margin: 12px auto 0
+                                margin: 20px auto 0
                             }
 
                             .formmain {
