@@ -39,19 +39,17 @@
                             }
 
                             #form-wrap {
-                                position: absolute;
-                                left: 50%;
-                                transform: translateX(-50%);
-                                bottom: 0;
-                                top: auto;
                                 overflow: hidden;
                                 height: 447px;
-                                transition: height 1s ease-in-out .3s;
-                                width: 100%;
+                                position: relative;
+                                top: 0;
+                                transition: all 1s ease-in-out .3s;
+                                z-index: 0
                             }
 
                             #form-wrap:hover {
                                 height: [[${theme.config.envelope_comment.height}]]px;
+                                top: -200px
                             }
 
                             #beforeimg {
@@ -87,9 +85,7 @@
 
                             #maincontent {
                                 width: 530px;
-                                margin: 20px auto 0;
-                                position: relative;
-                                min-height: [[${theme.config.envelope_comment.height}]]px;
+                                margin: 20px auto 0
                             }
 
                             .formmain {
