@@ -18839,6 +18839,6 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
   border: 0 !important;
   box-shadow: none !important;
   content: none !important;
-  display: none !important;  /* 保底：避免被 display:none 的伪元素影响 */
+  display: block !important;  /* 保底：避免被 display:none 的伪元素影响 */
 }
 
