@@ -18830,49 +18830,54 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
   -webkit-backdrop-filter: blur(20px);
   z-index: -1;
 }
-/* === 留言板整页包裹为一张“大卡片” === */
-/* 仅影响本页：有 #body-wrap.page + .page-comments 的组合 */
-#body-wrap.page #content-inner.layout { padding: 0; }  /* 去掉内边距，卡片边缘贴合 */
 
-#body-wrap.page #page.page-comments {
+/* === 留言板一体化：#body-wrap 作为“整页一张大卡片” === */
+/* 你的留言板页在 content 里用了合并外壳：<div class="page" id="body-wrap">  */
+#body-wrap.page {
   background: var(--heo-card-bg);
   color: var(--heo-font-color);
   border: var(--style-border);
   border-radius: 16px;
   box-shadow: var(--heo-shadow-border);
-  overflow: hidden;        /* 切齐内部圆角 */
+  overflow: hidden;            /* 圆角内裁切 */
 }
 
-/* 让内部各段落在卡片内“拼接”，取消大缝隙 */
-#body-wrap.page #page.page-comments > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-/* 头部与内容之间做一条分割线 */
-#body-wrap.page #page.page-comments > header#page-header {
+/* header 贴边并加一条分割线 */
+#body-wrap.page #page-header {
   margin: 0;
   border-bottom: var(--style-border);
-}
-
-/* 卡片内的主体区块统一内边距与分割线（你有 .flink / 评论卡等） */
-#body-wrap.page #page.page-comments > .flink,
-#body-wrap.page #page.page-comments > section,
-#body-wrap.page #page.page-comments > .card-comment,
-#body-wrap.page #page.page-comments > .bbtalk-card {
-  padding: 1rem 1.25rem;
-  border-top: var(--style-border);
-}
-
-/* 你模板里自带一个 <hr>，卡片里不再需要，隐藏掉 */
-#body-wrap.page #page.page-comments hr { display: none; }
-
-/* 保留你要的 not-top-img 配色 */
-#body-wrap.page #page-header.not-top-img {
+  /* 你想保留的 not-top-img 配色 */
   background: var(--heo-secondbg);
   color: var(--heo-font-color);
 }
 
+/* 让主体贴合卡片边缘，再在内部做统一内边距 */
+#body-wrap.page #content-inner.layout { padding: 0; }
+#body-wrap.page #page { padding: 1rem 1.25rem; }
+
+/* === 关键：去掉内部子块自带的“小卡片皮肤”，避免“分段感” === */
+#body-wrap.page .card,
+#body-wrap.page .card-widget,
+#body-wrap.page .bbtalk-card,
+#body-wrap.page .card-comment,
+#body-wrap.page #article-container.flink {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding-left: 0; padding-right: 0;
+}
+
+/* 把块与块之间用细分割线衔接起来（可选）*/
+#body-wrap.page #page > * + * {
+  margin-top: 1rem;
+  border-top: var(--style-border);
+  padding-top: 1rem;
+}
+
+/* 你模板里可能有 <hr>，卡片内就不需要了 */
+#body-wrap.page #page hr { display: none; }
+
 /* 信封层级兜底，避免被导航覆盖 */
-#body-wrap.page .page-comments .envelope { position: relative; z-index: 2; }
+#body-wrap.page .envelope { position: relative; z-index: 2; }
 #nav { z-index: 20; }
