@@ -6,7 +6,26 @@
                 _permalink = ${singlePage.status.permalink},
                 _cover = ${singlePage.spec.cover},
                 _excerpt = ${singlePage.status.excerpt},
-                _type = 'website')}"></th:block>
+                _type = 'website')}">
+    <style>
+      /* Guestbook: remove pseudo backplates on containers marked .no-card */
+      #page.page-comments #article-container.no-card,
+      #body-wrap.is-guestbook #article-container.no-card{
+        background: transparent !important;
+        border: 0 !important;
+        box-shadow: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      #page.page-comments #article-container.no-card::before,
+      #page.page-comments #article-container.no-card::after,
+      #body-wrap.is-guestbook #article-container.no-card::before,
+      #body-wrap.is-guestbook #article-container.no-card::after{
+        content: none !important;
+        display: none !important;
+      }
+    </style>
+</th:block>
 </th:block>
 <th:block th:fragment="content">
 
@@ -152,7 +171,7 @@
 
                 </th:block>
 
-                <div id="article-container">
+                <div class="flink" id="article-container" class="no-card">
                     <th:block  th:utext="${singlePage.content.content}"></th:block>
                 </div>
 
