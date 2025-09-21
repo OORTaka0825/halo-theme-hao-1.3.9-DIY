@@ -18831,19 +18831,17 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
   z-index: -1;
 }
 
-#page.page-comments #article-container.no-card,
-#body-wrap.is-guestbook #article-container.no-card{
+/* 只关掉“被标记为 no-card 的 #article-container”的卡片效果与伪元素 */
+#article-container.no-card {
   background: transparent !important;
   border: 0 !important;
   box-shadow: none !important;
   margin: 0 !important;
   padding: 0 !important;
 }
-#page.page-comments #article-container.no-card::before,
-#page.page-comments #article-container.no-card::after,
-#body-wrap.is-guestbook #article-container.no-card::before,
-#body-wrap.is-guestbook #article-container.no-card::after{
+#article-container.no-card::before,
+#article-container.no-card::after {
   content: none !important;
-  display: none !important;
+  display: none !important;   /* ← 关键：必须隐藏伪元素 */
 }
 
