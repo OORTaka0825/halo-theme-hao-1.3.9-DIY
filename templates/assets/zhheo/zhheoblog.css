@@ -18831,3 +18831,49 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
   z-index: -1;
 }
 
+/* 1) 给整页内容容器加“背板”——只是一层 ::before，不改变任何前景色 */
+#body-wrap.page #content-inner.layout { padding: 0; } /* 让背板贴边 */
+#body-wrap.page #page {
+  position: relative;
+  padding: 1rem 1.25rem;      /* 你想要的内边距 */
+  background: transparent;    /* 本体透明，由背板来呈现 */
+}
+#body-wrap.page #page::before {
+  content: "";
+  position: absolute;
+  inset: 0;                   /* 背板覆盖整个内容区（不含 header）*/
+  background: var(--heo-card-bg);
+  border: var(--style-border);
+  border-radius: 16px;
+  box-shadow: var(--heo-shadow-border);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  z-index: -1;                /* 永远在内容后面 */
+}
+
+/* 2) header 保持你要的 not-top-img 配色，并与背板衔接 */
+#body-wrap.page #page-header.not-top-img {
+  background: var(--heo-secondbg);
+  color: var(--heo-font-color);
+  margin: 0;
+  border-bottom: var(--style-border);
+}
+
+/* 3) 去掉“分段感”：把内部小卡片的底色去掉（不改 .formmain 等表单白底） */
+#body-wrap.page #page > .card,
+#body-wrap.page #page > .card-widget,
+#body-wrap.page #page > .bbtalk-card,
+#body-wrap.page #page > .card-comment,
+#body-wrap.page #page > #article-container.flink {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding-left: 0; padding-right: 0;
+}
+/* 你的模板里有 <hr>，背板存在时就不需要它了 */
+#body-wrap.page #page > hr { display: none; }
+
+/* 4) 信封层级兜底（只影响信封，不改变其它颜色） */
+#body-wrap.page .envelope { position: relative; z-index: 2; }
+#nav { z-index: 20; }
