@@ -18831,3 +18831,23 @@ body[data-type=neodb] .sort-button-group button,body[data-type=neodb] .type-butt
   z-index: -1;
 }
 
+/* 仅留言板页：关闭顶部那个 #article-container 的卡片伪元素与外观 */
+#page.page-comments > #article-container:first-of-type::before,
+#page.page-comments > #article-container:first-of-type::after{
+  display: none !important;
+  content: none !important;
+}
+#page.page-comments > #article-container:first-of-type{
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* 有些主题会把“背板”挂到 #page::before；若它刚好延伸到信封下缘，也一起关掉 */
+#page.page-comments::before{
+  display: none !important;
+  content: none !important;
+}
+
