@@ -1,7 +1,7 @@
-// 访客欢迎信息模块（NSMAO） —— PJAX安全版
+// 访客欢迎信息模块（适配 Cloudflare Worker 版） —— PJAX安全版
 let ipLocation;
 
-// 默认中心点
+// 默认中心点（博主位置）
 const WELCOME_DEFAULT_CENTER = { lng: 111.64, lat: 21.54 };
 
 function getWelcomeCenter() {
@@ -27,27 +27,31 @@ function getDistance(e1, n1, e2, n2) {
 }
 
 function fetchIpLocation() {
-  // 1. 直接读取你在后台填写的那个“Key”输入框的内容
   let myUrl = (GLOBAL_CONFIG?.source?.welcome?.key || "").trim();
 
-  // 2. 如果你没填或者填的不是网址，才去尝试用奈斯猫（兜底）
+  // 如果没有填 URL 则默认指向奈斯猫（兜底）
   if (!myUrl.startsWith('http')) {
     myUrl = 'https://api.nsmao.net/api/ip/query?key=' + myUrl;
   }
 
   $.ajax({
     type: 'get',
-    url: myUrl, // 重点：这里直接使用你填写的完整域名，不再强制拼接 nsmao
+    url: myUrl,
     dataType: 'json',
     success: function (res) {
-      // 适配你 Worker 的返回格式
+      // 适配 Worker 返回的数据结构
       const d = res.data || res; 
-      if (res.code === 200 || res.status === "success") {
+      if (res.code === 200 || res.status === "success" || d.ip) {
         ipLocation = {
           ip: d.ip || d.query,
-          location: { lat: d.lat || 0, lng: d.lng || 0 },
+          // 确保经纬度为数字以计算距离
+          location: { 
+            lat: parseFloat(d.lat) || 0, 
+            lng: parseFloat(d.lng) || parseFloat(d.lon) || 0 
+          },
           ad_info: {
-            nation: d.country || "中国",
+            // 统一国家标识
+            nation: (d.country === "CN" || d.country === "United States" || d.country === "US") ? d.country : (d.country || "外国"),
             province: d.region || d.regionName || "",
             city: d.city || "",
             district: d.district || ""
@@ -71,7 +75,8 @@ function showWelcome() {
   let ip = ipLocation.ip;
   let desc = '带我去你的城市逛逛吧！';
 
-  if (pos === "中国") {
+  // 国内逻辑：包含“中国”或返回的是“CN”标识
+  if (pos === "中国" || pos === "CN") {
     const province = ipLocation.ad_info.province || "";
     const city = ipLocation.ad_info.city || "";
     const district = ipLocation.ad_info.district || "";
@@ -106,7 +111,6 @@ function showWelcome() {
           default: desc = "可否带我品尝河南烩面啦？"; break;
         }
         break;
-      // ……其余省份略（保持你原来的文案表）
       case "湖南省": desc = "74751，长沙斯塔克"; break;
       case "四川省": desc = "康康川妹子"; break;
       case "广西壮族自治区": desc = "桂林山水甲天下"; break;
@@ -115,18 +119,18 @@ function showWelcome() {
       default: desc = `来自 ${city} 的小伙伴你好呀~`;
     }
   } else {
+    // 国外逻辑：修正重复文案问题
     switch (pos) {
-      case "日本": desc = "よろしく，一起去看樱花吗"; break;
-      case "美国": desc = "Let us live in peace!"; break;
-      case "英国": desc = "想同你一起夜乘伦敦眼"; break;
-      case "俄罗斯": desc = "干了这瓶伏特加！"; break;
-      case "法国": desc = "C'est La Vie"; break;
-      case "德国": desc = "Die Zeit verging im Fluge."; break;
-      case "澳大利亚": desc = "一起去大堡礁吧！"; break;
-      case "加拿大": desc = "拾起一片枫叶赠予你"; break;
+      case "US": case "United States": case "美国": pos = "美国"; desc = "Let us live in peace!"; break;
+      case "JP": case "Japan": case "日本": pos = "日本"; desc = "よろしく，一起去看樱花吗"; break;
+      case "UK": case "United Kingdom": case "英国": pos = "英国"; desc = "想同你一起夜乘伦敦眼"; break;
+      case "RU": case "Russia": case "俄罗斯": pos = "俄罗斯"; desc = "干了这瓶伏特加！"; break;
+      case "FR": case "France": case "法国": pos = "法国"; desc = "C'est La Vie"; break;
+      case "DE": case "Germany": case "德国": pos = "德国"; desc = "Die Zeit verging im Fluge."; break;
+      case "AU": case "Australia": case "澳大利亚": pos = "澳大利亚"; desc = "一起去大堡礁吧！"; break;
+      case "CA": case "Canada": case "加拿大": pos = "加拿大"; desc = "拾起一片枫叶赠予你"; break;
       default: desc = "带我去你的国家逛逛吧";
     }
-    pos = "来自 " + pos + " 的朋友";
   }
 
   const hour = new Date().getHours();
@@ -139,7 +143,7 @@ function showWelcome() {
 
   if (ip.includes(":")) ip = "好复杂，咱看不懂~(ipv6)";
 
-  /* 真实 IP 文本常驻，用 .ip-blur 做模糊，鼠标悬停显示 */
+  // 统一 HTML 模版渲染，pos 已经在上面处理干净了，不会再出现“来自来自”
   const html = `欢迎来自 <b><span style="color: var(--kouseki-ip-color);">${pos}</span></b> 的小友 💖<br>
     ${desc}🍂<br>
     当前位置距博主约 <b><span style="color: var(--kouseki-ip-color)">${dist}</span></b> 公里！<br>
@@ -147,12 +151,9 @@ function showWelcome() {
     ${greet} <br>`;
 
   box.innerHTML = html;
-
-  /* 取消点击/键盘切换（按你的要求不需要）
-     —— 这里不再绑定任何事件 —— */
 }
 
-// 首次与 PJAX 触发
+// PJAX 加载逻辑保持不变
 (function () {
   if (window.__WELCOME_BIND_ONCE__) return;
   window.__WELCOME_BIND_ONCE__ = true;
