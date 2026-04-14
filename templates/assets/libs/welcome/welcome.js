@@ -29,7 +29,6 @@ function getDistance(e1, n1, e2, n2) {
 function fetchIpLocation() {
   let myUrl = (GLOBAL_CONFIG?.source?.welcome?.key || "").trim();
 
-  // 如果没有填 URL 则默认指向奈斯猫（兜底）
   if (!myUrl.startsWith('http')) {
     myUrl = 'https://api.nsmao.net/api/ip/query?key=' + myUrl;
   }
@@ -39,18 +38,15 @@ function fetchIpLocation() {
     url: myUrl,
     dataType: 'json',
     success: function (res) {
-      // 适配 Worker 返回的数据结构
       const d = res.data || res; 
       if (res.code === 200 || res.status === "success" || d.ip) {
         ipLocation = {
           ip: d.ip || d.query,
-          // 确保经纬度为数字以计算距离
           location: { 
             lat: parseFloat(d.lat) || 0, 
             lng: parseFloat(d.lng) || parseFloat(d.lon) || 0 
           },
           ad_info: {
-            // 统一国家标识
             nation: (d.country === "CN" || d.country === "United States" || d.country === "US") ? d.country : (d.country || "外国"),
             province: d.region || d.regionName || "",
             city: d.city || "",
@@ -71,17 +67,17 @@ function showWelcome() {
   const { lng: myLng, lat: myLat } = getWelcomeCenter();
   const dist = getDistance(myLng, myLat, ipLocation.location.lng, ipLocation.location.lat);
 
-  let pos = ipLocation.ad_info.nation;
+  let nation = ipLocation.ad_info.nation;
+  let province = ipLocation.ad_info.province || "";
+  let city = ipLocation.ad_info.city || "";
+  let district = ipLocation.ad_info.district || "";
   let ip = ipLocation.ip;
   let desc = '带我去你的城市逛逛吧！';
+  let pos = "";
 
-  // 国内逻辑：包含“中国”或返回的是“CN”标识
-  if (pos === "中国" || pos === "CN") {
-    const province = ipLocation.ad_info.province || "";
-    const city = ipLocation.ad_info.city || "";
-    const district = ipLocation.ad_info.district || "";
+  // 区分国内与国外逻辑
+  if (nation === "中国" || nation === "CN") {
     pos = `${province} ${city} ${district}`.trim();
-
     switch (province) {
       case "北京市": desc = "北——京——欢迎你~"; break;
       case "天津市": desc = "讲段相声吧"; break;
@@ -116,19 +112,20 @@ function showWelcome() {
       case "广西壮族自治区": desc = "桂林山水甲天下"; break;
       case "新疆维吾尔自治区": desc = "驼铃古道丝绸路，胡马犹闻唐汉风"; break;
       case "香港特别行政区": desc = "永定贼有残留地鬼嚎，迎击光非岁玉"; break;
-      default: desc = `来自 ${city} 的小伙伴你好呀~`;
+      default: desc = `来自 ${city || province} 的小伙伴你好呀~`;
     }
   } else {
-    // 国外逻辑：修正重复文案问题
-    switch (pos) {
-      case "US": case "United States": case "美国": pos = "美国"; desc = "Let us live in peace!"; break;
-      case "JP": case "Japan": case "日本": pos = "日本"; desc = "よろしく，一起去看樱花吗"; break;
-      case "UK": case "United Kingdom": case "英国": pos = "英国"; desc = "想同你一起夜乘伦敦眼"; break;
-      case "RU": case "Russia": case "俄罗斯": pos = "俄罗斯"; desc = "干了这瓶伏特加！"; break;
-      case "FR": case "France": case "法国": pos = "法国"; desc = "C'est La Vie"; break;
-      case "DE": case "Germany": case "德国": pos = "德国"; desc = "Die Zeit verging im Fluge."; break;
-      case "AU": case "Australia": case "澳大利亚": pos = "澳大利亚"; desc = "一起去大堡礁吧！"; break;
-      case "CA": case "Canada": case "加拿大": pos = "加拿大"; desc = "拾起一片枫叶赠予你"; break;
+    // 国外显示：国家 + 城市 (若无城市只显示国家)
+    pos = city ? `${nation} ${city}` : nation;
+    switch (nation) {
+      case "US": case "United States": case "美国": pos = "美国 " + city; desc = "Let us live in peace!"; break;
+      case "JP": case "Japan": case "日本": pos = "日本 " + city; desc = "よろしく，一起去看樱花吗"; break;
+      case "UK": case "United Kingdom": case "英国": pos = "英国 " + city; desc = "想同你一起夜乘伦敦眼"; break;
+      case "RU": case "Russia": case "俄罗斯": pos = "俄罗斯 " + city; desc = "干了这瓶伏特加！"; break;
+      case "FR": case "France": case "法国": pos = "法国 " + city; desc = "C'est La Vie"; break;
+      case "DE": case "Germany": case "德国": pos = "德国 " + city; desc = "Die Zeit verging im Fluge."; break;
+      case "AU": case "Australia": case "澳大利亚": pos = "澳大利亚 " + city; desc = "一起去大堡礁吧！"; break;
+      case "CA": case "Canada": case "加拿大": pos = "加拿大 " + city; desc = "拾起一片枫叶赠予你"; break;
       default: desc = "带我去你的国家逛逛吧";
     }
   }
@@ -143,7 +140,6 @@ function showWelcome() {
 
   if (ip.includes(":")) ip = "好复杂，咱看不懂~(ipv6)";
 
-  // 统一 HTML 模版渲染，pos 已经在上面处理干净了，不会再出现“来自来自”
   const html = `欢迎来自 <b><span style="color: var(--kouseki-ip-color);">${pos}</span></b> 的小友 💖<br>
     ${desc}🍂<br>
     当前位置距博主约 <b><span style="color: var(--kouseki-ip-color)">${dist}</span></b> 公里！<br>
@@ -153,7 +149,6 @@ function showWelcome() {
   box.innerHTML = html;
 }
 
-// PJAX 加载逻辑保持不变
 (function () {
   if (window.__WELCOME_BIND_ONCE__) return;
   window.__WELCOME_BIND_ONCE__ = true;
