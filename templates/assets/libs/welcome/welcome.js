@@ -26,32 +26,37 @@ function getDistance(e1, n1, e2, n2) {
   return Math.round(asin(c/2) * 2 * R);
 }
 
-export default {
-  async fetch(request) {
-    const clientIp = request.headers.get('cf-connecting-ip');
-    
-    // 仍然建议调用一次 ip-api 的中文接口，因为 CF 原生数据只有拼音
-    const response = await fetch(`http://ip-api.com/json/${clientIp}?lang=zh-CN`);
-    const d = await response.json();
+function fetchIpLocation() {
+  // 1. 直接读取你在后台填写的那个“Key”输入框的内容
+  let myUrl = (GLOBAL_CONFIG?.source?.welcome?.key || "").trim();
 
-    const data = {
-      status: "success", // 模拟成功状态
-      ip: d.query,
-      country: d.country,
-      region: d.regionName, // 返回“广东省”而不是“GD”
-      city: d.city,
-      district: d.district || "",
-      lat: d.lat,
-      lng: d.lon
-    };
-
-    return new Response(JSON.stringify(data), {
-      headers: { 
-        'content-type': 'application/json;charset=UTF-8', 
-        'Access-Control-Allow-Origin': '*' 
-      }
-    });
+  // 2. 如果你没填或者填的不是网址，才去尝试用奈斯猫（兜底）
+  if (!myUrl.startsWith('http')) {
+    myUrl = 'https://api.nsmao.net/api/ip/query?key=' + myUrl;
   }
+
+  $.ajax({
+    type: 'get',
+    url: myUrl, // 重点：这里直接使用你填写的完整域名，不再强制拼接 nsmao
+    dataType: 'json',
+    success: function (res) {
+      // 适配你 Worker 的返回格式
+      const d = res.data || res; 
+      if (res.code === 200 || res.status === "success") {
+        ipLocation = {
+          ip: d.ip || d.query,
+          location: { lat: d.lat || 0, lng: d.lng || 0 },
+          ad_info: {
+            nation: d.country || "中国",
+            province: d.region || d.regionName || "",
+            city: d.city || "",
+            district: d.district || ""
+          }
+        };
+        showWelcome();
+      }
+    }
+  });
 }
 
 function showWelcome() {
