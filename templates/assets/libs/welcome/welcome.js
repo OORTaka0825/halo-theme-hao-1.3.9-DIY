@@ -26,27 +26,32 @@ function getDistance(e1, n1, e2, n2) {
   return Math.round(asin(c/2) * 2 * R);
 }
 
-function fetchIpLocation() {
-  $.ajax({
-    type: 'get',
-    url: 'https://api.nsmao.net/api/ip/query',
-    data: { key: (GLOBAL_CONFIG?.source?.welcome?.key || "") },
-    dataType: 'json',
-    success: function (res) {
-      if (res.code !== 200) return;
-      ipLocation = {
-        ip: res.data.ip,
-        location: { lat: res.data.lat, lng: res.data.lng },
-        ad_info: {
-          nation: res.data.country,
-          province: res.data.prov || "",
-          city: res.data.city || "",
-          district: res.data.district || ""
-        }
-      };
-      showWelcome();
-    }
-  });
+export default {
+  async fetch(request) {
+    const clientIp = request.headers.get('cf-connecting-ip');
+    
+    // 仍然建议调用一次 ip-api 的中文接口，因为 CF 原生数据只有拼音
+    const response = await fetch(`http://ip-api.com/json/${clientIp}?lang=zh-CN`);
+    const d = await response.json();
+
+    const data = {
+      status: "success", // 模拟成功状态
+      ip: d.query,
+      country: d.country,
+      region: d.regionName, // 返回“广东省”而不是“GD”
+      city: d.city,
+      district: d.district || "",
+      lat: d.lat,
+      lng: d.lon
+    };
+
+    return new Response(JSON.stringify(data), {
+      headers: { 
+        'content-type': 'application/json;charset=UTF-8', 
+        'Access-Control-Allow-Origin': '*' 
+      }
+    });
+  }
 }
 
 function showWelcome() {
