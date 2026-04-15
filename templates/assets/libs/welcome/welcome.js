@@ -102,7 +102,7 @@ function showWelcome() {
     switch (city) {
       case "广州市": desc = "看小蛮腰，喝早茶了嘛~"; break;
       case "深圳市": desc = "今天你逛商场了嘛~"; break;
-      case "阳江市": desc = "阳春合水！博主家乡~ 欢迎来玩~"; break;
+      case "阳江市": desc = "阳西！博主家乡~ 欢迎来玩~"; break;
       case "佛山市": desc = "黄飞鸿的故乡，咏春拳打一套~"; break;
       case "东莞市": desc = "世界工厂，今天搬砖辛苦啦~"; break;
       case "珠海市": desc = "看情侣路，去长隆玩了嘛~"; break;
@@ -139,6 +139,29 @@ function showWelcome() {
       case "广西壮族自治区": desc = "桂林山水甲天下"; break;
       case "新疆维吾尔自治区": desc = "驼铃古道丝绸路，胡马犹闻唐汉风"; break;
       case "香港特别行政区": desc = "永定贼有残留地鬼嚎，迎击光非岁玉"; break;
+      case "浙江省": desc = "上有天堂，下有苏杭，今天去西湖了嘛~"; break;
+      case "福建省": desc = "去武夷山喝杯岩茶，今天心情不错吧~"; break;
+      case "山东省": desc = "好客山东，今天又去喝啤酒了吗？"; break;
+      case "辽宁省": desc = "东北老铁，说话带点儿海蛎子味没？"; break;
+      case "吉林省": desc = "去看长白山天池了嘛？好山好水好风光~"; break;
+      case "黑龙江省": desc = "哈尔滨的雪景看过了吗？感觉冷不冷？"; break;
+      case "安徽省": desc = "黄山云海非常美，去打卡了吗？"; break;
+      case "湖北省": desc = "武汉的热干面吃了吗？黄鹤楼登高望远~"; break;
+      case "江西省": desc = "庐山风景如画，记得去爬爬山哟~"; break;
+      case "海南省": desc = "椰风海韵，去三亚潜水了吗？"; break;
+      case "山西省": desc = "山西面食种类多，今天吃了几种呀？"; break;
+      case "陕西省": desc = "古都长安，肉夹馍还是那么香吗？"; break;
+      case "甘肃省": desc = "大漠孤烟直，去敦煌看飞天了嘛？"; break;
+      case "青海省": desc = "青海湖的水真蓝，去转转湖嘛？"; break;
+      case "云南省": desc = "彩云之南，今天去大理发呆了吗？"; break;
+      case "贵州省": desc = "多彩贵州，酸汤鱼确实很开胃呢~"; break;
+      case "西藏自治区": desc = "圣地拉萨，今天离云端更近了嘛？"; break;
+      case "内蒙古自治区": desc = "天苍苍野茫茫，今天去草原骑马了嘛？"; break;
+      case "宁夏回族自治区": desc = "塞上江南，大漠风光真是独特呢~"; break;
+      case "澳门特别行政区": desc = "澳门风云，今天去走走逛逛了嘛？"; break;
+      case "台湾省": desc = "宝岛风光无限，记得吃好喝好呀~"; break;
+      case "重庆市": desc = "山城火锅真的辣，今天挑战了几分辣？"; break;
+      case "上海市": desc = "魔都节奏快，今天在陆家嘴看风景了吗？"; break;
       default: desc = `来自 ${city || province} 的小伙伴你好呀~`;
     }
   } else {
