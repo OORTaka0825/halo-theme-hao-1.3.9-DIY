@@ -40,6 +40,13 @@ function fetchIpLocation() {
     success: function (res) {
       const d = res.data || res; 
       if (res.code === 200 || res.status === "success" || d.ip) {
+        
+        // 核心修正：补全省份和城市的“省/市”后缀，确保 switch 匹配成功
+        let p = d.prov || d.region || d.regionName || "";
+        let c = d.city || "";
+        if (p && !p.endsWith("省") && !p.endsWith("市") && !p.endsWith("自治区") && !p.endsWith("特别行政区")) p += "省";
+        if (c && !c.endsWith("市") && !c.endsWith("区") && !c.endsWith("县")) c += "市";
+
         ipLocation = {
           ip: d.ip || d.query,
           location: { 
@@ -47,9 +54,9 @@ function fetchIpLocation() {
             lng: parseFloat(d.lng) || parseFloat(d.lon) || 0 
           },
           ad_info: {
-            nation: (d.country === "CN" || d.country === "United States" || d.country === "US") ? d.country : (d.country || "外国"),
-            province: d.region || d.regionName || "",
-            city: d.city || "",
+            nation: (d.country === "CN" || d.country === "United States" || d.country === "US" || d.country === "中国") ? "中国" : (d.country || "外国"),
+            province: p, 
+            city: c,
             district: d.district || ""
           }
         };
@@ -77,7 +84,9 @@ function showWelcome() {
 
   // 区分国内与国外逻辑
   if (nation === "中国" || nation === "CN") {
+    // 强制拼接成：广东省 深圳市 区
     pos = `${province} ${city} ${district}`.trim();
+    
     switch (province) {
       case "北京市": desc = "北——京——欢迎你~"; break;
       case "天津市": desc = "讲段相声吧"; break;
