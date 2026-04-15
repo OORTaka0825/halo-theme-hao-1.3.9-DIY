@@ -99,12 +99,30 @@ function showWelcome() {
         }
         break;
       case "广东省":
-        switch (city) {
-          case "广州市": desc = "看小蛮腰，喝早茶了嘛~"; break;
-          case "深圳市": desc = "今天你逛商场了嘛~"; break;
-          case "阳江市": desc = "阳春合水！博主家乡~ 欢迎来玩~"; break;
-          default: desc = "来两斤福建人~"; break;
-        }
+    switch (city) {
+      case "广州市": desc = "看小蛮腰，喝早茶了嘛~"; break;
+      case "深圳市": desc = "今天你逛商场了嘛~"; break;
+      case "阳江市": desc = "阳春合水！博主家乡~ 欢迎来玩~"; break;
+      case "佛山市": desc = "黄飞鸿的故乡，咏春拳打一套~"; break;
+      case "东莞市": desc = "世界工厂，今天搬砖辛苦啦~"; break;
+      case "珠海市": desc = "看情侣路，去长隆玩了嘛~"; break;
+      case "中山市": desc = "孙中山故里，今天去哪里吃乳鸽？"; break;
+      case "惠州市": desc = "去西湖散步，去海边看日出了吗？"; break;
+      case "江门市": desc = "五邑侨乡，陈皮炖汤喝了吗？"; break;
+      case "汕头市": desc = "牛肉火锅安排上了吗？潮汕美食名不虚传~"; break;
+      case "湛江市": desc = "去吃生蚝了吗？海鲜大餐走起~"; break;
+      case "茂名市": desc = "荔枝之乡，今天吃得甜甜的吗？"; break;
+      case "肇庆市": desc = "鼎湖山空气好，去洗洗肺吗？"; break;
+      case "清远市": desc = "去泡温泉，或者去漂流了吗？"; break;
+      case "韶关市": desc = "丹霞地貌，去爬山运动了吗？"; break;
+      case "揭阳市": desc = "古城文化，今天有逛逛嘛？"; break;
+      case "梅州市": desc = "客家文化浓厚，腌面吃了吗？"; break;
+      case "汕尾市": desc = "海滨小城，今天看海了吗？"; break;
+      case "潮州市": desc = "逛牌坊街，牛肉丸吃爽了吗？"; break;
+      case "河源市": desc = "万绿湖畔，今天有去吸氧吗？"; break;
+      case "云浮市": desc = "禅宗文化，今天心情宁静吗？"; break;
+      default: desc = "来两斤福建人~"; break;
+    }
         break;
       case "河南省":
         switch (city) {
