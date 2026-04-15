@@ -1178,8 +1178,9 @@ spec:
           children:
             - $formkit: text
               name: key
-              label: NSMAO API配置 Key
-              help: 申请key:https://api.nsmao.net
+              label: 输入cf-Worker部署地址
+              help: 输入样式：https://ip.oortaka.top
+              help: 免费部署:https://oortaka.top/archives/ipdiliweizhi
             - $formkit: text
               name: locationLng
               label: 经度坐标
