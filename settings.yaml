@@ -1179,7 +1179,7 @@ spec:
             - $formkit: text
               name: key
               label: 输入cf-Worker部署地址
-              help: "输入样式：https://ip.oortaka.top <br> 免费部署：https://oortaka.top/archives/ipdiliweizhi"
+              help: "输入样式：https://ip.oortaka.top 免费部署：https://oortaka.top/archives/ipdiliweizhi"
             - $formkit: text
               name: locationLng
               label: 经度坐标
