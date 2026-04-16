@@ -33,66 +33,57 @@
     
     <!-- 网站背景 -->
     <div id="web_bg">
-        <div th:if="${theme.config.top.global_background.enable_global_background_img}">
-            <img th:if="${theme.config.top.global_background.enable_global_background_above_video == false}"
-                 class="global_background_img global_background_img--light"
-                 th:src="${theme.config.top.global_background.global_background_img_light}"
-            />
-            <img th:if="${theme.config.top.global_background.enable_global_background_above_video == false}"
-                 class="global_background_img global_background_img--dark"
-                 th:src="${theme.config.top.global_background.global_background_img_dark}"
-            />
-            <video th:if="${theme.config.top.global_background.enable_global_background_above_video}"
-                   class="index-video"
-                   id="index-video"
-                   autoplay=""
-                   th:src="${theme.config.top.global_background.global_background_video}"
-                   loop=""
-                   muted=""
-                   playsinline=""
-                   webkit-playsinline=""
-                   style="display:block;object-fit:cover;width:100%;height:100%;pointer-events:none;">
-            </video>
+    <div th:if="${theme.config.top.global_background.enable_global_background_img}">
+        <div th:if="${theme.config.top.global_background.enable_global_background_above_video == false}"
+             class="global_background_img global_background_img--light"
+             th:style="'background-image: url(' + ${theme.config.top.global_background.global_background_img_light} + ');'">
         </div>
-    </div>
-    
-    <th:block th:if="${theme.config.top.global_background.enable_global_background_img}">
-        <style>
-            @media screen and (min-width: 1300px) {
-                .global_background_img {
-
-
-                    width: 100%;
-                    height: 100%;
-                    top: 0;
-                    left: 0;
-                    opacity: 1;
-                    position: fixed;
-                    z-index: -999;
-                    
-                    background-attachment: fixed;
-                    background-repeat: no-repeat;
-                    background-size: cover;
-                }
-            }
-            
-            @media screen and (max-width: 1300px) {
-                .global_background_img {
-                    display: none;
-                }
-            }
+        <div th:if="${theme.config.top.global_background.enable_global_background_above_video == false}"
+             class="global_background_img global_background_img--dark"
+             th:style="'background-image: url(' + ${theme.config.top.global_background.global_background_img_dark} + ');'">
+        </div>
         
-        </style>
-<style>
-/* 明/暗主题切换不同背景图（不要放到 .global_background_img 的规则里） */
-:root[data-theme='light'] .global_background_img--dark { display: none !important; }
-:root[data-theme='dark']  .global_background_img--light { display: none !important; }
-/* 兜底：部分实现下，亮色时不设置 data-theme */
-html:not([data-theme='dark']) .global_background_img--dark { display: none !important; }
-html[data-theme='dark']      .global_background_img--light { display: none !important; }
-</style>
+        <video th:if="${theme.config.top.global_background.enable_global_background_above_video}"
+               class="index-video"
+               id="index-video"
+               autoplay=""
+               th:src="${theme.config.top.global_background.global_background_video}"
+               loop=""
+               muted=""
+               playsinline=""
+               webkit-playsinline=""
+               style="display:block;object-fit:cover;width:100%;height:100%;pointer-events:none;">
+        </video>
+    </div>
+</div>
 
-    </th:block>
+<th:block th:if="${theme.config.top.global_background.enable_global_background_img}">
+    <style>
+        @media screen and (min-width: 1300px) {
+            .global_background_img {
+                width: 100vw;
+                height: 100vh;
+                top: 0;
+                left: 0;
+                position: fixed;
+                z-index: -999;
+                /* 关键渲染设置 */
+                background-size: cover;
+                background-position: center center;
+                background-repeat: no-repeat;
+                /* 强制不显示由于缩放导致的杂边 */
+                image-rendering: -webkit-optimize-contrast;
+                image-rendering: high-quality;
+            }
+        }
+        
+        /* 亮暗模式切换显示逻辑 */
+        :root[data-theme='light'] .global_background_img--dark { display: none !important; }
+        :root[data-theme='dark']  .global_background_img--light { display: none !important; }
+        html:not([data-theme='dark']) .global_background_img--dark { display: none !important; }
+        html[data-theme='dark']      .global_background_img--light { display: none !important; }
+    </style>
+</th:block>
     
     <script th:inline="javascript"
     th:with="allPostList=${postFinder.listAll()},
