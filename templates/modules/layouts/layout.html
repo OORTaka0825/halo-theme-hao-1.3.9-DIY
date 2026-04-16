@@ -35,13 +35,13 @@
     <div id="web_bg">
         <div th:if="${theme.config.top.global_background.enable_global_background_img}">
             <img th:if="${theme.config.top.global_background.enable_global_background_above_video == false}"
-                 class="global_background_img global_background_img--light"
-                 th:src="${theme.config.top.global_background.global_background_img_light}"
-            />
-            <img th:if="${theme.config.top.global_background.enable_global_background_above_video == false}"
-                 class="global_background_img global_background_img--dark"
-                 th:src="${theme.config.top.global_background.global_background_img_dark}"
-            />
+     class="global_background_img global_background_img--light"
+     th:src="${theme.config.top.global_background.global_background_img_light + '?v=raw'}"
+/>
+<img th:if="${theme.config.top.global_background.enable_global_background_above_video == false}"
+     class="global_background_img global_background_img--dark"
+     th:src="${theme.config.top.global_background.global_background_img_dark + '?v=raw'}"
+/>
             <video th:if="${theme.config.top.global_background.enable_global_background_above_video}"
                    class="index-video"
                    id="index-video"
