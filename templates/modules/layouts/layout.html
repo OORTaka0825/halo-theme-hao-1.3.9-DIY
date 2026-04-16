@@ -59,22 +59,27 @@
     <th:block th:if="${theme.config.top.global_background.enable_global_background_img}">
         <style>
             @media screen and (min-width: 1300px) {
-                .global_background_img {
+    .global_background_img {
+        width: 100vw;           /* 使用视口宽度 */
+        height: 100vh;          /* 使用视口高度 */
+        top: 0;
+        left: 0;
+        opacity: 1;
+        position: fixed;
+        z-index: -999;
+        
+        /* 新增：强制图片按比例裁切填充，防止拉伸模糊 */
+        object-fit: cover; 
+        
+        /* 新增：强制浏览器使用最高质量渲染算法 */
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: high-quality;
 
-
-                    width: 100%;
-                    height: 100%;
-                    top: 0;
-                    left: 0;
-                    opacity: 1;
-                    position: fixed;
-                    z-index: -999;
-                    
-                    background-attachment: fixed;
-                    background-repeat: no-repeat;
-                    background-size: cover;
-                }
-            }
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+}
             
             @media screen and (max-width: 1300px) {
                 .global_background_img {
