@@ -42,11 +42,11 @@
                  class="global_background_img global_background_img--dark"
                  th:src="${theme.config.top.global_background.global_background_img_dark}"
             />
-            <video th:if="${theme.config.top.global_background.enable_global_background_above_video}"
+            <video th:src="${theme.config.top.global_background.global_background_img_light + '?v=raw'}"
                    class="index-video"
                    id="index-video"
                    autoplay=""
-                   th:src="${theme.config.top.global_background.global_background_video}"
+                   th:src="${theme.config.top.global_background.global_background_img_dark + '?v=raw'}"
                    loop=""
                    muted=""
                    playsinline=""
