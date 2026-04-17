@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{modules/layouts/layout :: layout(content = ~{::content}, htmlType = 'page',title = ${singlePage.spec.title + ' | ' + site.title})}">
+      th:replace="~{modules/layouts/layout :: layout(content = ~{::content}, htmlType = 'page', title = ${singlePage.spec.title + ' | ' + site.title}, head = ~{::head})}">
+
+<th:block th:fragment="head">
+</th:block>
 
 <th:block th:fragment="content">
 
     <div class="page" id="body-wrap">
 
-        <!-- 头部导航栏 -->
         <header class="not-top-img" id="page-header">
             <nav th:replace="~{modules/nav :: nav(title = ${singlePage.spec.title})}"></nav>
         </header>
@@ -187,7 +189,6 @@
                         cursor: pointer;
                     }
                 </style>
-                <!--/* 评论组件 */-->
                 <th:block
                         th:replace="~{modules/comment :: comment(group = 'content.halo.run',
                   kind = 'SinglePage',
@@ -196,9 +197,7 @@
             </div>
 
         </main>
-        <!-- 底部 -->
         <footer th:replace="~{modules/footer :: footer}"></footer>
-        <!-- 卡片顶部气泡效果 -->
         <script th:if="${theme.config.other.bubbleEnable}" async data-pjax
                 th:src="${assets_link + '/libs/canvas/bubble.js'}"></script>
     </div>
