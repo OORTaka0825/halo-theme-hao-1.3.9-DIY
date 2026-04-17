@@ -43,9 +43,10 @@ spec:
         file: album.html
   description: Halo 2.x Theme base on Thymeleaf, Referring to Butterfly and Heo
   logo: /themes/theme-hao/assets/images/hao-logo.jpg
-  website: https://liuzhihang.com
-  repo: https://github.com/liuzhihang/halo-theme-hao
+  homepage: https://www.halo.run/store/apps/app-MgZJX
+  issues: https://github.com/chengzhongxue/halo-theme-hao/issues
+  repo: https://github.com/chengzhongxue/halo-theme-hao
   settingName: "theme-hao-setting"
   configMapName: "theme-hao-configMap"
   version: "1.3.9"
-  require: ">=2.8.0"
+  requires: ">=2.22.1"
