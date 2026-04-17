@@ -11,7 +11,6 @@
 <th:block th:fragment="content">
 
     <div class="page" id="body-wrap">
-        <!-- 头部导航栏 -->
         <header class="not-top-img" id="page-header">
             <nav th:replace="~{modules/nav :: nav(title = '音乐馆')}"></nav>
         </header>
@@ -20,26 +19,51 @@
                 <div class="music-mask"></div>
                 <h1 class="page-title">音乐馆</h1>
                 <div id="anMusic-page">
-                    <!-- <div id="anMusicBtnGetSong"><i class="anzhiyufont anzhiyu-icon-shuffle"></i></div>
-                    <div id="anMusicRefreshBtn"><i class="anzhiyufont anzhiyu-icon-arrows-rotate"></i></div>
-                    <div id="anMusicSwitching"><i class="anzhiyufont anzhiyu-icon-repeat"></i></div> -->
                     <div id="anMusic-page-meting">
-                        <meting-js th:id="${theme.config.tool.nav_music.id}" th:server="${theme.config.tool.nav_music.server}" type="playlist" mutex="true" preload="auto"
-                                   theme="var(--heo-main)" order="list" list-max-height="calc(100vh - 169px)!important">
+                        <meting-js th:id="${theme.config.tool.nav_music.id}" 
+                                   th:server="${theme.config.tool.nav_music.server}" 
+                                   type="playlist" 
+                                   mutex="true" 
+                                   preload="auto"
+                                   theme="var(--heo-main)" 
+                                   order="list" 
+                                   list-max-height="calc(100vh - 169px)!important">
                         </meting-js>
                     </div>
                 </div>
             </div>
 
+            <script th:inline="javascript">
+                var meting_api = [(${theme.config.tool.nav_music.meting_api})];
+            </script>
 
-            <link rel="stylesheet" th:href="${assets_link + '/css/anmusic.css'}">
+            <link rel="stylesheet" th:href="${assets_link + '/libs/aplayer/APlayer.min.css'}" media="all" onload="this.media='all'">
+            <script th:src="${assets_link + '/libs/aplayer/APlayer.min.js'}"></script>
+            <script th:src="${assets_link + '/libs/aplayer/Meting2.min.js'}"></script>
 
+            <script data-pjax>
+                function initMetingPlayer() {
+                    if (typeof loadMeting === 'function') {
+                        loadMeting();
+                        console.log('MetingJS: 执行 loadMeting');
+                    } else if (typeof meting_init === 'function') {
+                        meting_init();
+                        console.log('MetingJS: 执行 meting_init');
+                    }
+                }
 
+                // 监听 PJAX 完成事件
+                document.addEventListener('pjax:complete', initMetingPlayer);
+                
+                // 页面首次加载
+                if (document.readyState === 'complete') {
+                    initMetingPlayer();
+                } else {
+                    window.addEventListener('load', initMetingPlayer);
+                }
+            </script>
         </main>
-        <!-- 底部 -->
-        <footer th:replace="~{modules/footer}"/>
+        <footer th:replace="~{modules/footer :: footer}"></footer>
     </div>
-
 </th:block>
-
 </html>
