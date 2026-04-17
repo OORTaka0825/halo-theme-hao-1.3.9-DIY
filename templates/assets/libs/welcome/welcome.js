@@ -190,7 +190,7 @@ function showWelcome() {
 
   if (ip.includes(":")) ip = "好复杂，咱看不懂~(ipv6)";
 
-  const html = `欢迎来自 <b><span style="color: var(--kouseki-ip-color);">${pos}</span></b> 的小友 💖<br>
+  const html = `欢迎 <b><span style="color: var(--kouseki-ip-color);">${pos}</span></b> 的小友 💖<br>
     ${desc}🍂<br>
     当前位置距博主约 <b><span style="color: var(--kouseki-ip-color)">${dist}</span></b> 公里！<br>
     您的IP地址为：<b><span class="ip-blur">${ip}</span></b><br>
