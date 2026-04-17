@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html  xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{modules/layouts/layout :: layout(content = ~{::content}, htmlType = 'music',title = ${singlePage.spec.title + ' | ' + site.title}, head = ~{::head})}">
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{modules/layouts/layout :: layout(content = ~{::content}, htmlType = 'music', title = ${singlePage.spec.title + ' | ' + site.title}, head = ~{::head})}">
 <th:block th:fragment="head">
     <th:block th:replace="~{modules/common/open-graph :: open-graph(_title = ${singlePage.spec.title},
                 _permalink = ${singlePage.status.permalink},
@@ -8,8 +8,8 @@
                 _excerpt = ${singlePage.status.excerpt},
                 _type = 'website')}"></th:block>
 </th:block>
-<th:block th:fragment="content">
 
+<th:block th:fragment="content">
     <div class="page" id="body-wrap">
         <header class="not-top-img" id="page-header">
             <nav th:replace="~{modules/nav :: nav(title = '音乐馆')}"></nav>
@@ -34,33 +34,33 @@
             </div>
 
             <script th:inline="javascript">
+                // 1. 声明 API 地址
                 var meting_api = [(${theme.config.tool.nav_music.meting_api})];
             </script>
 
-            <link rel="stylesheet" th:href="${assets_link + '/libs/aplayer/APlayer.min.css'}" media="all" onload="this.media='all'">
+            <link rel="stylesheet" th:href="${assets_link + '/libs/aplayer/APlayer.min.css'}">
             <script th:src="${assets_link + '/libs/aplayer/APlayer.min.js'}"></script>
             <script th:src="${assets_link + '/libs/aplayer/Meting2.min.js'}"></script>
 
             <script data-pjax>
-                function initMetingPlayer() {
-                    if (typeof loadMeting === 'function') {
-                        loadMeting();
-                        console.log('MetingJS: 执行 loadMeting');
-                    } else if (typeof meting_init === 'function') {
-                        meting_init();
-                        console.log('MetingJS: 执行 meting_init');
+                (function() {
+                    function loadMusic() {
+                        console.log("正在尝试初始化音乐播放器...");
+                        if (typeof meting_init === 'function') {
+                            meting_init();
+                        } else if (typeof loadMeting === 'function') {
+                            loadMeting();
+                        }
                     }
-                }
 
-                // 监听 PJAX 完成事件
-                document.addEventListener('pjax:complete', initMetingPlayer);
-                
-                // 页面首次加载
-                if (document.readyState === 'complete') {
-                    initMetingPlayer();
-                } else {
-                    window.addEventListener('load', initMetingPlayer);
-                }
+                    // 这里的延时是为了躲开 Halo 2.4.0 的资源加载高峰
+                    setTimeout(loadMusic, 500);
+
+                    // 兼容 PJAX
+                    document.addEventListener('pjax:complete', function() {
+                        setTimeout(loadMusic, 500);
+                    });
+                })();
             </script>
         </main>
         <footer th:replace="~{modules/footer :: footer}"></footer>
