@@ -1,7 +1,7 @@
 (() => {
     /* === QQ 昵称+邮箱 补丁 (后台配置版) === */
     // 动态读取 Halo 后台设置的接口地址
-    const __CF_PROXY_URL__ = "[(${theme.config.comments.twikoos.qqApiUrl})]";
+    const __CF_PROXY_URL__ = window.GLOBAL_QQ_API || '';
 
     async function __manual_fetchNick__(qq) {
         try {
