@@ -3092,10 +3092,9 @@ spec:
             - $formkit: text
               name: qqApiUrl
               key: qqApiUrl
-              label: QQ 昵称 API 地址
+              label: 获取QQ昵称API接口地址
               placeholder: 请输入你的自定义 接口地址
               help: 接口地址例如 https://tx.oortaka.top/index.php?qq=
-              validation: required
         - $formkit: group
           if: $get(commentsEnable).value && $get(use).value == 'Waline'
           name: walines
