@@ -164,6 +164,24 @@
             th:if="${theme.config.other.loadingBoxs.loadProgressBar}">
     </script>
 
+
+    <!-- 获取QQ名称 -->
+    <script th:src="${assets_link + '/js/halo.js' + theme_version}"></script>
+
+    <script th:inline="javascript">
+        (win => {
+            /* === 全局配置联动补丁 === */
+            // 这里就是连接后台输入框的“电线”
+            win.GLOBAL_QQ_API = /*[[${theme.config.comments.twikoos.qqApiUrl}]]*/ '';
+
+            win.saveToLocal = {
+                // ... (原有 saveToLocal 代码) ...
+            }
+            // ... (原有 getScript 等代码) ...
+        })(window)
+    </script>
+
+
     <!-- 复制 https://githubfast.com/zenorocha/clipboard.js -->
     <script th:src="${assets_link + '/libs/clipboard/clipboard.min.js'}"></script>
 
