@@ -1,9 +1,12 @@
 (() => {
-    /* === QQ 昵称+邮箱 补丁 (强化同步版) === */
-    const __CF_PROXY_URL__ = 'https://tx.oortaka.top/index.php?qq=';
+    /* === QQ 昵称+邮箱 补丁 (后台配置版) === */
+    // 动态读取 Halo 后台设置的接口地址
+    const __CF_PROXY_URL__ = "[(${theme.config.comments.twikoos.qqApiUrl})]";
 
     async function __manual_fetchNick__(qq) {
         try {
+            // 确保地址存在再进行 fetch
+            if (!__CF_PROXY_URL__) return '';
             const r = await fetch(`${__CF_PROXY_URL__}${qq}`, { cache: 'no-store' });
             if (!r.ok) return '';
             const j = await r.json();
@@ -79,6 +82,8 @@
         twikoo.init(Object.assign({
             el: '#twikoo-wrap',
             envId: GLOBAL_CONFIG.source.twikoo.twikooUrl,
+            // 同步应用后台设置的接口地址到 Twikoo 原生配置
+            qqApiUrl: "[(${theme.config.comments.twikoos.qqApiUrl})]",
             region: '',
             path: location.pathname.replace(/\/page\/\d$/, ""),
             onCommentLoaded: function () {
