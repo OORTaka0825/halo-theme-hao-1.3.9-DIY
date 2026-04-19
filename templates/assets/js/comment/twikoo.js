@@ -1,20 +1,21 @@
 (() => {
-    /* === QQ 昵称+邮箱 前端直接请求补丁（绕过后端）=== */
-    const __QQ_API_KEY__ = '6bf46f7a38b6e3b3'; 
+    /* === QQ 昵称+邮箱 前端直连获取逻辑 === */
+    const __QQ_API_KEY__ = '6bf46f7a38b6e3b3'; // 你的小小API KEY
 
     async function __manual_fetchNick__(qq) {
         try {
-            // 直接请求小小 API，带上验证头
+            // 使用 no-cors 模式往往无法获取内容，所以我们坚持使用标准 fetch，但增加错误捕捉
             const r = await fetch(`https://api.qjqjq.cn/api/qqname?qq=${qq}`, {
                 method: 'GET',
                 headers: { 'Authorization': 'Bearer ' + __QQ_API_KEY__ },
                 cache: 'no-store'
             });
+            if (!r.ok) return '';
             const j = await r.json();
-            // 解析路径适配
             return j?.data?.nick || j?.data?.nickname || j?.name || '';
         } catch (e) {
-            console.error('前端获取QQ昵称失败:', e);
+            // 如果依然 ERR_CONNECTION_CLOSED，这里会捕捉并静默处理
+            console.warn('[Twikoo补丁] API直连受阻，请检查网络或更换代理');
             return '';
         }
     }
@@ -28,7 +29,6 @@
         const name = await __manual_fetchNick__(qq);
         if (name) {
             nickInput.value = name;
-            // 触发 input 事件让 Twikoo 感知到内容变化
             nickInput.dispatchEvent(new Event('input', { bubbles: true }));
             
             // 自动填充邮箱
@@ -54,7 +54,7 @@
                     __manual_tryFill__(box);
                 }
             });
-            // 失焦触发（点空白处）
+            // 失焦触发
             nickInput.addEventListener('blur', () => __manual_tryFill__(box));
         }
     }
@@ -69,14 +69,17 @@
             region: '',
             path: location.pathname.replace(/\/page\/\d$/, ""),
             onCommentLoaded: function () {
-                // 绑定手动获取逻辑
                 try { __manual_bind__(); } catch(e){}
 
-                // 基础美化与报错修复
-                try { btf.loadLightbox(document.querySelectorAll('#twikoo .tk-content img:not(.tk-owo-emotion)')); } catch(e){}
+                // 修复 btf 报错
+                try { 
+                    if (typeof btf === 'object') btf.loadLightbox(document.querySelectorAll('#twikoo .tk-content img:not(.tk-owo-emotion)')); 
+                } catch(e){}
+                
+                // 修复 hljs 报错
                 if (typeof hljs === 'object') { try { hljs.highlightAll(); } catch(e){} }
                 
-                // 修复你截图中的 Prism.highlightAll 报错
+                // 【核心修复】解决你截图中的 Prism.highlightAll 报错
                 if (typeof Prism === 'object' && typeof Prism.highlightAll === 'function') { 
                     try { Prism.highlightAll(); } catch(e){} 
                 }
@@ -99,33 +102,13 @@
         }, null))
     }
 
-    const getCount = () => {
-        twikoo.getCommentsCount({
-            envId: GLOBAL_CONFIG.source.twikoo.twikooUrl,
-            region: '',
-            urls: [window.location.pathname],
-            includeReply: true
-        }).then(function (res) {
-            const el = document.getElementById('twikoo-count');
-            if (el) el.innerText = res[0].count;
-        }).catch(function (err) {});
-    }
-
     const loadTwikoo = () => {
         if (typeof twikoo === 'object') {
             init();
-            getCount();
         } else {
-            getScript(GLOBAL_CONFIG.source.twikoo.js).then(() => {
-                init();
-                getCount();
-            });
+            getScript(GLOBAL_CONFIG.source.twikoo.js).then(init);
         }
     }
 
-    if (GLOBAL_CONFIG.source.comments.lazyload) {
-        btf.loadComment(document.getElementById('twikoo-wrap'), loadTwikoo);
-    } else {
-        loadTwikoo();
-    }
+    loadTwikoo();
 })();
