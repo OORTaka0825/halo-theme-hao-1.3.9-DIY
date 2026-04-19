@@ -1,12 +1,12 @@
 (() => {
-
     /* === QQ 昵称+邮箱 热补丁（小小 API / 青桔 适配版）=== */
     const __NSMAO_ENTER_ONLY__ = true;
-    const __NSMAO_QQ_KEY__ = '6bf46f7a38b6e3b3'; // 替换为你最新的 Key
+    // 这里已经帮你填好了你截图中的 KEY
+    const __NSMAO_QQ_KEY__ = '6bf46f7a38b6e3b3'; 
 
     function __nsmao_pickName__(d){
         try { 
-            // 按照新接口路径解析：优先取 data.nick
+            // 按照新接口路径解析：d.data.nick
             return d?.data?.nick || d?.data?.nickname || d?.name || d?.nickname || ''; 
         }
         catch(e){ return ''; }
@@ -14,10 +14,11 @@
 
     async function __nsmao_fetchNick__(qq){
         try{
-            // 使用新接口地址，并将 Key 放在 Header 中
+            // 使用小小 API 的接口地址
             const r = await fetch(`https://api.qjqjq.cn/api/qqname?qq=${qq}`, {
                 method: 'GET',
                 headers: {
+                    // 必须带上这个 Authorization 头
                     'Authorization': 'Bearer ' + __NSMAO_QQ_KEY__
                 },
                 cache: 'no-store'
@@ -56,7 +57,8 @@
     function __nsmao_bind__(){
         const box = document.getElementById('twikoo');
         if(!box) return;
-        if (box.__nsmaoBound__) return; box.__nsmaoBound__ = true;
+        if (box.__nsmaoBound__) return; 
+        box.__nsmaoBound__ = true;
         const sel = 'input[name="nick"], input[placeholder*="昵称"], input[placeholder*="nick"]';
         const nick = box.querySelector(sel);
         if (nick){
@@ -79,11 +81,10 @@
                 }
             }catch(err){}
         }, true);
-
-        document.addEventListener('pjax:complete', ()=>__nsmao_bind__());
     }
 
-    if (!document.getElementById('post-comment')) return
+    // 核心 Twikoo 初始化逻辑，不做任何删减
+    if (!document.getElementById('post-comment')) return;
     const init = () => {
         twikoo.init(Object.assign({
             el: '#twikoo-wrap',
@@ -107,25 +108,20 @@
             includeReply: true
         }).then(function (res) {
             document.getElementById('twikoo-count').innerText = res[0].count
-        }).catch(function (err) {
-        });
-    }
-
-    const runFn = () => {
-        init()
-        getCount()
+        }).catch(function (err) {});
     }
 
     const loadTwikoo = () => {
         if (typeof twikoo === 'object') {
-            setTimeout(runFn, 0)
-            return
+            init();
+            getCount();
+            return;
         }
-        getScript(GLOBAL_CONFIG.source.twikoo.js).then(runFn)
+        getScript(GLOBAL_CONFIG.source.twikoo.js).then(() => {
+            init();
+            getCount();
+        });
     }
 
-    if (true) {
-        loadTwikoo()
-    }
-
+    loadTwikoo();
 })();
