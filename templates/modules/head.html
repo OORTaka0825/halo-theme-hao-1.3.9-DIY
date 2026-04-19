@@ -166,11 +166,7 @@
 
 
     <!-- 获取QQ名称 -->
-    <script th:inline="javascript">
-    // 核心：把后台填的地址，存到 window.GLOBAL_QQ_API 这个变量里
-         window.GLOBAL_QQ_API = "[(${theme.config.comments.twikoos.qqApiUrl})]";
-    </script>
-
+    <script th:inline="javascript"></script>
 
     <!-- 复制 https://githubfast.com/zenorocha/clipboard.js -->
     <script th:src="${assets_link + '/libs/clipboard/clipboard.min.js'}"></script>
