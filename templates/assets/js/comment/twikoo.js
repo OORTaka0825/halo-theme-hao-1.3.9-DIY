@@ -1,6 +1,46 @@
 (() => {
-    // 逻辑说明：由于前端直连 API 被封锁 (ERR_CONNECTION_CLOSED)
-    // 本脚本已移除前端 fetch 逻辑，请确保 Twikoo 管理面板已配置 QQ_API_KEY
+    // 强制前端补丁：避开 Vercel 后端连接失败的问题
+    const QQ_KEY = '6bf46f7a38b6e3b3'; 
+
+    async function fetchQQInfo(qq) {
+        try {
+            // 使用小小 API 的标准格式
+            const response = await fetch(`https://api.qjqjq.cn/api/qqname?qq=${qq}`, {
+                method: 'GET',
+                headers: { 'Authorization': 'Bearer ' + QQ_KEY }
+            });
+            const resData = await response.json();
+            return resData?.data?.nick || resData?.data?.nickname || '';
+        } catch (e) {
+            return '';
+        }
+    }
+
+    function bindEvents() {
+        const el = document.getElementById('twikoo');
+        if (!el || el._qqBound) return;
+        el._qqBound = true;
+
+        const nickInput = el.querySelector('input[name="nick"]');
+        if (nickInput) {
+            nickInput.addEventListener('blur', async () => {
+                const val = nickInput.value.trim();
+                if (/^\d{5,11}$/.test(val)) {
+                    const name = await fetchQQInfo(val);
+                    if (name) {
+                        nickInput.value = name;
+                        nickInput.dispatchEvent(new Event('input', { bubbles: true }));
+                        // 顺便填下邮箱
+                        const mailInput = el.querySelector('input[name="mail"]');
+                        if (mailInput) {
+                            mailInput.value = val + '@qq.com';
+                            mailInput.dispatchEvent(new Event('input', { bubbles: true }));
+                        }
+                    }
+                }
+            });
+        }
+    }
 
     if (!document.getElementById('post-comment')) return;
 
@@ -8,41 +48,19 @@
         twikoo.init(Object.assign({
             el: '#twikoo-wrap',
             envId: GLOBAL_CONFIG.source.twikoo.twikooUrl,
-            region: '',
             path: location.pathname.replace(/\/page\/\d$/, ""),
             onCommentLoaded: function () {
-                // 1. 基础美化兜底
-                try { 
-                    if (typeof btf === 'object') btf.loadLightbox(document.querySelectorAll('#twikoo .tk-content img:not(.tk-owo-emotion)')); 
-                } catch(e){}
+                bindEvents(); // 绑定获取逻辑
                 
-                if (typeof hljs === 'object') { try { hljs.highlightAll(); } catch(e){} }
-                
-                // 2. 【深度修复】解决 Prism.highlightAll is not a function 报错
-                // 只有当插件函数确实存在时才运行，防止脚本运行中断
-                if (typeof Prism === 'object' && typeof Prism.highlightAll === 'function') { 
-                    try { Prism.highlightAll(); } catch(e){} 
+                // 修复你截图中的 Prism 报错
+                if (typeof Prism === 'object' && typeof Prism.highlightAll === 'function') {
+                    try { Prism.highlightAll(); } catch(e){}
                 }
-
-                // 3. 布局修正补丁
-                (function __fixTkExtraGaps__(root) {
-                    try {
-                        var container = root.getElementById ? root.getElementById('twikoo') : root;
-                        (container || root).querySelectorAll('.tk-extra .tk-icon + *').forEach(function (el) {
-                            el.normalize();
-                            el.childNodes.forEach(function (n) {
-                                if (n.nodeType === 3) {
-                                    n.textContent = n.textContent
-                                        .replace(/[\u00A0\u202F\u2009\u200A\u200B\uFEFF]/g, ' ')
-                                        .replace(/\s+/g, ' ')
-                                        .replace(/^\s+/, '');
-                                }
-                            });
-                        });
-                    } catch (e) {}
-                })(document);
+                
+                // 基础美化
+                try { btf.loadLightbox(document.querySelectorAll('#twikoo .tk-content img:not(.tk-owo-emotion)')); } catch(e){}
             }
-        }, null))
+        }, null));
     }
 
     const loadTwikoo = () => {
