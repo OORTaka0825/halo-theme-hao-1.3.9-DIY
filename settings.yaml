@@ -3089,6 +3089,13 @@ spec:
               label: Twikoo评论 - js
               placeholder: 请输入js文件地址
               help: 主题的twikoo版本是最新版本(如果你使用的不是最新版本请自己引入js文件)
+            - $formkit: text
+              name: qqApiUrl
+              key: qqApiUrl
+              label: QQ 昵称 API 地址
+              placeholder: 请输入你的自定义 接口地址
+              help: 接口地址例如 https://tx.oortaka.top/index.php?qq=
+              validation: required
         - $formkit: group
           if: $get(commentsEnable).value && $get(use).value == 'Waline'
           name: walines
