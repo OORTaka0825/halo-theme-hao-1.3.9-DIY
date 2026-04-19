@@ -1,7 +1,6 @@
 (() => {
     /* === QQ 昵称+邮箱 补丁 (强化同步版) === */
-    // 这一行就会自动读取后台设置，如果后台没填就为空
-const __CF_PROXY_URL__ = /*[[${theme.config.comments.twikoos.qqApiUrl}]]*/ 'https://tx.oortaka.top/index.php?qq=';
+    const __CF_PROXY_URL__ = 'https://tx.oortaka.top/index.php?qq=';
 
     async function __manual_fetchNick__(qq) {
         try {
