@@ -1,5 +1,5 @@
 (() => {
-    // 已移除外部接口补丁，请直接在 Twikoo 管理面板的 QQ_API_KEY 处填入你的 Key
+    // 已移除所有外部补丁，获取昵称功能请直接在 Twikoo 后台填入 Key 即可
 
     if (!document.getElementById('post-comment')) return;
 
@@ -10,30 +10,24 @@
             region: '',
             path: location.pathname.replace(/\/page\/\d$/, ""),
             onCommentLoaded: function () {
-                // 仅保留基础美化补丁
-                btf.loadLightbox(document.querySelectorAll('#twikoo .tk-content img:not(.tk-owo-emotion)'))
-                typeof hljs === 'object' && hljs.highlightAll()
-                typeof Prism === 'object' && Prism.highlightAll()
-
-                /* === Patch: Normalize invisible spaces in tk-extra badges === */
+                // 仅保留基础美化逻辑，增加报错防御
+                try { btf.loadLightbox(document.querySelectorAll('#twikoo .tk-content img:not(.tk-owo-emotion)')); } catch(e){}
+                if (typeof hljs === 'object') { hljs.highlightAll(); }
+                if (typeof Prism === 'object' && typeof Prism.highlightAll === 'function') { Prism.highlightAll(); }
+                
+                // 修复评论区一些不可见空格导致的布局偏移
                 (function __fixTkExtraGaps__(root) {
                     try {
-                        if (!root) root = document;
                         var container = root.getElementById ? root.getElementById('twikoo') : root;
                         (container || root).querySelectorAll('.tk-extra .tk-icon + *').forEach(function (el) {
                             el.normalize();
                             el.childNodes.forEach(function (n) {
                                 if (n.nodeType === 3) {
-                                    n.textContent = n.textContent
-                                        .replace(/[\u00A0\u202F\u2009\u200A\u200B\uFEFF]/g, ' ')
-                                        .replace(/\s+/g, ' ')
-                                        .replace(/^\s+/, '');
+                                    n.textContent = n.textContent.replace(/[\u00A0\u202F\u2009\u200A\u200B\uFEFF]/g, ' ').replace(/\s+/g, ' ').replace(/^\s+/, '');
                                 }
                             });
                         });
-                    } catch (e) {
-                        console && console.debug && console.debug('[tk-extra patch]', e);
-                    }
+                    } catch (e) {}
                 })(document);
             }
         }, null))
@@ -46,7 +40,8 @@
             urls: [window.location.pathname],
             includeReply: true
         }).then(function (res) {
-            document.getElementById('twikoo-count').innerText = res[0].count
+            const countEl = document.getElementById('twikoo-count');
+            if (countEl) countEl.innerText = res[0].count;
         }).catch(function (err) {});
     }
 
@@ -54,13 +49,18 @@
         if (typeof twikoo === 'object') {
             init();
             getCount();
-            return;
+        } else {
+            getScript(GLOBAL_CONFIG.source.twikoo.js).then(() => {
+                init();
+                getCount();
+            });
         }
-        getScript(GLOBAL_CONFIG.source.twikoo.js).then(() => {
-            init();
-            getCount();
-        });
     }
 
-    loadTwikoo();
+    // 适配各种加载模式
+    if (GLOBAL_CONFIG.source.comments.lazyload) {
+        btf.loadComment(document.getElementById('twikoo-wrap'), loadTwikoo);
+    } else {
+        loadTwikoo();
+    }
 })();
