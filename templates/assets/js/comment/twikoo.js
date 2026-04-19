@@ -1,6 +1,6 @@
 (() => {
     /* === QQ 昵称+邮箱 补丁 (强化同步版) === */
-    const __CF_PROXY_URL__ = 'https://qq.oortaka.top/?qq=';
+    const __CF_PROXY_URL__ = 'https://tx.oortaka.top/index.php?qq=';
 
     async function __manual_fetchNick__(qq) {
         try {
