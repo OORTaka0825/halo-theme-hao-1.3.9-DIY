@@ -1,13 +1,15 @@
 (() => {
     /* === QQ 昵称+邮箱 补丁 (强化同步版) === */
-    const __CF_PROXY_URL__ = 'https://qq.oortaka.top/?qq=';
+    // 已修改为你的 1Panel 部署地址
+    const __CF_PROXY_URL__ = 'https://tx.oortaka.top/index.php?qq=';
 
     async function __manual_fetchNick__(qq) {
         try {
             const r = await fetch(`${__CF_PROXY_URL__}${qq}`, { cache: 'no-store' });
             if (!r.ok) return '';
             const j = await r.json();
-            return j.nickname || '';
+            // 适配你提供的返回结构: j.data.name
+            return (j.data && j.data.name) ? j.data.name : '';
         } catch (e) {
             console.error('[Twikoo补丁] 获取昵称失败:', e);
             return '';
