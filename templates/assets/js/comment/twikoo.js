@@ -6,13 +6,16 @@
     async function __manual_fetchNick__(qq) {
         try {
             const r = await fetch(`${__CF_PROXY_URL__}${qq}`, { cache: 'no-store' });
-            if (!r.ok) return '';
+            if (!r.ok) return '神秘用户'; 
             const j = await r.json();
-            // 适配你提供的返回结构: j.data.name
-            return (j.data && j.data.name) ? j.data.name : '';
+            
+            // 核心修改在这里：先取值，再判定
+            const name = (j.data && j.data.name) ? j.data.name : '';
+            return (!name || name === 'null') ? '神秘用户' : name;
+            
         } catch (e) {
             console.error('[Twikoo补丁] 获取昵称失败:', e);
-            return '';
+            return '神秘用户';
         }
     }
 
