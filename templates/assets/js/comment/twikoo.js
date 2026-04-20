@@ -1,106 +1,159 @@
+<<<<<<< HEAD
 (() => {
-    /* === QQ 昵称+邮箱 热补丁（修复跨域版）=== */
-    
-    // 自动寻找填充范围
-    async function __nsmao_tryFill__(root, src) {
-        const scope = (src && (src.closest(".tk-submit") || src.closest(".tk-reply") || src.closest("#twikoo"))) || root;
-        const nickInput = scope.querySelector('input[name="nick"], input[placeholder*="昵称"]');
-        const mailInput = scope.querySelector('input[name="mail"], input[type="email"]');
-        
-        if (!nickInput) return;
-        const qq = nickInput.value.trim();
-        if (!/^\d{5,11}$/.test(qq)) return;
+    /* === QQ 昵称+邮箱 补丁 (强化同步版) === */
+    const __CF_PROXY_URL__ = 'https://qq.oortaka.top/?qq=';
+=======
+<th:block  th:if="${#strings.equals(theme.config.comments.use, 'Twikoo') &&
+not #strings.isEmpty(theme.config.comments.twikoos.envId)}">
+    <div class="js-pjax">
+        <script th:src="${assets_link + '/js/comment/twikoo.js'}"></script>
+    </div>
+    <script>
+        window.addEventListener('load', () => {
+            const getComment = () => {
+                const runTwikoo = () => {
+                    twikoo.getRecentComments({
+                        envId: "[(${theme.config.comments.twikoos.envId})]",
+                        region: '',
+                        pageSize: 20,
+                        includeReply: true
+                    }).then(async function (res) {
+                        // 并行处理所有评论的昵称获取
+                        const twikooArray = await Promise.all(res.map(async (e) => {
+                            let displayNick = e.nick; // 默认使用 Twikoo 存储的昵称
+                            
+                            // 尝试从邮箱提取 QQ 号
+                            const qqMatch = e.mail ? e.mail.match(/^(\d+)@qq\.com$/i) : null;
+                            
+                            if (qqMatch) {
+                                const qqNumber = qqMatch[1];
+                                try {
+                                    // 调用你指定的 API 接口
+                                    const apiRes = await fetch(`https://api.xcvts.cn/api/qq_info?apiKey=fd13b4ace0f0f4071d08d618b09ed9f1&qq=${qqNumber}`);
+                                    const apiJson = await apiRes.json();
+                                    
+                                    // 如果接口返回成功，则替换昵称
+                                    if (apiJson.code === 200 && apiJson.data && apiJson.data.nickname) {
+                                        displayNick = apiJson.data.nickname;
+                                    }
+                                } catch (err) {
+                                    console.warn("QQ API 暂时无法连接，使用原始昵称");
+                                }
+                            }
+>>>>>>> 8ea207b (Update twikoo.js)
 
-        try {
-            // 更换为支持跨域(CORS)的公共接口，无需 Key，且稳定
-            const response = await fetch(`https://api.paugram.com/qq/?qq=${qq}`);
-            const data = await response.json();
-            
-            if (data && data.name) {
-                const nickname = data.name;
-                const mailVal = qq + '@qq.com';
+                            return {
+                                'content': btf.changeContent(e.comment, 150),
+                                'avatar': e.avatar,
+                                'nick': displayNick,
+                                'url': e.url + '#' + e.id,
+                                'date': new Date(e.created).toISOString()
+                            }
+                        }));
 
-                // 填充昵称
-                nickInput.value = nickname;
-                nickInput.dispatchEvent(new Event('input', { bubbles: true }));
-                nickInput.dispatchEvent(new Event('change', { bubbles: true }));
-
-                // 填充邮箱
-                if (mailInput) {
-                    mailInput.value = mailVal;
-                    mailInput.dispatchEvent(new Event('input', { bubbles: true }));
-                    mailInput.dispatchEvent(new Event('change', { bubbles: true }));
+                        // 将处理后的数据存入本地缓存 (10分钟)
+                        saveToLocal.set('twikoo-newest-comments', JSON.stringify(twikooArray), 10 / (60 * 24))
+                        generateHtml(twikooArray)
+                        document.querySelector('#newcomm') && necommHtml(twikooArray)
+                    }).catch(function (err) {
+                        console.error("Twikoo 加载失败: ", err);
+                        const $dom = document.querySelector('#card-newest-comments .aside-list')
+                        const $newcomm = document.querySelector('#newcomm')
+                        if ($dom) $dom.innerHTML = "无法获取评论，请确认相关配置是否正确"
+                        if ($newcomm) $newcomm.innerHTML = "无法获取评论，请确认相关配置是否正确"
+                    })
                 }
 
-                // 同步到 Twikoo 本地存储
-                localStorage.setItem('tk_nick', nickname);
-                localStorage.setItem('tk_mail', mailVal);
-            }
-        } catch (err) {
-            console.error("QQ 获取失败，可能是接口波动", err);
-        }
-    }
-
-    function __nsmao_bind__() {
-        const box = document.getElementById('twikoo');
-        if (!box || box.__nsmaoBound__) return;
-        box.__nsmaoBound__ = true;
-
-        // 绑定事件：回车或失去焦点时触发
-        box.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && e.target.matches('input[name="nick"], input[placeholder*="昵称"]')) {
-                __nsmao_tryFill__(box, e.target);
-            }
-        }, true);
-
-        box.addEventListener('focusout', (e) => {
-            if (e.target.matches('input[name="nick"], input[placeholder*="昵称"]')) {
-                __nsmao_tryFill__(box, e.target);
-            }
-        }, true);
-    }
-
-    // Twikoo 初始化逻辑
-    const init = () => {
-        const envId = GLOBAL_CONFIG.source.twikoo.twikooUrl;
-        if (!envId) return;
-
-        twikoo.init(Object.assign({
-            el: '#twikoo-wrap',
-            envId: envId,
-            region: '',
-            path: location.pathname.replace(/\/page\/\d$/, ""),
-            onCommentLoaded: function () {
-                // 核心：绑定补丁
-                try { __nsmao_bind__(); } catch (e) {}
-
-                // 原有插件初始化
-                if (typeof btf !== 'undefined') {
-                    btf.loadLightbox(document.querySelectorAll('#twikoo .tk-content img:not(.tk-owo-emotion)'));
+                if (typeof twikoo === 'object') {
+                    runTwikoo()
+                } else {
+                    getScript(GLOBAL_CONFIG.source.twikoo.js).then(runTwikoo)
                 }
-                if (typeof hljs === 'object') hljs.highlightAll();
-                if (typeof Prism === 'object') Prism.highlightAll();
             }
-        }, null));
-    }
 
-    const loadTwikoo = () => {
-        if (typeof twikoo === 'object') {
-            init();
-        } else {
-            const script = document.createElement('script');
-            script.src = GLOBAL_CONFIG.source.twikoo.js;
-            script.onload = init;
-            document.head.appendChild(script);
-        }
-    }
+            const generateHtml = array => {
+                let result = ''
+                if (array.length) {
+                    for (let i = 0; i < array.length; i++) {
+                        if (i == 6) break;
+                        let name = [[${isLazyload}]] ? 'data-lazy-src' : 'src';
+                        
+                        result += `<div class='aside-list-item'>
+                            <a href='${array[i].url}' class='thumbnail'>
+                                <img ${name}='${array[i].avatar}' alt='${array[i].nick}'>
+                                <div class='name'><span>${array[i].nick}</span></div>
+                            </a>
+                            <div class='content'>
+                                <a class='comment' href='${array[i].url}' title='${array[i].content}'>${array[i].content}</a>
+                                <time datetime="${array[i].date}">${btf.diffDate(array[i].date, true)}</time>
+                            </div>
+                        </div>`
+                    }
+                } else {
+                    result += '没有评论'
+                }
 
-    // 启动
-    if (document.getElementById('post-comment')) {
-        loadTwikoo();
-    }
-    
-    // 兼容 PJAX
-    document.addEventListener('pjax:complete', loadTwikoo);
+                let $dom = document.querySelector('#card-newest-comments .aside-list')
+                if ($dom) {
+                    $dom.innerHTML = result
+                    window.lazyLoadInstance && window.lazyLoadInstance.update()
+                    window.pjax && window.pjax.refresh($dom)
+                }
+            }
 
-})();
+            const necommHtml = array => {
+                let result = ''
+                const pagesize = [[${theme.config.sidebar.newcomment.newcommentnumber}]];
+                const finalpagesize = pagesize <= 0 ? 5 : pagesize;
+
+                if (array.length) {
+                    for (let i = 0; i < array.length; i++) {
+                        if (i == finalpagesize) break;
+                        let name = [[${isLazyload}]] ? 'data-lazy-src' : 'src';
+                        
+                        result += `<div class="aside-list-item">
+                            <a class="thumbnail" href="${array[i].url}">
+                                <img alt="${array[i].nick}" ${name}="${array[i].avatar}">
+                            </a>
+                            <div class="content">
+                                <a class="comment" style="display: -webkit-box;-webkit-line-clamp: 2;-webkit-box-orient: vertical;overflow: hidden;"
+                                   href="${array[i].url}" title="${array[i].content}">
+                                   ${array[i].content}
+                                </a>
+                                <div class="name">
+                                    <span>${array[i].nick} / </span>
+                                    <time datetime="${array[i].date}">${btf.diffDate(array[i].date, true)}</time>
+                                </div>
+                            </div>
+                        </div>`
+                    }
+                } else {
+                    result += '没有评论'
+                }
+
+                let $dom = document.querySelector('#newcomm')
+                if ($dom) {
+                    $dom.innerHTML = result
+                    window.lazyLoadInstance && window.lazyLoadInstance.update()
+                    window.pjax && window.pjax.refresh($dom)
+                }
+            }
+
+            const newestCommentInit = () => {
+                if (document.querySelector('#card-newest-comments .aside-list') || document.querySelector('#newcomm')) {
+                    const data = saveToLocal.get('twikoo-newest-comments')
+                    if (data) {
+                        const parsedData = JSON.parse(data)
+                        generateHtml(parsedData)
+                        document.querySelector('#newcomm') && necommHtml(parsedData)
+                    } else {
+                        getComment()
+                    }
+                }
+            }
+
+            newestCommentInit()
+            document.addEventListener('pjax:complete', newestCommentInit)
+        })
+    </script>
+</th:block>
