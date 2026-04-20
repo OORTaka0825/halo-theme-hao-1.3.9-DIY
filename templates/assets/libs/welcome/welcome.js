@@ -30,7 +30,7 @@ function fetchIpLocation() {
   let myUrl = (GLOBAL_CONFIG?.source?.welcome?.key || "").trim();
 
   if (!myUrl || !myUrl.startsWith('http')) {
-    console.log("Welcome Script: 未检测到有效的完整接口链接，已跳过请求。");
+    //console.log("Welcome Script: 未检测到有效的完整接口链接，已跳过请求。");
     return; 
   }
 
