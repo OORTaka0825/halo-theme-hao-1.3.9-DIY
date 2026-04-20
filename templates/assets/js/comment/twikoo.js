@@ -1,6 +1,6 @@
 (() => {
     /* === QQ 昵称+邮箱 补丁 (强化同步版) === */
-    const __CF_PROXY_URL__ = 'https://qq.oortaka.top/?qq=';
+    const __CF_PROXY_URL__ = 'https://api.xcvts.cn/api/qq_info?apiKey=fd13b4ace0f0f4071d08d618b09ed9f1&qq=';
 
     async function __manual_fetchNick__(qq) {
         try {
