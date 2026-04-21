@@ -77,9 +77,35 @@
                     </div>
                 </th:block>
 
+                <!-- 图片列表 -->
+<div id="article-container">
+    <section class="page-1 loadings">
+        <div class="type-gallery ">
+            <div class="gallery" id="gallery-list">
+
+                <!-- ✅ 加了 gallery-item 类 -->
+                <div class="fj-gallery-item gallery-item" th:each="photo : ${photos.items}">
+                    <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
+                        [[${photo.spec.displayName}]]
+                    </div>
+                    <img th:src="${photo.spec.url}" th:alt="${photo.spec.description}"
+                         th:title="${photo.spec.description}">
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ✅ 分页按钮 -->
+    <div class="pagination-box">
+        <button id="prevPage">上一页</button>
+        <span id="pageInfo"></span>
+        <button id="nextPage">下一页</button>
+    </div>
+</div>
+
                 <div class="gallery-groups" th:if="${#strings.equals(theme.config.photos.photosStyle, 'one')}">
-                    <th:block th:with="photoRes = ${photoFinder.listByGroupName(group.metadata.name, param.page == null ? 1 : param.page, 20)}">
-    <th:block th:each="photo : ${photoRes.items}">
+                    <th:block th:each="group : ${photoFinder.groupBy()}">
                         <h1 style="margin: 8px 0px 20px" th:if="${#strings.equals(group.metadata.name, param.group) && not #strings.isEmpty(param.group) }">
                             [[${group.spec.displayName}]]
                         </h1>
@@ -98,17 +124,6 @@
                                              th:title="${photo.spec.description}">
 
                                     </div>
-                                    <div class="pagination-container" style="text-align: center; margin-top: 20px;">
-    <a th:if="${photoRes.hasPrevious()}" 
-       th:href="@{/photos(group=${param.group},page=${photoRes.page - 1})}" 
-       style="padding: 8px 16px; background: var(--heo-card-bg); border-radius: 8px; border: var(--style-border);">上一页</a>
-    
-    <span style="margin: 0 15px;">[[${photoRes.page}]] / [[${photoRes.totalPages}]]</span>
-    
-    <a th:if="${photoRes.hasNext()}" 
-       th:href="@{/photos(group=${param.group},page=${photoRes.page + 1})}" 
-       style="padding: 8px 16px; background: var(--heo-card-bg); border-radius: 8px; border: var(--style-border);">下一页</a>
-</div>
                                 </div>
                             </div>
                         </section>
@@ -241,6 +256,71 @@
                         user-drag: none
                     }
                 </style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const pageSize = 20;
+        const items = document.querySelectorAll(".gallery-item");
+
+        let currentPage = 1;
+        const totalPages = Math.ceil(items.length / pageSize);
+
+        function showPage(page) {
+            items.forEach((item, index) => {
+                item.style.display =
+                    index >= (page - 1) * pageSize &&
+                    index < page * pageSize
+                        ? "block"
+                        : "none";
+            });
+
+            document.getElementById("pageInfo").innerText =
+                page + " / " + totalPages;
+
+            document.getElementById("prevPage").disabled = page === 1;
+            document.getElementById("nextPage").disabled = page === totalPages;
+        }
+
+        document.getElementById("prevPage").addEventListener("click", () => {
+            if (currentPage > 1) {
+                currentPage--;
+                showPage(currentPage);
+            }
+        });
+
+        document.getElementById("nextPage").addEventListener("click", () => {
+            if (currentPage < totalPages) {
+                currentPage++;
+                showPage(currentPage);
+            }
+        });
+
+        // 初始化
+        showPage(currentPage);
+    });
+</script>
+<style>
+.pagination-box {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.pagination-box button {
+    padding: 8px 16px;
+    margin: 0 10px;
+    border-radius: 6px;
+    border: none;
+    background: var(--heo-main);
+    color: #fff;
+    cursor: pointer;
+}
+
+.pagination-box button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+</style>
+
                 <!--/* 评论组件 */-->
                 <th:block th:replace="~{modules/comment :: comment(group = 'content.halo.run',
                   kind = 'SinglePage',
