@@ -78,7 +78,8 @@
                 </th:block>
 
                 <div class="gallery-groups" th:if="${#strings.equals(theme.config.photos.photosStyle, 'one')}">
-                    <th:block th:each="group : ${photoFinder.groupBy()}">
+                    <th:block th:with="photoRes = ${photoFinder.listByGroupName(group.metadata.name, param.page == null ? 1 : param.page, 20)}">
+    <th:block th:each="photo : ${photoRes.items}">
                         <h1 style="margin: 8px 0px 20px" th:if="${#strings.equals(group.metadata.name, param.group) && not #strings.isEmpty(param.group) }">
                             [[${group.spec.displayName}]]
                         </h1>
@@ -97,6 +98,17 @@
                                              th:title="${photo.spec.description}">
 
                                     </div>
+                                    <div class="pagination-container" style="text-align: center; margin-top: 20px;">
+    <a th:if="${photoRes.hasPrevious()}" 
+       th:href="@{/photos(group=${param.group},page=${photoRes.page - 1})}" 
+       style="padding: 8px 16px; background: var(--heo-card-bg); border-radius: 8px; border: var(--style-border);">上一页</a>
+    
+    <span style="margin: 0 15px;">[[${photoRes.page}]] / [[${photoRes.totalPages}]]</span>
+    
+    <a th:if="${photoRes.hasNext()}" 
+       th:href="@{/photos(group=${param.group},page=${photoRes.page + 1})}" 
+       style="padding: 8px 16px; background: var(--heo-card-bg); border-radius: 8px; border: var(--style-border);">下一页</a>
+</div>
                                 </div>
                             </div>
                         </section>
