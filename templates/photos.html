@@ -11,36 +11,17 @@
 <th:block th:fragment="content">
 
     <div class="page" id="body-wrap">
-        <!-- 头部导航栏 -->
         <header class="not-top-img" id="page-header">
             <nav th:replace="~{modules/nav :: nav(title = ${_title})}"></nav>
         </header>
+
         <main class="layout hide-aside" id="content-inner">
             <div id="page">
+
+                <!-- 默认模式 -->
                 <th:block th:if="${#strings.equals(theme.config.photos.photosStyle, 'default')}">
-                    <th:block th:each="group : ${photoFinder.groupBy()}">
-                        <th:block
-                                th:if="${#strings.equals(group.metadata.name, param.group) && not #strings.isEmpty(param.group)}"
-                                th:with="description = ${#annotations.get(group, 'description')},
-                         background = ${#annotations.get(group, 'background')}">
-                            <div class="author-content author-content-item essayPage single"
-                                 th:style="'background:url('+${background}+') left 28% / cover no-repeat !important;'">
-                                <div class="card-content">
-                                    <div class="author-content-item-tips">相册集</div>
-                                    <span class="author-content-item-title" th:text="${group.spec.displayName}"></span>
-                                    <div class="content-bottom">
-                                        <div class="tips" th:text="${description}"></div>
-                                    </div>
-                                    <div class="banner-button-group">
-                                        <a class="banner-button" th:href="${theme.config.photos.topLink}">
-  <i class="haofont hao-icon-circle-arrow-right"></i>
-  <span class="banner-button-text">返回</span>
-</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </th:block>
-                    </th:block>
+
+                    <!-- 头图保持不动 -->
                     <th:block th:if="${#strings.isEmpty(param.group)}"
                               th:with="background = ${theme.config.photos.backgroundImg}">
                         <div class="author-content author-content-item essayPage single"
@@ -48,294 +29,155 @@
                             <div class="card-content">
                                 <div class="author-content-item-tips">相册集</div>
                                 <span class="author-content-item-title">全部</span>
-                                <div class="content-bottom">
-                                    <div class="tips"></div>
-                                </div>
-                                <div class="banner-button-group">
-                                    <a class="banner-button" th:href="${theme.config.photos.topLink}">
-  <i class="haofont hao-icon-circle-arrow-right"></i>
-  <span class="banner-button-text">返回</span>
-</a>
-                                </div>
                             </div>
                         </div>
                     </th:block>
+
+                    <!-- 图片区域 -->
                     <div id="article-container">
                         <section class="page-1 loadings">
                             <div class="type-gallery ">
-                                <div class="gallery">
-                                    <div class="fj-gallery-item" th:each="photo : ${photos.items}">
+                                <div class="gallery" id="gallery-list">
+
+                                    <!-- ✅ 加 class -->
+                                    <div class="fj-gallery-item gallery-item" th:each="photo : ${photos.items}">
                                         <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
-                                            [[${photo.spec.displayName}]]</div>
+                                            [[${photo.spec.displayName}]]
+                                        </div>
                                         <img th:src="${photo.spec.url}" th:alt="${photo.spec.description}"
                                              th:title="${photo.spec.description}">
-
                                     </div>
+
                                 </div>
                             </div>
                         </section>
+
+                        <!-- ✅ 分页 -->
+                        <div class="pagination-box">
+                            <button id="prevPage">上一页</button>
+                            <span id="pageInfo"></span>
+                            <button id="nextPage">下一页</button>
+                        </div>
                     </div>
                 </th:block>
 
-                <!-- 图片列表 -->
-<div id="article-container">
-    <section class="page-1 loadings">
-        <div class="type-gallery ">
-            <div class="gallery" id="gallery-list">
 
-                <!-- ✅ 加了 gallery-item 类 -->
-                <div class="fj-gallery-item gallery-item" th:each="photo : ${photos.items}">
-                    <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
-                        [[${photo.spec.displayName}]]
-                    </div>
-                    <img th:src="${photo.spec.url}" th:alt="${photo.spec.description}"
-                         th:title="${photo.spec.description}">
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- ✅ 分页按钮 -->
-    <div class="pagination-box">
-        <button id="prevPage">上一页</button>
-        <span id="pageInfo"></span>
-        <button id="nextPage">下一页</button>
-    </div>
-</div>
-
+                <!-- one 模式 -->
                 <div class="gallery-groups" th:if="${#strings.equals(theme.config.photos.photosStyle, 'one')}">
-                    <th:block th:each="group : ${photoFinder.groupBy()}">
-                        <h1 style="margin: 8px 0px 20px" th:if="${#strings.equals(group.metadata.name, param.group) && not #strings.isEmpty(param.group) }">
-                            [[${group.spec.displayName}]]
-                        </h1>
-                        <h1 style="margin: 8px 0px 20px" th:if="${#strings.isEmpty(param.group) }">
-                            全部
-                        </h1>
-                    </th:block>
+
                     <div id="article-container">
                         <section class="page-1 loadings">
                             <div class="type-gallery ">
-                                <div class="gallery">
-                                    <div class="fj-gallery-item" th:each="photo : ${photos.items}">
+                                <div class="gallery" id="gallery-list-2">
+
+                                    <!-- ✅ 同样加 class -->
+                                    <div class="fj-gallery-item gallery-item" th:each="photo : ${photos.items}">
                                         <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
-                                            [[${photo.spec.displayName}]]</div>
+                                            [[${photo.spec.displayName}]]
+                                        </div>
                                         <img th:src="${photo.spec.url}" th:alt="${photo.spec.description}"
                                              th:title="${photo.spec.description}">
-
                                     </div>
+
                                 </div>
                             </div>
                         </section>
+
+                        <!-- ✅ 分页 -->
+                        <div class="pagination-box">
+                            <button id="prevPage2">上一页</button>
+                            <span id="pageInfo2"></span>
+                            <button id="nextPage2">下一页</button>
+                        </div>
                     </div>
                 </div>
+
+                <!-- 原样式 + 新分页样式 -->
                 <style>
-                    .gallery-groups {
-                        box-shadow: var(--heo-shadow-border);
-                        padding: 1rem 2rem;
-                        border-radius: 12px;
-                        background: var(--heo-card-bg);
-                        border: var(--style-border);
-                        width: 100%;
-                        align-self: flex-start;
-                        animation: slide-in 0.6s 0.1s backwards;
+                    .pagination-box {
+                        margin-top: 20px;
+                        text-align: center;
                     }
 
-                    #content-inner .loadings .type-gallery {
-                        opacity: 0
-                    }
-
-                    .loadings {
-                        height: 60px;
-                        background-position: center;
-                        background-repeat: no-repeat;
-                        color: #504e4e;
+                    .pagination-box button {
+                        padding: 8px 16px;
+                        margin: 0 10px;
+                        border-radius: 6px;
                         border: none;
-                        background-size: auto 100%;
-                        box-shadow: none;
-                        background-color: inherit;
-                        background-image: none;
-                        background-image: url(/themes/theme-hao/assets/images/load/rotating-ball-o.svg)
+                        background: var(--heo-main);
+                        color: #fff;
+                        cursor: pointer;
                     }
 
-                    #article-container .type-gallery {
-                        overflow: hidden;
-                        margin-top: 40px;
-                    }
-
-                    #content-inner .gallery {
-                        margin: 0 0 16px;
-                        text-align: center
-                    }
-
-                    #content-inner .gallery .fj-gallery {
-                        opacity: 0;
-                        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
-                        filter: alpha(opacity=0)
-                    }
-
-                    #content-inner .gallery .fj-gallery .img-alt {
-                        display: none
-                    }
-
-                    #content-inner .gallery .fj-gallery.lazyload+button {
-                        display: inline-block
-                    }
-
-                    #content-inner .gallery .fj-gallery .gallery-data {
-                        opacity: 0;
-                        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
-                        filter: alpha(opacity=0);
-                        visibility: hidden
-                    }
-
-                    #content-inner .gallery button {
-                        display: none;
-                        margin-top: 25px;
-                        padding: 10px;
-                        width: 9em;
-                        border-radius: 5px;
-                        background: var(--btn-bg);
-                        color: var(--btn-color);
-                        font-weight: 700;
-                        font-size: 1.1em;
-                        -webkit-transition: all .3s;
-                        -moz-transition: all .3s;
-                        -o-transition: all .3s;
-                        -ms-transition: all .3s;
-                        transition: all .3s
-                    }
-
-                    #content-inner .gallery button>* {
-                        -webkit-transition: all .4s;
-                        -moz-transition: all .4s;
-                        -o-transition: all .4s;
-                        -ms-transition: all .4s;
-                        transition: all .4s
-                    }
-
-                    #content-inner .gallery button i {
-                        opacity: 1;
-                        -ms-filter: none;
-                        filter: none;
-                        font-size: 1.1rem
-                    }
-
-                    #content-inner .gallery button:hover {
-                        background: var(--btn-hover-color)
-                    }
-
-                    #content-inner .gallery button:hover i {
-                        margin-left: 2px
-                    }
-
-                    #article-container .tag-address {
-                        display: flex;
-                        position: absolute;
-                        left: 8px;
-                        top: 8px;
-                        padding: 4px 6px;
-                        border-radius: 8px;
-                        background: var(--heo-black-op);
-                        font-size: 12px;
-                        color: var(--heo-white);
-                        transition: .3s;
-                        z-index: 1;
-                        user-select: none
-                    }
-
-                    img {
-                        border-style: none;
-                        border-radius: 8px;
-                        max-width: 100%;
-                        transition: all .2s ease 0s;
-                        -webkit-user-drag: none;
-                        -khtml-user-drag: none;
-                        -moz-user-drag: none;
-                        -ms-user-drag: none;
-                        user-drag: none
+                    .pagination-box button:disabled {
+                        opacity: 0.5;
                     }
                 </style>
 
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const pageSize = 20;
-        const items = document.querySelectorAll(".gallery-item");
-
-        let currentPage = 1;
-        const totalPages = Math.ceil(items.length / pageSize);
-
-        function showPage(page) {
-            items.forEach((item, index) => {
-                item.style.display =
-                    index >= (page - 1) * pageSize &&
-                    index < page * pageSize
-                        ? "block"
-                        : "none";
-            });
-
-            document.getElementById("pageInfo").innerText =
-                page + " / " + totalPages;
-
-            document.getElementById("prevPage").disabled = page === 1;
-            document.getElementById("nextPage").disabled = page === totalPages;
-        }
-
-        document.getElementById("prevPage").addEventListener("click", () => {
-            if (currentPage > 1) {
-                currentPage--;
-                showPage(currentPage);
-            }
-        });
-
-        document.getElementById("nextPage").addEventListener("click", () => {
-            if (currentPage < totalPages) {
-                currentPage++;
-                showPage(currentPage);
-            }
-        });
-
-        // 初始化
-        showPage(currentPage);
-    });
-</script>
-<style>
-.pagination-box {
-    margin-top: 20px;
-    text-align: center;
-}
-
-.pagination-box button {
-    padding: 8px 16px;
-    margin: 0 10px;
-    border-radius: 6px;
-    border: none;
-    background: var(--heo-main);
-    color: #fff;
-    cursor: pointer;
-}
-
-.pagination-box button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-</style>
-
-                <!--/* 评论组件 */-->
+                <!-- 评论 -->
                 <th:block th:replace="~{modules/comment :: comment(group = 'content.halo.run',
                   kind = 'SinglePage',
                   name = 'photos',
                   allowComment = true)}" />
-            </div>
 
+            </div>
         </main>
-        <!-- 底部 -->
+
         <footer th:replace="~{modules/footer :: footer}"></footer>
-        <!-- 卡片顶部气泡效果 -->
-        <script th:if="${theme.config.other.bubbleEnable}" async data-pjax
-                th:src="${assets_link + '/libs/canvas/bubble.js'}"></script>
+
+        <!-- ✅ 分页JS -->
+        <script>
+            function initPagination(containerSelector, prevBtn, nextBtn, info) {
+                const pageSize = 20;
+                const items = document.querySelectorAll(containerSelector + " .gallery-item");
+
+                let currentPage = 1;
+                const totalPages = Math.ceil(items.length / pageSize);
+
+                function showPage(page) {
+                    items.forEach((item, index) => {
+                        item.style.display =
+                            index >= (page - 1) * pageSize &&
+                            index < page * pageSize
+                                ? "block"
+                                : "none";
+                    });
+
+                    document.getElementById(info).innerText =
+                        page + " / " + totalPages;
+
+                    document.getElementById(prevBtn).disabled = page === 1;
+                    document.getElementById(nextBtn).disabled = page === totalPages;
+                }
+
+                document.getElementById(prevBtn).onclick = () => {
+                    if (currentPage > 1) {
+                        currentPage--;
+                        showPage(currentPage);
+                    }
+                };
+
+                document.getElementById(nextBtn).onclick = () => {
+                    if (currentPage < totalPages) {
+                        currentPage++;
+                        showPage(currentPage);
+                    }
+                };
+
+                showPage(currentPage);
+            }
+
+            document.addEventListener("DOMContentLoaded", function () {
+                if (document.getElementById("gallery-list")) {
+                    initPagination("#gallery-list", "prevPage", "nextPage", "pageInfo");
+                }
+                if (document.getElementById("gallery-list-2")) {
+                    initPagination("#gallery-list-2", "prevPage2", "nextPage2", "pageInfo2");
+                }
+            });
+        </script>
+
     </div>
 
 </th:block>
-
 </html>
