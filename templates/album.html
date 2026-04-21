@@ -12,14 +12,12 @@
 
     <div class="page" id="body-wrap">
 
-        <!-- 头部导航栏 -->
         <header class="not-top-img" id="page-header">
             <nav th:replace="~{modules/nav :: nav(title = ${singlePage.spec.title})}"></nav>
         </header>
 
         <main class="layout hide-aside" id="content-inner">
             <div id="page">
-                <!-- 默认样式 -->
                 <div id="album" th:if="${#strings.equals(theme.config.photos.photosStyle, 'default')}">
                   <div th:replace="~{macro/author-content :: author-content(
                       background = ${#strings.isEmpty(theme.config.photos.backgroundImg) ? singlePage.spec.cover : theme.config.photos.backgroundImg},
@@ -31,8 +29,7 @@
                   )}"></div>
 
                   <div class="card-album">
-                    <th:block th:each="group : ${photoFinder.groupBy()}">
-                      <!-- 直接把外层设为 a，并同时带上 .card 类以继承原来的样式 -->
+                    <th:block th:each="group : ${photoFinder.groupBy(param.page != null ? #conversions.convert(param.page, 'Integer') : 1, 20).items}">
                       <a class="card album-card"
                          th:href="@{/photos?group={g}(g=${group.metadata.name})}"
                          th:onclick="|if(window.pjax && typeof pjax.loadUrl==='function'){
@@ -55,11 +52,10 @@
                   </div>
                 </div>
 
-                <!-- 样式一 -->
                 <div class="gallery-groups" th:if="${#strings.equals(theme.config.photos.photosStyle, 'one')}">
                     <h2 style="text-align:center;">[[${theme.config.photos.bigTitle}]]</h2>
                     <div class="gallery-group-main">
-                        <th:block th:each="group : ${photoFinder.groupBy()}">
+                        <th:block th:each="group : ${photoFinder.groupBy(param.page != null ? #conversions.convert(param.page, 'Integer') : 1, 20).items}">
                             <figure class="gallery-group no-lightbox">
                                 <img class="gallery-group-img no-lightbox"
                                      th:src="${isLazyload ? loadingImg : #annotations.get(group, 'cover')}"
@@ -68,7 +64,6 @@
                                 <figcaption>
                                     <div class="gallery-group-name">[[${group.spec.displayName}]]</div>
                                     <p>[[${#annotations.get(group, 'description')}]]</p>
-                                    <!-- 也补上真实 href + PJAX 兼容 -->
                                     <a class="gallery-group-link"
                                        th:href="@{/photos?group={g}(g=${group.metadata.name})}"
                                        aria-label="查看 [[${group.spec.displayName}]]"
@@ -113,14 +108,12 @@
                         margin: var(--album-spacing-xxl) 0 0
                     }
 
-                    /* 让 a 作为块级/弹性容器使用，继承原 .card 的布局 */
                     #album .album-card { display: flex; }
 
                     #album .card-album .album-content-nocover {
                         width: calc(100% / 4 - 40px)
                     }
 
-                    /* 原本作用在 .card 的样式继续生效（a 也带有 .card 类） */
                     #album .card-album .card {
                         list-style: none;
                         position: relative;
@@ -190,7 +183,27 @@
                     }
                 </style>
 
-                <!-- 评论组件 -->
+                <nav id="album-pagination" th:with="groupRes = ${photoFinder.groupBy(param.page != null ? #conversions.convert(param.page, 'Integer') : 1, 20)}">
+                    <div class="pagination-container" th:if="${groupRes.hasPrevious() or groupRes.hasNext()}" style="text-align: center; margin: 20px 0; padding: 20px;">
+                        
+                        <a th:if="${groupRes.hasPrevious()}" 
+                           th:href="@{${singlePage.status.permalink}(page=${groupRes.page - 1})}" 
+                           style="padding: 10px 20px; background: var(--heo-card-bg); border: var(--style-border); border-radius: 8px; margin-right: 10px; color: var(--font-color);">
+                           上一页
+                        </a>
+                        
+                        <span style="padding: 10px 20px; color: var(--font-color); opacity: 0.8;">
+                           [[${groupRes.page}]] / [[${groupRes.totalPages}]]
+                        </span>
+                        
+                        <a th:if="${groupRes.hasNext()}" 
+                           th:href="@{${singlePage.status.permalink}(page=${groupRes.page + 1})}" 
+                           style="padding: 10px 20px; background: var(--heo-card-bg); border: var(--style-border); border-radius: 8px; margin-left: 10px; color: var(--font-color);">
+                           下一页
+                        </a>
+                    </div>
+                </nav>
+
                 <th:block th:replace="~{modules/comment :: comment(group = 'content.halo.run',
                   kind = 'SinglePage',
                   name = ${singlePage.metadata.name},
@@ -198,10 +211,8 @@
             </div>
         </main>
 
-        <!-- 底部 -->
         <footer th:replace="~{modules/footer}"/>
 
-        <!-- 卡片顶部气泡效果 -->
         <script th:if="${theme.config.other.bubbleEnable}" async data-pjax
                 th:src="${assets_link + '/libs/canvas/bubble.js'}"></script>
     </div>
