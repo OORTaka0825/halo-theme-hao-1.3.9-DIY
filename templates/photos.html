@@ -17,7 +17,7 @@
         <main class="layout hide-aside" id="content-inner">
             <div id="page">
                 <th:block th:with="pageNum = ${param.page == null ? 1 : #conversions.convert(param.page, 'Integer')}">
-                
+
                 <th:block th:if="${#strings.equals(theme.config.photos.photosStyle, 'default')}">
                     <th:block th:each="group : ${photoFinder.groupBy()}">
                         <th:block
@@ -48,10 +48,10 @@
                                 </th:block>
                             </div>
 
-                            <nav id="pagination" th:if="${photoRes.hasPrevious() or photoRes.hasNext()}" style="text-align: center; margin: 30px 0; display: flex; justify-content: center; align-items: center; gap: 12px;">
-                                <a th:if="${photoRes.hasPrevious()}" th:href="@{/photos(group=${param.group},page=${photoRes.page - 1})}" style="padding: 10px 22px; background: var(--heo-card-bg); border: var(--style-border); border-radius: 12px; color: var(--font-color); text-decoration: none;">上一页</a>
-                                <span style="padding: 10px 22px; background: var(--heo-secondbg); border-radius: 12px; color: var(--font-color); font-weight: bold;">[[${photoRes.page}]] / [[${photoRes.totalPages}]]</span>
-                                <a th:if="${photoRes.hasNext()}" th:href="@{/photos(group=${param.group},page=${photoRes.page + 1})}" style="padding: 10px 22px; background: var(--heo-card-bg); border: var(--style-border); border-radius: 12px; color: var(--font-color); text-decoration: none;">下一页</a>
+                            <nav id="pagination" th:if="${photoRes.hasPrevious() or photoRes.hasNext()}" style="text-align: center; margin: 30px 0; display: flex; justify-content: center; align-items: center; gap: 10px;">
+                                <a th:if="${photoRes.hasPrevious()}" th:href="@{/photos(group=${param.group},page=${photoRes.page - 1})}" style="padding: 10px 20px; background: var(--heo-card-bg); border: var(--style-border); border-radius: 12px; color: var(--font-color); text-decoration: none;">上一页</a>
+                                <span style="padding: 10px 20px; background: var(--heo-secondbg); border-radius: 12px; color: var(--font-color); font-weight: bold;">[[${photoRes.page}]] / [[${photoRes.totalPages}]]</span>
+                                <a th:if="${photoRes.hasNext()}" th:href="@{/photos(group=${param.group},page=${photoRes.page + 1})}" style="padding: 10px 20px; background: var(--heo-card-bg); border: var(--style-border); border-radius: 12px; color: var(--font-color); text-decoration: none;">下一页</a>
                             </nav>
                         </th:block>
                     </th:block>
@@ -80,19 +80,17 @@
                                     </th:block>
                                 </div>
                             </div>
-
-                            <nav id="pagination" th:if="${photoRes.hasPrevious() or photoRes.hasNext()}" style="text-align: center; margin: 30px 0; display: flex; justify-content: center; align-items: center; gap: 12px;">
-                                <a th:if="${photoRes.hasPrevious()}" th:href="@{/photos(group=${param.group},page=${photoRes.page - 1})}" style="padding: 10px 22px; background: var(--heo-card-bg); border: var(--style-border); border-radius: 12px; color: var(--font-color); text-decoration: none;">上一页</a>
-                                <span style="padding: 10px 22px; background: var(--heo-secondbg); border-radius: 12px; color: var(--font-color); font-weight: bold;">[[${photoRes.page}]] / [[${photoRes.totalPages}]]</span>
-                                <a th:if="${photoRes.hasNext()}" th:href="@{/photos(group=${param.group},page=${photoRes.page + 1})}" style="padding: 10px 22px; background: var(--heo-card-bg); border: var(--style-border); border-radius: 12px; color: var(--font-color); text-decoration: none;">下一页</a>
+                            
+                            <nav id="pagination" th:if="${photoRes.hasPrevious() or photoRes.hasNext()}" style="text-align: center; margin: 30px 0; display: flex; justify-content: center; align-items: center; gap: 10px;">
+                                <a th:if="${photoRes.hasPrevious()}" th:href="@{/photos(group=${param.group},page=${photoRes.page - 1})}" style="padding: 10px 20px; background: var(--heo-card-bg); border: var(--style-border); border-radius: 12px; color: var(--font-color); text-decoration: none;">上一页</a>
+                                <span style="padding: 10px 20px; background: var(--heo-secondbg); border-radius: 12px; color: var(--font-color); font-weight: bold;">[[${photoRes.page}]] / [[${photoRes.totalPages}]]</span>
+                                <a th:if="${photoRes.hasNext()}" th:href="@{/photos(group=${param.group},page=${photoRes.page + 1})}" style="padding: 10px 20px; background: var(--heo-card-bg); border: var(--style-border); border-radius: 12px; color: var(--font-color); text-decoration: none;">下一页</a>
                             </nav>
                         </th:block>
                     </th:block>
                 </th:block>
 
-                </th:block>
-
-                <style>
+                </th:block> <style>
                     .gallery-groups {
                         box-shadow: var(--heo-shadow-border);
                         padding: 1rem 2rem;
