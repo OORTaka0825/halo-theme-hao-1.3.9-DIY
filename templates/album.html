@@ -31,7 +31,7 @@
                   )}"></div>
 
                   <div class="card-album">
-                    <th:block th:each="group : ${photoFinder.groupBy(param.page != null ? param.page : 1, 20).items}">
+                    <th:block th:each="group : ${photoFinder.groupBy()}">
                       <!-- 直接把外层设为 a，并同时带上 .card 类以继承原来的样式 -->
                       <a class="card album-card"
                          th:href="@{/photos?group={g}(g=${group.metadata.name})}"
