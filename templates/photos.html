@@ -10,211 +10,240 @@
 </th:block>
 <th:block th:fragment="content">
 
-    <div class="page" id="body-wrap">
-        <!-- 头部导航栏 -->
-        <header class="not-top-img" id="page-header">
-            <nav th:replace="~{modules/nav :: nav(title = ${_title})}"></nav>
-        </header>
-        <main class="layout hide-aside" id="content-inner">
-            <div id="page">
-                <th:block th:if="${#strings.equals(theme.config.photos.photosStyle, 'default')}">
-                    <th:block th:each="group : ${photoFinder.groupBy()}">
-                        <th:block
-                                th:if="${#strings.equals(group.metadata.name, param.group) && not #strings.isEmpty(param.group)}"
-                                th:with="description = ${#annotations.get(group, 'description')},
-                         background = ${#annotations.get(group, 'background')}">
-                            <div class="author-content author-content-item essayPage single"
-                                 th:style="'background:url('+${background}+') left 28% / cover no-repeat !important;'">
-                                <div class="card-content">
-                                    <div class="author-content-item-tips">相册集</div>
-                                    <span class="author-content-item-title" th:text="${group.spec.displayName}"></span>
-                                    <div class="content-bottom">
-                                        <div class="tips" th:text="${description}"></div>
-                                    </div>
-                                    <div class="banner-button-group">
-                                        <a class="banner-button" th:href="${theme.config.photos.topLink}">
-                                            <i class="haofont hao-icon-circle-arrow-right"></i>
-                                            <span class="banner-button-text">返回</span>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </th:block>
-                    </th:block>
+<div class="page" id="body-wrap">
+<header class="not-top-img" id="page-header">
+    <nav th:replace="~{modules/nav :: nav(title = ${_title})}"></nav>
+</header>
 
-                    <th:block th:if="${#strings.isEmpty(param.group)}"
-                              th:with="background = ${theme.config.photos.backgroundImg}">
-                        <div class="author-content author-content-item essayPage single"
-                             th:style="'background:url('+${background}+') left 28% / cover no-repeat !important;'">
-                            <div class="card-content">
-                                <div class="author-content-item-tips">相册集</div>
-                                <span class="author-content-item-title">全部</span>
-                                <div class="content-bottom">
-                                    <div class="tips"></div>
-                                </div>
-                                <div class="banner-button-group">
-                                    <a class="banner-button" th:href="${theme.config.photos.topLink}">
-                                        <i class="haofont hao-icon-circle-arrow-right"></i>
-                                        <span class="banner-button-text">返回</span>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </th:block>
+<main class="layout hide-aside" id="content-inner">
+<div id="page">
 
-                    <div id="article-container">
-                        <section class="page-1 loadings">
-                            <div class="type-gallery ">
-                                <div class="gallery">
+<!-- ========== 原 default 结构（完全保留） ========== -->
+<th:block th:if="${#strings.equals(theme.config.photos.photosStyle, 'default')}">
 
-                                    <!-- ✅ 只加了一个 class -->
-                                    <div class="fj-gallery-item gallery-item" th:each="photo : ${photos.items}">
-                                        <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
-                                            [[${photo.spec.displayName}]]
-                                        </div>
-                                        <img th:src="${photo.spec.url}" th:alt="${photo.spec.description}"
-                                             th:title="${photo.spec.description}">
-                                    </div>
+    <th:block th:each="group : ${photoFinder.groupBy()}">
+        <th:block th:if="${#strings.equals(group.metadata.name, param.group) && not #strings.isEmpty(param.group)}"
+                  th:with="description = ${#annotations.get(group, 'description')},
+                           background = ${#annotations.get(group, 'background')}">
 
-                                </div>
-                            </div>
-                        </section>
-
-                        <!-- ✅ 分页（只新增，不影响布局） -->
-                        <div class="pagination-box">
-                            <button id="prevPage">上一页</button>
-                            <span id="pageInfo"></span>
-                            <button id="nextPage">下一页</button>
-                        </div>
+            <div class="author-content author-content-item essayPage single"
+                 th:style="'background:url('+${background}+') left 28% / cover no-repeat !important;'">
+                <div class="card-content">
+                    <div class="author-content-item-tips">相册集</div>
+                    <span class="author-content-item-title" th:text="${group.spec.displayName}"></span>
+                    <div class="content-bottom">
+                        <div class="tips" th:text="${description}"></div>
                     </div>
-                </th:block>
-
-                <!-- one 模式同样处理 -->
-                <div class="gallery-groups" th:if="${#strings.equals(theme.config.photos.photosStyle, 'one')}">
-                    <th:block th:each="group : ${photoFinder.groupBy()}">
-                        <h1 style="margin: 8px 0px 20px"
-                            th:if="${#strings.equals(group.metadata.name, param.group) && not #strings.isEmpty(param.group)}">
-                            [[${group.spec.displayName}]]
-                        </h1>
-                        <h1 style="margin: 8px 0px 20px" th:if="${#strings.isEmpty(param.group)}">
-                            全部
-                        </h1>
-                    </th:block>
-
-                    <div id="article-container">
-                        <section class="page-1 loadings">
-                            <div class="type-gallery ">
-                                <div class="gallery">
-
-                                    <!-- ✅ 同样只加 class -->
-                                    <div class="fj-gallery-item gallery-item" th:each="photo : ${photos.items}">
-                                        <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
-                                            [[${photo.spec.displayName}]]
-                                        </div>
-                                        <img th:src="${photo.spec.url}" th:alt="${photo.spec.description}"
-                                             th:title="${photo.spec.description}">
-                                    </div>
-
-                                </div>
-                            </div>
-                        </section>
-
-                        <div class="pagination-box">
-                            <button id="prevPage2">上一页</button>
-                            <span id="pageInfo2"></span>
-                            <button id="nextPage2">下一页</button>
-                        </div>
+                    <div class="banner-button-group">
+                        <a class="banner-button" th:href="${theme.config.photos.topLink}">
+                            <i class="haofont hao-icon-circle-arrow-right"></i>
+                            <span class="banner-button-text">返回</span>
+                        </a>
                     </div>
                 </div>
-
-                <!-- ✅ 只新增样式 -->
-                <style>
-                    .pagination-box {
-                        margin-top: 20px;
-                        text-align: center;
-                    }
-
-                    .pagination-box button {
-                        padding: 8px 16px;
-                        margin: 0 10px;
-                        border-radius: 6px;
-                        border: none;
-                        background: var(--heo-main);
-                        color: #fff;
-                        cursor: pointer;
-                    }
-
-                    .pagination-box button:disabled {
-                        opacity: 0.5;
-                    }
-                </style>
-
-                <!-- 评论 -->
-                <th:block th:replace="~{modules/comment :: comment(group = 'content.halo.run',
-                  kind = 'SinglePage',
-                  name = 'photos',
-                  allowComment = true)}" />
             </div>
 
-        </main>
+        </th:block>
+    </th:block>
 
-        <footer th:replace="~{modules/footer :: footer}"></footer>
+    <th:block th:if="${#strings.isEmpty(param.group)}"
+              th:with="background = ${theme.config.photos.backgroundImg}">
+        <div class="author-content author-content-item essayPage single"
+             th:style="'background:url('+${background}+') left 28% / cover no-repeat !important;'">
+            <div class="card-content">
+                <div class="author-content-item-tips">相册集</div>
+                <span class="author-content-item-title">全部</span>
+                <div class="content-bottom">
+                    <div class="tips"></div>
+                </div>
+                <div class="banner-button-group">
+                    <a class="banner-button" th:href="${theme.config.photos.topLink}">
+                        <i class="haofont hao-icon-circle-arrow-right"></i>
+                        <span class="banner-button-text">返回</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </th:block>
 
-        <!-- ✅ 分页JS（不影响原脚本） -->
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
+    <div id="article-container">
+        <section class="page-1 loadings">
+            <div class="type-gallery ">
+                <div class="gallery">
 
-                function runPagination(prevId, nextId, infoId) {
-                    const items = document.querySelectorAll(".gallery-item");
-                    if (!items.length) return;
+                    <!-- ✅ 只加 class -->
+                    <div class="fj-gallery-item gallery-item" th:each="photo : ${photos.items}">
+                        <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
+                            [[${photo.spec.displayName}]]
+                        </div>
+                        <img th:src="${photo.spec.url}" th:alt="${photo.spec.description}"
+                             th:title="${photo.spec.description}">
+                    </div>
 
-                    const pageSize = 20;
-                    let currentPage = 1;
-                    const totalPages = Math.ceil(items.length / pageSize);
+                </div>
+            </div>
+        </section>
 
-                    function showPage(page) {
-                        items.forEach((item, index) => {
-                            item.style.display =
-                                index >= (page - 1) * pageSize &&
-                                index < page * pageSize
-                                    ? ""
-                                    : "none";
-                        });
-
-                        document.getElementById(infoId).innerText = page + " / " + totalPages;
-                        document.getElementById(prevId).disabled = page === 1;
-                        document.getElementById(nextId).disabled = page === totalPages;
-                    }
-
-                    document.getElementById(prevId).onclick = () => {
-                        if (currentPage > 1) {
-                            currentPage--;
-                            showPage(currentPage);
-                        }
-                    };
-
-                    document.getElementById(nextId).onclick = () => {
-                        if (currentPage < totalPages) {
-                            currentPage++;
-                            showPage(currentPage);
-                        }
-                    };
-
-                    showPage(currentPage);
-                }
-
-                if (document.getElementById("prevPage")) {
-                    runPagination("prevPage", "nextPage", "pageInfo");
-                }
-
-                if (document.getElementById("prevPage2")) {
-                    runPagination("prevPage2", "nextPage2", "pageInfo2");
-                }
-
-            });
-        </script>
-
+        <!-- ✅ 分页 -->
+        <div class="pagination-box">
+            <button id="prevPage">上一页</button>
+            <span id="pageInfo"></span>
+            <button id="nextPage">下一页</button>
+        </div>
     </div>
 
+</th:block>
+
+<!-- ========== one 模式（也完全保留） ========== -->
+<div class="gallery-groups" th:if="${#strings.equals(theme.config.photos.photosStyle, 'one')}">
+
+    <th:block th:each="group : ${photoFinder.groupBy()}">
+        <h1 style="margin: 8px 0px 20px"
+            th:if="${#strings.equals(group.metadata.name, param.group) && not #strings.isEmpty(param.group)}">
+            [[${group.spec.displayName}]]
+        </h1>
+        <h1 style="margin: 8px 0px 20px" th:if="${#strings.isEmpty(param.group)}">
+            全部
+        </h1>
+    </th:block>
+
+    <div id="article-container">
+        <section class="page-1 loadings">
+            <div class="type-gallery ">
+                <div class="gallery">
+
+                    <!-- ✅ 同样加 class -->
+                    <div class="fj-gallery-item gallery-item" th:each="photo : ${photos.items}">
+                        <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
+                            [[${photo.spec.displayName}]]
+                        </div>
+                        <img th:src="${photo.spec.url}" th:alt="${photo.spec.description}"
+                             th:title="${photo.spec.description}">
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <div class="pagination-box">
+            <button id="prevPage2">上一页</button>
+            <span id="pageInfo2"></span>
+            <button id="nextPage2">下一页</button>
+        </div>
+    </div>
+
+</div>
+
+<!-- ✅ 关键修复：初始隐藏 -->
+<style>
+.gallery-item {
+    display: none;
+}
+
+.pagination-box {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.pagination-box button {
+    padding: 8px 16px;
+    margin: 0 10px;
+    border-radius: 6px;
+    border: none;
+    background: var(--heo-main);
+    color: #fff;
+    cursor: pointer;
+}
+
+.pagination-box button:disabled {
+    opacity: 0.5;
+}
+</style>
+
+<!-- 评论 -->
+<th:block th:replace="~{modules/comment :: comment(group = 'content.halo.run',
+  kind = 'SinglePage',
+  name = 'photos',
+  allowComment = true)}" />
+
+</div>
+</main>
+
+<footer th:replace="~{modules/footer :: footer}"></footer>
+
+<!-- ✅ 分页 JS（已修复 fjGallery 冲突） -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const items = document.querySelectorAll(".gallery-item");
+    if (!items.length) return;
+
+    const pageSize = 20;
+    let currentPage = 1;
+    const totalPages = Math.ceil(items.length / pageSize);
+
+    function showPage(page) {
+
+        items.forEach((item, index) => {
+            if (
+                index >= (page - 1) * pageSize &&
+                index < page * pageSize
+            ) {
+                item.style.display = "";
+            } else {
+                item.style.display = "none";
+            }
+        });
+
+        const info = document.getElementById("pageInfo") || document.getElementById("pageInfo2");
+        if (info) info.innerText = page + " / " + totalPages;
+
+        const prev = document.getElementById("prevPage") || document.getElementById("prevPage2");
+        const next = document.getElementById("nextPage") || document.getElementById("nextPage2");
+
+        if (prev) prev.disabled = page === 1;
+        if (next) next.disabled = page === totalPages;
+
+        // ⭐关键：重新布局
+        setTimeout(() => {
+            if (window.fjGallery) {
+                document.querySelectorAll(".gallery").forEach(g => {
+                    try {
+                        window.fjGallery(g).layout();
+                    } catch (e) {}
+                });
+            }
+        }, 80);
+    }
+
+    const prev = document.getElementById("prevPage") || document.getElementById("prevPage2");
+    const next = document.getElementById("nextPage") || document.getElementById("nextPage2");
+
+    if (prev) {
+        prev.onclick = () => {
+            if (currentPage > 1) {
+                currentPage--;
+                showPage(currentPage);
+            }
+        };
+    }
+
+    if (next) {
+        next.onclick = () => {
+            if (currentPage < totalPages) {
+                currentPage++;
+                showPage(currentPage);
+            }
+        };
+    }
+
+    // ⭐关键：延迟执行（等 fjGallery 初始化完）
+    setTimeout(() => {
+        showPage(currentPage);
+    }, 150);
+});
+</script>
+
+</div>
 </th:block>
 </html>
