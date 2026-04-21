@@ -12,12 +12,14 @@
 
     <div class="page" id="body-wrap">
 
+        <!-- 头部导航栏 -->
         <header class="not-top-img" id="page-header">
             <nav th:replace="~{modules/nav :: nav(title = ${singlePage.spec.title})}"></nav>
         </header>
 
         <main class="layout hide-aside" id="content-inner">
             <div id="page">
+                <!-- 默认样式 -->
                 <div id="album" th:if="${#strings.equals(theme.config.photos.photosStyle, 'default')}">
                   <div th:replace="~{macro/author-content :: author-content(
                       background = ${#strings.isEmpty(theme.config.photos.backgroundImg) ? singlePage.spec.cover : theme.config.photos.backgroundImg},
@@ -29,7 +31,8 @@
                   )}"></div>
 
                   <div class="card-album">
-                    <th:block th:each="group : ${photoFinder.listAll()}">
+                    <th:block th:each="group : ${photoFinder.groupBy()}">
+                      <!-- 直接把外层设为 a，并同时带上 .card 类以继承原来的样式 -->
                       <a class="card album-card"
                          th:href="@{/photos?group={g}(g=${group.metadata.name})}"
                          th:onclick="|if(window.pjax && typeof pjax.loadUrl==='function'){
@@ -46,16 +49,17 @@
                       </a>
                     </th:block>
 
-                    <th:block th:each="photos : ${photoFinder.listAll()}">
+                    <th:block th:each="photos : ${photoFinder.groupBy()}">
                       <div class="album-content-nocover"></div>
                     </th:block>
                   </div>
                 </div>
 
+                <!-- 样式一 -->
                 <div class="gallery-groups" th:if="${#strings.equals(theme.config.photos.photosStyle, 'one')}">
                     <h2 style="text-align:center;">[[${theme.config.photos.bigTitle}]]</h2>
                     <div class="gallery-group-main">
-                        <th:block th:each="group : ${photoFinder.listAll()}">
+                        <th:block th:each="group : ${photoFinder.groupBy()}">
                             <figure class="gallery-group no-lightbox">
                                 <img class="gallery-group-img no-lightbox"
                                      th:src="${isLazyload ? loadingImg : #annotations.get(group, 'cover')}"
@@ -64,6 +68,7 @@
                                 <figcaption>
                                     <div class="gallery-group-name">[[${group.spec.displayName}]]</div>
                                     <p>[[${#annotations.get(group, 'description')}]]</p>
+                                    <!-- 也补上真实 href + PJAX 兼容 -->
                                     <a class="gallery-group-link"
                                        th:href="@{/photos?group={g}(g=${group.metadata.name})}"
                                        aria-label="查看 [[${group.spec.displayName}]]"
@@ -185,6 +190,7 @@
                     }
                 </style>
 
+                <!-- 评论组件 -->
                 <th:block th:replace="~{modules/comment :: comment(group = 'content.halo.run',
                   kind = 'SinglePage',
                   name = ${singlePage.metadata.name},
@@ -192,8 +198,10 @@
             </div>
         </main>
 
+        <!-- 底部 -->
         <footer th:replace="~{modules/footer}"/>
 
+        <!-- 卡片顶部气泡效果 -->
         <script th:if="${theme.config.other.bubbleEnable}" async data-pjax
                 th:src="${assets_link + '/libs/canvas/bubble.js'}"></script>
     </div>
