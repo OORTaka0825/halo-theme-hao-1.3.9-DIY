@@ -66,19 +66,7 @@
     <section class="page-1 loadings">
         <div class="type-gallery">
             <div class="gallery" id="gallery-list">
-
-                <div class="fj-gallery-item"
-                     th:each="photo : ${photos.items}">
-
-                    <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
-                        [[${photo.spec.displayName}]]
-                    </div>
-
-                    <img th:src="${photo.spec.url}"
-                         th:alt="${photo.spec.description}"
-                         th:title="${photo.spec.description}">
-                </div>
-
+                <!-- JS 动态生成 -->
             </div>
         </div>
     </section>
@@ -93,6 +81,7 @@
 
 </th:block>
 
+<!-- 分组模式 -->
 <div class="gallery-groups" th:if="${#strings.equals(theme.config.photos.photosStyle, 'one')}">
 
     <div id="article-container">
@@ -100,19 +89,7 @@
         <section class="page-1 loadings">
             <div class="type-gallery">
                 <div class="gallery" id="gallery-list-2">
-
-                    <div class="fj-gallery-item"
-                         th:each="photo : ${photos.items}">
-
-                        <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
-                            [[${photo.spec.displayName}]]
-                        </div>
-
-                        <img th:src="${photo.spec.url}"
-                             th:alt="${photo.spec.description}"
-                             th:title="${photo.spec.description}">
-                    </div>
-
+                    <!-- JS 动态生成 -->
                 </div>
             </div>
         </section>
@@ -128,21 +105,24 @@
 </div>
 
 <style>
+
+/* =======================
+   3列网格（彻底摆脱瀑布流）
+======================= */
 .gallery {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 12px;
 }
 
+/* 图片样式 */
 .fj-gallery-item img {
     width: 100%;
     border-radius: 8px;
+    display: block;
 }
 
-.page-hidden {
-    display: none !important;
-}
-
+/* 分页 */
 .pagination {
     text-align: center;
     margin: 30px 0;
@@ -160,56 +140,95 @@
 
 .page-btn:disabled {
     opacity: 0.5;
+    cursor: not-allowed;
 }
+
+.page-info {
+    font-size: 14px;
+    color: var(--heo-fontcolor);
+}
+
 </style>
 
 <script>
+
 window.addEventListener("load", function () {
 
+    // =========================
+    // 获取所有图片（只读取一次）
+    // =========================
+    function getAllPhotos() {
+        const temp = document.querySelectorAll(".fj-gallery-item");
+
+        let list = [];
+        temp.forEach(el => {
+            list.push({
+                html: el.outerHTML
+            });
+        });
+
+        return list;
+    }
+
+    // =========================
+    // 分页核心
+    // =========================
     function initPagination(galleryId, prevId, nextId, infoId) {
 
         const gallery = document.getElementById(galleryId);
-        const items = gallery.querySelectorAll(".fj-gallery-item");
+        if (!gallery) return;
+
+        const allPhotos = getAllPhotos();
 
         const pageSize = 20;
         let currentPage = 1;
-        const totalPages = Math.ceil(items.length / pageSize);
+        const totalPages = Math.max(1, Math.ceil(allPhotos.length / pageSize));
 
-        function showPage(page) {
+        function render(page) {
 
             currentPage = page;
 
-            items.forEach((item, index) => {
+            const start = (page - 1) * pageSize;
+            const end = page * pageSize;
 
-                const show =
-                    index >= (page - 1) * pageSize &&
-                    index < page * pageSize;
+            const pageData = allPhotos.slice(start, end);
 
-                item.classList.toggle("page-hidden", !show);
-            });
+            // =========================
+            // 🔥 核心：完全重建 DOM
+            // =========================
+            gallery.innerHTML = pageData.map(p => p.html).join("");
 
+            // 页码
             document.getElementById(infoId).innerText =
                 `第 ${currentPage} 页 / 共 ${totalPages} 页`;
 
+            // 按钮状态
             document.getElementById(prevId).disabled = currentPage === 1;
             document.getElementById(nextId).disabled = currentPage === totalPages;
         }
 
-        document.getElementById(prevId).onclick = () => {
-            if (currentPage > 1) showPage(currentPage - 1);
+        // 上一页
+        document.getElementById(prevId).onclick = function () {
+            if (currentPage > 1) render(currentPage - 1);
         };
 
-        document.getElementById(nextId).onclick = () => {
-            if (currentPage < totalPages) showPage(currentPage + 1);
+        // 下一页
+        document.getElementById(nextId).onclick = function () {
+            if (currentPage < totalPages) render(currentPage + 1);
         };
 
-        showPage(1);
+        // 首次渲染
+        render(1);
     }
 
+    // =========================
+    // 初始化两个区域
+    // =========================
     initPagination("gallery-list", "prevPage", "nextPage", "pageInfo");
     initPagination("gallery-list-2", "prevPage2", "nextPage2", "pageInfo2");
 
 });
+
 </script>
                 <!--/* 评论组件 */-->
                 <th:block th:replace="~{modules/comment :: comment(group = 'content.halo.run',
