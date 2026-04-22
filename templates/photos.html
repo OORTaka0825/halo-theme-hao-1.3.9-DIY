@@ -64,9 +64,7 @@
                         <section class="page-1 loadings">
                             <div class="type-gallery ">
                                 <div class="gallery">
-                                    <div class="fj-gallery-item" th:each="photo, stat : ${photos.items}" 
-     th:with="p=${param.page == null ? 1 : T(java.lang.Integer).parseInt(param.page)}"
-     th:if="${stat.index >= (p - 1) * 20 and stat.index < p * 20}">
+                                    <div class="fj-gallery-item" th:each="photo : ${photos.items}">
                                         <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
                                             [[${photo.spec.displayName}]]</div>
                                         <img th:src="${photo.spec.url}" th:alt="${photo.spec.description}"
