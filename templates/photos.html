@@ -200,53 +200,6 @@
         max-width: 100%;
     }
 </style>
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-
-    function initPagination(galleryId, prevId, nextId, infoId) {
-        const items = document.querySelectorAll("#" + galleryId + " .fj-gallery-item");
-
-        const pageSize = 20;
-        let currentPage = 1;
-        const total = items.length;
-        const totalPages = Math.ceil(total / pageSize);
-
-        function showPage(page) {
-            currentPage = page;
-
-            items.forEach((item, index) => {
-                if (index >= (page - 1) * pageSize && index < page * pageSize) {
-                    item.style.display = "block";
-                } else {
-                    item.style.display = "none";
-                }
-            });
-
-            document.getElementById(infoId).innerText =
-                `第 ${currentPage} 页 / 共 ${totalPages} 页`;
-
-            document.getElementById(prevId).disabled = currentPage === 1;
-            document.getElementById(nextId).disabled = currentPage === totalPages;
-        }
-
-        document.getElementById(prevId).onclick = () => {
-            if (currentPage > 1) showPage(currentPage - 1);
-        };
-
-        document.getElementById(nextId).onclick = () => {
-            if (currentPage < totalPages) showPage(currentPage + 1);
-        };
-
-        showPage(1);
-    }
-
-    // 初始化两个分页（普通 + 分组）
-    initPagination("gallery-list", "prevPage", "nextPage", "pageInfo");
-    initPagination("gallery-list", "prevPage2", "nextPage2", "pageInfo2");
-
-});
-</script>
                 <!--/* 评论组件 */-->
                 <th:block th:replace="~{modules/comment :: comment(group = 'content.halo.run',
                   kind = 'SinglePage',
