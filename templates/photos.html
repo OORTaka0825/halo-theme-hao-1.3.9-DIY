@@ -59,6 +59,21 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="pagination-nav" th:if="${photoRes.totalPages > 1}" style="display: flex; justify-content: center; align-items: center; gap: 15px; margin: 20px 0;">
+    
+    <a th:if="${photoRes.hasPrevious()}" 
+       th:href="@{/photos(group=${param.group},page=${photoRes.page - 1})}" 
+       style="padding: 10px 20px; background: var(--heo-card-bg); border: var(--style-border); border-radius: 12px; color: var(--font-color); text-decoration: none;">上一页</a>
+
+    <span style="font-weight: bold;">[[${photoRes.page}]] / [[${photoRes.totalPages}]]</span>
+
+    <a th:if="${photoRes.hasNext()}" 
+       th:href="@{/photos(group=${param.group},page=${photoRes.page + 1})}" 
+       style="padding: 10px 20px; background: var(--heo-card-bg); border: var(--style-border); border-radius: 12px; color: var(--font-color); text-decoration: none;">下一页</a>
+       
+</div>
+
                     </th:block>
                     <div id="article-container">
                         <section class="page-1 loadings">
