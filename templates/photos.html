@@ -63,8 +63,8 @@
 <div id="article-container">
     <section class="page-1 loadings">
         <div class="type-gallery ">
-            <div class="gallery">
-                <div class="fj-gallery-item" th:each="photo : ${photos.items}">
+            <div class="gallery" id="gallery-list">
+                <div class="fj-gallery-item" th:each="photo,iterStat : ${photos.items}" th:attr="data-index=${iterStat.index}">
                     <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
                         [[${photo.spec.displayName}]]
                     </div>
@@ -77,41 +77,27 @@
 
     <!-- ✅ 分页按钮 -->
     <div class="pagination">
-        <!-- 上一页 -->
-        <a th:if="${photos.hasPrevious}"
-           th:href="@{?(page=${photos.number - 1}, size=${photos.size})}"
-           class="page-btn">上一页</a>
-
-        <!-- 当前页 -->
-        <span class="page-info">
-            第 [[${photos.number + 1}]] 页 / 共 [[${photos.totalPages}]] 页
-        </span>
-
-        <!-- 下一页 -->
-        <a th:if="${photos.hasNext}"
-           th:href="@{?(page=${photos.number + 1}, size=${photos.size})}"
-           class="page-btn">下一页</a>
+        <button id="prevPage" class="page-btn">上一页</button>
+        <span id="pageInfo" class="page-info"></span>
+        <button id="nextPage" class="page-btn">下一页</button>
     </div>
 </div>
 </th:block>
 
 <div class="gallery-groups" th:if="${#strings.equals(theme.config.photos.photosStyle, 'one')}">
     <th:block th:each="group : ${photoFinder.groupBy()}">
-        <h1 style="margin: 8px 0px 20px"
-            th:if="${#strings.equals(group.metadata.name, param.group) && not #strings.isEmpty(param.group)}">
+        <h1 style="margin: 8px 0px 20px" th:if="${#strings.equals(group.metadata.name, param.group) && not #strings.isEmpty(param.group) }">
             [[${group.spec.displayName}]]
         </h1>
-        <h1 style="margin: 8px 0px 20px"
-            th:if="${#strings.isEmpty(param.group)}">
+        <h1 style="margin: 8px 0px 20px" th:if="${#strings.isEmpty(param.group) }">
             全部
         </h1>
     </th:block>
-
     <div id="article-container">
         <section class="page-1 loadings">
             <div class="type-gallery ">
-                <div class="gallery">
-                    <div class="fj-gallery-item" th:each="photo : ${photos.items}">
+                <div class="gallery" id="gallery-list">
+                    <div class="fj-gallery-item" th:each="photo,iterStat : ${photos.items}" th:attr="data-index=${iterStat.index}">
                         <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
                             [[${photo.spec.displayName}]]
                         </div>
@@ -122,19 +108,11 @@
             </div>
         </section>
 
-        <!-- ✅ 分页按钮（分组模式也加） -->
+        <!-- ✅ 分页按钮（分组模式也有） -->
         <div class="pagination">
-            <a th:if="${photos.hasPrevious}"
-               th:href="@{?(page=${photos.number - 1}, size=${photos.size})}"
-               class="page-btn">上一页</a>
-
-            <span class="page-info">
-                第 [[${photos.number + 1}]] 页 / 共 [[${photos.totalPages}]] 页
-            </span>
-
-            <a th:if="${photos.hasNext}"
-               th:href="@{?(page=${photos.number + 1}, size=${photos.size})}"
-               class="page-btn">下一页</a>
+            <button id="prevPage2" class="page-btn">上一页</button>
+            <span id="pageInfo2" class="page-info"></span>
+            <button id="nextPage2" class="page-btn">下一页</button>
         </div>
     </div>
 </div>
@@ -158,18 +136,18 @@
     }
 
     .page-btn {
-        display: inline-block;
         padding: 8px 16px;
         margin: 0 10px;
         border-radius: 6px;
         background: var(--btn-bg);
         color: var(--btn-color);
-        text-decoration: none;
-        transition: 0.3s;
+        border: none;
+        cursor: pointer;
     }
 
-    .page-btn:hover {
-        background: var(--btn-hover-color);
+    .page-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
     }
 
     .page-info {
@@ -222,6 +200,53 @@
         max-width: 100%;
     }
 </style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    function initPagination(galleryId, prevId, nextId, infoId) {
+        const items = document.querySelectorAll("#" + galleryId + " .fj-gallery-item");
+
+        const pageSize = 20;
+        let currentPage = 1;
+        const total = items.length;
+        const totalPages = Math.ceil(total / pageSize);
+
+        function showPage(page) {
+            currentPage = page;
+
+            items.forEach((item, index) => {
+                if (index >= (page - 1) * pageSize && index < page * pageSize) {
+                    item.style.display = "block";
+                } else {
+                    item.style.display = "none";
+                }
+            });
+
+            document.getElementById(infoId).innerText =
+                `第 ${currentPage} 页 / 共 ${totalPages} 页`;
+
+            document.getElementById(prevId).disabled = currentPage === 1;
+            document.getElementById(nextId).disabled = currentPage === totalPages;
+        }
+
+        document.getElementById(prevId).onclick = () => {
+            if (currentPage > 1) showPage(currentPage - 1);
+        };
+
+        document.getElementById(nextId).onclick = () => {
+            if (currentPage < totalPages) showPage(currentPage + 1);
+        };
+
+        showPage(1);
+    }
+
+    // 初始化两个分页（普通 + 分组）
+    initPagination("gallery-list", "prevPage", "nextPage", "pageInfo");
+    initPagination("gallery-list", "prevPage2", "nextPage2", "pageInfo2");
+
+});
+</script>
                 <!--/* 评论组件 */-->
                 <th:block th:replace="~{modules/comment :: comment(group = 'content.halo.run',
                   kind = 'SinglePage',
