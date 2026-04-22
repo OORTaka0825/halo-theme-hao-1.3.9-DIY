@@ -60,9 +60,10 @@
                             </div>
                         </div>
                     </th:block>
-<div id="article-container">
-    <section class="page-1 loadings">
 
+<div id="article-container">
+
+    <section class="page-1 loadings">
         <div class="type-gallery">
             <div class="gallery" id="gallery-list">
 
@@ -80,7 +81,6 @@
 
             </div>
         </div>
-
     </section>
 
     <div class="pagination">
@@ -88,14 +88,16 @@
         <span id="pageInfo" class="page-info"></span>
         <button id="nextPage" class="page-btn">下一页</button>
     </div>
+
 </div>
+
 </th:block>
 
 <div class="gallery-groups" th:if="${#strings.equals(theme.config.photos.photosStyle, 'one')}">
 
     <div id="article-container">
-        <section class="page-1 loadings">
 
+        <section class="page-1 loadings">
             <div class="type-gallery">
                 <div class="gallery" id="gallery-list-2">
 
@@ -113,7 +115,6 @@
 
                 </div>
             </div>
-
         </section>
 
         <div class="pagination">
@@ -121,6 +122,7 @@
             <span id="pageInfo2" class="page-info"></span>
             <button id="nextPage2" class="page-btn">下一页</button>
         </div>
+
     </div>
 
 </div>
@@ -179,15 +181,11 @@ window.addEventListener("load", function () {
 
             items.forEach((item, index) => {
 
-                const inPage =
+                const show =
                     index >= (page - 1) * pageSize &&
                     index < page * pageSize;
 
-                if (inPage) {
-                    item.classList.remove("page-hidden");
-                } else {
-                    item.classList.add("page-hidden");
-                }
+                item.classList.toggle("page-hidden", !show);
             });
 
             document.getElementById(infoId).innerText =
