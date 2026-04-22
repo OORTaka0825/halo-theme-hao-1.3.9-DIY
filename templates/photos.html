@@ -66,7 +66,19 @@
     <section class="page-1 loadings">
         <div class="type-gallery">
             <div class="gallery" id="gallery-list">
-                <!-- JS 动态生成 -->
+
+                <div class="fj-gallery-item"
+                     th:each="photo : ${photos.items}">
+
+                    <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
+                        [[${photo.spec.displayName}]]
+                    </div>
+
+                    <img th:src="${photo.spec.url}"
+                         th:alt="${photo.spec.description}"
+                         th:title="${photo.spec.description}">
+                </div>
+
             </div>
         </div>
     </section>
@@ -81,7 +93,6 @@
 
 </th:block>
 
-<!-- 分组模式 -->
 <div class="gallery-groups" th:if="${#strings.equals(theme.config.photos.photosStyle, 'one')}">
 
     <div id="article-container">
@@ -89,7 +100,19 @@
         <section class="page-1 loadings">
             <div class="type-gallery">
                 <div class="gallery" id="gallery-list-2">
-                    <!-- JS 动态生成 -->
+
+                    <div class="fj-gallery-item"
+                         th:each="photo : ${photos.items}">
+
+                        <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
+                            [[${photo.spec.displayName}]]
+                        </div>
+
+                        <img th:src="${photo.spec.url}"
+                             th:alt="${photo.spec.description}"
+                             th:title="${photo.spec.description}">
+                    </div>
+
                 </div>
             </div>
         </section>
@@ -106,9 +129,7 @@
 
 <style>
 
-/* =======================
-   3列网格（彻底摆脱瀑布流）
-======================= */
+/* ===== 3列稳定布局（避免瀑布流冲突） ===== */
 .gallery {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -140,7 +161,11 @@
 
 .page-btn:disabled {
     opacity: 0.5;
-    cursor: not-allowed;
+}
+
+/* ⭐ 关键：分页隐藏（不会破坏布局） */
+.page-hidden {
+    display: none !important;
 }
 
 .page-info {
@@ -154,76 +179,66 @@
 
 window.addEventListener("load", function () {
 
-    // =========================
-    // 获取所有图片（只读取一次）
-    // =========================
-    function getAllPhotos() {
-        const temp = document.querySelectorAll(".fj-gallery-item");
-
-        let list = [];
-        temp.forEach(el => {
-            list.push({
-                html: el.outerHTML
-            });
-        });
-
-        return list;
-    }
-
-    // =========================
-    // 分页核心
-    // =========================
     function initPagination(galleryId, prevId, nextId, infoId) {
 
         const gallery = document.getElementById(galleryId);
         if (!gallery) return;
 
-        const allPhotos = getAllPhotos();
+        const items = gallery.querySelectorAll(".fj-gallery-item");
 
         const pageSize = 20;
         let currentPage = 1;
-        const totalPages = Math.max(1, Math.ceil(allPhotos.length / pageSize));
+        const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
 
-        function render(page) {
+        function refreshLayout() {
+            // 强制主题重新计算布局（防止错位）
+            window.dispatchEvent(new Event('resize'));
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+            }, 80);
+        }
+
+        function showPage(page) {
 
             currentPage = page;
 
             const start = (page - 1) * pageSize;
             const end = page * pageSize;
 
-            const pageData = allPhotos.slice(start, end);
+            items.forEach((item, index) => {
 
-            // =========================
-            // 🔥 核心：完全重建 DOM
-            // =========================
-            gallery.innerHTML = pageData.map(p => p.html).join("");
+                if (index >= start && index < end) {
+                    item.classList.remove("page-hidden");
+                } else {
+                    item.classList.add("page-hidden");
+                }
 
-            // 页码
+            });
+
             document.getElementById(infoId).innerText =
                 `第 ${currentPage} 页 / 共 ${totalPages} 页`;
 
-            // 按钮状态
             document.getElementById(prevId).disabled = currentPage === 1;
             document.getElementById(nextId).disabled = currentPage === totalPages;
+
+            refreshLayout();
         }
 
-        // 上一页
         document.getElementById(prevId).onclick = function () {
-            if (currentPage > 1) render(currentPage - 1);
+            if (currentPage > 1) showPage(currentPage - 1);
         };
 
-        // 下一页
         document.getElementById(nextId).onclick = function () {
-            if (currentPage < totalPages) render(currentPage + 1);
+            if (currentPage < totalPages) showPage(currentPage + 1);
         };
 
-        // 首次渲染
-        render(1);
+        // ⭐ 延迟初始化（解决你“首次33张/按钮失效”问题）
+        setTimeout(() => {
+            showPage(1);
+        }, 150);
+
     }
 
-    // =========================
-    // 初始化两个区域
-    // =========================
     initPagination("gallery-list", "prevPage", "nextPage", "pageInfo");
     initPagination("gallery-list-2", "prevPage2", "nextPage2", "pageInfo2");
 
