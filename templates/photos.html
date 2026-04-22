@@ -77,10 +77,11 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const pageSize = 20; // 每页显示 20 张
+    const pageSize = 20; 
     let currentPage = 1;
-    const gallery = document.getElementById('my-photo-gallery');
-    const photos = Array.from(gallery.getElementsByClassName('fj-gallery-item'));
+    const galleryContainer = document.getElementById('my-photo-gallery');
+    // 注意：这里要抓取真正包含图片的子元素
+    const photos = Array.from(galleryContainer.getElementsByClassName('fj-gallery-item'));
     const totalPages = Math.ceil(photos.length / pageSize);
     const paginationContainer = document.getElementById('photo-pagination');
 
@@ -89,30 +90,52 @@ document.addEventListener('DOMContentLoaded', function() {
         const start = (page - 1) * pageSize;
         const end = page * pageSize;
 
+        // 1. 先切换显示/隐藏
         photos.forEach((photo, index) => {
-            photo.style.display = (index >= start && index < end) ? 'block' : 'none';
+            if (index >= start && index < end) {
+                photo.style.display = 'inline-block'; // 恢复显示
+                photo.style.visibility = 'visible';
+                photo.style.position = 'relative'; // 重置定位，防止堆叠
+            } else {
+                photo.style.display = 'none'; // 彻底移除占位
+            }
         });
 
+        // 2. 关键步骤：通知布局插件重新排列图片
+        // 你的主题使用的是 fjGallery 插件
+        if (typeof fjGallery === 'function') {
+            fjGallery(galleryContainer, 'destroy'); // 先销毁旧布局
+            fjGallery(galleryContainer, { 
+                itemSelector: '.fj-gallery-item',
+                gutter: 4 // 间距，根据你页面效果调整
+            });
+        } else if (window.fjGallery) {
+            window.fjGallery.reInit(); // 如果支持重载则重载
+        }
+
         renderButtons();
-        // 如果有滚动需求，翻页后回到顶部
-        gallery.scrollIntoView({ behavior: 'smooth' });
+        // 翻页后平滑滚动到相册顶部
+        galleryContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     function renderButtons() {
-        if (totalPages <= 1) return;
+        if (totalPages <= 1) {
+            paginationContainer.innerHTML = '';
+            return;
+        }
         
         paginationContainer.innerHTML = `
-            <button id="prevPage" ${currentPage === 1 ? 'style="display:none"' : ''} class="pagination-btn">上一页</button>
-            <span style="font-weight:bold; color: var(--font-color);">${currentPage} / ${totalPages}</span>
-            <button id="nextPage" ${currentPage === totalPages ? 'style="display:none"' : ''} class="pagination-btn">下一页</button>
+            <button id="prevPage" ${currentPage === 1 ? 'style="visibility:hidden"' : ''} class="pagination-btn">上一页</button>
+            <span style="font-weight:bold; color: var(--font-color); min-width: 50px; text-align: center;">${currentPage} / ${totalPages}</span>
+            <button id="nextPage" ${currentPage === totalPages ? 'style="visibility:hidden"' : ''} class="pagination-btn">下一页</button>
         `;
 
         document.getElementById('prevPage')?.addEventListener('click', () => showPage(currentPage - 1));
         document.getElementById('nextPage')?.addEventListener('click', () => showPage(currentPage + 1));
     }
 
-    // 初始化第一页
-    showPage(1);
+    // 延迟初始化，确保布局插件已经运行
+    setTimeout(() => showPage(1), 500);
 });
 </script>
 
