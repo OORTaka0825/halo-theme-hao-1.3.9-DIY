@@ -62,12 +62,13 @@
                     </th:block>
 <div id="article-container">
     <section class="page-1 loadings">
+
         <div class="type-gallery">
             <div class="gallery" id="gallery-list">
 
                 <div class="fj-gallery-item"
                      th:each="photo : ${photos.items}">
-                    
+
                     <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
                         [[${photo.spec.displayName}]]
                     </div>
@@ -79,6 +80,7 @@
 
             </div>
         </div>
+
     </section>
 
     <div class="pagination">
@@ -90,14 +92,16 @@
 </th:block>
 
 <div class="gallery-groups" th:if="${#strings.equals(theme.config.photos.photosStyle, 'one')}">
+
     <div id="article-container">
         <section class="page-1 loadings">
+
             <div class="type-gallery">
                 <div class="gallery" id="gallery-list-2">
 
                     <div class="fj-gallery-item"
                          th:each="photo : ${photos.items}">
-                        
+
                         <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
                             [[${photo.spec.displayName}]]
                         </div>
@@ -109,6 +113,7 @@
 
                 </div>
             </div>
+
         </section>
 
         <div class="pagination">
@@ -117,9 +122,25 @@
             <button id="nextPage2" class="page-btn">下一页</button>
         </div>
     </div>
+
 </div>
 
 <style>
+.gallery {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.fj-gallery-item img {
+    width: 100%;
+    border-radius: 8px;
+}
+
+.page-hidden {
+    display: none !important;
+}
+
 .pagination {
     text-align: center;
     margin: 30px 0;
@@ -138,15 +159,6 @@
 .page-btn:disabled {
     opacity: 0.5;
 }
-
-.page-info {
-    font-size: 14px;
-}
-
-/* ✅ 核心修复：不占高度 */
-.page-hidden {
-    display: none !important;
-}
 </style>
 
 <script>
@@ -155,28 +167,23 @@ window.addEventListener("load", function () {
     function initPagination(galleryId, prevId, nextId, infoId) {
 
         const gallery = document.getElementById(galleryId);
-        if (!gallery) return;
-
         const items = gallery.querySelectorAll(".fj-gallery-item");
 
         const pageSize = 20;
         let currentPage = 1;
         const totalPages = Math.ceil(items.length / pageSize);
 
-        function relayout() {
-            // 🔥 强制 fj-gallery / masonry 重算布局
-            window.dispatchEvent(new Event('resize'));
-            setTimeout(() => {
-                window.dispatchEvent(new Event('resize'));
-            }, 100);
-        }
-
         function showPage(page) {
+
             currentPage = page;
 
             items.forEach((item, index) => {
 
-                if (index >= (page - 1) * pageSize && index < page * pageSize) {
+                const inPage =
+                    index >= (page - 1) * pageSize &&
+                    index < page * pageSize;
+
+                if (inPage) {
                     item.classList.remove("page-hidden");
                 } else {
                     item.classList.add("page-hidden");
@@ -188,8 +195,6 @@ window.addEventListener("load", function () {
 
             document.getElementById(prevId).disabled = currentPage === 1;
             document.getElementById(nextId).disabled = currentPage === totalPages;
-
-            relayout();
         }
 
         document.getElementById(prevId).onclick = () => {
@@ -200,10 +205,7 @@ window.addEventListener("load", function () {
             if (currentPage < totalPages) showPage(currentPage + 1);
         };
 
-        // ✅ 延迟初始化（防止第一次空白）
-        setTimeout(() => {
-            showPage(1);
-        }, 200);
+        showPage(1);
     }
 
     initPagination("gallery-list", "prevPage", "nextPage", "pageInfo");
