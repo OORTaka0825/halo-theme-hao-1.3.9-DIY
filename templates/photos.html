@@ -60,49 +60,50 @@
                             </div>
                         </div>
                     </th:block>
-                    <div id="article-container">
-                        <section class="page-1 loadings">
-                            <div class="type-gallery ">
-                                <div class="gallery">
-                                    <div class="fj-gallery-item" th:each="photo : ${photos.items}">
-                                        <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
-                                            [[${photo.spec.displayName}]]</div>
-                                        <img th:src="${photo.spec.url}" th:alt="${photo.spec.description}"
-                                             th:title="${photo.spec.description}">
 
-                                    </div>
+                <div id="article-container">
+                    <section class="page-1 loadings">
+                        <div class="type-gallery">
+                            <div class="gallery">
+                                <div class="fj-gallery-item" th:each="photo : ${photos.items}">
+                                    <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
+                                        [[${photo.spec.displayName}]]</div>
+                                    <img th:src="${photo.spec.url}" th:alt="${photo.spec.description}"
+                                         th:title="${photo.spec.description}">
                                 </div>
                             </div>
-                        </section>
-                    </div>
-                </th:block>
-
-                <div class="gallery-groups" th:if="${#strings.equals(theme.config.photos.photosStyle, 'one')}">
-                    <th:block th:each="group : ${photoFinder.groupBy()}">
-                        <h1 style="margin: 8px 0px 20px" th:if="${#strings.equals(group.metadata.name, param.group) && not #strings.isEmpty(param.group) }">
-                            [[${group.spec.displayName}]]
-                        </h1>
-                        <h1 style="margin: 8px 0px 20px" th:if="${#strings.isEmpty(param.group) }">
-                            全部
-                        </h1>
-                    </th:block>
-                    <div id="article-container">
-                        <section class="page-1 loadings">
-                            <div class="type-gallery ">
-                                <div class="gallery">
-                                    <div class="fj-gallery-item" th:each="photo : ${photos.items}">
-                                        <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
-                                            [[${photo.spec.displayName}]]</div>
-                                        <img th:src="${photo.spec.url}" th:alt="${photo.spec.description}"
-                                             th:title="${photo.spec.description}">
-
-                                    </div>
-                                </div>
-                            </div>
-                        </section>
-                    </div>
+                        </div>
+                    </section>
                 </div>
+
+                <div class="pagination-nav" th:if="${photos.hasPrevious() or photos.hasNext()}" style="display: flex; justify-content: center; align-items: center; gap: 20px; margin: 30px 0;">
+                    
+                    <a th:if="${photos.hasPrevious()}" 
+                       th:href="@{${#request.requestURI}(page=${photos.prevPage},group=${param.group})}" 
+                       class="pag-btn">上一页</a>
+
+                    <span style="font-weight: bold; color: var(--font-color);">[[${photos.page}]] / [[${photos.totalPages}]]</span>
+
+                    <a th:if="${photos.hasNext()}" 
+                       th:href="@{${#request.requestURI}(page=${photos.nextPage},group=${param.group})}" 
+                       class="pag-btn">下一页</a>
+                </div>
+
                 <style>
+                    .pag-btn {
+                        padding: 10px 20px;
+                        background: var(--heo-card-bg);
+                        border: var(--style-border);
+                        border-radius: 12px;
+                        color: var(--font-color);
+                        text-decoration: none;
+                        transition: 0.3s;
+                    }
+                    .pag-btn:hover {
+                        background: var(--heo-main);
+                        color: #fff !important;
+                    }
+                </style>
                     .gallery-groups {
                         box-shadow: var(--heo-shadow-border);
                         padding: 1rem 2rem;
