@@ -85,10 +85,12 @@
 
 <div class="gallery-groups" th:if="${#strings.equals(theme.config.photos.photosStyle, 'one')}">
     <th:block th:each="group : ${photoFinder.groupBy()}">
-        <h1 style="margin: 8px 0px 20px" th:if="${#strings.equals(group.metadata.name, param.group) && not #strings.isEmpty(param.group) }">
+        <h1 style="margin: 8px 0px 20px"
+            th:if="${#strings.equals(group.metadata.name, param.group) && not #strings.isEmpty(param.group)}">
             [[${group.spec.displayName}]]
         </h1>
-        <h1 style="margin: 8px 0px 20px" th:if="${#strings.isEmpty(param.group) }">
+        <h1 style="margin: 8px 0px 20px"
+            th:if="${#strings.isEmpty(param.group)}">
             全部
         </h1>
     </th:block>
@@ -96,6 +98,7 @@
     <div id="article-container">
         <section class="page-1 loadings">
             <div class="type-gallery ">
+                <!-- ✅ 已修复：不同ID -->
                 <div class="gallery" id="gallery-list-2">
                     <div class="fj-gallery-item" th:each="photo,iterStat : ${photos.items}" th:attr="data-index=${iterStat.index}">
                         <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
@@ -117,14 +120,6 @@
 </div>
 
 <style>
-.gallery-groups {
-    box-shadow: var(--heo-shadow-border);
-    padding: 1rem 2rem;
-    border-radius: 12px;
-    background: var(--heo-card-bg);
-    border: var(--style-border);
-}
-
 .pagination {
     text-align: center;
     margin: 30px 0;
@@ -146,11 +141,9 @@
 
 .page-info {
     font-size: 14px;
-    color: var(--heo-fontcolor);
 }
 
 #article-container .type-gallery {
-    overflow: hidden;
     margin-top: 40px;
 }
 
@@ -161,32 +154,28 @@ img {
 </style>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
+window.onload = function () {
 
     function initPagination(galleryId, prevId, nextId, infoId) {
 
         const gallery = document.getElementById(galleryId);
+        if (!gallery) return;
+
         const items = gallery.querySelectorAll(".fj-gallery-item");
 
         const pageSize = 20;
         let currentPage = 1;
         const totalPages = Math.ceil(items.length / pageSize);
 
-        function relayout() {
-            // 🔥 核心：强制瀑布流重排
-            window.dispatchEvent(new Event('resize'));
-
-            setTimeout(() => {
-                window.dispatchEvent(new Event('resize'));
-            }, 200);
-        }
+        // ✅ 先全部隐藏（防止闪）
+        items.forEach(item => item.style.display = "none");
 
         function showPage(page) {
             currentPage = page;
 
             items.forEach((item, index) => {
                 if (index >= (page - 1) * pageSize && index < page * pageSize) {
-                    item.style.display = "";   // ✅ 保持原布局
+                    item.style.display = "";
                 } else {
                     item.style.display = "none";
                 }
@@ -198,7 +187,8 @@ document.addEventListener("DOMContentLoaded", function () {
             document.getElementById(prevId).disabled = currentPage === 1;
             document.getElementById(nextId).disabled = currentPage === totalPages;
 
-            relayout();
+            // 强制刷新布局
+            window.dispatchEvent(new Event('resize'));
         }
 
         document.getElementById(prevId).onclick = () => {
@@ -209,16 +199,13 @@ document.addEventListener("DOMContentLoaded", function () {
             if (currentPage < totalPages) showPage(currentPage + 1);
         };
 
-        // ✅ 等图片加载完再分页（关键修复）
-        window.addEventListener("load", () => {
-            showPage(1);
-        });
+        showPage(1);
     }
 
     initPagination("gallery-list", "prevPage", "nextPage", "pageInfo");
     initPagination("gallery-list-2", "prevPage2", "nextPage2", "pageInfo2");
 
-});
+};
 </script>
                 <!--/* 评论组件 */-->
                 <th:block th:replace="~{modules/comment :: comment(group = 'content.halo.run',
