@@ -62,15 +62,21 @@
                     </th:block>
 <div id="article-container">
     <section class="page-1 loadings">
-        <div class="type-gallery ">
+        <div class="type-gallery">
             <div class="gallery" id="gallery-list">
-                <div class="fj-gallery-item" th:each="photo : ${photos.items}">
+
+                <div class="fj-gallery-item"
+                     th:each="photo : ${photos.items}">
+                    
                     <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
                         [[${photo.spec.displayName}]]
                     </div>
-                    <img th:src="${photo.spec.url}" th:alt="${photo.spec.description}"
+
+                    <img th:src="${photo.spec.url}"
+                         th:alt="${photo.spec.description}"
                          th:title="${photo.spec.description}">
                 </div>
+
             </div>
         </div>
     </section>
@@ -84,28 +90,23 @@
 </th:block>
 
 <div class="gallery-groups" th:if="${#strings.equals(theme.config.photos.photosStyle, 'one')}">
-    <th:block th:each="group : ${photoFinder.groupBy()}">
-        <h1 style="margin: 8px 0px 20px"
-            th:if="${#strings.equals(group.metadata.name, param.group) && not #strings.isEmpty(param.group)}">
-            [[${group.spec.displayName}]]
-        </h1>
-        <h1 style="margin: 8px 0px 20px"
-            th:if="${#strings.isEmpty(param.group)}">
-            全部
-        </h1>
-    </th:block>
-
     <div id="article-container">
         <section class="page-1 loadings">
-            <div class="type-gallery ">
+            <div class="type-gallery">
                 <div class="gallery" id="gallery-list-2">
-                    <div class="fj-gallery-item" th:each="photo : ${photos.items}">
+
+                    <div class="fj-gallery-item"
+                         th:each="photo : ${photos.items}">
+                        
                         <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
                             [[${photo.spec.displayName}]]
                         </div>
-                        <img th:src="${photo.spec.url}" th:alt="${photo.spec.description}"
+
+                        <img th:src="${photo.spec.url}"
+                             th:alt="${photo.spec.description}"
                              th:title="${photo.spec.description}">
                     </div>
+
                 </div>
             </div>
         </section>
@@ -142,16 +143,9 @@
     font-size: 14px;
 }
 
-/* 🔥 核心隐藏 */
-.fj-hide {
-    visibility: hidden !important;
-    position: absolute !important;
-    pointer-events: none;
-}
-
-/* 防闪 */
-.gallery {
-    visibility: hidden;
+/* ✅ 核心修复：不占高度 */
+.page-hidden {
+    display: none !important;
 }
 </style>
 
@@ -170,17 +164,22 @@ window.addEventListener("load", function () {
         const totalPages = Math.ceil(items.length / pageSize);
 
         function relayout() {
+            // 🔥 强制 fj-gallery / masonry 重算布局
             window.dispatchEvent(new Event('resize'));
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+            }, 100);
         }
 
         function showPage(page) {
             currentPage = page;
 
             items.forEach((item, index) => {
+
                 if (index >= (page - 1) * pageSize && index < page * pageSize) {
-                    item.classList.remove("fj-hide");
+                    item.classList.remove("page-hidden");
                 } else {
-                    item.classList.add("fj-hide");
+                    item.classList.add("page-hidden");
                 }
             });
 
@@ -201,8 +200,10 @@ window.addEventListener("load", function () {
             if (currentPage < totalPages) showPage(currentPage + 1);
         };
 
-        showPage(1);
-        gallery.style.visibility = "visible";
+        // ✅ 延迟初始化（防止第一次空白）
+        setTimeout(() => {
+            showPage(1);
+        }, 200);
     }
 
     initPagination("gallery-list", "prevPage", "nextPage", "pageInfo");
