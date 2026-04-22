@@ -64,7 +64,7 @@
     <section class="page-1 loadings">
         <div class="type-gallery ">
             <div class="gallery" id="gallery-list">
-                <div class="fj-gallery-item" th:each="photo,iterStat : ${photos.items}">
+                <div class="fj-gallery-item" th:each="photo : ${photos.items}">
                     <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
                         [[${photo.spec.displayName}]]
                     </div>
@@ -98,9 +98,8 @@
     <div id="article-container">
         <section class="page-1 loadings">
             <div class="type-gallery ">
-                <!-- ⚠️ 不同ID -->
                 <div class="gallery" id="gallery-list-2">
-                    <div class="fj-gallery-item" th:each="photo,iterStat : ${photos.items}">
+                    <div class="fj-gallery-item" th:each="photo : ${photos.items}">
                         <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
                             [[${photo.spec.displayName}]]
                         </div>
@@ -143,16 +142,14 @@
     font-size: 14px;
 }
 
-#article-container .type-gallery {
-    margin-top: 40px;
+/* 🔥 核心隐藏 */
+.fj-hide {
+    visibility: hidden !important;
+    position: absolute !important;
+    pointer-events: none;
 }
 
-img {
-    border-radius: 8px;
-    max-width: 100%;
-}
-
-/* 🔥 防止闪大图 */
+/* 防闪 */
 .gallery {
     visibility: hidden;
 }
@@ -174,9 +171,6 @@ window.addEventListener("load", function () {
 
         function relayout() {
             window.dispatchEvent(new Event('resize'));
-            setTimeout(() => {
-                window.dispatchEvent(new Event('resize'));
-            }, 100);
         }
 
         function showPage(page) {
@@ -184,9 +178,9 @@ window.addEventListener("load", function () {
 
             items.forEach((item, index) => {
                 if (index >= (page - 1) * pageSize && index < page * pageSize) {
-                    item.style.display = "";
+                    item.classList.remove("fj-hide");
                 } else {
-                    item.style.display = "none";
+                    item.classList.add("fj-hide");
                 }
             });
 
@@ -207,10 +201,7 @@ window.addEventListener("load", function () {
             if (currentPage < totalPages) showPage(currentPage + 1);
         };
 
-        // 初始化
         showPage(1);
-
-        // 显示画廊（避免闪）
         gallery.style.visibility = "visible";
     }
 
