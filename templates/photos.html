@@ -64,7 +64,7 @@
     <section class="page-1 loadings">
         <div class="type-gallery ">
             <div class="gallery" id="gallery-list">
-                <div class="fj-gallery-item" th:each="photo,iterStat : ${photos.items}" th:attr="data-index=${iterStat.index}">
+                <div class="fj-gallery-item" th:each="photo,iterStat : ${photos.items}">
                     <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
                         [[${photo.spec.displayName}]]
                     </div>
@@ -98,9 +98,9 @@
     <div id="article-container">
         <section class="page-1 loadings">
             <div class="type-gallery ">
-                <!-- ✅ 已修复：不同ID -->
+                <!-- ⚠️ 不同ID -->
                 <div class="gallery" id="gallery-list-2">
-                    <div class="fj-gallery-item" th:each="photo,iterStat : ${photos.items}" th:attr="data-index=${iterStat.index}">
+                    <div class="fj-gallery-item" th:each="photo,iterStat : ${photos.items}">
                         <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
                             [[${photo.spec.displayName}]]
                         </div>
@@ -151,10 +151,15 @@ img {
     border-radius: 8px;
     max-width: 100%;
 }
+
+/* 🔥 防止闪大图 */
+.gallery {
+    visibility: hidden;
+}
 </style>
 
 <script>
-window.onload = function () {
+window.addEventListener("load", function () {
 
     function initPagination(galleryId, prevId, nextId, infoId) {
 
@@ -167,8 +172,12 @@ window.onload = function () {
         let currentPage = 1;
         const totalPages = Math.ceil(items.length / pageSize);
 
-        // ✅ 先全部隐藏（防止闪）
-        items.forEach(item => item.style.display = "none");
+        function relayout() {
+            window.dispatchEvent(new Event('resize'));
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+            }, 100);
+        }
 
         function showPage(page) {
             currentPage = page;
@@ -187,8 +196,7 @@ window.onload = function () {
             document.getElementById(prevId).disabled = currentPage === 1;
             document.getElementById(nextId).disabled = currentPage === totalPages;
 
-            // 强制刷新布局
-            window.dispatchEvent(new Event('resize'));
+            relayout();
         }
 
         document.getElementById(prevId).onclick = () => {
@@ -199,13 +207,17 @@ window.onload = function () {
             if (currentPage < totalPages) showPage(currentPage + 1);
         };
 
+        // 初始化
         showPage(1);
+
+        // 显示画廊（避免闪）
+        gallery.style.visibility = "visible";
     }
 
     initPagination("gallery-list", "prevPage", "nextPage", "pageInfo");
     initPagination("gallery-list-2", "prevPage2", "nextPage2", "pageInfo2");
 
-};
+});
 </script>
                 <!--/* 评论组件 */-->
                 <th:block th:replace="~{modules/comment :: comment(group = 'content.halo.run',
