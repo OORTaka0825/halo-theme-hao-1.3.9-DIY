@@ -93,6 +93,7 @@
 
 </th:block>
 
+<!-- 分组模式 -->
 <div class="gallery-groups" th:if="${#strings.equals(theme.config.photos.photosStyle, 'one')}">
 
     <div id="article-container">
@@ -129,21 +130,24 @@
 
 <style>
 
-/* ===== 3列稳定布局（避免瀑布流冲突） ===== */
-.gallery {
-    display: grid;
+/* =========================
+   强制 3 列布局（避免瀑布流控制）
+========================= */
+#article-container .gallery {
+    display: grid !important;
     grid-template-columns: repeat(3, 1fr);
     gap: 12px;
 }
 
-/* 图片样式 */
-.fj-gallery-item img {
+#article-container img {
     width: 100%;
     border-radius: 8px;
     display: block;
 }
 
-/* 分页 */
+/* =========================
+   分页按钮
+========================= */
 .pagination {
     text-align: center;
     margin: 30px 0;
@@ -163,7 +167,9 @@
     opacity: 0.5;
 }
 
-/* ⭐ 关键：分页隐藏（不会破坏布局） */
+/* =========================
+   分页隐藏（不会影响布局计算）
+========================= */
 .page-hidden {
     display: none !important;
 }
@@ -184,21 +190,13 @@ window.addEventListener("load", function () {
         const gallery = document.getElementById(galleryId);
         if (!gallery) return;
 
-        const items = gallery.querySelectorAll(".fj-gallery-item");
+        const items = Array.from(gallery.querySelectorAll(".fj-gallery-item"));
 
         const pageSize = 20;
         let currentPage = 1;
         const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
 
-        function refreshLayout() {
-            // 强制主题重新计算布局（防止错位）
-            window.dispatchEvent(new Event('resize'));
-            setTimeout(() => {
-                window.dispatchEvent(new Event('resize'));
-            }, 80);
-        }
-
-        function showPage(page) {
+        function applyPage(page) {
 
             currentPage = page;
 
@@ -206,13 +204,11 @@ window.addEventListener("load", function () {
             const end = page * pageSize;
 
             items.forEach((item, index) => {
-
                 if (index >= start && index < end) {
                     item.classList.remove("page-hidden");
                 } else {
                     item.classList.add("page-hidden");
                 }
-
             });
 
             document.getElementById(infoId).innerText =
@@ -221,21 +217,24 @@ window.addEventListener("load", function () {
             document.getElementById(prevId).disabled = currentPage === 1;
             document.getElementById(nextId).disabled = currentPage === totalPages;
 
-            refreshLayout();
+            // ⭐ 强制触发主题重排（解决你说的空白区域）
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+            }, 50);
         }
 
         document.getElementById(prevId).onclick = function () {
-            if (currentPage > 1) showPage(currentPage - 1);
+            if (currentPage > 1) applyPage(currentPage - 1);
         };
 
         document.getElementById(nextId).onclick = function () {
-            if (currentPage < totalPages) showPage(currentPage + 1);
+            if (currentPage < totalPages) applyPage(currentPage + 1);
         };
 
-        // ⭐ 延迟初始化（解决你“首次33张/按钮失效”问题）
+        // ⭐ 延迟初始化（解决：刚进来33张 / 按钮失效）
         setTimeout(() => {
-            showPage(1);
-        }, 150);
+            applyPage(1);
+        }, 200);
 
     }
 
