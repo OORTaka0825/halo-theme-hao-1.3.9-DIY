@@ -60,48 +60,48 @@
                             </div>
                         </div>
                     </th:block>
+                    <div id="article-container">
+                        <section class="page-1 loadings">
+                            <div class="type-gallery ">
+                                <div class="gallery">
+                                    <div class="fj-gallery-item" th:each="photo : ${photos.items}">
+                                        <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
+                                            [[${photo.spec.displayName}]]</div>
+                                        <img th:src="${photo.spec.url}" th:alt="${photo.spec.description}"
+                                             th:title="${photo.spec.description}">
 
-                <div id="article-container" th:class="${#strings.equals(theme.config.photos.photosStyle, 'default') ? '' : 'gallery-groups'}">
-                    
-                    <th:block th:if="${#strings.equals(theme.config.photos.photosStyle, 'one')}">
-                        <th:block th:each="group : ${photoFinder.groupBy()}">
-                            <h1 style="margin: 8px 0px 20px" th:if="${#strings.equals(group.metadata.name, param.group) && not #strings.isEmpty(param.group) }">
-                                [[${group.spec.displayName}]]
-                            </h1>
-                            <h1 style="margin: 8px 0px 20px" th:if="${#strings.isEmpty(param.group) }">全部</h1>
-                        </th:block>
-                    </th:block>
-
-                    <section class="page-1 loadings">
-                        <div class="type-gallery">
-                            <div class="gallery">
-                                <div class="fj-gallery-item" th:each="photo : ${photos.items}">
-                                    <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
-                                        [[${photo.spec.displayName}]]</div>
-                                    <img th:src="${photo.spec.url}" th:alt="${photo.spec.description}"
-                                         th:title="${photo.spec.description}">
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </section>
-                </div>
+                        </section>
+                    </div>
+                </th:block>
 
-                <div class="pagination-nav" style="display: flex; justify-content: center; align-items: center; gap: 20px; margin: 30px 0;">
-                    
-                    <th:block th:with="p=${param.page == null ? 1 : #conversions.convert(param.page, 'Integer')}">
-                        
-                        <a th:if="${p > 1}" 
-                           th:href="@{/photos(page=${p - 1},group=${param.group})}" 
-                           style="padding: 10px 20px; background: var(--heo-card-bg); border: var(--style-border); border-radius: 12px; color: var(--font-color); text-decoration: none;">上一页</a>
-
-                        <span style="font-weight: bold; color: var(--font-color);">第 [[${p}]] 页</span>
-
-                        <a th:if="${#lists.size(photos.items) >= 20}" 
-                           th:href="@{/photos(page=${p + 1},group=${param.group})}" 
-                           style="padding: 10px 20px; background: var(--heo-card-bg); border: var(--style-border); border-radius: 12px; color: var(--font-color); text-decoration: none;">下一页</a>
+                <div class="gallery-groups" th:if="${#strings.equals(theme.config.photos.photosStyle, 'one')}">
+                    <th:block th:each="group : ${photoFinder.groupBy()}">
+                        <h1 style="margin: 8px 0px 20px" th:if="${#strings.equals(group.metadata.name, param.group) && not #strings.isEmpty(param.group) }">
+                            [[${group.spec.displayName}]]
+                        </h1>
+                        <h1 style="margin: 8px 0px 20px" th:if="${#strings.isEmpty(param.group) }">
+                            全部
+                        </h1>
                     </th:block>
-                </div>
+                    <div id="article-container">
+                        <section class="page-1 loadings">
+                            <div class="type-gallery ">
+                                <div class="gallery">
+                                    <div class="fj-gallery-item" th:each="photo : ${photos.items}">
+                                        <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
+                                            [[${photo.spec.displayName}]]</div>
+                                        <img th:src="${photo.spec.url}" th:alt="${photo.spec.description}"
+                                             th:title="${photo.spec.description}">
 
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
                 <style>
                     .gallery-groups {
                         box-shadow: var(--heo-shadow-border);
@@ -162,6 +162,46 @@
                         visibility: hidden
                     }
 
+                    #content-inner .gallery button {
+                        display: none;
+                        margin-top: 25px;
+                        padding: 10px;
+                        width: 9em;
+                        border-radius: 5px;
+                        background: var(--btn-bg);
+                        color: var(--btn-color);
+                        font-weight: 700;
+                        font-size: 1.1em;
+                        -webkit-transition: all .3s;
+                        -moz-transition: all .3s;
+                        -o-transition: all .3s;
+                        -ms-transition: all .3s;
+                        transition: all .3s
+                    }
+
+                    #content-inner .gallery button>* {
+                        -webkit-transition: all .4s;
+                        -moz-transition: all .4s;
+                        -o-transition: all .4s;
+                        -ms-transition: all .4s;
+                        transition: all .4s
+                    }
+
+                    #content-inner .gallery button i {
+                        opacity: 1;
+                        -ms-filter: none;
+                        filter: none;
+                        font-size: 1.1rem
+                    }
+
+                    #content-inner .gallery button:hover {
+                        background: var(--btn-hover-color)
+                    }
+
+                    #content-inner .gallery button:hover i {
+                        margin-left: 2px
+                    }
+
                     #article-container .tag-address {
                         display: flex;
                         position: absolute;
@@ -186,7 +226,7 @@
                         -khtml-user-drag: none;
                         -moz-user-drag: none;
                         -ms-user-drag: none;
-                        user-drag: none
+                        -user-drag: none
                     }
                 </style>
                 <!--/* 评论组件 */-->
