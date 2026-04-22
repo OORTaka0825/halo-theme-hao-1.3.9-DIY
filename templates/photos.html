@@ -75,7 +75,6 @@
         </div>
     </section>
 
-    <!-- ✅ 分页按钮 -->
     <div class="pagination">
         <button id="prevPage" class="page-btn">上一页</button>
         <span id="pageInfo" class="page-info"></span>
@@ -93,10 +92,11 @@
             全部
         </h1>
     </th:block>
+
     <div id="article-container">
         <section class="page-1 loadings">
             <div class="type-gallery ">
-                <div class="gallery" id="gallery-list">
+                <div class="gallery" id="gallery-list-2">
                     <div class="fj-gallery-item" th:each="photo,iterStat : ${photos.items}" th:attr="data-index=${iterStat.index}">
                         <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
                             [[${photo.spec.displayName}]]
@@ -108,7 +108,6 @@
             </div>
         </section>
 
-        <!-- ✅ 分页按钮（分组模式也有） -->
         <div class="pagination">
             <button id="prevPage2" class="page-btn">上一页</button>
             <span id="pageInfo2" class="page-info"></span>
@@ -118,106 +117,76 @@
 </div>
 
 <style>
-    .gallery-groups {
-        box-shadow: var(--heo-shadow-border);
-        padding: 1rem 2rem;
-        border-radius: 12px;
-        background: var(--heo-card-bg);
-        border: var(--style-border);
-        width: 100%;
-        align-self: flex-start;
-        animation: slide-in 0.6s 0.1s backwards;
-    }
+.gallery-groups {
+    box-shadow: var(--heo-shadow-border);
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    background: var(--heo-card-bg);
+    border: var(--style-border);
+}
 
-    /* ✅ 分页样式 */
-    .pagination {
-        text-align: center;
-        margin: 30px 0;
-    }
+.pagination {
+    text-align: center;
+    margin: 30px 0;
+}
 
-    .page-btn {
-        padding: 8px 16px;
-        margin: 0 10px;
-        border-radius: 6px;
-        background: var(--btn-bg);
-        color: var(--btn-color);
-        border: none;
-        cursor: pointer;
-    }
+.page-btn {
+    padding: 8px 16px;
+    margin: 0 10px;
+    border-radius: 6px;
+    background: var(--btn-bg);
+    color: var(--btn-color);
+    border: none;
+    cursor: pointer;
+}
 
-    .page-btn:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
+.page-btn:disabled {
+    opacity: 0.5;
+}
 
-    .page-info {
-        font-size: 14px;
-        color: var(--heo-fontcolor);
-    }
+.page-info {
+    font-size: 14px;
+    color: var(--heo-fontcolor);
+}
 
-    #content-inner .loadings .type-gallery {
-        opacity: 0
-    }
+#article-container .type-gallery {
+    overflow: hidden;
+    margin-top: 40px;
+}
 
-    .loadings {
-        height: 60px;
-        background-position: center;
-        background-repeat: no-repeat;
-        color: #504e4e;
-        border: none;
-        background-size: auto 100%;
-        box-shadow: none;
-        background-color: inherit;
-        background-image: none;
-        background-image: url(/themes/theme-hao/assets/images/load/rotating-ball-o.svg)
-    }
-
-    #article-container .type-gallery {
-        overflow: hidden;
-        margin-top: 40px;
-    }
-
-    #content-inner .gallery {
-        margin: 0 0 16px;
-        text-align: center
-    }
-
-    #article-container .tag-address {
-        display: flex;
-        position: absolute;
-        left: 8px;
-        top: 8px;
-        padding: 4px 6px;
-        border-radius: 8px;
-        background: var(--heo-black-op);
-        font-size: 12px;
-        color: var(--heo-white);
-        z-index: 1;
-    }
-
-    img {
-        border-radius: 8px;
-        max-width: 100%;
-    }
+img {
+    border-radius: 8px;
+    max-width: 100%;
+}
 </style>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
 
     function initPagination(galleryId, prevId, nextId, infoId) {
-        const items = document.querySelectorAll("#" + galleryId + " .fj-gallery-item");
+
+        const gallery = document.getElementById(galleryId);
+        const items = gallery.querySelectorAll(".fj-gallery-item");
 
         const pageSize = 20;
         let currentPage = 1;
-        const total = items.length;
-        const totalPages = Math.ceil(total / pageSize);
+        const totalPages = Math.ceil(items.length / pageSize);
+
+        function relayout() {
+            // 🔥 核心：强制瀑布流重排
+            window.dispatchEvent(new Event('resize'));
+
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+            }, 200);
+        }
 
         function showPage(page) {
             currentPage = page;
 
             items.forEach((item, index) => {
                 if (index >= (page - 1) * pageSize && index < page * pageSize) {
-                    item.style.display = "block";
+                    item.style.display = "";   // ✅ 保持原布局
                 } else {
                     item.style.display = "none";
                 }
@@ -228,6 +197,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
             document.getElementById(prevId).disabled = currentPage === 1;
             document.getElementById(nextId).disabled = currentPage === totalPages;
+
+            relayout();
         }
 
         document.getElementById(prevId).onclick = () => {
@@ -238,12 +209,14 @@ document.addEventListener("DOMContentLoaded", function () {
             if (currentPage < totalPages) showPage(currentPage + 1);
         };
 
-        showPage(1);
+        // ✅ 等图片加载完再分页（关键修复）
+        window.addEventListener("load", () => {
+            showPage(1);
+        });
     }
 
-    // 初始化两个分页（普通 + 分组）
     initPagination("gallery-list", "prevPage", "nextPage", "pageInfo");
-    initPagination("gallery-list", "prevPage2", "nextPage2", "pageInfo2");
+    initPagination("gallery-list-2", "prevPage2", "nextPage2", "pageInfo2");
 
 });
 </script>
