@@ -84,7 +84,7 @@
 </div>
 </th:block>
 
-                <div class="gallery-groups" th:if="${#strings.equals(theme.config.photos.photosStyle, 'one')}">
+<div class="gallery-groups" th:if="${#strings.equals(theme.config.photos.photosStyle, 'one')}">
     <th:block th:each="group : ${photoFinder.groupBy()}">
         <h1 style="margin: 8px 0px 20px" th:if="${#strings.equals(group.metadata.name, param.group) && not #strings.isEmpty(param.group) }">
             [[${group.spec.displayName}]]
@@ -107,135 +107,146 @@
                 </div>
             </div>
         </section>
-                    </div>
-                </div>
-                <style>
-                    .gallery-groups {
-                        box-shadow: var(--heo-shadow-border);
-                        padding: 1rem 2rem;
-                        border-radius: 12px;
-                        background: var(--heo-card-bg);
-                        border: var(--style-border);
-                        width: 100%;
-                        align-self: flex-start;
-                        animation: slide-in 0.6s 0.1s backwards;
-                    }
 
-                    #content-inner .loadings .type-gallery {
-                        opacity: 0
-                    }
+        <!-- ✅ 分页按钮（分组模式也有） -->
+        <div class="pagination">
+            <button id="prevPage2" class="page-btn">上一页</button>
+            <span id="pageInfo2" class="page-info"></span>
+            <button id="nextPage2" class="page-btn">下一页</button>
+        </div>
+    </div>
+</div>
 
-                    .loadings {
-                        height: 60px;
-                        background-position: center;
-                        background-repeat: no-repeat;
-                        color: #504e4e;
-                        border: none;
-                        background-size: auto 100%;
-                        box-shadow: none;
-                        background-color: inherit;
-                        background-image: none;
-                        background-image: url(/themes/theme-hao/assets/images/load/rotating-ball-o.svg)
-                    }
+<style>
+    .gallery-groups {
+        box-shadow: var(--heo-shadow-border);
+        padding: 1rem 2rem;
+        border-radius: 12px;
+        background: var(--heo-card-bg);
+        border: var(--style-border);
+        width: 100%;
+        align-self: flex-start;
+        animation: slide-in 0.6s 0.1s backwards;
+    }
 
-                    #article-container .type-gallery {
-                        overflow: hidden;
-                        margin-top: 40px;
-                    }
+    /* ✅ 分页样式 */
+    .pagination {
+        text-align: center;
+        margin: 30px 0;
+    }
 
-                    #content-inner .gallery {
-                        margin: 0 0 16px;
-                        text-align: center
-                    }
+    .page-btn {
+        padding: 8px 16px;
+        margin: 0 10px;
+        border-radius: 6px;
+        background: var(--btn-bg);
+        color: var(--btn-color);
+        border: none;
+        cursor: pointer;
+    }
 
-                    #content-inner .gallery .fj-gallery {
-                        opacity: 0;
-                        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
-                        filter: alpha(opacity=0)
-                    }
+    .page-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
 
-                    #content-inner .gallery .fj-gallery .img-alt {
-                        display: none
-                    }
+    .page-info {
+        font-size: 14px;
+        color: var(--heo-fontcolor);
+    }
 
-                    #content-inner .gallery .fj-gallery.lazyload+button {
-                        display: inline-block
-                    }
+    #content-inner .loadings .type-gallery {
+        opacity: 0
+    }
 
-                    #content-inner .gallery .fj-gallery .gallery-data {
-                        opacity: 0;
-                        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
-                        filter: alpha(opacity=0);
-                        visibility: hidden
-                    }
+    .loadings {
+        height: 60px;
+        background-position: center;
+        background-repeat: no-repeat;
+        color: #504e4e;
+        border: none;
+        background-size: auto 100%;
+        box-shadow: none;
+        background-color: inherit;
+        background-image: none;
+        background-image: url(/themes/theme-hao/assets/images/load/rotating-ball-o.svg)
+    }
 
-                    #content-inner .gallery button {
-                        display: none;
-                        margin-top: 25px;
-                        padding: 10px;
-                        width: 9em;
-                        border-radius: 5px;
-                        background: var(--btn-bg);
-                        color: var(--btn-color);
-                        font-weight: 700;
-                        font-size: 1.1em;
-                        -webkit-transition: all .3s;
-                        -moz-transition: all .3s;
-                        -o-transition: all .3s;
-                        -ms-transition: all .3s;
-                        transition: all .3s
-                    }
+    #article-container .type-gallery {
+        overflow: hidden;
+        margin-top: 40px;
+    }
 
-                    #content-inner .gallery button>* {
-                        -webkit-transition: all .4s;
-                        -moz-transition: all .4s;
-                        -o-transition: all .4s;
-                        -ms-transition: all .4s;
-                        transition: all .4s
-                    }
+    #content-inner .gallery {
+        margin: 0 0 16px;
+        text-align: center
+    }
 
-                    #content-inner .gallery button i {
-                        opacity: 1;
-                        -ms-filter: none;
-                        filter: none;
-                        font-size: 1.1rem
-                    }
+    #article-container .tag-address {
+        display: flex;
+        position: absolute;
+        left: 8px;
+        top: 8px;
+        padding: 4px 6px;
+        border-radius: 8px;
+        background: var(--heo-black-op);
+        font-size: 12px;
+        color: var(--heo-white);
+        z-index: 1;
+    }
 
-                    #content-inner .gallery button:hover {
-                        background: var(--btn-hover-color)
-                    }
+    img {
+        border-radius: 8px;
+        max-width: 100%;
+    }
+</style>
 
-                    #content-inner .gallery button:hover i {
-                        margin-left: 2px
-                    }
+<script>
+document.addEventListener("DOMContentLoaded", function () {
 
-                    #article-container .tag-address {
-                        display: flex;
-                        position: absolute;
-                        left: 8px;
-                        top: 8px;
-                        padding: 4px 6px;
-                        border-radius: 8px;
-                        background: var(--heo-black-op);
-                        font-size: 12px;
-                        color: var(--heo-white);
-                        transition: .3s;
-                        z-index: 1;
-                        user-select: none
-                    }
+    function initPagination(galleryId, prevId, nextId, infoId) {
+        const items = document.querySelectorAll("#" + galleryId + " .fj-gallery-item");
 
-                    img {
-                        border-style: none;
-                        border-radius: 8px;
-                        max-width: 100%;
-                        transition: all .2s ease 0s;
-                        -webkit-user-drag: none;
-                        -khtml-user-drag: none;
-                        -moz-user-drag: none;
-                        -ms-user-drag: none;
-                        -user-drag: none
-                    }
-                </style>
+        const pageSize = 20;
+        let currentPage = 1;
+        const total = items.length;
+        const totalPages = Math.ceil(total / pageSize);
+
+        function showPage(page) {
+            currentPage = page;
+
+            items.forEach((item, index) => {
+                if (index >= (page - 1) * pageSize && index < page * pageSize) {
+                    item.style.display = "block";
+                } else {
+                    item.style.display = "none";
+                }
+            });
+
+            document.getElementById(infoId).innerText =
+                `第 ${currentPage} 页 / 共 ${totalPages} 页`;
+
+            document.getElementById(prevId).disabled = currentPage === 1;
+            document.getElementById(nextId).disabled = currentPage === totalPages;
+        }
+
+        document.getElementById(prevId).onclick = () => {
+            if (currentPage > 1) showPage(currentPage - 1);
+        };
+
+        document.getElementById(nextId).onclick = () => {
+            if (currentPage < totalPages) showPage(currentPage + 1);
+        };
+
+        showPage(1);
+    }
+
+    // 初始化两个分页（普通 + 分组）
+    initPagination("gallery-list", "prevPage", "nextPage", "pageInfo");
+    initPagination("gallery-list", "prevPage2", "nextPage2", "pageInfo2");
+
+});
+</script>
                 <!--/* 评论组件 */-->
                 <th:block th:replace="~{modules/comment :: comment(group = 'content.halo.run',
                   kind = 'SinglePage',
