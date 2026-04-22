@@ -65,8 +65,6 @@
                             <div class="type-gallery ">
                                 <div class="gallery">
                                     <div class="fj-gallery-item" th:each="photo : ${photos.items}">
-<th:block th:with="pageSize=20, pageNum=${param.page == null ? 1 : #conversions.convert(param.page, 'Integer')}, startIdx=${(pageNum - 1) * pageSize}, endIdx=${pageNum * pageSize > photos.total ? photos.total : pageNum * pageSize}">
-<div class="fj-gallery-item" th:each="photo, stat : ${photos.items}" th:if="${stat.index >= startIdx and stat.index < endIdx}">
                                         <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
                                             [[${photo.spec.displayName}]]</div>
                                         <img th:src="${photo.spec.url}" th:alt="${photo.spec.description}"
@@ -74,20 +72,6 @@
 
                                     </div>
                                 </div>
-                                <div class="pagination-nav" th:if="${photos.total > 20}" style="display: flex; justify-content: center; align-items: center; gap: 15px; margin: 30px 0;">
-    <th:block th:with="pageNum=${param.page == null ? 1 : #conversions.convert(param.page, 'Integer')}, totalPages=${(photos.total + 19) / 20}">
-        
-        <a th:if="${pageNum > 1}" 
-           th:href="@{/photos(group=${param.group},page=${pageNum - 1})}" 
-           style="padding: 10px 20px; background: var(--heo-card-bg); border: var(--style-border); border-radius: 12px; color: var(--font-color);">上一页</a>
-
-        <span style="font-weight: bold;">[[${pageNum}]] / [[${#numbers.formatDecimal(totalPages, 0, 0)}]]</span>
-
-        <a th:if="${pageNum < totalPages}" 
-           th:href="@{/photos(group=${param.group},page=${pageNum + 1})}" 
-           style="padding: 10px 20px; background: var(--heo-card-bg); border: var(--style-border); border-radius: 12px; color: var(--font-color);">下一页</a>
-    </th:block>
-</div>
                             </div>
                         </section>
                     </div>
