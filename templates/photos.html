@@ -59,23 +59,43 @@
                                 </div>
                             </div>
                         </div>
-                    </th:block>
-                    <div id="article-container">
-                        <section class="page-1 loadings">
-                            <div class="type-gallery ">
-                                <div class="gallery">
-                                    <div class="fj-gallery-item" th:each="photo : ${photos.items}">
-                                        <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
-                                            [[${photo.spec.displayName}]]</div>
-                                        <img th:src="${photo.spec.url}" th:alt="${photo.spec.description}"
-                                             th:title="${photo.spec.description}">
-
-                                    </div>
-                                </div>
-                            </div>
-                        </section>
+                    <th:block th:with="pageSize=20, pageNum=${param.page == null ? 1 : #conversions.convert(param.page, 'Integer')}, startIdx=${(pageNum - 1) * pageSize}, endIdx=${pageNum * pageSize}">
+    
+    <div id="article-container">
+        <section class="page-1 loadings">
+            <div class="type-gallery">
+                <div class="gallery">
+                    <div class="fj-gallery-item" th:each="photo, stat : ${photos.items}" 
+                         th:if="${stat.index >= startIdx and stat.index < endIdx}">
+                        
+                        <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
+                            [[${photo.spec.displayName}]]
+                        </div>
+                        <img th:src="${photo.spec.url}" 
+                             th:alt="${photo.spec.description}"
+                             th:title="${photo.spec.description}">
                     </div>
-                </th:block>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="pagination-nav" th:if="${photos.total > pageSize}" style="display: flex; justify-content: center; align-items: center; gap: 20px; margin: 30px 0;">
+        <th:block th:with="totalPages=${(photos.total + pageSize - 1) / pageSize}">
+            
+            <a th:if="${pageNum > 1}" 
+               th:href="@{/photos(group=${param.group},page=${pageNum - 1})}" 
+               style="padding: 10px 20px; background: var(--heo-card-bg); border: var(--style-border); border-radius: 12px; color: var(--font-color); text-decoration: none;">上一页</a>
+
+            <span style="font-weight: bold; color: var(--font-color);">[[${pageNum}]] / [[${totalPages}]]</span>
+
+            <a th:if="${pageNum < totalPages}" 
+               th:href="@{/photos(group=${param.group},page=${pageNum + 1})}" 
+               style="padding: 10px 20px; background: var(--heo-card-bg); border: var(--style-border); border-radius: 12px; color: var(--font-color); text-decoration: none;">下一页</a>
+        </th:block>
+    </div>
+
+</th:block>
 
                 <div class="gallery-groups" th:if="${#strings.equals(theme.config.photos.photosStyle, 'one')}">
                     <th:block th:each="group : ${photoFinder.groupBy()}">
