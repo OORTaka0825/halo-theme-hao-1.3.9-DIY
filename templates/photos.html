@@ -60,22 +60,29 @@
                             </div>
                         </div>
                     </th:block>
-                    <div id="article-container">
-                        <section class="page-1 loadings">
-                            <div class="type-gallery ">
-                                <div class="gallery">
-                                    <div class="fj-gallery-item" th:each="photo : ${photos.items}">
-                                        <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
-                                            [[${photo.spec.displayName}]]</div>
-                                        <img th:src="${photo.spec.url}" th:alt="${photo.spec.description}"
-                                             th:title="${photo.spec.description}">
-
-                                    </div>
-                                </div>
-                            </div>
-                        </section>
+<div id="article-container">
+    <section class="page-1 loadings">
+        <div class="type-gallery ">
+            <div class="gallery" id="gallery-list">
+                <div class="fj-gallery-item" th:each="photo,iterStat : ${photos.items}" th:attr="data-index=${iterStat.index}">
+                    <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
+                        [[${photo.spec.displayName}]]
                     </div>
-                </th:block>
+                    <img th:src="${photo.spec.url}" th:alt="${photo.spec.description}"
+                         th:title="${photo.spec.description}">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ✅ 分页按钮 -->
+    <div class="pagination">
+        <button id="prevPage" class="page-btn">上一页</button>
+        <span id="pageInfo" class="page-info"></span>
+        <button id="nextPage" class="page-btn">下一页</button>
+    </div>
+</div>
+</th:block>
 
                 <div class="gallery-groups" th:if="${#strings.equals(theme.config.photos.photosStyle, 'one')}">
                     <th:block th:each="group : ${photoFinder.groupBy()}">
