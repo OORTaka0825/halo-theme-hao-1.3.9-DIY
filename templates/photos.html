@@ -60,190 +60,175 @@
                             </div>
                         </div>
                     </th:block>
+                    <div id="article-container">
+                        <section class="page-1 loadings">
+                            <div class="type-gallery ">
+                                <div class="gallery">
+                                    <div class="fj-gallery-item" th:each="photo : ${photos.items}">
+                                        <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
+                                            [[${photo.spec.displayName}]]</div>
+                                        <img th:src="${photo.spec.url}" th:alt="${photo.spec.description}"
+                                             th:title="${photo.spec.description}">
 
-<div id="article-container">
-
-    <section class="page-1 loadings">
-        <div class="type-gallery">
-            <div class="gallery" id="gallery-list">
-
-                <div class="fj-gallery-item"
-                     th:each="photo : ${photos.items}">
-
-                    <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
-                        [[${photo.spec.displayName}]]
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
                     </div>
+                </th:block>
 
-                    <img th:src="${photo.spec.url}"
-                         th:alt="${photo.spec.description}"
-                         th:title="${photo.spec.description}">
-                </div>
+                <div class="gallery-groups" th:if="${#strings.equals(theme.config.photos.photosStyle, 'one')}">
+                    <th:block th:each="group : ${photoFinder.groupBy()}">
+                        <h1 style="margin: 8px 0px 20px" th:if="${#strings.equals(group.metadata.name, param.group) && not #strings.isEmpty(param.group) }">
+                            [[${group.spec.displayName}]]
+                        </h1>
+                        <h1 style="margin: 8px 0px 20px" th:if="${#strings.isEmpty(param.group) }">
+                            全部
+                        </h1>
+                    </th:block>
+                    <div id="article-container">
+                        <section class="page-1 loadings">
+                            <div class="type-gallery ">
+                                <div class="gallery">
+                                    <div class="fj-gallery-item" th:each="photo : ${photos.items}">
+                                        <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
+                                            [[${photo.spec.displayName}]]</div>
+                                        <img th:src="${photo.spec.url}" th:alt="${photo.spec.description}"
+                                             th:title="${photo.spec.description}">
 
-            </div>
-        </div>
-    </section>
-
-    <div class="pagination">
-        <button id="prevPage" class="page-btn">上一页</button>
-        <span id="pageInfo" class="page-info"></span>
-        <button id="nextPage" class="page-btn">下一页</button>
-    </div>
-
-</div>
-
-</th:block>
-
-<!-- 分组模式 -->
-<div class="gallery-groups" th:if="${#strings.equals(theme.config.photos.photosStyle, 'one')}">
-
-    <div id="article-container">
-
-        <section class="page-1 loadings">
-            <div class="type-gallery">
-                <div class="gallery" id="gallery-list-2">
-
-                    <div class="fj-gallery-item"
-                         th:each="photo : ${photos.items}">
-
-                        <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
-                            [[${photo.spec.displayName}]]
-                        </div>
-
-                        <img th:src="${photo.spec.url}"
-                             th:alt="${photo.spec.description}"
-                             th:title="${photo.spec.description}">
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
                     </div>
-
                 </div>
-            </div>
-        </section>
+                <style>
+                    .gallery-groups {
+                        box-shadow: var(--heo-shadow-border);
+                        padding: 1rem 2rem;
+                        border-radius: 12px;
+                        background: var(--heo-card-bg);
+                        border: var(--style-border);
+                        width: 100%;
+                        align-self: flex-start;
+                        animation: slide-in 0.6s 0.1s backwards;
+                    }
 
-        <div class="pagination">
-            <button id="prevPage2" class="page-btn">上一页</button>
-            <span id="pageInfo2" class="page-info"></span>
-            <button id="nextPage2" class="page-btn">下一页</button>
-        </div>
+                    #content-inner .loadings .type-gallery {
+                        opacity: 0
+                    }
 
-    </div>
+                    .loadings {
+                        height: 60px;
+                        background-position: center;
+                        background-repeat: no-repeat;
+                        color: #504e4e;
+                        border: none;
+                        background-size: auto 100%;
+                        box-shadow: none;
+                        background-color: inherit;
+                        background-image: none;
+                        background-image: url(/themes/theme-hao/assets/images/load/rotating-ball-o.svg)
+                    }
 
-</div>
+                    #article-container .type-gallery {
+                        overflow: hidden;
+                        margin-top: 40px;
+                    }
 
-<style>
+                    #content-inner .gallery {
+                        margin: 0 0 16px;
+                        text-align: center
+                    }
 
-/* =========================
-   强制 3 列布局（避免瀑布流控制）
-========================= */
-#article-container .gallery {
-    display: grid !important;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-}
+                    #content-inner .gallery .fj-gallery {
+                        opacity: 0;
+                        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+                        filter: alpha(opacity=0)
+                    }
 
-#article-container img {
-    width: 100%;
-    border-radius: 8px;
-    display: block;
-}
+                    #content-inner .gallery .fj-gallery .img-alt {
+                        display: none
+                    }
 
-/* =========================
-   分页按钮
-========================= */
-.pagination {
-    text-align: center;
-    margin: 30px 0;
-}
+                    #content-inner .gallery .fj-gallery.lazyload+button {
+                        display: inline-block
+                    }
 
-.page-btn {
-    padding: 8px 16px;
-    margin: 0 10px;
-    border-radius: 6px;
-    background: var(--btn-bg);
-    color: var(--btn-color);
-    border: none;
-    cursor: pointer;
-}
+                    #content-inner .gallery .fj-gallery .gallery-data {
+                        opacity: 0;
+                        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+                        filter: alpha(opacity=0);
+                        visibility: hidden
+                    }
 
-.page-btn:disabled {
-    opacity: 0.5;
-}
+                    #content-inner .gallery button {
+                        display: none;
+                        margin-top: 25px;
+                        padding: 10px;
+                        width: 9em;
+                        border-radius: 5px;
+                        background: var(--btn-bg);
+                        color: var(--btn-color);
+                        font-weight: 700;
+                        font-size: 1.1em;
+                        -webkit-transition: all .3s;
+                        -moz-transition: all .3s;
+                        -o-transition: all .3s;
+                        -ms-transition: all .3s;
+                        transition: all .3s
+                    }
 
-/* =========================
-   分页隐藏（不会影响布局计算）
-========================= */
-.page-hidden {
-    display: none !important;
-}
+                    #content-inner .gallery button>* {
+                        -webkit-transition: all .4s;
+                        -moz-transition: all .4s;
+                        -o-transition: all .4s;
+                        -ms-transition: all .4s;
+                        transition: all .4s
+                    }
 
-.page-info {
-    font-size: 14px;
-    color: var(--heo-fontcolor);
-}
+                    #content-inner .gallery button i {
+                        opacity: 1;
+                        -ms-filter: none;
+                        filter: none;
+                        font-size: 1.1rem
+                    }
 
-</style>
+                    #content-inner .gallery button:hover {
+                        background: var(--btn-hover-color)
+                    }
 
-<script>
+                    #content-inner .gallery button:hover i {
+                        margin-left: 2px
+                    }
 
-window.addEventListener("load", function () {
+                    #article-container .tag-address {
+                        display: flex;
+                        position: absolute;
+                        left: 8px;
+                        top: 8px;
+                        padding: 4px 6px;
+                        border-radius: 8px;
+                        background: var(--heo-black-op);
+                        font-size: 12px;
+                        color: var(--heo-white);
+                        transition: .3s;
+                        z-index: 1;
+                        user-select: none
+                    }
 
-    function initPagination(galleryId, prevId, nextId, infoId) {
-
-        const gallery = document.getElementById(galleryId);
-        if (!gallery) return;
-
-        const items = Array.from(gallery.querySelectorAll(".fj-gallery-item"));
-
-        const pageSize = 20;
-        let currentPage = 1;
-        const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
-
-        function applyPage(page) {
-
-            currentPage = page;
-
-            const start = (page - 1) * pageSize;
-            const end = page * pageSize;
-
-            items.forEach((item, index) => {
-                if (index >= start && index < end) {
-                    item.classList.remove("page-hidden");
-                } else {
-                    item.classList.add("page-hidden");
-                }
-            });
-
-            document.getElementById(infoId).innerText =
-                `第 ${currentPage} 页 / 共 ${totalPages} 页`;
-
-            document.getElementById(prevId).disabled = currentPage === 1;
-            document.getElementById(nextId).disabled = currentPage === totalPages;
-
-            // ⭐ 强制触发主题重排（解决你说的空白区域）
-            setTimeout(() => {
-                window.dispatchEvent(new Event('resize'));
-            }, 50);
-        }
-
-        document.getElementById(prevId).onclick = function () {
-            if (currentPage > 1) applyPage(currentPage - 1);
-        };
-
-        document.getElementById(nextId).onclick = function () {
-            if (currentPage < totalPages) applyPage(currentPage + 1);
-        };
-
-        // ⭐ 延迟初始化（解决：刚进来33张 / 按钮失效）
-        setTimeout(() => {
-            applyPage(1);
-        }, 200);
-
-    }
-
-    initPagination("gallery-list", "prevPage", "nextPage", "pageInfo");
-    initPagination("gallery-list-2", "prevPage2", "nextPage2", "pageInfo2");
-
-});
-
-</script>
+                    img {
+                        border-style: none;
+                        border-radius: 8px;
+                        max-width: 100%;
+                        transition: all .2s ease 0s;
+                        -webkit-user-drag: none;
+                        -khtml-user-drag: none;
+                        -moz-user-drag: none;
+                        -ms-user-drag: none;
+                        -user-drag: none
+                    }
+                </style>
                 <!--/* 评论组件 */-->
                 <th:block th:replace="~{modules/comment :: comment(group = 'content.halo.run',
                   kind = 'SinglePage',
