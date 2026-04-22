@@ -85,28 +85,28 @@
 </th:block>
 
                 <div class="gallery-groups" th:if="${#strings.equals(theme.config.photos.photosStyle, 'one')}">
-                    <th:block th:each="group : ${photoFinder.groupBy()}">
-                        <h1 style="margin: 8px 0px 20px" th:if="${#strings.equals(group.metadata.name, param.group) && not #strings.isEmpty(param.group) }">
-                            [[${group.spec.displayName}]]
-                        </h1>
-                        <h1 style="margin: 8px 0px 20px" th:if="${#strings.isEmpty(param.group) }">
-                            全部
-                        </h1>
-                    </th:block>
-                    <div id="article-container">
-                        <section class="page-1 loadings">
-                            <div class="type-gallery ">
-                                <div class="gallery">
-                                    <div class="fj-gallery-item" th:each="photo : ${photos.items}">
-                                        <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
-                                            [[${photo.spec.displayName}]]</div>
-                                        <img th:src="${photo.spec.url}" th:alt="${photo.spec.description}"
-                                             th:title="${photo.spec.description}">
-
-                                    </div>
-                                </div>
-                            </div>
-                        </section>
+    <th:block th:each="group : ${photoFinder.groupBy()}">
+        <h1 style="margin: 8px 0px 20px" th:if="${#strings.equals(group.metadata.name, param.group) && not #strings.isEmpty(param.group) }">
+            [[${group.spec.displayName}]]
+        </h1>
+        <h1 style="margin: 8px 0px 20px" th:if="${#strings.isEmpty(param.group) }">
+            全部
+        </h1>
+    </th:block>
+    <div id="article-container">
+        <section class="page-1 loadings">
+            <div class="type-gallery ">
+                <div class="gallery" id="gallery-list">
+                    <div class="fj-gallery-item" th:each="photo,iterStat : ${photos.items}" th:attr="data-index=${iterStat.index}">
+                        <div th:if="${theme.config.photos.tagEnable}" class="tag-address">
+                            [[${photo.spec.displayName}]]
+                        </div>
+                        <img th:src="${photo.spec.url}" th:alt="${photo.spec.description}"
+                             th:title="${photo.spec.description}">
+                    </div>
+                </div>
+            </div>
+        </section>
                     </div>
                 </div>
                 <style>
