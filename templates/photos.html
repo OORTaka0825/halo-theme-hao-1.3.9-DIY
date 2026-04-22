@@ -196,64 +196,7 @@
     }
 </style>
 
-<script>
-document.addEventListener("DOMContentLoaded", function () {
 
-    function initPagination(galleryId, prevId, nextId, infoId) {
-        const items = document.querySelectorAll("#" + galleryId + " .fj-gallery-item");
-
-        const pageSize = 20;
-        let currentPage = 1;
-        const total = items.length;
-        const totalPages = Math.ceil(total / pageSize);
-
-        function refreshLayout() {
-            // 触发主题重新计算布局（关键）
-            window.dispatchEvent(new Event('resize'));
-            setTimeout(() => {
-                window.dispatchEvent(new Event('resize'));
-            }, 200);
-        }
-
-        function showPage(page) {
-            currentPage = page;
-
-            items.forEach((item, index) => {
-                if (index >= (page - 1) * pageSize && index < page * pageSize) {
-                    item.style.display = "";   // ✅ 不破坏布局
-                } else {
-                    item.style.display = "none";
-                }
-            });
-
-            document.getElementById(infoId).innerText =
-                `第 ${currentPage} 页 / 共 ${totalPages} 页`;
-
-            document.getElementById(prevId).disabled = currentPage === 1;
-            document.getElementById(nextId).disabled = currentPage === totalPages;
-
-            refreshLayout();
-        }
-
-        document.getElementById(prevId).onclick = () => {
-            if (currentPage > 1) showPage(currentPage - 1);
-        };
-
-        document.getElementById(nextId).onclick = () => {
-            if (currentPage < totalPages) showPage(currentPage + 1);
-        };
-
-        // ✅ 延迟执行，防止首屏错乱
-        setTimeout(() => {
-            showPage(1);
-        }, 100);
-    }
-
-    initPagination("gallery-list", "prevPage", "nextPage", "pageInfo");
-    initPagination("gallery-list-2", "prevPage2", "nextPage2", "pageInfo2");
-
-});
-</script>
                 <!--/* 评论组件 */-->
                 <th:block th:replace="~{modules/comment :: comment(group = 'content.halo.run',
                   kind = 'SinglePage',
