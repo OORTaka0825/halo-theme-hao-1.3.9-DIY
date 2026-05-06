@@ -18,10 +18,10 @@
         </header>
         <main class="layout hide-aside" id="content-inner">
             <div id="page">
-                <div  th:replace="~{macro/author-content :: author-content(background = ${singlePage.spec.cover},
-                        smallTitle = '想做清单',
-                        bigTitle = ${singlePage.spec.title},
-                        detail = ${singlePage.spec.excerpt.raw},
+                <div  th:replace="~{macro/author-content :: author-content(background = ${!#strings.isEmpty(theme.config.todo.backgroundImg) ? theme.config.todo.backgroundImg : singlePage.spec.cover},
+                        smallTitle = ${!#strings.isEmpty(theme.config.todo.smallTitle) ? theme.config.todo.smallTitle : '想做清单'},
+                        bigTitle = ${!#strings.isEmpty(theme.config.todo.bigTitle) ? theme.config.todo.bigTitle : singlePage.spec.title},
+                        detail = ${!#strings.isEmpty(theme.config.todo.detail) ? theme.config.todo.detail : singlePage.spec.excerpt.raw},
                         buttonUrl = '',
                         buttonTitle = '')}" ></div>
                 <div id="todolist-main" th:if="${not #lists.isEmpty(theme.config.todo.list)}"
