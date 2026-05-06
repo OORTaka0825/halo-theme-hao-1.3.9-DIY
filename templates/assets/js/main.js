@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const $this = $(o)
                 const lazyloadSrc = $this.attr('data-lazy-src') || $this.attr('src')
                 const dataCaption = $this.attr('alt') || ''
-                $this.wrap(`<a href="${lazyloadSrc}" data-fancybox="images" class="fancybox" data-srcset="${lazyloadSrc}"></a>`)
+                $this.wrap(`<a href="${lazyloadSrc}" data-fancybox="images" data-caption="${dataCaption}" class="fancybox" data-srcset="${lazyloadSrc}"></a>`)
 
             })
 
@@ -117,9 +117,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 transitionEffect: 'slide',
                 protect: true,
                 buttons: ['slideShow', 'fullScreen', 'thumbs', 'close'],
-                hash: false,
-              caption: function () { return '' }
-})
+                hash: false
+            })
         }
 
         if (typeof $.fancybox === 'undefined') {
@@ -283,7 +282,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // 當滾動條小于 0 的時候
         if (document.body.scrollHeight <= innerHeight) {
             $rightside.style.cssText = 'opacity: 1; transform: translateX(-58px)'
-            /* no early return: always bind scroll even if first screen is short */
+            return
         }
 
         let initTop = 0
