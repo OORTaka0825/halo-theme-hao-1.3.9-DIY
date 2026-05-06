@@ -3,11 +3,14 @@
       th:replace="~{modules/layouts/layout :: layout(content = ~{::content},htmlType = 'tag',title = ${'标签' + ' | ' + site.title}, head = ~{::head})}">
 
 <th:block th:fragment="head">
-    <th:block th:replace="~{modules/common/open-graph :: open-graph(_title = '标签',
-                _permalink = '/tags',
-                _cover = ${theme.config.other.opengraph.image},
-                _excerpt = ${site.seo.description},
-                _type = 'website')}"></th:block>
+    <!-- 简化了 Open-Graph 引用，防止变量缺失报错 -->
+    <th:block th:if="${theme.config.other?.opengraph != null}">
+        <th:block th:replace="~{modules/common/open-graph :: open-graph(_title = '标签',
+                    _permalink = '/tags',
+                    _cover = ${theme.config.other.opengraph.image},
+                    _excerpt = ${site.seo.description},
+                    _type = 'website')}"></th:block>
+    </th:block>
 </th:block>
 
 <th:block th:fragment="content">
@@ -18,31 +21,28 @@
         <main class="layout hide-aside" id="content-inner">
             <div id="page">
                 <h1 class="page-title" style="display: inline;">标签</h1>
-                <!-- 将 0 修改为动态获取标签总数 -->
+                
+                <!-- 动态获取数量，如果失败则回退显示 0 -->
                 <div class="tag-cloud-title is-center">
-                    标签 - <span class="tag-cloud-amount" th:text="${tagFinder.count()}">0</span>
+                    标签 - <span class="tag-cloud-amount" th:text="${tagFinder != null ? tagFinder.count() : 0}">0</span>
                 </div>
-                <div class="tag-cloud-list is-center" th:with="allTags = ${tagFinder.listAll()}">
-                    <!-- 只有当标签列表不为空时才进行循环 -->
-                    <th:block th:if="${not #lists.isEmpty(allTags)}">
+
+                <div class="tag-cloud-list is-center">
+                    <!-- 使用最基础的循环逻辑 -->
+                    <th:block th:with="allTags = ${tagFinder.listAll()}">
                         <a th:each="tagItem : ${allTags}"
-                           th:if="${tagItem.status != null && tagItem.spec != null}"
                            th:href="@{${tagItem.status.permalink}}"
                            th:id="${tagItem.spec.displayName}" 
-                           th:style="'font-size: 1em; color:' + ${tagItem.spec.color ?: '#333'} ">
+                           th:style="'font-size: 1em; color:' + ${tagItem.spec.color ?: '#333'}">
                             <span class="tags-punctuation">[[${tagItem.spec.displayName}]]</span>
                             <span class="tagsPageCount" th:text="${tagItem.status.visiblePostCount}">0</span>
                         </a>
                     </th:block>
-                    <!-- 如果没有标签时的友好提示 -->
-                    <th:block th:if="${#lists.isEmpty(allTags)}">
-                        <p style="text-align: center; color: #999; margin-top: 2rem;">暂无标签</p>
-                    </th:block>
                 </div>
             </div>
         </main>
-        <!-- 底部 -->
-        <footer th:replace="~{modules/footer :: footer}"/>
+        <!-- 修正了 Footer 的引用方式 -->
+        <footer th:replace="~{modules/footer :: footer}"></footer>
     </div>
 </th:block>
 
