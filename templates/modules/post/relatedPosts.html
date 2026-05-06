@@ -17,8 +17,8 @@ postRandomImg=${#strings.contains(theme.config.layout.postRandomImg,'?') ? theme
                 <div th:if="${!containsTitle ? iterStat.index <6 : true}">
                     <a th:href="@{${recommandPost.status.permalink}}" th:title="${recommandPost.spec.title}">
                         <img alt="cover" class="cover" id="preimg"
-                             th:with="img = ${#strings.isEmpty(recommandPost.spec.cover) ? postRandomImg+recommandPost.spec.title : thumbnail.gen(recommandPost.spec.cover, 'm')}"
-                             th:src="${isLazyload ? '' : img}"
+                             th:with="img = ${#strings.isEmpty(recommandPost.spec.cover) ? postRandomImg+recommandPost.spec.title : recommandPost.spec.cover}"
+                             th:src="${isLazyload ? loadingImg : img}"
                              th:data-lazy-src="${ isLazyload ? img : ''}">
                         <div class="content is-center">
                             <div class="date" style="color: white"><i class="far fa-calendar-alt fa-fw"></i>
@@ -37,9 +37,9 @@ postRandomImg=${#strings.contains(theme.config.layout.postRandomImg,'?') ? theme
                 <div th:if="${!containsTitle ? iterStat.index <2 : true}">
                     <a th:href="@{${recommandPost.status.permalink}}" th:title="${recommandPost.spec.title}">
                         <img class="cover" alt="cover"
-                             th:with="img = ${#strings.isEmpty(recommandPost.spec.cover) ? postRandomImg+recommandPost.spec.title : thumbnail.gen(recommandPost.spec.cover, 'm')}"
+                             th:with="img = ${#strings.isEmpty(recommandPost.spec.cover) ? postRandomImg+recommandPost.spec.title : recommandPost.spec.cover}"
 
-                             th:src="${isLazyload ? '' : img}"
+                             th:src="${isLazyload ? loadingImg : img}"
                              th:data-lazy-src="${ isLazyload ? img : ''}">
                         <div class="content is-center">
                             <div class="date"><i class="far fa-calendar-alt fa-fw"></i>
