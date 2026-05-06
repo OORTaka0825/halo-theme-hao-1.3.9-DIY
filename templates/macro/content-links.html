@@ -11,7 +11,13 @@
                     <i class="haofont hao-icon-paper-plane1"></i>
                     <span class="banner-button-text">随机访问</span>
                 </a>
-                <a class="banner-button" href="#post-comment" rel="external nofollow">
+                <a th:unless="${pluginFinder.available('link-submit')}"
+                        class="banner-button" href="#post-comment" rel="external nofollow">
+                    <i class="haofont hao-icon-link"></i>
+                    <span class="banner-button-text">申请友链</span>
+                </a>
+                <a th:if="${pluginFinder.available('link-submit')}"
+                   class="banner-button" href="javascript:LinkSubmitWidget.open()" rel="external nofollow">
                     <i class="haofont hao-icon-link"></i>
                     <span class="banner-button-text">申请友链</span>
                 </a>
@@ -25,14 +31,14 @@
                                    th:title="${linkOdd.spec.displayName}"
                                    th:with="linkOdd = ${group.links.get(iterStat.index - 1)}">
                                     <img th:with=" img = @{${linkOdd.spec.logo}}"
-                                         th:src="${isLazyload ? loadingImg : img}"
+                                         th:src="${isLazyload ? '' : img}"
                                          th:data-lazy-src="${ isLazyload ? img : ''}"
                                          th:title="${linkOdd.spec.displayName}">
                                 </a>
                                 <a class="tags-group-icon" target="_blank" th:href="${linkEven.spec.url}"
                                    th:title="${linkEven.spec.displayName}" th:with="linkEven = ${link}">
                                     <img th:with="img = @{${linkEven.spec.logo}}"
-                                         th:src="${isLazyload ? loadingImg : img}"
+                                         th:src="${isLazyload ? '' : img}"
                                          th:data-lazy-src="${ isLazyload ? img : ''}"
                                          th:title="${linkEven.spec.displayName}">
                                 </a>
@@ -45,30 +51,6 @@
 
         <!--互动友链-->
         <th:block th:replace="~{macro/links-canvas :: links-canvas(${groups})}" />
-
-        <!--钓鱼-->
-        <th:block th:if="${not #lists.isEmpty(groups) && theme.config.fcircle.linksRandomFriendsEnable}">
-            <div class="title-h2-a">
-                <div class="title-h2-a-left">
-                    <h2 style="padding-top:0;margin:.6rem 0 .6rem">🎣 钓鱼</h2>
-                    <a class="random-post-start" href="javascript:fetchRandomPost();">
-                        <i class="haofont hao-icon-arrow-rotate-right"></i>
-                    </a>
-                </div>
-                <div th:if="${not #strings.isEmpty(theme.config.link.fcircleUrl)}" class="title-h2-a-right">
-                    <a class="random-post-all" th:href="${theme.config.link.fcircleUrl}" data-pjax-state="">查看鱼塘</a>
-                </div>
-            </div>
-            <div id="random-post"></div>
-            <script type="text/javascript">
-                var fdataUser = {
-                    apiurl: "[(${ theme.config.fcircle.apiurl })]",
-                    defaultFish: 500,
-                    hungryFish: 500,
-                }
-            </script>
-            <script th:src="${assets_link + '/libs/moments/random-friends-post.js'}"></script>
-        </th:block>
 
         <div class="flink" id="article-container">
 
@@ -95,7 +77,7 @@
                             <img class="flink-avatar" style="pointer-events: none;" th:alt="${link.spec.displayName}"
                                  th:with="img = @{${#strings.isEmpty(#annotations.get(link, 'siteshot')) ? link.spec.logo : #annotations.get(link,'siteshot') }}"
 
-                                 th:src="${isLazyload ? loadingImg : img}"
+                                 th:src="${isLazyload ? '' : img}"
                                  th:data-lazy-src="${ isLazyload ? img : ''}">
                         </a>
 
@@ -104,7 +86,7 @@
                             <div class="site-card-avatar no-lightbox">
                                 <img class="flink-avatar cf-friends-avatar" th:alt="${link.spec.displayName}"
 
-                                     th:src="${isLazyload ? loadingImg : link.spec.logo}"
+                                     th:src="${isLazyload ? '' : link.spec.logo}"
                                      th:data-lazy-src="${ isLazyload ? link.spec.logo : ''}">
                             </div>
                             <div class="site-card-text">
@@ -128,14 +110,14 @@
                            th:title="${link.spec.displayName}">
                             <img class="flink-avatar cf-friends-avatar" th:alt="${link.spec.displayName}"
 
-                                 th:src="${isLazyload ? loadingImg : link.spec.logo}"
+                                 th:src="${isLazyload ? '' : link.spec.logo}"
                                  th:data-lazy-src="${ isLazyload ? link.spec.logo : ''}">
                             <div class="flink-item-info no-lightbox">
                                 <span class="flink-item-name cf-friends-name" th:text="${link.spec.displayName}"></span>
                                 <span class="flink-item-desc" th:text="${link.spec.description}"
                                       th:title="${link.spec.description}"></span>
                                 <img
-                                     th:src="${isLazyload ? loadingImg : link.spec.logo}"
+                                     th:src="${isLazyload ? '' : link.spec.logo}"
                                      th:data-lazy-src="${ isLazyload ? link.spec.logo : ''}">
                             </div>
                         </a>
@@ -149,7 +131,7 @@
                            th:title="${link.spec.displayName}">
                             <img class="flink-avatar cf-friends-avatar"
 
-                                 th:src="${isLazyload ? loadingImg : link.spec.logo}"
+                                 th:src="${isLazyload ? '' : link.spec.logo}"
                                  th:data-lazy-src="${ isLazyload ? link.spec.logo : ''}"
                                  th:alt="${link.spec.displayName}">
                             <div class="img-alt is-center">[[${link.spec.displayName}]]</div>
