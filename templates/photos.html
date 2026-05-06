@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{modules/layouts/layout :: layout(content = ~{::content},htmlType = 'photos',title = ${title + ' | ' + site.title}, head = ~{::head},_title = ${title})}">
 <th:block th:fragment="head">
     <th:block th:replace="~{modules/common/open-graph :: open-graph(_title = ${_title},
@@ -32,11 +32,10 @@
                                         <div class="tips" th:text="${description}"></div>
                                     </div>
                                     <div class="banner-button-group">
-                                        <a class="banner-button" target="_blank"
-                                           th:attr="onclick='pjax.loadUrl(\''+ ${theme.config.photos.topLink} +'\')'">
-                                            <i class="haofont hao-icon-circle-arrow-right"></i>
-                                            <span class="banner-button-text" th:text="返回"></span>
-                                        </a>
+                                        <a class="banner-button" th:href="${theme.config.photos.topLink}">
+  <i class="haofont hao-icon-circle-arrow-right"></i>
+  <span class="banner-button-text">返回</span>
+</a>
                                     </div>
                                 </div>
                             </div>
@@ -53,11 +52,10 @@
                                     <div class="tips"></div>
                                 </div>
                                 <div class="banner-button-group">
-                                    <a class="banner-button" target="_blank"
-                                       th:attr="onclick='pjax.loadUrl(\''+ ${theme.config.photos.topLink} +'\')'">
-                                        <i class="haofont hao-icon-circle-arrow-right"></i>
-                                        <span class="banner-button-text" th:text="返回"></span>
-                                    </a>
+                                    <a class="banner-button" th:href="${theme.config.photos.topLink}">
+  <i class="haofont hao-icon-circle-arrow-right"></i>
+  <span class="banner-button-text">返回</span>
+</a>
                                 </div>
                             </div>
                         </div>
@@ -77,10 +75,6 @@
                             </div>
                         </section>
                     </div>
-                    <!-- 分页 -->
-                    <th:block th:with="param_group = ${not #strings.isEmpty(param.group) ? '?group='+param.group : ''}">
-                        <div th:replace="~{modules/widgets/page :: page('/photos',${photos},false,${param_group})}"></div>
-                    </th:block>
                 </th:block>
 
                 <div class="gallery-groups" th:if="${#strings.equals(theme.config.photos.photosStyle, 'one')}">
@@ -107,12 +101,7 @@
                             </div>
                         </section>
                     </div>
-                    <!-- 分页 -->
-                    <th:block th:with="param_group = ${not #strings.isEmpty(param.group) ? '?group='+param.group : ''}">
-                        <div th:replace="~{modules/widgets/page :: page('/photos',${photos},false,${param_group})}"></div>
-                    </th:block>
                 </div>
-
                 <style>
                     .gallery-groups {
                         box-shadow: var(--heo-shadow-border);
@@ -237,7 +226,7 @@
                         -khtml-user-drag: none;
                         -moz-user-drag: none;
                         -ms-user-drag: none;
-                        user-drag: none
+                        -user-drag: none
                     }
                 </style>
                 <!--/* 评论组件 */-->
@@ -249,7 +238,7 @@
 
         </main>
         <!-- 底部 -->
-        <footer th:replace="~{modules/footer}"/>
+        <footer th:replace="~{modules/footer :: footer}"></footer>
         <!-- 卡片顶部气泡效果 -->
         <script th:if="${theme.config.other.bubbleEnable}" async data-pjax
                 th:src="${assets_link + '/libs/canvas/bubble.js'}"></script>
