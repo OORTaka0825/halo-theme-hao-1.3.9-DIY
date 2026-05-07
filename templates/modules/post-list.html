@@ -3,10 +3,9 @@
 
 <th:block th:fragment="post-list"
           th:with='postItems=${posts.items},
-          /* 核心：如果外部没传path，自动根据当前页面类型获取路径 */
-          finalPath = ${path ?: (category != null ? category.status.permalink : (tag != null ? tag.status.permalink : (isIndex ? "/" : "")) )},
+          path = ${path ?: (isIndex ? "/" : (category != null ? category.status.permalink : (tag != null ? tag.status.permalink : "/")))},
           postRandomImg=${#strings.contains(theme.config.layout.postRandomImg,"?") ? theme.config.layout.postRandomImg+"&" : theme.config.layout.postRandomImg+"?"}'>
 
-    <div th:replace="~{modules/widgets/page :: page(${finalPath},${posts},${isIndex ?: false})}"></div>
+    <div th:replace="~{modules/widgets/page :: page(${path},${posts},${isIndex ?: false})}"></div>
 </th:block>
 </html>
