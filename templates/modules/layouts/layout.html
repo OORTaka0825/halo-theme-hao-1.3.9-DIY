@@ -27,15 +27,20 @@
 <body>
 
 <!-- loading 页面 -->
-<th:block th:replace="~{modules/loading-box}"/>
-
-<!-- 网站背景 -->
-<div id="web_bg">
+    <th:block th:replace="~{modules/loading-box}"/>
+    
+    <!-- 网站背景 -->
+    <div id="web_bg">
     <div th:if="${theme.config.top.global_background.enable_global_background_img}">
-        <img th:if="${theme.config.top.global_background.enable_global_background_above_video == false}"
-             class="global_background_img"
-             th:src="${theme.config.top.global_background.global_background_img}"
-        />
+        <div th:if="${theme.config.top.global_background.enable_global_background_above_video == false}"
+             class="global_background_img global_background_img--light"
+             th:style="'background-image: url(' + ${theme.config.top.global_background.global_background_img_light} + ');'">
+        </div>
+        <div th:if="${theme.config.top.global_background.enable_global_background_above_video == false}"
+             class="global_background_img global_background_img--dark"
+             th:style="'background-image: url(' + ${theme.config.top.global_background.global_background_img_dark} + ');'">
+        </div>
+        
         <video th:if="${theme.config.top.global_background.enable_global_background_above_video}"
                class="index-video"
                id="index-video"
@@ -54,45 +59,44 @@
     <style>
         @media screen and (min-width: 1300px) {
             .global_background_img {
-                width: 100%;
-                height: 100%;
+                width: 100vw;
+                height: 100vh;
                 top: 0;
                 left: 0;
-                opacity: 1;
                 position: fixed;
                 z-index: -999;
-                background: var(--heo-background);
-                background-attachment: fixed;
-                background-repeat: no-repeat;
+                /* 关键渲染设置 */
                 background-size: cover;
+                background-position: center center;
+                background-repeat: no-repeat;
+                /* 强制不显示由于缩放导致的杂边 */
+                image-rendering: -webkit-optimize-contrast;
+                image-rendering: high-quality;
             }
         }
         
-        @media screen and (max-width: 1300px) {
-            .global_background_img {
-                display: none;
-            }
-        }
-    
+        /* 亮暗模式切换显示逻辑 */
+        :root[data-theme='light'] .global_background_img--dark { display: none !important; }
+        :root[data-theme='dark']  .global_background_img--light { display: none !important; }
+        html:not([data-theme='dark']) .global_background_img--dark { display: none !important; }
+        html[data-theme='dark']      .global_background_img--light { display: none !important; }
     </style>
 </th:block>
-
-<script th:if="${not #lists.isEmpty(postFinder.listAll())}"
-        th:inline="javascript"
+    
+    <script th:inline="javascript"
     th:with="allPostList=${postFinder.listAll()},
     randomIndex=${T(java.lang.Math).floor(T(java.lang.Math).random()*#lists.size(allPostList))},
-    postPermalink=${allPostList[randomIndex].status.permalink}"
->
-    function toRandomPost() {
-        // 随机跳转全站的一篇文章
-        let permalink = /*[[${postPermalink}]]*/ "/";
-        
-        // 当前窗口打开
-        //window.location.href = permalink;
-        pjax.loadUrl(permalink);
-        // window.open(permalink);
+    postPermalink=${allPostList[randomIndex].status.permalink}">
+  function toRandomPost() {
+    var permalink = /*[[${postPermalink}]]*/ "/";
+    if (window.pjax && typeof pjax.loadUrl === 'function') {
+      // 开启 PJAX：无刷新跳转
+      pjax.loadUrl(permalink);
+    } else {
+      // 关闭 PJAX：整页跳转
+      window.location.href = permalink;
     }
-
+  }
 </script>
 
 <!-- 网站背景 -->
