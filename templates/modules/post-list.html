@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
-<th:block
-        th:with='postItems=${posts.items},
+<th:block th:fragment="post-list"
+          th:with='postItems=${posts.items},
           postRandomImg=${#strings.contains(theme.config.layout.postRandomImg,"?") ? theme.config.layout.postRandomImg+"&" : theme.config.layout.postRandomImg+"?"}'>
 
     <!-- card，需要添加在没有图片时使用随机图片 -->
