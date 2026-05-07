@@ -48,20 +48,45 @@ spec:
             phone_menu: true
             enable_ali_iconfont_symbol_header: false
           children:
-            - $formkit: switch
+            - $formkit: radio
               name: pc_leftMenu
               id: pc_leftMenu
               label: pc端左侧菜单
-            - $formkit: switch
+              options:
+                - label: 显示
+                  value: true
+                - label: 隐藏
+                  value: false
+            - $formkit: radio
               name: phone_leftMenu
               label: 移动左侧菜单
-            - $formkit: switch
+              options:
+                - label: 显示
+                  value: true
+                - label: 隐藏
+                  value: false
+            - $formkit: radio
               name: phone_menu
               label: 移动主菜单
-            - $formkit: switch
+              options:
+                - label: 显示
+                  value: true
+                - label: 隐藏
+                  value: false
+            - $formkit: select
               name: enable_ali_iconfont_symbol_header
               label: 阿里巴巴IconFont Symbol
               help: '开启后，可以使用阿里IconFont的Symbol彩色图标。语法为 #icon-xxx，例如 #icon-shouye'
+              options:
+                - value: true
+                  label: 开启
+                - value: false
+                  label: 关闭
+            - $formkit: text
+              name: iconfont_js
+              label: 阿里巴巴 IconFont Symbol 链接
+              help: 填写 IconFont 的Symbol js 链接，例如 //at.alicdn.com/t/c/font_xxxxx.js
+              value: ""
         - $formkit: menuRadio
           name: leftMenu
           if: $get(pc_leftMenu).value
@@ -79,29 +104,54 @@ spec:
             console:
               consoleEnable: true
           children:
-            - $formkit: switch
+            - $formkit: radio
               name: travelling
               id: travelling
               key: travelling
               label: 开往按钮
-            - $formkit: switch
+              options:
+                - label: 显示
+                  value: true
+                - label: 隐藏
+                  value: false
+            - $formkit: radio
               name: article
               label: 随机文章
               help: 右上角随机文章按钮
-            - $formkit: switch
+              options:
+                - label: 显示
+                  value: true
+                - label: 隐藏
+                  value: false
+            - $formkit: radio
               name: darkMode
               label: 切换模式
               help: 右上角切换主题模式按钮
-            - $formkit: switch
+              options:
+                - label: 显示
+                  value: true
+                - label: 隐藏
+                  value: false
+            - $formkit: radio
               name: navLogin
               label: 登入按钮
               help: 右上角登入按钮
+              options:
+                - label: 显示
+                  value: true
+                - label: 隐藏
+                  value: false
             - $formkit: group
               name: console
               label: 中控台
               children:
-                - $formkit: switch
+                - $formkit: radio
                   name: consoleEnable
+                  options:
+                    - label: 显示
+                      value: true
+                    - label: 隐藏
+                      value: false
 
     - group: top
       label: 顶部
@@ -119,10 +169,15 @@ spec:
             phone_index_img:
             index_video:
           children:
-            - $formkit: switch
+            - $formkit: radio
               name: enable_above
               key: enable_above
               id: enable_above
+              options:
+                - label: 显示
+                  value: true
+                - label: 隐藏
+                  value: false
             - $formkit: repeater
               name: typed
               if: $get(enable_above).value
@@ -133,7 +188,7 @@ spec:
                   name: text
                   label: 自定义文字
                   placeholder: 请输入自定义文字
-            - $formkit: switch
+            - $formkit: radio
               label: 随机文字
               if: $get(enable_above).value
               name: enable_typed_random
@@ -141,13 +196,39 @@ spec:
               id: enable_typed_random
               value: false
               help: 如果配置了自定义文字，优先展示自定义文字
-            - $formkit: switch
+              options:
+                - label: 启用
+                  value: true
+                - label: 禁用
+                  value: false
+            - $formkit: radio
               if: $get(enable_above).value
               label: 背景模式
               name: enable_above_video
               key: enable_above_video
               id: enable_above_video
               value: false
+              options:
+                - label: 显示视频
+                  value: true
+                - label: 显示图片
+                  value: false
+            - $formkit: select
+              if: $get(enable_above).value
+              name: full_page_height
+              key: full_page_height
+              id: full_page_height
+              label: 铺满屏幕
+              value: "100vh"
+              options:
+                - label: 100%
+                  value: "100vh"
+                - label: 75%
+                  value: "75vh"
+                - label: 50%
+                  value: "50vh"
+                - label: 25%
+                  value: "25vh"
             - $formkit: attachment
               name: index_video
               key: index_video
@@ -161,8 +242,6 @@ spec:
               name: index_img
               if: $get(enable_above).value  &&  $get(enable_above_video).value == false
               label: PC背景图
-              width: "15rem"
-              aspectRatio: "16/9"
               placeholder: 请填写背景图地址
               value: https://www.dmoe.cc/random.php
             - $formkit: attachment
@@ -170,8 +249,6 @@ spec:
               if: $get(enable_above).value  &&  $get(enable_above_video).value == false
               label: 移动端背景图
               placeholder: 请填写移动端背景图地址
-              width: "15rem"
-              aspectRatio: "16/9"
               value: https://imgapi.kouseki.cn/random?sort=mp
         - $formkit: group
           name: global_background
@@ -181,43 +258,61 @@ spec:
             enable_global_background_img: false
             index_background_img:
           children:
-            - $formkit: switch
+            - $formkit: radio
               label: 全局透明背景图
               name: enable_global_background_img
               key: enable_global_background_img
               id: enable_global_background_img
               value: false
               help: 首页透明背景图
-            - $formkit: switch
+              options:
+                - label: 启用
+                  value: true
+                - label: 禁用
+                  value: false
+            - $formkit: radio
               if: $get(enable_global_background_img).value
               label: 全局背景模式
               name: enable_global_background_above_video
               key: enable_global_background_above_video
               id: enable_global_background_above_video
               value: false
+              options:
+                - label: 显示视频
+                  value: true
+                - label: 显示图片
+                  value: false
             - $formkit: attachment
-              name: global_background_img
-              key: global_background_img
-              id: global_background_img
+              name: global_background_img_light
+              key: global_background_img_light
+              id: global_background_img_light
               if: $get(enable_global_background_img).value  &&  $get(enable_global_background_above_video).value == false
-              label: 全局背景图片
-              width: "15rem"
-              aspectRatio: "16/9"
-              placeholder: 请填写全局背景图片地址
+              label: 全局背景图片（亮主题）
+              placeholder: 请填写亮主题全局背景图片地址
+            - $formkit: attachment
+              name: global_background_img_dark
+              key: global_background_img_dark
+              id: global_background_img_dark
+              if: $get(enable_global_background_img).value  &&  $get(enable_global_background_above_video).value == false
+              label: 全局背景图片（暗主题）
+              placeholder: 请填写暗主题全局背景图片地址
             - $formkit: attachment
               name: global_background_video
               id: global_background_video
               key: global_background_video
               if: $get(enable_global_background_img).value  &&  $get(enable_global_background_above_video).value
               label: 全局背景视频
-              width: "15rem"
-              aspectRatio: "16/9"
               placeholder: 请填写全局背景视频地址
-        - $formkit: switch
+        - $formkit: radio
           name: moment
           label: 瞬间说说
           value: true
           help: 需要安装瞬间插件
+          options:
+            - label: 显示
+              value: true
+            - label: 隐藏
+              value: false
         - $formkit: group
           name: climb
           label: 宠物挂件
@@ -226,68 +321,76 @@ spec:
             climbEnable: false
             climbImg: https://imgapi.yyds.pink/random?sort=animals
           children:
-            - $formkit: switch
+            - $formkit: radio
               name: climbEnable
               key: climbEnable
               id: climbEnable
+              options:
+                - label: 显示
+                  value: true
+                - label: 隐藏
+                  value: false
             - $formkit: url
               name: climbImg
               if: $get(climbEnable).value
               label: 图片
               help: 随机图地址：https://imgapi.yyds.pink/random?sort=animals
-        - $formkit: switch
+        - $formkit: radio
           name: recentTop
           id: recentTop
           key: recentTop
           label: 顶部 Banner
           value: true
+          options:
+            - label: 显示
+              value: true
+            - label: 隐藏
+              value: false
         - $formkit: group
           name: BannerLeft
           label: Banner 左侧
           if: $get(recentTop).value
           value:
-            bannersBackgroundRollStyle: tags-group-all
-            bannersBackground: default
-            bannersTitleBig: <div class="banners-title-big">Halo Theme</div><div class="banners-title-big">Hao</div>
+            bannersBackground: 默认
+            bannersTitleBig: Halo Theme Hao
             bannersTitleSmall: 更多信息请关注 GitHub
             categoryGroup:
-              - title: "必看"
+              - title: "必看精选"
                 icon: "haofont hao-icon-book"
                 url: "/"
                 colorOneLight: "#358bff"
                 colorTwoLight: "#15c6ff"
                 colorOneDark: "#0653b8"
                 colorTwoDark: "#2fcbff"
-              - title: "热门"
+              - title: "热门文章"
                 icon: "haofont hao-icon-fire"
                 url: "/"
                 colorOneLight: "#ff6655"
                 colorTwoLight: "#ffbf37"
                 colorOneDark: "#e22a16"
                 colorTwoDark: "#da980c"
+              - title: "实用教程"
+                icon: "haofont hao-icon-book"
+                url: "/"
+                colorOneLight: "#18e7ae"
+                colorTwoLight: "#1eebeb"
+                colorOneDark: "#099e74"
+                colorTwoDark: "#0ea4a4"
             techStack:
           children:
             - $formkit: select
               name: bannersBackground
-              id: bannersBackground
-              key: bannersBackground
               label: 背景图
               options:
                 - label: 默认技术栈
                   value: default
                 - label: 个人技术栈
                   value: techStack
-            - $formkit: array
+            - $formkit: repeater
               name: techStack
-              if: $get(bannersBackground).value == 'techStack'
               label: 个人技术栈
               help: 需要选择上方“个人技术栈”
               value: [ ]
-              itemLabels:
-                - type: text
-                  label: $value.name
-                - type: text
-                  label: $value.url
               children:
                 - $formkit: text
                   name: name
@@ -300,31 +403,20 @@ spec:
                 - $formkit: color
                   name: background
                   label: 背景色
-            - $formkit: code
+            - $formkit: textarea
               name: bannersTitleBig
               label: 大标题
               placeholder: 请输入大标题
-              height: 80px
-              language: html
-              help: 支持 HTML 语法  <div class="banners-title-big">内容</div>
-            - $formkit: code
+              help: 支持 HTML 语法
+            - $formkit: textarea
               name: bannersTitleSmall
               label: 小标题
               placeholder: 请输入小标题
-              height: 80px
-              language: html
               help: 支持 HTML 语法
-            - $formkit: array
+            - $formkit: repeater
               name: categoryGroup
-              id: categoryGroup
-              key: categoryGroup
-              min: 0
-              max: 2
-              itemLabels:
-                - type: text
-                  label: $value.title
-                - type: text
-                  label: $value.url
+              min: 3
+              max: 3
               children:
                 - $formkit: text
                   name: title
@@ -377,12 +469,17 @@ spec:
               todayRecommendxTitle: 今日推荐
             recommendPost: latest
           children:
-            - $formkit: switch
+            - $formkit: radio
               name: todayRecommend
               id: todayRecommend
               key: todayRecommend
               label: 今日推荐
               help: 开启后会在推荐文章前显示“今日推荐”模块
+              options:
+                - label: 显示
+                  value: true
+                - label: 隐藏
+                  value: false
             - $formkit: group
               name: todayRecommendContent
               if: $get(todayRecommend).value
@@ -413,8 +510,6 @@ spec:
                   label: 背景图
                   placeholder: 请输入地址
                   value: https://liuzhihang.com/upload/hao_dark.jpg
-                  width: "15rem"
-                  aspectRatio: "16/9"
             - $formkit: select
               name: recommendPost
               id: recommendPost
@@ -468,35 +563,29 @@ spec:
                   value: custom-tag
                 - label: 自定义路径
                   value: custom-url
-            - $formkit: categorySelect
+            - $formkit: repeater
               if: $get(nav).value === 'custom-category'
-              name: navCategory
-              key: navCategory
+              name: navCustomCategory
               label: 自定义分类
-              multiple: true
-              clearable: true
-              searchable: true
-              sortable: true
-            - $formkit: tagSelect
+              value: [ ]
+              children:
+                - $formkit: categorySelect
+                  name: category
+                  label: 分类
+            - $formkit: repeater
               if: $get(nav).value === 'custom-tag'
-              name: navTag
-              key: navTag
+              name: navCustomTag
               label: 自定义标签
-              multiple: true
-              clearable: true
-              searchable: true
-              sortable: true
-            - $formkit: array
+              value: [ ]
+              children:
+                - $formkit: tagSelect
+                  name: tag
+                  label: 标签
+            - $formkit: repeater
               if: $get(nav).value === 'custom-url'
               name: navCustomUrl
-              key: navCustomUrl
               label: 自定义路径
               value: [ ]
-              itemLabels:
-                - type: text
-                  label: $value.title
-                - type: text
-                  label: $value.url
               children:
                 - $formkit: text
                   name: title
@@ -540,6 +629,8 @@ spec:
                   value: col2
                 - label: 三列
                   value: col3
+                - label: 四列
+                  value: col4
             - $formkit: select
               name: postLocation
               label: 封面位置
@@ -558,10 +649,15 @@ spec:
           label: 随机封面
           value: https://source.unsplash.com/random/600x400/?blog,scenery,night,desert,sea
           help: 未设置文章封面时，将使用随机封面 (二次元随机图地址：https://www.dmoe.cc/random.php)
-        - $formkit: switch
+        - $formkit: radio
           name: articleCardPolish
           label: 首页文章卡片(擦亮效果)
           value: false
+          options:
+            - label: 显示
+              value: true
+            - label: 隐藏
+              value: false
 
     - group: sidebar
       label: 侧栏
@@ -629,6 +725,8 @@ spec:
                       label: Steam卡片
                     - value: "music"
                       label: 音乐卡片
+                    - value: "welcome"
+                      label: 小板报
                     - value: "friend-link"
                       label: 通讯录
                     - value: "recent-posts"
@@ -692,6 +790,8 @@ spec:
                       label: Steam卡片
                     - value: "music"
                       label: 音乐卡片
+                    - value: "welcome"
+                      label: 小板报
                     - value: "friend-link"
                       label: 通讯录
                     - value: "recent-posts"
@@ -753,6 +853,8 @@ spec:
                       label: Steam卡片
                     - value: "music"
                       label: 音乐卡片
+                    - value: "welcome"
+                      label: 小板报
                     - value: "friend-link"
                       label: 通讯录
                     - value: "recent-posts"
@@ -813,6 +915,8 @@ spec:
                       label: Steam卡片
                     - value: "music"
                       label: 音乐卡片
+                    - value: "welcome"
+                      label: 小板报
                     - value: "friend-link"
                       label: 通讯录
                     - value: "recent-posts"
@@ -874,6 +978,8 @@ spec:
                       label: Steam卡片
                     - value: "music"
                       label: 音乐卡片
+                    - value: "welcome"
+                      label: 小板报
                     - value: "friend-link"
                       label: 通讯录
                     - value: "recent-posts"
@@ -934,8 +1040,6 @@ spec:
               name: backgroundImg
               label: 背景图片
               value: /themes/theme-hao/assets/images/sidebar/profile.webp
-              width: "15rem"
-              aspectRatio: "16/9"
               placeholder: 请输入背景图片路径或地址（建议使用 280px * 330px 图片效果最佳）
             - $formkit: attachment
               name: stickerImg
@@ -965,21 +1069,54 @@ spec:
               height: 200px
               language: html
               help: 支持 HTML 语法
-            - $formkit: array
+            - $formkit: repeater
               name: socialMedia
               label: 社交媒体
               help: 此处社交媒体最多设置两个
               max: 2
               value: [ ]
-              itemLabels:
-                - type: image
-                  label: $value.logo
-                - type: text
-                  label: $value.name
               children:
-                - $formkit: text
+                - $formkit: select
                   name: icon
                   label: 图标
+                  options:
+                    - label: 腾讯 QQ
+                      value: hao-icon-qq
+                    - label: Telegram
+                      value: hao-icon-telegram
+                    - label: 微信
+                      value: hao-icon-weixin
+                    - label: 公众号
+                      value: hao-icon-weixingongzhonghao
+                    - label: GitHub
+                      value: hao-icon-github
+                    - label: 哔哩哔哩
+                      value: hao-icon-bilibili
+                    - label: RSS
+                      value: hao-icon-rss
+                    - label: 新浪微博
+                      value: hao-icon-weibo
+                    - label: 知乎
+                      value: hao-icon-zhihu
+                    - label: 抖音 / TikTok
+                      value: hao-icon-tiktok
+                    - label: YouTube
+                      value: hao-icon-youtube
+                    - label: Discord
+                      value: hao-icon-discord
+                    - label: Steam
+                      value: hao-icon-steam
+                    - label: Facebook
+                      value: hao-icon-facebook
+                    - label: Instagram
+                      value: hao-icon-instagram
+                    - label: LinkedIn
+                      value: hao-icon-linkedin
+                    - label: Twitter
+                      value: hao-icon-twitter
+                    - label: 邮箱
+                      value: hao-icon-envelope
+
                 - $formkit: text
                   name: name
                   label: 名称
@@ -1009,14 +1146,10 @@ spec:
             - $formkit: attachment
               name: wechatImgFace
               label: 公众号正面图
-              width: "15rem"
-              aspectRatio: "20/8"
             - $formkit: attachment
               name: wechatImgBack
               label: 公众号背面图
               help: 图片可以从公众号后台下载物料或者自制
-              width: "15rem"
-              aspectRatio: "20/8"
         - $formkit: group
           name: power
           label: 爱发电赞助
@@ -1036,9 +1169,30 @@ spec:
               label: 赞助用户名
               help: carolcoral
         - $formkit: group
+          name: welcome
+          label: 小板报
+          value:
+            key:
+            locationLng:
+            locationLat:
+          children:
+            - $formkit: text
+              name: key
+              label: 输入cf-Worker部署地址
+              help: "输入样式：https://ip.oortaka.top 免费部署：https://oortaka.top/archives/ipdiliweizhi"
+            - $formkit: text
+              name: locationLng
+              label: 经度坐标
+              help: 可访问 https://lbs.amap.com/tools/picker 拾取坐标
+            - $formkit: text
+              name: locationLat
+              label: 纬度坐标
+              help: 示例：22.582401
+
+        - $formkit: group
           name: music
           label: 音乐卡片
-          help: 文档请看：https://githubfast.com/zonemeen/netease-recent-profile
+          help: 文档请看：https://github.com/zonemeen/netease-recent-profile
           value:
             musicUrl: /music
             lightMsimg: https://card-music.yyds.pink/?id=xxxxx&theme=card&themeColor=e60026&mode=light&size=300&show_random=1
@@ -1068,7 +1222,7 @@ spec:
         - $formkit: group
           name: steam
           label: Steam卡片
-          help: 文档请看：https://githubfast.com/yuyinws/steam-card
+          help: 文档请看：https://github.com/yuyinws/steam-card
           value:
             steamUrl: /
             cardSteam: https://card.yuy1n.io/card/xxxxxx/gradient1,badge,bg-game-1111460,games,screenshots,badges
@@ -1120,14 +1274,24 @@ spec:
           label: 文章归档
           value: 0
           help: 小于 0 则展示全部归档(目前没用等适配)
-        - $formkit: switch
+        - $formkit: radio
           name: tags_switch
           label: 标签&归档&统计 (标签按钮开关)
           value: true
-        - $formkit: switch
+          options:
+            - label: 显示
+              value: true
+            - label: 隐藏
+              value: false
+        - $formkit: radio
           name: archive_switch
           label: 标签&归档&统计 (归档按钮开关)
           value: false
+          options:
+            - label: 显示
+              value: true
+            - label: 隐藏
+              value: false
         - $formkit: group
           name: adbox
           label: 广告区域
@@ -1181,12 +1345,17 @@ spec:
                       value: vertical
                     - label: 水平横向
                       value: horizontal
-                - $formkit: switch
+                - $formkit: radio
                   name: full_width_responsive
                   id: full_width_responsive
                   key: full_width_responsive
                   value: false
-                  label: 宽度自适应
+                  label: 是否宽度自适应
+                  options:
+                    - label: 是
+                      value: true
+                    - label: 否
+                      value: false
             - $formkit: group
               if: $get(adType).value == 'customAd'
               name: ad_custom
@@ -1209,7 +1378,6 @@ spec:
                   name: ad_redirect_url
                   label: 自定义跳转地址
                   help: 自定义跳转地址
-
     - group: footer
       label: 页脚
       formSchema:
@@ -1221,9 +1389,14 @@ spec:
             logo: "困困鱼"
             description: "来自 困困鱼 最新设计与科技的文章"
           children:
-            - $formkit: switch
+            - $formkit: radio
               name: footer_bar_enable
               id: footer_bar_enable
+              options:
+                - label: 显示
+                  value: true
+                - label: 隐藏
+                  value: false
             - $formkit: code
               if: $get(footer_bar_enable).value
               name: logo
@@ -1249,89 +1422,172 @@ spec:
               label: 中间 logo
               placeholder: 请填写 logo 图片地址
               value: https://liuzhihang.com/upload/logo.png
-            - $formkit: array
+            - $formkit: repeater
               name: socialMediaLeft
               label: 左侧
               value: [ ]
-              itemLabels:
-                - type: text
-                  label: $value.name
-                - type: text
-                  label: $value.url
               children:
-                - $formkit: radio
-                  name: option_social_data
-                  id: left_option_social_data
-                  label: 类型
-                  value: icon
-                  help: "icon图标选择icon图标或者图片(如果使用图片请输入完整img标签)选择自定义"
-                  options:
-                    - value: icon
-                      label: icon图标
-                    - value: custom
-                      label: 自定义
-                - $formkit: textarea
+                - $formkit: select
                   name: icon
-                  key:  icon
-                  if: $get(left_option_social_data).value == 'icon'
-                  help: "icon图标，svg代码，图片(如果使用图片请输入完整img标签)"
                   label: 图标
-                  validation: "required"
-                - $formkit: iconify
-                  if: $get(left_option_social_data).value == 'custom'
-                  name: icon
-                  key:  custom_icon
-                  label: svg图标
-                  format: svg # svg / dataurl / url / name
+                  options:
+                    - label: 电子邮箱
+                      value: hao-icon-envelope
+                    - label: 微信
+                      value: hao-icon-weixin
+                    - label: 公众号
+                      value: hao-icon-weixingongzhonghao
+                    - label: rss
+                      value: hao-icon-rss
+                    - label: 腾讯 QQ
+                      value: hao-icon-qq
+                    - label: 新浪微博
+                      value: hao-icon-weibo
+                    - label: 知乎
+                      value: hao-icon-29
+                    - label: 豆瓣
+                      value: hao-icon-douban
+                    - label: 哔哩哔哩
+                      value: hao-icon-bilibili
+                    - label: GitHub
+                      value: hao-icon-github
+                    - label: GitLab
+                      value: hao-icon-gitlab
+                    - label: 百度
+                      value: hao-icon-baidu
+                    - label: 掘金
+                      value: hao-icon-juejin
+                    - label: 语雀
+                      value: hao-icon-yuque
+                    - label: 博客园
+                      value: hao-icon-cnblogs
+                    - label: CSDN
+                      value: hao-icon-csdn
+                    - label: LeetCode
+                      value: hao-icon-leetcode
+                    - label: 头条
+                      value: hao-icon-toutiao
+                    - label: 抖音 / TikTok
+                      value: hao-icon-tiktok
+                    - label: Telegram
+                      value: hao-icon-telegram
+                    - label: Facebook
+                      value: hao-icon-facebook1
+                    - label: Instagram
+                      value: hao-icon-Instagram
+                    - label: LinkedIn
+                      value: hao-icon-linkedin
+                    - label: Twitter
+                      value: hao-icon-dove
+                    - label: Slack
+                      value: hao-icon-slack
+                    - label: Discord
+                      value: hao-icon-discord-line
+                    - label: YouTube
+                      value: hao-icon-youtube
+                    - label: Steam
+                      value: hao-icon-steam
+                    - label: Dribbble
+                      value: hao-icon-dribbble
                 - $formkit: text
                   name: name
                   label: 名称
-                  validation: "required"
                 - $formkit: text
                   name: url
                   label: 链接
-                  validation: "required"
-            - $formkit: array
+                - $formkit: radio
+                  name: urlType
+                  label: 链接类型
+                  value: normal
+                  help: 如果选择了图片类型，那么在访客点击之后会使用弹框的形式加载
+                  options:
+                    - label: 跳转链接
+                      value: normal
+                    - label: 图片
+                      value: image
+            - $formkit: repeater
               name: socialMediaRight
               label: 右侧
               value: [ ]
-              itemLabels:
-                - type: text
-                  label: $value.name
-                - type: text
-                  label: $value.url
               children:
-                - $formkit: radio
-                  name: option_social_data
-                  id: right_option_social_data
-                  label: 类型
-                  value: icon
-                  options:
-                    - value: icon
-                      label: icon图标
-                    - value: custom
-                      label: 自定义
-                - $formkit: textarea
-                  if: $get(right_option_social_data).value == 'icon'
+                - $formkit: select
                   name: icon
-                  key:  icon
-                  help: "icon图标或者图片(如果使用图片请输入完整img标签)"
                   label: 图标
-                  validation: "required"
-                - $formkit: iconify
-                  if: $get(right_option_social_data).value == 'custom'
-                  name: icon
-                  key:  custom_icon
-                  label: svg图标
-                  format: svg # svg / dataurl / url / name
+                  options:
+                    - label: 电子邮箱
+                      value: hao-icon-envelope
+                    - label: 微信
+                      value: hao-icon-weixin
+                    - label: 公众号
+                      value: hao-icon-weixingongzhonghao
+                    - label: rss
+                      value: hao-icon-rss
+                    - label: 腾讯 QQ
+                      value: hao-icon-qq
+                    - label: 新浪微博
+                      value: hao-icon-weibo
+                    - label: 知乎
+                      value: hao-icon-29
+                    - label: 豆瓣
+                      value: hao-icon-douban
+                    - label: 哔哩哔哩
+                      value: hao-icon-bilibili
+                    - label: GitHub
+                      value: hao-icon-github
+                    - label: GitLab
+                      value: hao-icon-gitlab
+                    - label: 百度
+                      value: hao-icon-baidu
+                    - label: 掘金
+                      value: hao-icon-juejin
+                    - label: 语雀
+                      value: hao-icon-yuque
+                    - label: 博客园
+                      value: hao-icon-cnblogs
+                    - label: CSDN
+                      value: hao-icon-csdn
+                    - label: LeetCode
+                      value: hao-icon-leetcode
+                    - label: 头条
+                      value: hao-icon-toutiao
+                    - label: 抖音 / TikTok
+                      value: hao-icon-tiktok
+                    - label: Telegram
+                      value: hao-icon-telegram
+                    - label: Facebook
+                      value: hao-icon-facebook1
+                    - label: Instagram
+                      value: hao-icon-Instagram
+                    - label: LinkedIn
+                      value: hao-icon-linkedin
+                    - label: Twitter
+                      value: hao-icon-dove
+                    - label: Slack
+                      value: hao-icon-slack
+                    - label: Discord
+                      value: hao-icon-discord-line
+                    - label: YouTube
+                      value: hao-icon-youtube
+                    - label: Steam
+                      value: hao-icon-steam
+                    - label: Dribbble
+                      value: hao-icon-dribbble
                 - $formkit: text
                   name: name
                   label: 名称
-                  validation: "required"
                 - $formkit: text
                   name: url
                   label: 链接
-                  validation: "required"
+                - $formkit: radio
+                  name: urlType
+                  label: 链接类型
+                  value: normal
+                  help: 如果选择了图片类型，那么在访客点击之后会使用弹框的形式加载
+                  options:
+                    - label: 跳转链接
+                      value: normal
+                    - label: 图片
+                      value: image
         - $formkit: menuRadio
           name: menu
           label: 相关链接
@@ -1343,10 +1599,15 @@ spec:
             enable_footer_group: true
             num: 3
           children:
-            - $formkit: switch
+            - $formkit: radio
               name: enable_footer_group
               id: enable_footer_group
               key: enable_footer_group
+              options:
+                - label: 启用
+                  value: true
+                - label: 禁用
+                  value: false
             - $formkit: number
               if: $get(enable_footer_group).value
               name: num
@@ -1384,59 +1645,99 @@ spec:
               label: 底部页脚
               value:
               children:
-                - $formkit: switch
+                - $formkit: radio
                   name: default_enable
                   id: default_enable
                   key: default_enable
                   label: 底部启用
+                  options:
+                    - label: 显示
+                      value: true
+                    - label: 隐藏
+                      value: false
                 - $formkit: number
                   if: $get(default_enable).value
                   name: footer_banner_padding
                   id: footer_banner_padding
                   key: footer_banner_padding
                   label: 页脚高度
-                - $formkit: switch
+                - $formkit: radio
                   if: $get(default_enable).value
                   name: dingyue
                   id: dingyue
                   key: dingyue
                   label: 订阅
-                - $formkit: switch
+                  options:
+                    - label: 显示
+                      value: true
+                    - label: 隐藏
+                      value: false
+                - $formkit: radio
                   if: $get(default_enable).value
                   name: zhuti
                   id: zhuti
                   key: zhuti
                   label: 主题
-                - $formkit: switch
+                  options:
+                    - label: 显示
+                      value: true
+                    - label: 隐藏
+                      value: false
+                - $formkit: radio
                   if: $get(default_enable).value
                   name: about
                   id: about
                   key: about
                   label: 关于
-                - $formkit: switch
+                  options:
+                    - label: 显示
+                      value: true
+                    - label: 隐藏
+                      value: false
+                - $formkit: radio
                   if: $get(default_enable).value
                   name: icp_icon
                   id: icp_icon
                   key: icp_icon
                   label: icp备案
-                - $formkit: switch
+                  options:
+                    - label: 显示
+                      value: true
+                    - label: 隐藏
+                      value: false
+                - $formkit: radio
                   if: $get(default_enable).value
                   name: gongwangan
                   id: gongwangan
                   key: gongwangan
                   label: 公网安备案
-                - $formkit: switch
+                  options:
+                    - label: 显示
+                      value: true
+                    - label: 隐藏
+                      value: false
+                - $formkit: radio
                   if: $get(default_enable).value
                   name: yingsi
                   id: yingsi
                   key: yingsi
                   label: 隐私
-                - $formkit: switch
+                  options:
+                    - label: 显示
+                      value: true
+                    - label: 隐藏
+                      value: false
+                - $formkit: radio
                   if: $get(default_enable).value
                   name: yunzhichi
                   id: yunzhichi
                   key: yunzhichi
                   label: 云服务支持
+                  options:
+                    - label: 显示
+                      value: true
+                    - label: 隐藏
+                      value: false
                 - $formkit: select
                   name: yunzhichi_list
                   id: yunzhichi_list
@@ -1475,20 +1776,28 @@ spec:
               label: 中间
               value:
               children:
-                - $formkit: switch
+                - $formkit: radio
                   name: owner_enable
                   label: 网站所有者
-                - $formkit: switch
+                  options:
+                    - label: 显示
+                      value: true
+                    - label: 隐藏
+                      value: false
+                - $formkit: radio
                   name: runtime_enable
                   id: runtime_enable
                   label: 运行时间
+                  options:
+                    - label: 显示
+                      value: true
+                    - label: 隐藏
+                      value: false
                 - $formkit: attachment
                   if: $get(runtime_enable).value
                   key: work_img
                   name: work_img
                   label: 上班时间的徽标
-                  width: "12rem"
-                  aspectRatio: "14/8"
                   placeholder: 请输入内容
                 - $formkit: text
                   if: $get(runtime_enable).value
@@ -1501,8 +1810,6 @@ spec:
                   key: offduty_img
                   name: offduty_img
                   label: 下班时间的徽标
-                  width: "12rem"
-                  aspectRatio: "14/8"
                   placeholder: 请输入内容
                 - $formkit: text
                   if: $get(runtime_enable).value
@@ -1510,19 +1817,19 @@ spec:
                   name: offduty_description
                   label: 下班时间的 title 描述
                   placeholder: 请输入内容
-                - $formkit: switch
+                - $formkit: radio
                   name: bdageitem_enable
                   id: bdageitem_enable
                   label: 徽标配置项
-                - $formkit: array
+                  options:
+                    - label: 显示
+                      value: true
+                    - label: 隐藏
+                      value: false
+                - $formkit: repeater
                   name: bdageitem
                   label: 徽标配置项
                   if: $get(bdageitem_enable).value
-                  itemLabels:
-                    - type: text
-                      label: $value.message
-                    - type: text
-                      label: $value.link
                   value:
                   children:
                     - $formkit: url
@@ -1536,8 +1843,6 @@ spec:
                       label: 徽标
                       placeholder: 请输入内容
                       validation: required
-                      width: "12rem"
-                      aspectRatio: "14/8"
                       value: "https://npm.onmicrosoft.cn/hao-theme-static@1.3.6/images/Frame-Halo-blue.svg"
                     - $formkit: text
                       name: message
@@ -1549,15 +1854,44 @@ spec:
     - group: post
       label: 文章
       formSchema:
-        - $formkit: switch
+        - $formkit: radio
           name: dynamicBackground
           label: 动态主色
           value: true
+          options:
+            - label: 打开
+              value: true
+            - label: 关闭
+              value: false
           help: 文章主色匹配图片颜色
-        - $formkit: switch
-          name: opacity
-          label: 目录模糊效果
-          value: true
+        - $formkit: group
+          name: postHeroColor
+          label: 文章标题背景（独立）
+          value:
+            enable: false
+            light: '#4a73d9'
+            dark:  '#e3a23a'
+          children:
+            - $formkit: radio
+              name: enable
+              id: postHeroColor_enable
+              key: postHeroColor_enable
+              label: 启用文章标题背景自定义
+              options:
+                - label: 开启
+                  value: true
+                - label: 关闭
+                  value: false
+            - $formkit: color
+              if: $get(postHeroColor_enable).value
+              name: light
+              label: 浅色模式颜色
+              format: hex
+            - $formkit: color
+              if: $get(postHeroColor_enable).value
+              name: dark
+              label: 深色模式颜色
+              format: hex
         - $formkit: group
           name: aiDescription
           label: 文章 AI 摘要
@@ -1572,11 +1906,16 @@ spec:
             key:
             Referer:
           children:
-            - $formkit: switch
+            - $formkit: radio
               name: aiDescriptionEnable
               id: aiDescriptionEnable
               key: aiDescriptionEnable
               value: false
+              options:
+                - label: 启用
+                  value: true
+                - label: 禁用
+                  value: false
             - $formkit: text
               if: $get(aiDescriptionEnable).value
               name: gptName
@@ -1594,11 +1933,16 @@ spec:
                   value: local
                 - label: ai
                   value: tianli
-            - $formkit: switch
+            - $formkit: radio
               if: $get(aiDescriptionEnable).value
               name: switchBtn
               label: 显示切换按钮
               value: false
+              options:
+                - label: 是
+                  value: true
+                - label: 否
+                  value: false
             - $formkit: url
               if: $get(aiDescriptionEnable).value
               name: btnLink
@@ -1629,33 +1973,6 @@ spec:
               label: 你的博客地址
               help: 注意保留最后的斜杠
               value: https://xx.xx/
-        - $formkit: group
-          name: passage_tips
-          label: 温馨提示
-          value:
-            enable: false
-            content: 文章内容可能已经过时。
-            day: 7
-          children:
-            - $formkit: switch
-              name: enable
-              id: enable
-            - $formkit: number
-              if: "$get(enable).value"
-              name: day
-              label: 更新时间大于天数显示
-              validation: required
-            - $formkit: code
-              if: "$get(enable).value"
-              name: content
-              height: 100px
-              label: 温馨提示文案
-              help: "自定义温馨提示的文案，支持html语法"
-              language: html
-        - $formkit: switch
-          name: update_time
-          label: 最后更新时间
-          value: false
         - $formkit: select
           name: copyrightsStyle
           id: copyrightsStyle
@@ -1676,19 +1993,26 @@ spec:
           name: post_edit
           label: 运营模式与责任
           value:
-            enable_post_edit: false
-            post_edit_url: "/rss"
+            enable_post_edit:
+            post_edit_url:
           children:
-            - $formkit: switch
+            - $formkit: radio
               name: enable_post_edit
               id: enable_post_edit
               key: enable_post_edit
               help: 启用文章运营模式与责任，请正确填写链接
+              value: false
+              options:
+                - label: 启用
+                  value: true
+                - label: 禁用
+                  value: false
             - $formkit: url
               name: post_edit_url
               if: $get(enable_post_edit).value
               label: 运营模式与责任地址
               placeholder: 请输入运营模式与责任地址
+              value: /rss
         - $formkit: group
           name: share_right
           label: 分享按钮
@@ -1697,50 +2021,58 @@ spec:
             weibo_edit: true
             copyurl_edit: true
           children:
-            - $formkit: switch
+            - $formkit: radio
               name: mobile_edit
               help: 启用分享手机访问二维码
               value: true
-            - $formkit: switch
+              options:
+                - label: 启用
+                  value: true
+                - label: 禁用
+                  value: false
+            - $formkit: radio
               name: weibo_edit
               help: 启用分享到微博
-            - $formkit: switch
+              value: true
+              options:
+                - label: 启用
+                  value: true
+                - label: 禁用
+                  value: false
+            - $formkit: radio
               name: copyurl_edit
               help: 启用复制链接
               value: true
+              options:
+                - label: 启用
+                  value: true
+                - label: 禁用
+                  value: false
         - $formkit: group
           name: copyrights
           label: 版权声明
           help: 需要在发布文章时的元数据上选显示版权声明才可以生效
           value:
-            enable: true
             content: '本文是原创文章，采用 <a target="_blank" href="/cc">CC BY-NC-ND 4.0</a> 协议，完整转载请注明来自 <a href="/" target="_blank" >程序员小航</a>'
             reprintContent: '本文是转载文章，版权归原作者所有。建议访问原文，转载本文请联系原作者。'
           children:
-            - $formkit: switch
-              name: enable
-              help: 文章底部显示版权声明模块
-            - $formkit: text
-              name: originalUrl
-              label: 原创链接
-              placeholder: 请输入链接
-            - $formkit: text
-              name: reprintUrl
-              label: 转载链接
-              placeholder: 请输入链接
-            - $formkit: code
+            - $formkit: "text"
+              name: "originalUrl"
+              label: "原创链接"
+              placeholder: "请输入链接"
+            - $formkit: "text"
+              name: "reprintUrl"
+              label: "转载链接"
+              placeholder: "请输入链接"
+            - $formkit: textarea
               name: content
               label: 原创声明内容
               placeholder: '本文是原创文章，采用 <a target="_blank" href="/cc">CC BY-NC-ND 4.0</a> 协议，完整转载请注明来自 <a href="/" target="_blank" >程序员小航</a>'
-              height: 120px
-              language: html
               help: 支持 HTML 语法
-            - $formkit: code
+            - $formkit: textarea
               name: reprintContent
               label: 转载声明内容
               placeholder: '本文是转载文章，版权归原作者所有。建议访问原文，转载本文请联系原作者。'
-              height: 120px
-              language: html
               help: 支持 HTML 语法
         - $formkit: select
           name: recommendQuantity
@@ -1771,8 +2103,6 @@ spec:
         - $formkit: attachment
           name: backgroundImg
           label: 背景图
-          width: "15rem"
-          aspectRatio: "16/9"
           value: https://liuzhihang.com/upload/moments.png
           placeholder: 请输入图片地址
         - $formkit: text
@@ -1817,25 +2147,75 @@ spec:
           name: linksUrl
           value: "/links"
           label: 友链链接
-        - $formkit: switch
+        - $formkit: radio
           name: linksCanvas
           label: 互动友链
           value: false
-        - $formkit: switch
-          name: enable_comment
-          label: 启用评论
-          help: "启用链接插件原生适配的评论组件，需要链接插件 >= 1.4.0 版本"
+          options:
+            - label: 打开
+              value: true
+            - label: 关闭
+              value: false
         - $formkit: code
           name: linksArticle
-          height: 300px
+          height: 200px
           label: 底部显示内容
           language: html
-        - $formkit: text
-          name: fmomentsPageSize
-          label: 友链每页数量
-          help: "填写每页（滚动加载）展示的友链数量,"
-          value: 12
 
+    - group: fcircle
+      label: 友链鱼塘
+      formSchema:
+        - $formkit: attachment
+          name: backgroundImg
+          label: 背景图
+          value: https://npm.onmicrosoft.cn/hao-theme-static@1.3.6/images/64624940e3623.jpeg
+          placeholder: 请输入图片地址
+        - $formkit: text
+          name: smallTitle
+          label: 小标题
+          value: 友链
+        - $formkit: text
+          name: bigTitle
+          label: 大标题
+          value: 最新文章订阅
+        - $formkit: text
+          name: detail
+          label: 描述
+          value: 使用 友链朋友圈 订阅友链最新文章
+        - $formkit: text
+          name: buttonTitle
+          label: 按钮标题
+          value: 部署项目
+        - $formkit: url
+          name: buttonUrl
+          validation: url
+          value: https://githubfast.com/Rock-Candy-Tea/hexo-circle-of-friends
+          label: 按钮跳转连链接
+          placeholder: 请输入跳转 url
+        - $formkit: url
+          name: apiurl
+          value: "https://fcircle.oortaka.top/"
+          label: token地址
+          placeholder: 请输入token地址
+          help: 部署配置项目地址：https://github.com/Rock-Candy-Tea/hexo-circle-of-friends
+        - $formkit: radio
+          name: fcircleRandomFriendsEnable
+          label: 友链鱼塘页面（钓鱼）
+          value: true
+          options:
+            - label: 打开
+              value: true
+            - label: 关闭
+              value: false
+        - $formkit: radio
+          name: linksRandomFriendsEnable
+          label: 友链页面（钓鱼）
+          value: true
+          options:
+            - label: 打开
+              value: true
+            - label: 关闭
+              value: false
 
     - group: photos
       label: 图库
@@ -1851,6 +2231,22 @@ spec:
               label: 默认
             - value: one
               label: 样式一
+        - $formkit: attachment
+          if: $get(photosStyle).value == 'default'
+          name: backgroundImg
+          label: 背景图
+          value: https://liuzhihang.com/upload/moments.png
+        - $formkit: text
+          if: $get(photosStyle).value == 'default'
+          name: smallTitle
+          key: smallTitle
+          label: 小标题
+          value: 相册集
+        - $formkit: text
+          name: bigTitle
+          key: bigTitle
+          label: 大标题
+          value: 这里是我的相册集哦😯
         - $formkit: text
           name: topLink
           key: topLink
@@ -1862,33 +2258,41 @@ spec:
           name: detail
           label: 描述
           value: 每一张照片都是一次美好的记忆。
-        - $formkit: switch
+        - $formkit: radio
           name: tagEnable
           label: 图片标签
           value: false
           help: 图片左上角标签
-        - $formkit: attachment
-          name: backgroundImg
-          key: backgroundImg
-          id: backgroundImg
-          label: 背景图
-          width: "15rem"
-          aspectRatio: "16/9"
-          value: https://liuzhihang.com/upload/moments.png
-          placeholder: 请输入图片地址
+          options:
+            - label: 显示
+              value: true
+            - label: 隐藏
+              value: false
 
     - group: todo
       label: 待办清单
       formSchema:
-        - $formkit: array
+        - $formkit: attachment
+          name: backgroundImg
+          label: 背景图
+          value: https://npm.onmicrosoft.cn/hao-theme-static@1.3.6/images/64624940e3623.jpeg
+          placeholder: 请输入图片地址
+        - $formkit: text
+          name: smallTitle
+          label: 小标题
+          value: 想做清单
+        - $formkit: text
+          name: bigTitle
+          label: 大标题
+          value: ToDoList
+        - $formkit: text
+          name: detail
+          label: 描述
+          value: 要做的事还有很多，想做的事源源不断
+        - $formkit: repeater
           name: list
-          label: 待办清单列表
+          label: 待办清单
           value: [ ]
-          itemLabels:
-            - type: text
-              label: $value.seat
-            - type: text
-              label: $value.class_name
           children:
             - $formkit: text
               name: class_name
@@ -1903,15 +2307,10 @@ spec:
                   value: left
                 - label: 右
                   value: right
-            - $formkit: array
+            - $formkit: repeater
               name: todo_list
               label: 内容列表
               value: [ ]
-              itemLabels:
-                - type: text
-                  label: $value.completed
-                - type: text
-                  label: $value.content
               children:
                 - $formkit: textarea
                   name: content
@@ -1933,8 +2332,6 @@ spec:
         - $formkit: attachment
           name: backgroundImg
           label: 背景图
-          width: "15rem"
-          aspectRatio: "16/9"
           value: https://liuzhihang.com/upload/moments.png
           placeholder: 请输入图片地址
         - $formkit: text
@@ -1949,93 +2346,55 @@ spec:
           name: detail
           label: 描述
           value: 跟我一起享受科技带来的乐趣
-
-    - group: envelope_comment
-      label: 留言板
-      formSchema:
-        - $formkit: switch
-          label: 信笺
-          name: enable_envelope_comment
-          key: enable_envelope_comment
-          id: enable_envelope_comment
-          value: true
-        - $formkit: code
-          if: $get(enable_envelope_comment).value
-          name: title
-          label: 标题
-          placeholder: 请输入内容
-          value: <div align="center">留言板</div>
-          height: 80px
-          language: html
-          help: 支持 HTML 语法
-        - $formkit: group
-          name: custom_pic
-          if: $get(enable_envelope_comment).value
-          label: 信笺图片
-          value:
-            cover:
-            line:
-            beforeimg:
-            afterimg:
-          children:
-            - $formkit: attachment
-              name: cover
-              label: 头部图片
-              placeholder: 请输入内容
-              width: "15rem"
-              aspectRatio: "20/15"
-              value: "https://npm.elemecdn.com/hexo-butterfly-envelope/lib/violet.jpg"
-            - $formkit: attachment
-              name: line
-              label: 底部图片
-              placeholder: 请输入内容
-              width: "15rem"
-              aspectRatio: "20/15"
-              value: "https://npm.elemecdn.com/hexo-butterfly-envelope/lib/line.png"
-            - $formkit: attachment
-              name: beforeimg
-              label: 前半部分图片
-              placeholder: 请输入内容
-              width: "15rem"
-              aspectRatio: "20/15"
-              value: "https://npm.elemecdn.com/hexo-butterfly-envelope/lib/before.png"
-            - $formkit: attachment
-              name: afterimg
-              label: 后半部分图片
-              placeholder: 请输入内容
-              width: "15rem"
-              aspectRatio: "20/15"
-              value: "https://npm.elemecdn.com/hexo-butterfly-envelope/lib/after.png"
-        - $formkit: list
-          if: $get(enable_envelope_comment).value
-          name: message_list
-          label: 正文
-          addLabel: 添加标签
-          help: 选项是默认给的值
-          itemType: string
-          value:
-            - 有什么想问的？
-            - 有什么想说的？
-            - 有什么想吐槽的？
-            - 哪怕是有什么想吃的，都可以告诉我哦~
+        - $formkit: repeater
+          name: category_list
+          label: 我的装备
+          value: [ ]
           children:
             - $formkit: text
-              index: "$index"
-              validation: required
-        - $formkit: text
-          name: bottom
-          if: $get(enable_envelope_comment).value
-          label: 底部文本
-          placeholder: 请输入内容
-          value: 自动书记人偶竭诚为您服务！
-          help: 仅支持单行文本
-        - $formkit: number
-          name: height
-          if: $get(enable_envelope_comment).value
-          label: 高度
-          placeholder: 请输入内容
-          help: 信封划出的高度
-          value: 1024
+              name: category_name
+              label: 装备分类名称
+              placeholder: 请输入装备分类名称
+              value: 生产力
+            - $formkit: text
+              name: description
+              label: 分类描述信息
+              placeholder: 请输入分类描述信息
+              value: 提升自己生产效率的硬件设备
+            - $formkit: repeater
+              name: equipment_list
+              label: 装备列表
+              value: [ ]
+              children:
+                - $formkit: attachment
+                  name: img
+                  label: 装备展示图
+                  placeholder: 请输入装备展示图地址
+                - $formkit: text
+                  name: name
+                  label: 装备名称
+                  placeholder: 请输入装备名称
+                  value: MacBookPro
+                - $formkit: text
+                  name: model
+                  label: 装备型号/版本
+                  placeholder: 请输入装备型号/版本
+                  value: M1Pro 32G / 1TB
+                - $formkit: textarea
+                  name: description
+                  label: 装备描述
+                  placeholder: 请输入装备描述
+                  value: 屏幕显示效果好、色彩准确、对比度强、性能强劲、续航优秀。可以用来开发和设计。
+                - $formkit: text
+                  name: button
+                  label: 左下角按钮显示文字
+                  placeholder: 请输入左下角按钮显示文字
+                  value: 详情
+                - $formkit: text
+                  name: url
+                  label: 左下角按钮跳转链接
+                  placeholder: 请输入左下角按钮跳转链接
+                  value: https://www.apple.com.cn/macbook-pro/
 
     - group: about
       label: 关于
@@ -2127,13 +2486,10 @@ spec:
               label: 生涯标题
               placeholder: 请输入内容
               value: 无限进步
-            - $formkit: array
+            - $formkit: repeater
               name: authorCareersTags
               label: 标签
               value: [ ]
-              itemLabels:
-                - type: text
-                  label: $value.desc
               children:
                 - $formkit: color
                   name: background
@@ -2187,7 +2543,7 @@ spec:
           name: authorCareersPhoto
           label: 图片
           value: https://liuzhihang.com/upload/recommend.png
-        - $formkit: array
+        - $formkit: repeater
           name: textarea
           label: 文本块
           value:
@@ -2200,9 +2556,6 @@ spec:
           min: 2
           max: 2
           help: 左边的一行10字 右面一行19字(设置两条数据，不然出不来)
-          itemLabels:
-            - type: text
-              label: $value.tittle
           children:
             - $formkit: text
               name: tittle
@@ -2273,17 +2626,12 @@ spec:
               name: game2_title
               label: 标题
               placeholder: 请输入内容
-            - $formkit: array
+            - $formkit: repeater
               name: comic_list
               id: comic_list
               key: comic_list
               if: $get(game2_type).value == 'comic'
               label: 追番列表
-              itemLabels:
-                - type: text
-                  label: $value.tittle
-                - type: text
-                  label: $value.url
               children:
                 - $formkit: text
                   name: title
@@ -2331,8 +2679,6 @@ spec:
             - $formkit: attachment
               name: like_bg
               label: 背景图片
-              width: "15rem"
-              aspectRatio: "16/9"
               placeholder: 请输入内容
         - $formkit: group
           name: music
@@ -2358,13 +2704,11 @@ spec:
             - $formkit: attachment
               name: music_bg
               label: 背景图片
-              width: "15rem"
-              aspectRatio: "16/9"
               placeholder: 请输入内容
         - $formkit: text
           name: LingQueMonitorID
-          label: 51la 网站统计
-          help: 统计ID
+          label: 51la网站统计：https://51.la/
+          help: 填入统计ID。类型：3e8j7Si43kD2NNbv
           placeholder: 请输入内容
         - $formkit: group
           name: map
@@ -2387,14 +2731,11 @@ spec:
               name: backgroundDark
               label: 地图暗色模式背景
               placeholder: 请输入内容
-            - $formkit: array
+            - $formkit: repeater
               name: authorInfo
               label: 个人信息
               min: 3
               max: 3
-              itemLabels:
-                - type: text
-                  label: $value.authorInfoTitle
               children:
                 - $formkit: text
                   name: authorInfoTitle
@@ -2429,10 +2770,15 @@ spec:
             start_time: "2023-11-22"
             end_time: "2033-11-22"
           children:
-            - $formkit: switch
+            - $formkit: radio
               name: tenyear_enable
               id: tenyear_enable
               key: tenyear_enable
+              options:
+                - label: 显示
+                  value: true
+                - label: 隐藏
+                  value: false
             - $formkit: text
               if: $get(tenyear_enable).value
               name: tenyear_tips
@@ -2460,25 +2806,17 @@ spec:
     - group: aboutReward
       label: 关于（打赏）
       formSchema:
-        - $formkit: switch
-          name: aboutRewardEnable
-          id: aboutRewardEnable
-          key: aboutRewardEnable
-          value: true
         - $formkit: text
-          if: $get(aboutRewardEnable).value
           name: title
           label: 标题
           placeholder: 请输入内容
           value: 赞赏名单
         - $formkit: text
-          if: $get(aboutRewardEnable).value
           name: content
           label: 内容
           placeholder: 请输入内容
           value: 感谢赞赏的人，因为你们，让我感受到写博客这件事情能够给你们创造价值。这会让我在这条路上走得更远。
         - $formkit: group
-          if: $get(aboutRewardEnable).value
           name: reward
           label: 打赏按钮
           value:
@@ -2486,20 +2824,32 @@ spec:
             name:
             wxPay:
             alipay:
-            enable_reward_wz: false
-            reward_md_url: "/about"
+            enable_reward_wz:
+            reward_md_url:
           children:
             - $formkit: url
               name: reward_md_url
               label: 名单地址
               placeholder: 请输入赞赏者名单地址
-            - $formkit: switch
+              value: /about
+            - $formkit: radio
               name: enable_reward_wz
               label: 文章页面打赏
-            - $formkit: switch
+              value: false
+              options:
+                - label: 启用
+                  value: true
+                - label: 禁用
+                  value: false
+            - $formkit: radio
               name: enable_reward
               label: 关于页面打赏
               value: false
+              options:
+                - label: 启用
+                  value: true
+                - label: 禁用
+                  value: false
             - $formkit: text
               name: name
               label: 按钮标题
@@ -2509,32 +2859,16 @@ spec:
               name: wxPay
               label: 微信收款码
               help: 微信二维码图片链接
-              width: "15rem"
               placeholder: 请填写微信二维码图片链接
             - $formkit: attachment
               name: alipay
               label: 支付宝收款码
               help: 支付宝二维码图片链接
-              width: "15rem"
               placeholder: 请填写支付宝二维码图片链接
-        - $formkit: text
-          if: $get(aboutRewardEnable).value
-          name: rewardNumber
-          label: 标记金额
-          placeholder: 请输入标记金额，大于等于该值自动标记
-          value: 10
-        - $formkit: array
-          if: $get(aboutRewardEnable).value
+        - $formkit: repeater
           name: reward_list
           label: 打赏名单
           value: [ ]
-          itemLabels:
-            - type: image
-              label: $value.avatar
-            - type: text
-              label: $value.name
-            - type: text
-              label: $value.amount
           children:
             - $formkit: text
               name: name
@@ -2548,20 +2882,120 @@ spec:
               name: datatime
               label: 时间
               placeholder: 请输入内容
+            - $formkit: radio
+              name: sign
+              label: 标记
+              value: N
+              options:
+                - label: 是
+                  value: Y
+                - label: 否
+                  value: N
+
+    - group: envelope_comment
+      label: 留言板
+      formSchema:
+        - $formkit: radio
+          label: 弹幕
+          name: enable_danmu
+          value: true
+          options:
+            - label: 启用
+              value: true
+            - label: 禁用
+              value: false
+        - $formkit: radio
+          label: 信笺
+          name: enable_envelope_comment
+          key: enable_envelope_comment
+          id: enable_envelope_comment
+          value: true
+          options:
+            - label: 启用
+              value: true
+            - label: 禁用
+              value: false
+        - $formkit: textarea
+          if: $get(enable_envelope_comment).value
+          name: title
+          label: 标题
+          placeholder: 请输入内容
+          value: <div align="center">留言板</div>
+          help: 支持 HTML 语法
+        - $formkit: group
+          name: custom_pic
+          if: $get(enable_envelope_comment).value
+          label: 信笺图片
+          value:
+            cover:
+            line:
+            beforeimg:
+            afterimg:
+          children:
             - $formkit: attachment
-              name: avatar
-              label: 头像
-              placeholder: 请输入头像地址
+              name: cover
+              label: 头部图片
+              placeholder: 请输入内容
+              value: "https://npm.elemecdn.com/hexo-butterfly-envelope/lib/violet.jpg"
+            - $formkit: attachment
+              name: line
+              label: 底部图片
+              placeholder: 请输入内容
+              value: "https://npm.elemecdn.com/hexo-butterfly-envelope/lib/line.png"
+            - $formkit: attachment
+              name: beforeimg
+              label: 前半部分图片
+              placeholder: 请输入内容
+              value: "https://npm.elemecdn.com/hexo-butterfly-envelope/lib/before.png"
+            - $formkit: attachment
+              name: afterimg
+              label: 后半部分图片
+              placeholder: 请输入内容
+              value: "https://npm.elemecdn.com/hexo-butterfly-envelope/lib/after.png"
+        - $formkit: repeater
+          name: messageList
+          if: $get(enable_envelope_comment).value
+          label: 正文
+          value:
+            - content: "有什么想问的？"
+            - content: "有什么想说的？"
+            - content: "有什么想吐槽的？"
+            - content: "哪怕是有什么想吃的，都可以告诉我哦~"
+          children:
+            - $formkit: text
+              name: content
+              label: 内容
+              placeholder: 请输入内容
+              value: "有什么想问的？"
+        - $formkit: text
+          name: bottom
+          if: $get(enable_envelope_comment).value
+          label: 底部文本
+          placeholder: 请输入内容
+          value: 自动书记人偶竭诚为您服务！
+          help: 仅支持单行文本
+        - $formkit: number
+          name: height
+          if: $get(enable_envelope_comment).value
+          label: 高度
+          placeholder: 请输入内容
+          help: 信封划出的高度
+          value: 1024
 
     - group: comments
       label: 评论
       formSchema:
-        - $formkit: switch
+        - $formkit: radio
           name: commentsEnable
           id: commentsEnable
           key: commentsEnable
           label: 开关
           value: true
+          options:
+            - label: 打开
+              value: true
+            - label: 关闭
+              value: false
         - $formkit: select
           name: use
           label: 请选择评论系统
@@ -2578,12 +3012,17 @@ spec:
               value: Artalk
             - label: Waline
               value: Waline
-        - $formkit: switch
+        - $formkit: radio
           if: ($get(use).value == 'Twikoo' || $get(use).value == 'Artalk' || $get(use).value == 'Waline' ) && $get(commentsEnable).value
           name: lazyload
           label: 评论懒加载
           value: false
           help: 当评论进入浏览器的视窗时，将加载评论系统。(不建议使用，定位不到评论位置)
+          options:
+            - label: 打开
+              value: true
+            - label: 关闭
+              value: false
         - $formkit: group
           if: $get(commentsEnable).value &&  $get(use).value == 'Artalk'
           name: artalks
@@ -2695,10 +3134,15 @@ spec:
             visitorMailEnable: true
             mail: visitor@xxx.com
           children:
-            - $formkit: switch
+            - $formkit: radio
               name: visitorMailEnable
               id: visitorMailEnable
               key: visitorMailEnable
+              options:
+                - label: 打开
+                  value: true
+                - label: 关闭
+                  value: false
             - $formkit: text
               if: $get(visitorMailEnable).value
               name: mail
@@ -2714,10 +3158,15 @@ spec:
             barrageTime: 4000
             mailMd5:
           children:
-            - $formkit: switch
+            - $formkit: radio
               name: commentBarrageEnable
               id: commentBarrageEnable
               key: commentBarrageEnable
+              options:
+                - label: 显示
+                  value: true
+                - label: 隐藏
+                  value: false
             - $formkit: number
               if: $get(commentBarrageEnable).value
               name: maxBarrage
@@ -2743,9 +3192,14 @@ spec:
               help: 用于验证博主评论，可前往cmd5.com加密自己使用的邮箱，选择32位小写
               validation: required
 
+
     - group: style
       label: 样式
       formSchema:
+        - $formkit: checkbox
+          name: enableChangeColorScheme
+          label: 允许访客切换配色
+          value: true
         - $formkit: radio
           name: colorScheme
           label: 默认配色
@@ -2765,10 +3219,15 @@ spec:
           name: themeDarkSkin
           label: 主题深色基色
           value: "#f2b94b"
-        - $formkit: switch
+        - $formkit: radio
           name: universe
           label: 深色模式粒子效果
           value: true
+          options:
+            - label: 打开
+              value: true
+            - label: 关闭
+              value: false
         - $formkit: group
           name: translate
           label: 简繁转换
@@ -2784,55 +3243,218 @@ spec:
                   value: 2
                 - label: 繁體中文
                   value: 1
-            - $formkit: switch
+            - $formkit: radio
               name: translateEnable
               label: 允许切换语言
-        - $formkit: textarea
-          name: fontFamily
+              options:
+                - label: 打开
+                  value: true
+                - label: 关闭
+                  value: false
+        - $formkit: select
+          name: global_font
           label: 全局字体
-          placeholder: '"PingFang SC", "Hiragino Sans GB", "Microsoft YaHei"'
-
+          value: off
+          help: 选择站点的全局字体（选择“关闭”将使用系统字体）
+          options:
+            - label: 关闭
+              value: off
+            - label: 筑紫A丸
+              value: zhuziawan
+            - label: 钉钉进步体
+              value: dingdingjinbuti
+            - label: 站酷仓耳渔阳体
+              value: zhankuyuyang
+            - label: 站酷快乐体
+              value: zhankukuaile
+        - $formkit: select
+          name: cursor_move
+          label: 鼠标移动特效
+          value: none
+          options:
+            - value: none
+              label: 关闭
+            - value: bubbleCursor
+              label: 气泡跟随
+            - value: emojiCursor
+              label: 表情包跟随
+            - value: springyEmojiCursor
+              label: 弹性表情包跟随
+            - value: fairyDustCursor
+              label: 仙女棒效果
+            - value: snowflakeCursor
+              label: 雪花跟随
+            - value: followingDotCursor
+              label: 圆点跟随
+            - value: ghostCursor
+              label: 移动残影（疏）
+            - value: trailingCursor
+              label: 移动残影（密）
+        - $formkit: select
+          name: cursor_click
+          label: 鼠标点击特效
+          value: none
+          options:
+            - value: none
+              label: 关闭
+            - value: firework
+              label: 烟花特效
+            - value: granule
+              label: 粒子爆炸
+            - value: prosperous
+              label: 富强民主
+            - value: heart
+              label: 爱心特效
+        - $formkit: radio
+          name: effects_lantern_mode
+          id: effects_lantern_mode
+          label: 灯笼特效显示模式
+          value: none
+          options:
+            - value: none
+              label: 不显示
+            - value: light
+              label: 明亮模式
+            - value: dark
+              label: 黑暗模式
+            - value: all
+              label: 全模式
+        - $formkit: radio
+          name: effects_sakura_mode
+          label: 樱花飘落特效显示模式
+          value: none
+          options:
+            - value: none
+              label: 不显示
+            - value: light
+              label: 明亮模式
+            - value: dark
+              label: 黑暗模式
+            - value: all
+              label: 全模式
+        - $formkit: radio
+          name: effects_snowflake_mode
+          label: 雪花飘落特效显示模式
+          value: none
+          options:
+            - value: none
+              label: 不显示
+            - value: light
+              label: 明亮模式
+            - value: dark
+              label: 黑暗模式
+            - value: all
+              label: 全模式
+        - $formkit: radio
+          name: effects_universe_mode
+          label: 宇宙星空特效显示模式
+          value: dark
+          options:
+            - value: none
+              label: 不显示
+            - value: light
+              label: 明亮模式
+            - value: dark
+              label: 黑暗模式
+            - value: all
+              label: 全模式
+        - $formkit: radio
+          name: effects_circle_magic_mode
+          label: 上升圆点特效显示模式
+          value: none
+          options:
+            - value: none
+              label: 不显示
+            - value: light
+              label: 明亮模式
+            - value: dark
+              label: 黑暗模式
+            - value: all
+              label: 全模式
+        - $formkit: radio
+          name: effects_quantum_silk_thread_mode
+          label: 量子丝线特效显示模式
+          value: none
+          options:
+            - value: none
+              label: 不显示
+            - value: light
+              label: 明亮模式
+            - value: dark
+              label: 黑暗模式
+            - value: all
+              label: 全模式
     - group: code
       label: 代码块
       formSchema:
-        - $formkit: switch
+        - $formkit: radio
           name: enable
           id: enable
           key: enable
           label: 启用代码块
           help: 如果安装代码块插件，可关闭此功能
           value: true
-        - $formkit: switch
+          options:
+            - label: 启用
+              value: true
+            - label: 禁用
+              value: false
+        - $formkit: radio
           name: enable_title
           if: $get(enable).value
           label: 启用代码标题
           help: 启用代码块的标题，默认显示语言类型，也可自定义标题
           value: true
-        - $formkit: switch
+          options:
+            - label: 启用
+              value: true
+            - label: 禁用
+              value: false
+        - $formkit: radio
           name: enable_hr
           if: $get(enable).value
           label: 启用代码标题分割线
           help: 启用代码标题和内容之间的分割线，不展示时会更加简洁
           value: true
-        - $formkit: switch
+          options:
+            - label: 启用
+              value: true
+            - label: 禁用
+              value: false
+        - $formkit: radio
           name: enable_line
           if: $get(enable).value
           label: 启用代码行号
           help: 启用代码块行号功能
           value: true
-        - $formkit: switch
+          options:
+            - label: 启用
+              value: true
+            - label: 禁用
+              value: false
+        - $formkit: radio
           name: enable_copy
           if: $get(enable).value
           label: 启用代码复制
           help: 启用代码块复制按钮
           value: true
-        - $formkit: switch
+          options:
+            - label: 启用
+              value: true
+            - label: 禁用
+              value: false
+        - $formkit: radio
           name: enable_expander
           if: $get(enable).value
           label: 启用代码折叠
           help: 启用代码折叠功能
           value: true
-        - $formkit: switch
+          options:
+            - label: 启用
+              value: true
+            - label: 禁用
+              value: false
+        - $formkit: radio
           name: enable_height_limit
           id: enable_height_limit
           key: enable_height_limit
@@ -2840,6 +3462,11 @@ spec:
           label: 启用代码高度限制
           help: 启用代码高度限制功能
           value: false
+          options:
+            - label: 启用
+              value: true
+            - label: 禁用
+              value: false
         - $formkit: number
           name: height_limit
           if: $get(enable_height_limit).value
@@ -3009,10 +3636,15 @@ spec:
           name: rightMenu
           label: 右键菜单
           value:
-            rightMenuEnable: false
+            rightMenuEnable: true
           children:
-            - $formkit: switch
+            - $formkit: radio
               name: rightMenuEnable
+              options:
+                - label: 打开
+                  value: true
+                - label: 关闭
+                  value: false
         - $formkit: group
           name: rightside
           label: 右下角悬浮操作按钮
@@ -3020,24 +3652,39 @@ spec:
             rightsideEnable: false
             readmode: false
           children:
-            - $formkit: switch
+            - $formkit: radio
               name: rightsideEnable
               id: rightsideEnable
-            - $formkit: switch
+              options:
+                - label: 打开
+                  value: true
+                - label: 关闭
+                  value: false
+            - $formkit: radio
               name: readmode
               if: $get(rightsideEnable).value
               label: 阅读模式
+              options:
+                - label: 打开
+                  value: true
+                - label: 关闭
+                  value: false
         - $formkit: group
           name: nav_music
           label: 音乐
           value:
             nav_musicEnable: false
           children:
-            - $formkit: switch
+            - $formkit: radio
               label: 左下角音乐
               name: nav_musicEnable
               id: nav_musicEnable
               key: nav_musicEnable
+              options:
+                - label: 打开
+                  value: true
+                - label: 关闭
+                  value: false
             - $formkit: text
               name: id
               label: 音乐的id
@@ -3063,10 +3710,15 @@ spec:
           value:
             switch: false
           children:
-            - $formkit: switch
+            - $formkit: radio
               name: switch
               id: switch
               key: switch
+              options:
+                - label: 打开
+                  value: true
+                - label: 关闭
+                  value: false
             - $formkit: text
               if: $get(switch).value
               name: introductionTitle
@@ -3093,6 +3745,17 @@ spec:
     - group: other
       label: 其他设置
       formSchema:
+
+        - $formkit: radio
+          name: pjax_enable
+          label: PJAX加载
+          help: "控制站点是否启用 PJAX，无刷新页面切换；关闭后则整页刷新"
+          value: true          # ← 新增，默认开启（你也可以设为 false）
+          options:
+            - label: 开启
+              value: true
+            - label: 关闭
+              value: false
         - $formkit: group
           name: staticResource
           label: 静态资源文件设置
@@ -3107,6 +3770,10 @@ spec:
               options:
                 - label: 本地
                   value: local
+                - label: onmicrosoft
+                  value: onmicrosoft
+                - label: cbd
+                  value: cbd
                 - label: 自定义
                   value: custom
             - $formkit: url
@@ -3117,18 +3784,6 @@ spec:
               value: 'https://npm.onmicrosoft.cn/hao-theme-static@1.3.7/templates/assets'
               help: '默认为npmJs的onmicrosoft加速地址，如果你有自己的cdn地址（请确保链接下assets文件夹下主题静态资源文件），可以填写，否则请勿修改！ '
         - $formkit: group
-          name: opengraph
-          label: Open Graph
-          value:
-            image:
-          children:
-            - $formkit: attachment
-              name: image
-              label: 默认图片
-              width: "15rem"
-              aspectRatio: "16/9"
-              help: 如果页面没有设置图片，那么将会使用此图片作为 Open Graph 图片
-        - $formkit: group
           name: vanillaLazyload
           label: 懒加载
           value:
@@ -3136,26 +3791,27 @@ spec:
             errorImg: "/themes/theme-hao/assets/images/404.gif"
             loadingImg: /themes/theme-hao/assets/images/404s.gif
           children:
-            - $formkit: switch
+            - $formkit: radio
               name: enable
               id: enable
               key: enable
+              options:
+                - label: 启用
+                  value: true
+                - label: 禁用
+                  value: false
             - $formkit: attachment
               name: loadingImg
               id: loadingImg
               key: loadingImg
               if: $get(enable).value
               label: 加载图片
-              width: "15rem"
-              aspectRatio: "16/9"
               validation: required
               placeholder: 请输入图片 url
             - $formkit: attachment
               name: errorImg
               label: 图片加载失败图
               validation: required
-              width: "15rem"
-              aspectRatio: "16/9"
               placeholder: 请输入图片 url
         - $formkit: group
           name: diytitle
@@ -3163,10 +3819,15 @@ spec:
           value:
             diytitleEnable: false
           children:
-            - $formkit: switch
+            - $formkit: radio
               name: diytitleEnable
               id: diytitleEnable
               key: diytitleEnable
+              options:
+                - label: 启用
+                  value: true
+                - label: 禁用
+                  value: false
             - $formkit: text
               name: leaveTitle
               if: $get(diytitleEnable).value
@@ -3185,20 +3846,28 @@ spec:
             loadingBoxImg: https://liuzhihang.com/upload/logo.png
             loadProgressBar: true
           children:
-            - $formkit: switch
+            - $formkit: radio
               name: loadingBoxEnable
               id: loadingBoxEnable
               key: loadingBoxEnable
+              options:
+                - label: 启用
+                  value: true
+                - label: 禁用
+                  value: false
             - $formkit: attachment
               name: loadingBoxImg
               if: $get(loadingBoxEnable).value
               label: 加载图片
-              width: "15rem"
-              aspectRatio: "16/9"
               placeholder: 请输入图片 url
-            - $formkit: switch
+            - $formkit: radio
               name: loadProgressBar
               label: 加载进度条
+              options:
+                - label: 启用
+                  value: true
+                - label: 禁用
+                  value: false
         - $formkit: group
           name: error_404
           label: 404 页面
@@ -3211,8 +3880,6 @@ spec:
               label: 标题
             - $formkit: attachment
               name: background
-              width: "15rem"
-              aspectRatio: "16/9"
               label: 背景
         - $formkit: group
           name: error_500
@@ -3226,42 +3893,53 @@ spec:
               label: 标题
             - $formkit: attachment
               name: background
-              width: "15rem"
-              aspectRatio: "16/9"
               label: 背景
-        - $formkit: switch
+        - $formkit: radio
           name: bubbleEnable
           label: 页面卡片顶部气泡升起效果
           help: 已有页面(友链鱼塘,瞬间,ToDoList,我的装备)
           value: false
-        - $formkit: switch
+          options:
+            - label: 启用
+              value: true
+            - label: 禁用
+              value: false
+        - $formkit: radio
           name: scrollbarLinearGradientEnable
           label: 渐变滚动条效果
           value: false
-        - $formkit: switch
+          options:
+            - label: 启用
+              value: true
+            - label: 禁用
+              value: false
+        - $formkit: radio
           name: tagRandomColorEnable
           label: 标签云随机颜色效果
           value: false
+          options:
+            - label: 启用
+              value: true
+            - label: 禁用
+              value: false
         - $formkit: group
           name: greeting
           label: 首页问候语
           children:
-            - $formkit: switch
+            - $formkit: radio
               name: enable_greeting
               key: enable_greeting
               id: enable_greeting
               value: false
-            - $formkit: array
+              options:
+                - label: 显示
+                  value: true
+                - label: 隐藏
+                  value: false
+            - $formkit: repeater
               name: setting
               if: $get(enable_greeting).value
               label: 问候语配置
-              itemLabels:
-                - type: text
-                  label: $value.greeting
-                - type: text
-                  label: $value.start_time
-                - type: text
-                  label: $value.end_time
               value:
                 - greeting: 晚安😴
                   start_time: 0
