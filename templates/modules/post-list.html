@@ -3,15 +3,10 @@
 
 <th:block th:fragment="post-list"
           th:with='postItems=${posts.items},
-          renderPath=${(category != null ? category.status.permalink : (tag != null ? tag.status.permalink : (isIndex ? "/" : "")) )},
+          /* 核心：如果外部没传path，自动根据当前页面类型获取路径 */
+          finalPath = ${path ?: (category != null ? category.status.permalink : (tag != null ? tag.status.permalink : (isIndex ? "/" : "")) )},
           postRandomImg=${#strings.contains(theme.config.layout.postRandomImg,"?") ? theme.config.layout.postRandomImg+"&" : theme.config.layout.postRandomImg+"?"}'>
 
-    <div class="recent-post-item"
-         th:classappend="${theme.config.layout.post.cols} + ' ' + ${theme.config.layout.post.postLocation} + ' ' + (${iStat.even} ? 'even' : 'odd') + (${post.spec.pinned} ? 'pinned-post-item' : '')"
-         th:each="post,iStat : ${postItems}">
-        </div>
-
-    <div th:replace="~{modules/widgets/page :: page(${renderPath},${posts},${isIndex ?: false})}"></div>
-
+    <div th:replace="~{modules/widgets/page :: page(${finalPath},${posts},${isIndex ?: false})}"></div>
 </th:block>
 </html>
