@@ -27,7 +27,7 @@
                     </a>
                 </div>
                 <!-- 文章 -->
-                <div th:replace="~{modules/widgets/page :: page}" th:with="path=${category.status.permalink}, pageInfo=${posts}, isIndex=false"></div>
+                <th:block th:replace="~{macro/post-list :: post-list(${'/tags/'+tag.spec.slug})}" />
             </div>
             <!-- sidebar -->
             <div th:replace="~{modules/aside :: aside(${theme.config.sidebar.widgetss.tagWidget})}"></div>

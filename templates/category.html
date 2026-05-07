@@ -33,7 +33,7 @@
                     <a class="category-bar-more" href="/categories">更多</a>
                 </div>
                 <!-- 文章 -->
-                <div th:replace="~{modules/widgets/page :: page}" th:with="path=${category.status.permalink}, pageInfo=${posts}, isIndex=false"></div>
+                <th:block th:replace="~{macro/post-list :: post-list(${'/categories/'+category.spec.slug})}" />
             </div>
             <!-- sidebar -->
             <div th:replace="~{modules/aside :: aside(${theme.config.sidebar.widgetss.categoryWidget})}"></div>
