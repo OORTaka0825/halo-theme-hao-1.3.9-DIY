@@ -9,10 +9,25 @@
  -->
 <nav id="pagination" th:fragment="page">
     <div class="pagination" th:with="
-        path = ${path ?: (category != null ? category.status.permalink : (tag != null ? tag.status.permalink : (isIndex ? '/' : '')))},
-        pageInfo = ${pageInfo ?: posts},
-        isIndex = ${isIndex ?: false},
-        paths = ${isIndex ? path + '/' : path}">
+        /* 2. 手动从变量池中抓取数据，谁有值就用谁 */
+        actualPath = ${path ?: (category != null ? category.status.permalink : (tag != null ? tag.status.permalink : (isIndex ? '/' : '/')))},
+        actualPageInfo = ${pageInfo ?: (posts ?: (archives ?: archives))},
+        actualIsIndex = ${isIndex ?: (category == null && tag == null)},
+        paths = ${actualIsIndex ? (actualPath == '/' ? '/' : actualPath + '/') : actualPath}">
+
+        <th:block th:if="${actualPageInfo != null && actualPageInfo.page > 3}">
+            <a class="page-number" th:href="${paths}" th:text="1" onclick="scrollToPost()"></a>
+            <span class="space" th:if="${actualPageInfo.page != 4}">…</span>
+        </th:block>
+
+        <th:block th:if="${actualPageInfo != null}" th:each="index:${#numbers.sequence(actualPageInfo.page-2,actualPageInfo.page+2)}">
+            <span class="page-number current" th:if="${actualPageInfo.page == index}" th:text="${actualPageInfo.page}"></span>
+            <a class="page-number" th:unless="${actualPageInfo.page == index}"
+               th:if="${index > 0 && index <= actualPageInfo.totalPages}"
+               th:href="${#strings.equals(index, '1') ? paths : actualPath + '/page/' + index}"
+               th:text="${index}"
+               onclick="scrollToPost()"></a>
+        </th:block>
 
         <!-- 页码按钮 -->
         <th:block th:if="${pageInfo.page > 3}">
