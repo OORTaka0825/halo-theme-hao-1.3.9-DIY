@@ -2,47 +2,50 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <nav id="pagination" th:fragment="page">
     <div class="pagination" th:with="
-        /* 1. 核心修复：手动对账。无论外部传 3 个还是 4 个，这里都能接到 */
-        p_path = ${path ?: (category != null ? category.status.permalink : (tag != null ? tag.status.permalink : (isIndex ? '/' : '/')))},
-        p_info = ${pageInfo ?: posts},
-        p_isIndex = ${isIndex ?: (category == null && tag == null)},
-        paths = ${p_isIndex ? (p_path == '/' ? '/' : p_path + '/') : p_path}">
+        /* 1. 尝试从不同来源抓取路径：参数优先，否则找分类/标签的 permalink */
+        actualPath = ${path ?: (category != null ? category.status.permalink : (tag != null ? tag.status.permalink : (isIndex ? '/' : '')))},
+        /* 2. 尝试抓取分页信息：pageInfo 优先，否则找全局的 posts */
+        actualPageInfo = ${pageInfo ?: posts},
+        /* 3. 确定是否为主页 */
+        actualIsIndex = ${isIndex ?: (category == null && tag == null)},
+        /* 4. 路径拼接逻辑 */
+        paths = ${actualIsIndex ? (actualPath == '/' ? '/' : actualPath + '/') : actualPath}">
 
-        <th:block th:if="${p_info != null}">
-            
-            <th:block th:if="${p_info.page > 3}">
+        <th:block th:if="${actualPageInfo != null}">
+
+            <th:block th:if="${actualPageInfo.page > 3}">
                 <a class="page-number" th:href="${paths}" th:text="1" onclick="scrollToPost()"></a>
-                <span class="space" th:if="${p_info.page != 4}">…</span>
+                <span class="space" th:if="${actualPageInfo.page != 4}">…</span>
             </th:block>
 
-            <th:block th:each="index:${#numbers.sequence(p_info.page-2,p_info.page+2)}">
-                <span class="page-number current" th:if="${p_info.page == index}" th:text="${p_info.page}"></span>
-                <a class="page-number" th:unless="${p_info.page == index}"
-                   th:if="${index > 0 && index <= p_info.totalPages}"
-                   th:href="${#strings.equals(index, '1') ? paths : p_path + '/page/' + index}"
+            <th:block th:each="index : ${#numbers.sequence(actualPageInfo.page - 2, actualPageInfo.page + 2)}">
+                <span class="page-number current" th:if="${actualPageInfo.page == index}" th:text="${actualPageInfo.page}"></span>
+                <a class="page-number" th:unless="${actualPageInfo.page == index}"
+                   th:if="${index > 0 && index <= actualPageInfo.totalPages}"
+                   th:href="${index == 1 ? paths : actualPath + '/page/' + index}"
                    th:text="${index}"
                    onclick="scrollToPost()"></a>
             </th:block>
 
-            <th:block th:if="${p_info.totalPages - p_info.page > 2}">
-                <span class="space" th:if="${p_info.totalPages - p_info.page != 3}">…</span>
+            <th:block th:if="${actualPageInfo.totalPages - actualPageInfo.page > 2}">
+                <span class="space" th:if="${actualPageInfo.totalPages - actualPageInfo.page != 3}">…</span>
                 <a class="page-number"
-                   th:href="${p_path + '/page/' + p_info.totalPages}"
-                   th:text="${p_info.totalPages}"
+                   th:href="${actualPath + '/page/' + actualPageInfo.totalPages}"
+                   th:text="${actualPageInfo.totalPages}"
                    onclick="scrollToPost()"></a>
             </th:block>
 
-            <a class="extend prev" rel="prev" th:if="${p_info.hasPrevious}" th:href="${p_info.prevUrl}" onclick="scrollToPost()">
+            <a class="extend prev" rel="prev" th:if="${actualPageInfo.hasPrevious}" th:href="${actualPageInfo.prevUrl}" onclick="scrollToPost()">
                 <i class="haofont hao-icon-chevron-left fa-fw"></i>
                 <div class="pagination_tips_prev">上页</div>
             </a>
 
-            <a class="extend next" rel="next" th:if="${p_info.hasNext}" th:href="${p_info.nextUrl}" onclick="scrollToPost()">
+            <a class="extend next" rel="next" th:if="${actualPageInfo.hasNext}" th:href="${actualPageInfo.nextUrl}" onclick="scrollToPost()">
                 <div class="pagination_tips_next">下页</div>
                 <i class="haofont hao-icon-chevron-right fa-fw"></i>
             </a>
 
-            <div th:if="${p_info.totalPages > 1 && p_isIndex}" class="toPageGroup">
+            <div th:if="${actualPageInfo.totalPages > 1 && actualIsIndex}" class="toPageGroup">
                 <input id="toPageText" maxlength="3" oninput="value=value.replace(/[^0-9]/g,'')">
                 <a id="toPageButton" onclick="heo.toPage();scrollToPost();"><i class="haofont hao-icon-angles-right"></i></a>
             </div>
