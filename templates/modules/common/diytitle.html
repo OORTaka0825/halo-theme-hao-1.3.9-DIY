@@ -1,5 +1,7 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <!-- 动态标题 -->
-<script
+<script th:fragment="diytitle"
         th:if="${theme.config.other.diytitle.diytitleEnable}">
     var leaveTitle = '[[${theme.config.other.diytitle.leaveTitle}]]';
     var backTitle = '[[${theme.config.other.diytitle.backTitle}]]';
@@ -20,3 +22,4 @@
         }
     })
 </script>
+</html>
