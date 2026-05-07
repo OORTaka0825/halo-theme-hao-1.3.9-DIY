@@ -8,8 +8,7 @@
     @param  isIndex    是否主页
  -->
 <nav id="pagination" th:fragment="page(path,pageInfo,isIndex)">
-    <div class="pagination" th:with="paths = ${isIndex ? (path == '/' ? '/' : path + '/') : path}">
-        </div>
+    <div class="pagination" th:with="paths = ${isIndex ? path+'/' : path}">
 
         <!-- 页码按钮 -->
         <th:block th:if="${pageInfo.page > 3}">
