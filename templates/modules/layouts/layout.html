@@ -393,19 +393,27 @@
 <th:block th:replace="~{'modules/variables/layout'}"></th:block>
 
 <script data-pjax="">
-    
+
+    if ([[${ theme.config.other.loadingBoxs.loadingBoxEnable }]]) {
+        // 移除加载动画
+        removeLoading();
+    }
     //页脚友联
     GLOBAL_CONFIG.isFriendLinksInFooter && heo.addFriendLinksInFooter()
     //音乐页面切换歌曲调用
-    if (GLOBAL_CONFIG.isMusic) {
+    if(GLOBAL_CONFIG.isMusic){
         heo.changeMusicBg(false);
     }
     //代码块
-    if (GLOBAL_CONFIG.prism.enable) {
+    if(GLOBAL_CONFIG.prism.enable){
         halo.addPrismTool()
         halo.dataCodeTheme()
     }
-
+    if(document.querySelector('#danmu') &&
+        document.body.clientWidth > 768 &&
+        [[${theme.config.envelope_comment.enable_danmu}]]){
+        halo.addScript("Danmaku", "[[${assets_link + '/libs/twikoo/easy-Danmaku.min.js'}]]", halo.danmu())
+    }
 </script>
 </body>
 
