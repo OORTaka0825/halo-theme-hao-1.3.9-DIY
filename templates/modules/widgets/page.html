@@ -7,8 +7,12 @@
     @param  pageInfo   Halo类型UrlContextListResult<ListedPostVo>
     @param  isIndex    是否主页
  -->
-<nav id="pagination" th:fragment="page(path,pageInfo,isIndex)">
-    <div class="pagination" th:with="paths = ${isIndex ? path+'/' : path}">
+<nav id="pagination" th:fragment="page">
+    <div class="pagination" th:with="
+        actualPath = ${path ?: (isIndex ? '/' : (category != null ? category.status.permalink : (tag != null ? tag.status.permalink : '/')))},
+        actualPageInfo = ${pageInfo ?: posts},
+        actualIsIndex = ${isIndex ?: false},
+        paths = ${actualIsIndex ? (actualPath == '/' ? '/' : actualPath + '/') : actualPath}">
 
         <!-- 页码按钮 -->
         <th:block th:if="${pageInfo.page > 3}">
