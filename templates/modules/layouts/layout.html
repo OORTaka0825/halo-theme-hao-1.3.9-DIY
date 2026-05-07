@@ -100,12 +100,12 @@
 </script>
 
 <!-- 网站背景 -->
-<div id="an_music_bg"></div>
+    <div id="an_music_bg"></div>
 
 <!-- 控制台 -->
-<div th:replace="~{modules/widgets/console}"/>
+<div th:replace="~{modules/widgets/console :: console}"></div>
 
-<div th:replace="~{modules/sidebar}"/>
+<div th:replace="~{modules/sidebar :: sidebar}"></div>
 
 <!-- 左下角音乐 -->
 <th:block th:if="${theme.config.tool.nav_music.nav_musicEnable}">
@@ -117,21 +117,118 @@
 
 
 <!-- todo 右下角悬浮操作按钮 -->
-<th:block th:replace="~{modules/widgets/rightside}"/>
+<th:block th:replace="~{modules/common/rightside :: rightside}"></th:block>
 
 
-<div th:replace="~{modules/widgets/right-menu}"/>
+<div th:replace="~{modules/right-menu :: right-menu}"></div>
 
 <div>
     <script th:src="${assets_link + '/js/utils.js' + theme_version}"></script>
-    <script th:src="${assets_link + '/js/halo.js' + theme_version}"></script>
     <script th:src="${assets_link + '/js/main.js' + theme_version}"></script>
     <script charset="utf-8" data-pjax th:src="${assets_link + '/zhheo/blogex.js' + theme_version}"></script>
     <script th:src="${assets_link + '/js/tw_cn.js' + theme_version}"></script>
-    <!-- https://instant.page/ 网站预加载， 放在 </body> 之前 -->
-    <script th:src="${assets_link + '/libs/instantpage/instantpage.min.js'}"
-            type="module"></script>
-    
+
+<!-- 
+    <!-- ===== Keep PJAX-like behavior when PJAX is OFF (append-only, v5) ===== -->
+    <script th:if="${!theme.config.other.pjax_enable}">
+    (function () {
+      var KEY_PREFIX = 'hao:list:scroll:';
+      var NAV_FLAG = 'hao:from:index_pagination';
+
+      if ('scrollRestoration' in history) try { history.scrollRestoration = 'manual'; } catch (e) {}
+
+      function saveScroll() {
+        try {
+          var key = KEY_PREFIX + location.pathname + location.search;
+          sessionStorage.setItem(key, String(window.scrollY || document.documentElement.scrollTop || 0));
+          // 记录：当前是否为分页页，从而“上一页”跳回首页时也能下滚
+          sessionStorage.setItem(NAV_FLAG, isIndexPagination() ? '1' : '0');
+        } catch (e) {}
+      }
+      addEventListener('beforeunload', saveScroll, { passive: true });
+      addEventListener('pagehide', saveScroll, { passive: true });
+
+      function restoreScrollIfAny() {
+        try {
+          var key = KEY_PREFIX + location.pathname + location.search;
+          var y = sessionStorage.getItem(key);
+          if (y !== null) requestAnimationFrame(function(){ scrollTo(0, parseInt(y,10) || 0); });
+        } catch (e) {}
+      }
+
+      function pickListEl(){
+        var sels = ['#home_top', '#recent-posts', '.recent-posts', '#content-inner'];
+        for (var i=0;i<sels.length;i++){
+          var el = document.querySelector(sels[i]);
+          if (el) return el;
+        }
+        return null;
+      }
+
+      function scrollToListSmooth() {
+        var el = pickListEl();
+        if (!el) return;
+        if (window.btf && typeof window.btf.scrollToDest === 'function') {
+          window.btf.scrollToDest(el.offsetTop, 500); // 主题内部会 -70
+          return;
+        }
+        if (window.heo && window.heo.scroll && typeof window.heo.scroll.homeToList === 'function'){
+          try { window.heo.scroll.homeToList(); return; } catch(e){}
+        }
+        var y = el.getBoundingClientRect().top + pageYOffset - 70;
+        try { scrollTo({ top: Math.max(0, y), behavior: 'smooth' }); }
+        catch (e) { scrollTo(0, Math.max(0, y)); }
+      }
+
+      function isIndexPagination() {
+        if (/\/page\/\d+\/?$/i.test(location.pathname)) return true;
+        if (/[?&]page=\d+/i.test(location.search)) return true;
+        return false;
+      }
+
+      function isHomeLike(){
+        // 首页（上一页可能从 /page/2 跳回 / 或 ?page=1）
+        if (location.pathname === '/' || location.pathname === '') return true;
+        if (/[?&]page=1\b/i.test(location.search)) return true;
+        return false;
+      }
+
+      function cameFromPagination(){
+        try { return sessionStorage.getItem(NAV_FLAG) === '1'; } catch(e){}
+        return false;
+      }
+
+      function clearNavFlag(){ try { sessionStorage.removeItem(NAV_FLAG); } catch(e){} }
+
+      function isBackForwardNav() {
+        try { 
+          var entries = performance.getEntriesByType && performance.getEntriesByType('navigation');
+          if (entries && entries[0]) return entries[0].type === 'back_forward';
+        } catch (e) {}
+        return false;
+      }
+
+      addEventListener('pageshow', function (ev) {
+        // 回退：恢复滚动位置
+        if (ev.persisted || isBackForwardNav()) { restoreScrollIfAny(); clearNavFlag(); return; }
+
+        // 正常进入：分页页直接滚动；或者从分页回到首页也滚动
+        if (isIndexPagination() || (isHomeLike() && cameFromPagination())) {
+          setTimeout(scrollToListSmooth, 60);
+        }
+        clearNavFlag();
+      }, { passive: true });
+
+      document.addEventListener('DOMContentLoaded', function () {
+        if (isIndexPagination() || (isHomeLike() && cameFromPagination())) {
+          setTimeout(scrollToListSmooth, 0);
+        }
+      });
+    })();
+    </script>
+
+    <script src="/themes/theme-hao/assets/libs/instantpage.min.js" type="module"></script>
+
     <script th:src="${assets_link + '/libs/vanilla-lazyload/lazyload.iife.min.js'}"></script>
     
     <!-- 右下角通知 https://www.polonel.com/snackbar/ -->
