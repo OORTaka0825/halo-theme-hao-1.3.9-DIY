@@ -1,23 +1,19 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{modules/layouts/layout :: layout(content = ~{::content}, htmlType = 'category', title = ${(category != null && category.spec != null) ? (category.spec.displayName + ' | ' + site.title) : ('分类 | ' + site.title)}, head = ~{::head})}">
-
+      th:replace="~{modules/layouts/layout :: layout(content = ~{::content}, htmlType = 'category',title = ${'分类' + ': ' + category.spec.displayName + ' | ' + site.title}, head = ~{::head})}">
 <th:block th:fragment="head">
-    <th:block th:if="${category != null}">
-        <th:block th:replace="~{modules/common/open-graph :: open-graph(_title = '分类',
-                    _permalink = ${category.status.permalink},
-                    _cover = ${category.spec.cover},
-                    _excerpt = ${category.spec.description},
-                    _type = 'website')}"></th:block>
-    </th:block>
+    <th:block th:replace="~{modules/common/open-graph :: open-graph(_title = '分类',
+                _permalink = ${category.status.permalink},
+                _cover = ${category.spec.cover},
+                _excerpt = ${category.spec.description},
+                _type = 'website')}"></th:block>
 </th:block>
-
 <th:block th:fragment="content">
+
     <div class="page" id="body-wrap">
         <header class="not-top-img" id="page-header">
-            <nav th:replace="~{modules/nav :: nav(title = ${(category != null && category.spec != null) ? ('分类: ' + category.spec.displayName) : '分类'})}"></nav>
+            <nav th:replace="~{modules/nav :: nav(title = ${'分类' + ': ' + category.spec.displayName})}"></nav>
         </header>
-        
         <main class="layout" id="content-inner">
             <div id="category">
                 <div id="category-bar">
@@ -26,7 +22,6 @@
                             <a href="/">首页</a>
                         </div>
                         <div class="category-bar-item"
-                             th:if="${category != null}"
                              th:classappend="${category.metadata.name == categoryItem.metadata.name} ? ' select'"
                              th:each="categoryItem : ${categoryFinder.listAll()}"
                              th:id="${categoryItem.spec.slug}">
@@ -34,21 +29,20 @@
                                th:text="${categoryItem.spec.displayName}"></a>
                         </div>
                     </div>
+                    <!-- 跳转到分类页 -->
                     <a class="category-bar-more" href="/categories">更多</a>
                 </div>
-
-                <th:block th:if="${category != null}">
-                     <th:block th:replace="~{macro/post-list :: post-list(${category.status.permalink})}" />
-                </th:block>
-                <th:block th:if="${category == null}">
-                     <div style="text-align:center; padding: 50px;">分类数据加载失败，请检查别名设置或重建索引。</div>
-                </th:block>
+                <!-- 文章 -->
+                <th:block th:replace="~{macro/post-list :: post-list(${'/categories/'+category.spec.slug})}" />
             </div>
-
+            <!-- sidebar -->
             <div th:replace="~{modules/aside :: aside(${theme.config.sidebar.widgetss.categoryWidget})}"></div>
         </main>
 
-        <footer th:replace="~{modules/footer :: footer}"></footer>
+        <!-- 底部 -->
+        <footer th:replace="~{modules/footer}"/>
     </div>
+
 </th:block>
+
 </html>
