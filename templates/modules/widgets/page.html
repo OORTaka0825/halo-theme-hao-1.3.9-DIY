@@ -9,10 +9,10 @@
  -->
 <nav id="pagination" th:fragment="page">
     <div class="pagination" th:with="
-        actualPath = ${path ?: (isIndex ? '/' : (category != null ? category.status.permalink : (tag != null ? tag.status.permalink : '/')))},
-        actualPageInfo = ${pageInfo ?: posts},
-        actualIsIndex = ${isIndex ?: false},
-        paths = ${actualIsIndex ? (actualPath == '/' ? '/' : actualPath + '/') : actualPath}">
+        path = ${path ?: (category != null ? category.status.permalink : (tag != null ? tag.status.permalink : (isIndex ? '/' : '')))},
+        pageInfo = ${pageInfo ?: posts},
+        isIndex = ${isIndex ?: false},
+        paths = ${isIndex ? path + '/' : path}">
 
         <!-- 页码按钮 -->
         <th:block th:if="${pageInfo.page > 3}">
