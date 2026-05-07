@@ -3,9 +3,8 @@
 
 <th:block th:fragment="post-list"
           th:with='postItems=${posts.items},
-          path = ${path ?: (isIndex ? "/" : "")},
+          renderPath=${path ?: (isIndex ? "/" : "")},
           postRandomImg=${#strings.contains(theme.config.layout.postRandomImg,"?") ? theme.config.layout.postRandomImg+"&" : theme.config.layout.postRandomImg+"?"}'>
-
     <!-- card，需要添加在没有图片时使用随机图片 -->
     <div class="recent-post-item"
          th:classappend="${theme.config.layout.post.cols} + ' ' +
@@ -105,8 +104,6 @@
     </div>
 
     <!-- 分页 -->
-    <div th:replace="~{modules/widgets/page :: page(${path},${posts},${isIndex ?: false})}"></div>
-
+    <div th:replace="~{modules/widgets/page :: page(${renderPath},${posts},${isIndex ?: false})}"></div>
 </th:block>
-
 </html>
