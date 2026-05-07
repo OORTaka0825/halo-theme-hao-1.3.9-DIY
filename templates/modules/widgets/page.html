@@ -6,7 +6,7 @@
     @param  isIndex    是否主页
     @param  _param     参数
  -->
-<nav id="pagination" th:fragment="page(path,pageInfo,isIndex,_param)">
+<nav id="pagination" th:fragment="page(path,pageInfo,isIndex,)">
     <div class="pagination" th:with="paths = ${isIndex ? path+'/' : path}">
 
         <!-- 页码按钮 -->
