@@ -27,10 +27,10 @@
                     </a>
                 </div>
                 <!-- 文章 -->
-                <th:block th:replace="~{macro/post-list :: post-list}" />
+                <th:block th:replace="~{macro/post-list :: post-list(posts=${tagPosts}, isIndex=false)}" />
             </div>
             <!-- sidebar -->
-            <div th:replace="~{modules/widgets/page :: page(${tag.status.permalink}, ${posts}, false)}"></div>
+            <div th:replace="~{modules/aside :: aside(${theme.config.sidebar.widgetss.tagWidget})}"></div>
         </main>
 
         <!-- 底部 -->
