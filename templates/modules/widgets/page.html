@@ -7,7 +7,7 @@
     @param  pageInfo   Halo类型UrlContextListResult<ListedPostVo>
     @param  isIndex    是否主页
  -->
-<nav id="pagination" th:fragment="page(path,pageInfo,isIndex)">
+<nav id="pagination" th:fragment="page(path,pageInfo,isIndex,_param)">
     <div class="pagination" th:with="paths = ${isIndex ? path+'/' : path}">
 
         <!-- 页码按钮 -->
