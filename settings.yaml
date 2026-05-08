@@ -3259,6 +3259,8 @@ spec:
           options:
             - label: 关闭
               value: off
+            - label: 江城圆体
+              value: jiangchengyuanti
             - label: 筑紫A丸
               value: zhuziawan
             - label: 钉钉进步体
