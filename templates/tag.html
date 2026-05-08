@@ -27,7 +27,7 @@
                     </a>
                 </div>
                 <!-- 文章 -->
-                <th:block th:replace="~{modules/post-list :: post-list(${tagPosts}, '/tags/' + ${tag.spec.slug}, false, ${tag.id})}"></th:block>
+                <th:block th:replace="~{macro/post-list :: post-list(${'/tags/'+tag.spec.slug})}" />
             </div>
             <!-- sidebar -->
             <div th:replace="~{modules/aside :: aside(${theme.config.sidebar.widgetss.tagWidget})}"></div>
