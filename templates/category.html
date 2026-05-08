@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{modules/layouts/layout :: layout(content = ~{::content}, htmlType = 'category', title=${'分类' + ': ' + category.spec.displayName + ' | ' + site.title}, head=~{::head})}">
+      th:replace="~{modules/layouts/layout :: layout(content=~{::content}, htmlType='category', title=${'分类' + ': ' + category.spec.displayName + ' | ' + site.title}, head=~{::head})}">
 <th:block th:fragment="head">
     <th:block th:replace="~{modules/common/open-graph :: open-graph(_title='分类',
                 _permalink=${category.status.permalink},
@@ -10,37 +10,37 @@
 </th:block>
 <th:block th:fragment="content">
 
-    <div class="page" id="body-wrap">
-        <header class="not-top-img" id="page-header">
-            <nav th:replace="~{modules/nav :: nav(title=${'分类' + ': ' + category.spec.displayName})}"></nav>
-        </header>
-        <main class="layout" id="content-inner">
-            <div id="category">
-                <div id="category-bar">
-                    <div class="category-bar-items" id="category-bar-items">
-                        <div class="category-bar-item" id="category-bar-home">
-                            <a href="/">首页</a>
-                        </div>
-                        <div class="category-bar-item"
-                             th:classappend="${category.metadata.name == categoryItem.metadata.name} ? ' select'"
-                             th:each="categoryItem : ${categoryFinder.listAll()}"
-                             th:id="${categoryItem.spec.slug}">
-                            <a th:href="@{${categoryItem.status.permalink}}"
-                               th:text="${categoryItem.spec.displayName}"></a>
-                        </div>
+<div class="page" id="body-wrap">
+    <header class="not-top-img" id="page-header">
+        <nav th:replace="~{modules/nav :: nav(title=${'分类' + ': ' + category.spec.displayName})}"></nav>
+    </header>
+    <main class="layout" id="content-inner">
+        <div id="category">
+            <div id="category-bar">
+                <div class="category-bar-items" id="category-bar-items">
+                    <div class="category-bar-item" id="category-bar-home">
+                        <a href="/">首页</a>
                     </div>
-                    <a class="category-bar-more" href="/categories">更多</a>
+                    <div class="category-bar-item"
+                         th:classappend="${category.metadata.name == categoryItem.metadata.name} ? ' select'"
+                         th:each="categoryItem : ${categoryFinder.listAll()}"
+                         th:id="${categoryItem.spec.slug}">
+                        <a th:href="@{${categoryItem.status.permalink}}"
+                           th:text="${categoryItem.spec.displayName}"></a>
+                    </div>
                 </div>
-
-                <!-- 文章列表：传入分页对象 categoryPosts -->
-                <th:block th:replace="~{modules/post-list :: post-list(${categoryPosts})}"></th:block>
-
+                <a class="category-bar-more" href="/categories">更多</a>
             </div>
-            <div th:replace="~{modules/aside :: aside(${theme.config.sidebar.widgetss.categoryWidget})}"></div>
-        </main>
 
-        <footer th:replace="~{modules/footer}"></footer>
-    </div>
+            <!-- 文章列表 + 分页 -->
+            <th:block th:replace="~{modules/post-list :: post-list(${categoryPosts}, '/categories/' + ${category.spec.slug}, false)}"></th:block>
+
+        </div>
+        <div th:replace="~{modules/aside :: aside(${theme.config.sidebar.widgetss.categoryWidget})}"></div>
+    </main>
+
+    <footer th:replace="~{modules/footer}"></footer>
+</div>
 
 </th:block>
 </html>
