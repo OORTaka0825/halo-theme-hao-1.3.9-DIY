@@ -27,10 +27,10 @@
                     </a>
                 </div>
                 <!-- 文章 -->
-                <th:block th:replace="~{modules/post-list :: post-list(${'/tags/'+tag.spec.slug}, _param=${tag.id})}" />
-            </div>
-            <!-- sidebar -->
-            <div th:replace="~{modules/aside :: aside(${theme.config.sidebar.widgetss.tagWidget})}"></div>
+                <div th:replace="modules/post-list :: post-list(${tagPosts})"></div>
+
+<!-- 标签分页 -->
+<div th:replace="modules/widgets/page :: page('/tags/'+${tag.spec.slug}, ${tagPosts}, false, ${tag.id})"></div>
         </main>
 
         <!-- 底部 -->

@@ -33,10 +33,10 @@
                     <a class="category-bar-more" href="/categories">更多</a>
                 </div>
                 <!-- 文章 -->
-                <th:block th:replace="~{modules/post-list :: post-list(${'/categories/'+category.spec.slug}, _param=${category.id})}" />
-            </div>
-            <!-- sidebar -->
-            <div th:replace="~{modules/aside :: aside(${theme.config.sidebar.widgetss.categoryWidget})}"></div>
+                <div th:replace="modules/post-list :: post-list(${categoryPosts})"></div>
+
+<!-- 分类分页 -->
+<div th:replace="modules/widgets/page :: page('/categories/'+${category.spec.slug}, ${categoryPosts}, false, ${category.id})"></div>
         </main>
 
         <!-- 底部 -->
