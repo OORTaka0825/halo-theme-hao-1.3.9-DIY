@@ -48,8 +48,7 @@
                 <!-- 分类导航栏 -->
                 <div th:replace="~{'modules/bar/' + ${theme.config.layout.navs.nav}}"></div>
 
-                <!-- 文章列表 -->
-                <th:block th:replace="~{modules/post-list :: post-list(${posts})}"></th:block>
+                <th:block th:replace="~{modules/post-list :: post-list}"></th:block>
 
             </div>
             <div th:replace="~{modules/aside :: aside(${theme.config.sidebar.widgetss.indexWidget})}"></div>
