@@ -3076,32 +3076,22 @@ spec:
               placeholder: 请输入环境id或URL
               help: 详情请查看文档 (后缀带 / )
               validation: required
-            - $formkit: group
-              if: $get(commentsEnable).value && $get(use).value == 'Twikoo'
-              name: qqNick
-              key: qqNick
-              label: 获取QQ名称
-              value:
-              mode: default
-              customApi: "https://tx.oortaka.top/index.php?qq="
-              children:
             - $formkit: radio
-              name: mode
-              key: mode
-              id: mode
-              label: 选择模式
+              if: $get(commentsEnable).value && $get(use).value == 'Twikoo'
+              name: qqNickMode
+              key: qqNickMode
+              label: 获取QQ名称
               value: default
               options:
-                - label: 主题默认
-                  value: default
-                - label: 自定义key
-                  value: custom
+            - label: 主题默认
+              value: default
+            - label: 自定义key
+              value: custom
             - $formkit: url
-              name: customApi
-              key: customApi
-              id: customApi
-              if: $get(mode).value == 'custom'
-              label: 自定义接口
+              if: $get(commentsEnable).value && $get(use).value == 'Twikoo' && $get(qqNickMode).value == 'custom'
+              name: qqNickCustomApi
+              key: qqNickCustomApi
+              label: 自定义QQ名称接口
               value: "https://tx.oortaka.top/index.php?qq="
               placeholder: 请输入QQ昵称接口
               help: 例如：https://tx.oortaka.top/index.php?qq=，末尾需要保留 qq=
