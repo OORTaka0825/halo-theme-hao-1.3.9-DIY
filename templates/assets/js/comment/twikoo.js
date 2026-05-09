@@ -1,6 +1,4 @@
 (() => {
-    /* === QQ 昵称+邮箱 补丁 (强化同步版) === */
-    // 已修改为你的 1Panel 部署地址
     /* === QQ 昵称+邮箱补丁，可在主题后台切换 === */
 const __QQ_NICK_MODE__ =
     GLOBAL_CONFIG &&
@@ -15,10 +13,10 @@ const __CF_PROXY_URL__ =
     GLOBAL_CONFIG.source &&
     GLOBAL_CONFIG.source.twikoo &&
     GLOBAL_CONFIG.source.twikoo.qqNickCustomApi
-        ? GLOBAL_CONFIG.source.twikoo.qqNickCustomApi
-        : 'https://tx.oortaka.top/index.php?qq=';
+        ? GLOBAL_CONFIG.source.twikoo.qqNickCustomApi.trim()
+        : '';
 
-const __QQ_NICK_ENABLE__ = __QQ_NICK_MODE__ === 'custom';
+const __QQ_NICK_ENABLE__ = __QQ_NICK_MODE__ === 'custom' && __CF_PROXY_URL__ !== '';
 
     async function __manual_fetchNick__(qq) {
         try {
@@ -77,7 +75,6 @@ const __QQ_NICK_ENABLE__ = __QQ_NICK_MODE__ === 'custom';
 
     const box = document.getElementById('twikoo');
     if (!box || box.__manualBound__) return;
-        box.__manualBound__ = true;
 
         const sel = 'input[name="nick"], input[placeholder*="昵称"]';
         

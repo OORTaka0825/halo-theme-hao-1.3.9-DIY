@@ -114,7 +114,7 @@
                 twikooUrl: "[(${theme.config.comments.twikoos.envId})]",
                 accessToken: "[(${theme.config.comments.twikoos.accessToken})]",
                 qqNickMode: "[(${not #strings.isEmpty(theme.config.comments.twikoos.qqNickMode) ? theme.config.comments.twikoos.qqNickMode : 'default'})]",
-                qqNickCustomApi: "[(${not #strings.isEmpty(theme.config.comments.twikoos.qqNickCustomApi) ? theme.config.comments.twikoos.qqNickCustomApi : 'https://tx.oortaka.top/index.php?qq='})]",
+                qqNickCustomApi: "[(${not #strings.isEmpty(theme.config.comments.twikoos.qqNickCustomApi) ? theme.config.comments.twikoos.qqNickCustomApi : ''})]",
             },
             artalk: {
                 js: [[${not #strings.isEmpty(theme.config.comments.artalks.artalkJs) ? theme.config.comments.artalks.artalkJs : assets_link +'/libs/artalk/Artalk.js' }]],
