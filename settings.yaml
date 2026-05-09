@@ -3083,10 +3083,10 @@ spec:
               label: 获取QQ名称
               value: default
               options:
-            - label: 主题默认
-              value: default
-            - label: 自定义key
-              value: custom
+              - label: 主题默认
+                value: default
+              - label: 自定义key
+                value: custom
             - $formkit: url
               if: $get(commentsEnable).value && $get(use).value == 'Twikoo' && $get(qqNickMode).value == 'custom'
               name: qqNickCustomApi
