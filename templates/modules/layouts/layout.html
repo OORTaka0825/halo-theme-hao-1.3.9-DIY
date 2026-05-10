@@ -405,9 +405,23 @@
         heo.changeMusicBg(false);
     }
     //代码块
-    if(GLOBAL_CONFIG.prism.enable){
-        halo.addPrismTool()
-        halo.dataCodeTheme()
+    if (GLOBAL_CONFIG.prism.enable) {
+        (function waitPrismToolbar(retry) {
+            if (window.Prism && Prism.plugins && Prism.plugins.toolbar) {
+                halo.addPrismTool();
+                halo.dataCodeTheme();
+                return;
+            }
+
+            if (retry > 0) {
+                setTimeout(function () {
+                    waitPrismToolbar(retry - 1);
+                }, 100);
+            } else {
+                halo.dataCodeTheme();
+                console.warn('[Hao] Prism Toolbar 未加载，已跳过代码工具栏初始化');
+            }
+        })(20);
     }
     if(document.querySelector('#danmu') &&
         document.body.clientWidth > 768 &&
