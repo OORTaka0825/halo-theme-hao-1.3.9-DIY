@@ -2340,6 +2340,12 @@ spec:
           label: 背景图
           value: https://liuzhihang.com/upload/moments.png
           placeholder: 请输入图片地址
+        - $formkit: attachment
+          name: backgroundVideo
+          label: 背景视频
+          value: ""
+          placeholder: 请输入 MP4 视频地址
+          help: 可上传/选择/输入 .mp4 视频链接；为空时使用上方背景图兜底
         - $formkit: text
           name: smallTitle
           label: 小标题
