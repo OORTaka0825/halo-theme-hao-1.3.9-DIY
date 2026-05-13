@@ -33,7 +33,9 @@
             <div class="tips" th:text="${detail}"></div>
         </div>
         <div class="banner-button-group" th:if="${not #strings.isEmpty(buttonUrl)}">
-            <a class="banner-button" th:href="${buttonUrl}">
+            <a class="banner-button"
+   th:href="${buttonUrl}"
+   th:target="${#strings.equals(buttonTitle, '返回') ? '_self' : '_blank'}">
     <i class="haofont hao-icon-circle-arrow-right"></i>
     <span class="banner-button-text" th:text="${buttonTitle}"></span>
 </a>
