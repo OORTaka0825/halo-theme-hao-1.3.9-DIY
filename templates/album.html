@@ -21,14 +21,15 @@
             <div id="page">
                 <!-- 默认样式 -->
                 <div id="album" th:if="${#strings.equals(theme.config.photos.photosStyle, 'default')}">
-                  <div th:replace="~{macro/author-content :: author-content(
-                      background = ${#strings.isEmpty(theme.config.photos.backgroundImg) ? singlePage.spec.cover : theme.config.photos.backgroundImg},
-                      smallTitle = ${theme.config.photos.smallTitle},
-                      bigTitle   = ${theme.config.photos.bigTitle},
-                      detail     = ${theme.config.photos.detail},
-                      buttonUrl  = '',
-                      buttonTitle= ''
-                  )}"></div>
+                  <div th:replace="~{macro/author-content :: author-content-video(
+    background = ${#strings.isEmpty(theme.config.photos.backgroundImg) ? singlePage.spec.cover : theme.config.photos.backgroundImg},
+    video = ${#strings.isEmpty(theme.config.photos.backgroundVideo) ? '' : theme.config.photos.backgroundVideo},
+    smallTitle = ${theme.config.photos.smallTitle},
+    bigTitle   = ${theme.config.photos.bigTitle},
+    detail     = ${theme.config.photos.detail},
+    buttonUrl  = '',
+    buttonTitle= ''
+)}"></div>
 
                   <div class="card-album">
                     <th:block th:each="group : ${photoFinder.groupBy()}">

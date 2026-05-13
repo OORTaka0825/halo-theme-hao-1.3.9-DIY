@@ -510,6 +510,12 @@ spec:
                   label: 背景图
                   placeholder: 请输入地址
                   value: https://liuzhihang.com/upload/hao_dark.jpg
+                - $formkit: attachment
+                  name: todayRecommendVideo
+                  label: 背景视频
+                  placeholder: 请输入 MP4 视频地址
+                  value: ""
+                  help: 可上传/选择/输入 .mp4 视频链接；为空时使用上方背景图兜底
             - $formkit: select
               name: recommendPost
               id: recommendPost
@@ -2105,6 +2111,12 @@ spec:
           label: 背景图
           value: https://liuzhihang.com/upload/moments.png
           placeholder: 请输入图片地址
+        - $formkit: attachment
+          name: backgroundVideo
+          label: 背景视频
+          value: ""
+          placeholder: 请输入 MP4 视频地址
+          help: 可上传/选择/输入 .mp4 视频链接；为空时使用上方背景图兜底
         - $formkit: text
           name: smallTitle
           label: 小标题
@@ -2242,6 +2254,13 @@ spec:
           name: backgroundImg
           label: 背景图
           value: https://liuzhihang.com/upload/moments.png
+        - $formkit: attachment
+          if: $get(photosStyle).value == 'default'
+          name: backgroundVideo
+          label: 背景视频
+          value: ""
+          placeholder: 请输入 MP4 视频地址
+          help: 可上传/选择/输入 .mp4 视频链接；为空时使用上方背景图兜底
         - $formkit: text
           if: $get(photosStyle).value == 'default'
           name: smallTitle

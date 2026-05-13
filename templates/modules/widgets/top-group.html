@@ -68,9 +68,33 @@
             <div class="todayCard-tips" th:text="${theme.config.top.BannerRight.todayRecommendContent.todayRecommendxTitle}"></div>
             <div class="todayCard-title" th:text="${theme.config.top.BannerRight.todayRecommendContent.todayRecommendTitle}"></div>
         </div>
-        <div class="todayCard-cover"
+                <div class="todayCard-cover"
              th:style="'background:url('+ ${theme.config.top.BannerRight.todayRecommendContent.todayRecommendCover} +') no-repeat center/cover'">
+            <video th:if="${not #strings.isEmpty(theme.config.top.BannerRight.todayRecommendContent.todayRecommendVideo)}"
+                   class="todayCard-cover-video"
+                   autoplay muted loop playsinline webkit-playsinline
+                   preload="metadata"
+                   th:poster="${theme.config.top.BannerRight.todayRecommendContent.todayRecommendCover}">
+                <source th:src="${theme.config.top.BannerRight.todayRecommendContent.todayRecommendVideo}" type="video/mp4">
+            </video>
         </div>
+            <style>
+        .todayCard-cover {
+            overflow: hidden !important;
+        }
+
+        .todayCard-cover-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center center;
+            display: block;
+            pointer-events: none;
+            filter: none !important;
+            backdrop-filter: none !important;
+            opacity: 1 !important;
+        }
+    </style>
         <div class="banner-button-group">
             <a class="banner-button" onclick="window.event.cancelBubble=!0;heo.hideTodayCard()">
                 <i class="haofont hao-icon-circle-plus"></i>
