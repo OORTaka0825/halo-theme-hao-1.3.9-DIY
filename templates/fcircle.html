@@ -38,25 +38,26 @@
       <div id="page">
 
         <!-- 头图组件：背景/小标题/大标题/描述 -->
-        <div th:replace="~{macro/author-content :: author-content(
-          background = ${
-                          !#strings.isEmpty(theme.config.fcircle.backgroundImg) ? theme.config.fcircle.backgroundImg
-                          : (!#strings.isEmpty(theme.config.fcircle.background) ? theme.config.fcircle.background
-                          : (!#strings.isEmpty(theme.config.fcircle.bg) ? theme.config.fcircle.bg : singlePage.spec.cover))
-                        },
-          smallTitle = ${ !#strings.isEmpty(theme.config.fcircle.smallTitle) ? theme.config.fcircle.smallTitle
-                        : (!#strings.isEmpty(theme.config.fcircle.subTitle) ? theme.config.fcircle.subTitle
-                        : (!#strings.isEmpty(theme.config.fcircle.subtitle) ? theme.config.fcircle.subtitle : '友链')) },
-          bigTitle   = ${ !#strings.isEmpty(theme.config.fcircle.bigTitle) ? theme.config.fcircle.bigTitle
-                        : (!#strings.isEmpty(theme.config.fcircle.title) ? theme.config.fcircle.title : singlePage.spec.title) },
-          detail     = ${
-                          !#strings.isEmpty(theme.config.fcircle.detail) ? theme.config.fcircle.detail
-                          : (!#strings.isEmpty(theme.config.fcircle.description) ? theme.config.fcircle.description
-                          : (!#strings.isEmpty(theme.config.fcircle.desc) ? theme.config.fcircle.desc : singlePage.spec.excerpt.raw))
-                        },
-          buttonUrl  = ${ !#strings.isEmpty(theme.config.fcircle.buttonUrl) ? theme.config.fcircle.buttonUrl : site.url },
-          buttonTitle= ${ !#strings.isEmpty(theme.config.fcircle.buttonTitle) ? theme.config.fcircle.buttonTitle : '部署项目' }
-        )}"></div>
+        <div th:replace="~{macro/author-content :: author-content-video(
+  background = ${
+                  !#strings.isEmpty(theme.config.fcircle.backgroundImg) ? theme.config.fcircle.backgroundImg
+                  : (!#strings.isEmpty(theme.config.fcircle.background) ? theme.config.fcircle.background
+                  : (!#strings.isEmpty(theme.config.fcircle.bg) ? theme.config.fcircle.bg : singlePage.spec.cover))
+                },
+  video      = ${ !#strings.isEmpty(theme.config.fcircle.backgroundVideo) ? theme.config.fcircle.backgroundVideo : '' },
+  smallTitle = ${ !#strings.isEmpty(theme.config.fcircle.smallTitle) ? theme.config.fcircle.smallTitle
+                : (!#strings.isEmpty(theme.config.fcircle.subTitle) ? theme.config.fcircle.subTitle
+                : (!#strings.isEmpty(theme.config.fcircle.subtitle) ? theme.config.fcircle.subtitle : '友链')) },
+  bigTitle   = ${ !#strings.isEmpty(theme.config.fcircle.bigTitle) ? theme.config.fcircle.bigTitle
+                : (!#strings.isEmpty(theme.config.fcircle.title) ? theme.config.fcircle.title : singlePage.spec.title) },
+  detail     = ${
+                  !#strings.isEmpty(theme.config.fcircle.detail) ? theme.config.fcircle.detail
+                  : (!#strings.isEmpty(theme.config.fcircle.description) ? theme.config.fcircle.description
+                  : (!#strings.isEmpty(theme.config.fcircle.desc) ? theme.config.fcircle.desc : singlePage.spec.excerpt.raw))
+                },
+  buttonUrl  = ${ !#strings.isEmpty(theme.config.fcircle.buttonUrl) ? theme.config.fcircle.buttonUrl : site.url },
+  buttonTitle= ${ !#strings.isEmpty(theme.config.fcircle.buttonTitle) ? theme.config.fcircle.buttonTitle : '部署项目' }
+)}"></div>
 
         <!-- 🎣 钓鱼 -->
         <th:block th:if="${theme.config.fcircle.fcircleRandomFriendsEnable}">
