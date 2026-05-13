@@ -2357,6 +2357,81 @@ spec:
                     - label: 未完成
                       value: false
 
+        - group: websites
+      label: 在线网站
+      formSchema:
+        - $formkit: attachment
+          name: backgroundImg
+          label: 背景图
+          value: /upload/Screen-Shot-tuya-tuya.jpeg
+          placeholder: 请输入图片地址
+        - $formkit: attachment
+          name: backgroundVideo
+          label: 背景视频
+          value: ""
+          placeholder: 请输入 MP4 视频地址
+          help: 可上传/选择/输入 .mp4 视频链接；为空时使用上方背景图兜底
+        - $formkit: text
+          name: smallTitle
+          label: 小标题
+          value: 效率
+        - $formkit: text
+          name: bigTitle
+          label: 大标题
+          value: 在线网站推荐
+        - $formkit: text
+          name: detail
+          label: 描述
+          value: 跟 Taka 一起高效的数字生活
+        - $formkit: repeater
+          name: category_list
+          label: 网站分类
+          value: []
+          children:
+            - $formkit: text
+              name: category_name
+              label: 分类名称
+              placeholder: 请输入分类名称
+              value: AI工具
+            - $formkit: text
+              name: description
+              label: 分类描述
+              placeholder: 请输入分类描述
+              value: 让人工智能帮助你完成枯燥的工作
+            - $formkit: select
+              name: style
+              label: 卡片样式
+              value: default
+              options:
+                - value: default
+                  label: 默认
+                - value: beautify
+                  label: 美化
+            - $formkit: repeater
+              name: website_list
+              label: 网站列表
+              value: []
+              children:
+                - $formkit: attachment
+                  name: icon
+                  label: 网站图标
+                  placeholder: 请输入图标地址
+                - $formkit: text
+                  name: name
+                  label: 网站名称
+                  placeholder: 请输入网站名称
+                  value: chatGPT
+                - $formkit: text
+                  name: url
+                  label: 网站链接
+                  placeholder: 请输入网站链接
+                  value: https://chat.openai.com/
+                - $formkit: text
+                  name: description
+                  label: 网站描述
+                  placeholder: 请输入网站描述，尽量不要使用英文逗号
+                  value: 文字AI巅峰                  
+
     - group: equipment
       label: 我的装备
       formSchema:

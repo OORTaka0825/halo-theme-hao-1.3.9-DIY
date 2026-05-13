@@ -17,6 +17,10 @@ spec:
         description: 关于页面
         screenshot:
         file: about.html
+      - name: 在线网站推荐页面模版
+        description: 在线网站推荐页面
+        screenshot:
+        file: websites.html
       - name: 鱼塘页面模版
         description: 友链鱼塘
         screenshot:
