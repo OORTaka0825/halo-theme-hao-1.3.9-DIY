@@ -2357,7 +2357,7 @@ spec:
                     - label: 未完成
                       value: false
 
-        - group: websites
+    - group: websites
       label: 在线网站
       formSchema:
         - $formkit: attachment
