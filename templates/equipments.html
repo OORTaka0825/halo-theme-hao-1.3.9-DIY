@@ -18,13 +18,15 @@
         </header>
         <main class="layout hide-aside" id="content-inner">
             <div id="page">
-                <div  th:replace="~{macro/author-content :: author-content-content(background = ${theme.config.equipment.backgroundImg},
-                        smallTitle = ${theme.config.equipment.smallTitle},
-                        video = ${ !#strings.isEmpty(theme.config.equipment.backgroundVideo) ? theme.config.equipment.backgroundVideo : '' },
-                        bigTitle = ${theme.config.equipment.bigTitle},
-                        detail = ${theme.config.equipment.detail},
-                        buttonUrl = '',
-                        buttonTitle = '')}" ></div>
+                <div th:replace="~{macro/author-content :: author-content-video(
+        background = ${theme.config.equipment.backgroundImg},
+        video = ${ !#strings.isEmpty(theme.config.equipment.backgroundVideo) ? theme.config.equipment.backgroundVideo : '' },
+        smallTitle = ${theme.config.equipment.smallTitle},
+        bigTitle = ${theme.config.equipment.bigTitle},
+        detail = ${theme.config.equipment.detail},
+        buttonUrl = '',
+        buttonTitle = ''
+)}"></div>
                 <div id="equipment" th:if="${not #lists.isEmpty(groups)}">
                     <th:block th:each="group : ${groups}">
                         <div class="equipment-item">
