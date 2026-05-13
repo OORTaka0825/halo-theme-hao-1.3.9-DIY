@@ -33,10 +33,10 @@
             <div class="tips" th:text="${detail}"></div>
         </div>
         <div class="banner-button-group" th:if="${not #strings.isEmpty(buttonUrl)}">
-            <a class="banner-button" target="_blank" th:href="${buttonUrl}">
-                <i class="haofont hao-icon-circle-arrow-right"></i>
-                <span class="banner-button-text" th:text="${buttonTitle}"></span>
-            </a>
+            <a class="banner-button" th:href="${buttonUrl}">
+    <i class="haofont hao-icon-circle-arrow-right"></i>
+    <span class="banner-button-text" th:text="${buttonTitle}"></span>
+</a>
         </div>
     </div>
 
