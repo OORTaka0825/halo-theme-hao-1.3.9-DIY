@@ -250,7 +250,6 @@
 
 <!-- === Force font like your old snippet (single font applied globally with !important) === -->
 <link rel="preconnect" href="https://oortaka.top" crossorigin>
-
 <!-- preload selected font only -->
 <th:block th:switch="${theme.config.style.global_font}">
   <link th:case="'zhankukuaile'" rel="preload" href="https://oortaka.top/ziti/zhankukuaile.woff2" as="font" type="font/woff2" crossorigin>
@@ -259,7 +258,6 @@
   <link th:case="'dingdingjinbuti'" rel="preload" href="https://oortaka.top/ziti/dingdingjinbuti.woff2" as="font" type="font/woff2" crossorigin>
   <link th:case="'jiangchengyuanti'" rel="preload" href="https://oortaka.top/ziti/jiangchengyuanti.woff2" as="font" type="font/woff2" crossorigin>
 </th:block>
-
 <!-- build the same effect as: * { font-family: "xxx" !important } -->
 <th:block th:if="${theme.config.style.global_font} != null and ${theme.config.style.global_font} != 'off'">
   <th:block th:switch="${theme.config.style.global_font}">
